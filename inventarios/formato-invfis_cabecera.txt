@@ -1,0 +1,5 @@
+                           FORMATO DE INVENTARIO FISICO                             
+	    009 - ENERGIGAS ARGENTINA - UBIC. 0000GR - GRIFO  
+
+CODIGO		NOMBRE     			PRECIO 	 STOCK   INVENTARIO FISICO 
+=========================================================================================

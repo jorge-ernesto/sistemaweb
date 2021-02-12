@@ -1,0 +1,856 @@
+
+      VENTA POR PRODUCTOS EN TURNO      
+
+EDS: SERVIGRIFOS KM14
+ANIO 2020 MES 08
+DEL 01 AL 01
+
+DIA: 2020-08-01 00:00:00
+TURNO: 1
+----------------------------------------
+DESCRIPCION    CANTIDAD       TOTAL     
+----------------------------------------
+Diesel B5 Max-D       
+                52.35        679.98
+GAS LICUADO DE PETROLEO
+                65.31        123.43
+GASOHOL 90            
+                 4.67         65.39
+GASOHOL 95            
+                10.01        150.00
+----------------------------------------
+TOTAL          132.34       1018.80
+
+DIA: 2020-08-01 00:00:00
+TURNO: 2
+----------------------------------------
+DESCRIPCION    CANTIDAD       TOTAL     
+----------------------------------------
+ADAMS TRIDENT TWIST YERBABUENA/SANDIA 1
+                 1.00          3.00
+**AMBROSITO X 25 GR   
+                 2.00          2.00
+ANDREE EMPANADA       
+                 2.00          9.00
+ANDREE ENRROLLADO POLLO/JAMON QUESO/VEG
+                 7.00         45.50
+ANDREE SANDWICHS CROISSANT
+                 5.00         30.00
+ANDREE SANDWICHS POLLO PREMIUM
+                 2.00         12.00
+ANDREE SUBMARINO CON HOT DOG
+                 6.00         45.00
+ANDREE TRIPLES SURTIDO
+                23.00        126.50
+ANDRE PANINI CON POLLO
+                 1.00          6.00
+BIMBO BIMBOLETES VAINILLA 55GR
+                 3.00          5.40
+BIO DRINK CAMU CAMU Y MANZANA 300 ML
+                 3.00         10.50
+BLUNT WRAP PAPEL LIAR FRENCH VANILLA
+                 2.00          9.00
+BLUNT WRAP PAPEL LIAR NATURAL FLAVOR
+                 2.00          9.00
+BOMBON CORAZON COSTA 162GR
+                 1.00         13.50
+BRAEDT CABANOSSI      
+                 1.00          3.00
+CARBON BRAZA BOLSA 5 KG
+                 1.00         30.00
+CEREAL BAR GOLDENCEREAL LECHE 18GR
+                 2.00          2.00
+CHEETOS MEGA QUESO X 34GR
+                 2.00          2.40
+CHIPY DORITOS QUESO ATREVIDO 41GR
+                 1.00          1.50
+CHIPY DORITOS VARIADOS 85 GR
+                 1.00          3.00
+CHIPY TORTEES NATURAL  60 GR
+                 2.00          3.20
+CHIPY TORTEES PICANTE 60G
+                 1.00          1.60
+CHIZITO  40 GR        
+                 1.00          1.00
+CHOCO SODA FIELD X 36G
+                 1.00          1.00
+CIELO AGUA ALCALINA X 650 ML
+                 2.00          4.00
+CIELO AGUA  S/G 1 LT  
+                 6.00         18.00
+CIELO AGUA S/G 625 ML 
+                 9.00         13.50
+CIELO AGUA VARIADOS 625 ML
+                 1.00          1.50
+CIFRUT FRUIT PUNCH 500 ML
+                 1.00          2.00
+COCA COLA 1.5 LITRO   
+                 2.00         15.00
+COCA COLA 500 ML      
+                10.00         28.00
+COCA COLA ZERO 500 ML 
+                 4.00         11.20
+COSTA CHOCMAN 30 GR   
+                 1.00          0.80
+COSTA FRAC CLASICA 45.5GR
+                 1.00          0.80
+**COSTA WAFER NIK CHOCOLATE 77 GR
+                 1.00          1.50
+**COSTA WAFER NIK VAINILLA 77 GR
+                 2.00          3.00
+CREAM CRACKER 316 GR  
+                 1.00          5.00
+CUSQUEÑA MALTA 330 ML
+                12.00         54.00
+CUSQUENA TRIGO 330 ML 
+                 5.00         22.50
+Diesel B5 Max-D       
+               422.81       5492.34
+EL CRUCEÑITO PAPAS AL HILO 50GR
+                 1.00          1.50
+ENCENDEDOR CRISTALINO BRAZA
+                 1.00          1.50
+FANTA 500 ML          
+                 1.00          2.80
+FANTA KOLA INGLESA 500 ML
+                 3.00          8.40
+FIBRA FRUT MANZANA 475ML
+                 1.00          4.00
+FREE TEA LIMON 475 ML 
+                 1.00          3.50
+FRITO LAY CHICHARRON 41G
+                 1.00          3.00
+FRUGOS DEL VALLE DURAZNO 1LT.
+                 3.00         18.00
+FRUGOS DEL VALLE DURAZNO 300ML.
+                 6.00         15.00
+FRUGOS DEL VALLE FRESH 500 ML
+                 2.00          4.00
+FRUGOS DEL VALLE NARANJA 1 LT
+                 1.00          6.00
+FRUGOS DEL VALLE NECTAR DURAZNO 286 ML
+                 4.00         10.00
+FRUGOS DEL VALLE NECTAR MANGO 1 LT.
+                 1.00          6.00
+FRUGOS MANGO BOTELLA 286 ML
+                 3.00          7.50
+**FRUGOS MANZANA 235 ML
+                 1.00          2.00
+**FRUGOS  NARANJA X 235 ML
+                 1.00          2.00
+FRUMAS NECTAR VARIADOS 475ML
+                 1.00          4.50
+FRUMAS SANDIA MANGO 400 ML
+                 2.00          9.00
+FRUTARIS MANZANA - UVA 500ML
+                 1.00          2.00
+GASEOSA H2OH! VARIADOS 500ML
+                 1.00          2.50
+GAS LICUADO DE PETROLEO
+              1161.49       2195.03
+GASOHOL 90            
+               292.93       4097.92
+GASOHOL 95            
+               271.09       4063.63
+GATORADE APPLE ICE 500 ML
+                 1.00          3.00
+GATORADE COOL BLUE 500 ML
+                 1.00          3.00
+GATORADE MANDARINA 750ML
+                 1.00          5.00
+GATORADE TROPICAL 500ML
+                 7.00         21.00
+GATORADE TROPICAL FRIUT 750 ML
+                 1.00          5.00
+GATORADE VARIADOS 500ML
+                 1.00          3.00
+GELCE BANANAS CHIPS 125 G
+                 2.00         11.00
+GLACITAS SABORES VARIADOS 32 GR
+                 1.00          0.90
+GLOBO POP CHUPETIN SURTIDO
+                 1.00          1.00
+GN RELLENITAS DE CHOCOLATE 42GR
+                 1.00          0.70
+GN RELLENITAS DE COCO 42 GR
+                 1.00          0.70
+G-Prix 97             
+                79.74       1275.01
+GRETEL CHOCOLATE 34GR 
+                 3.00          2.40
+GUARANA SABOR COPOAZU 450 ML
+                 1.00          2.50
+GUARANA ZERO 450 ML   
+                 2.00          5.00
+**GUSTOS MARY ALFAJORES BAÑADOS EN CHOC
+                 1.00          8.50
+GUSTOS MARY ROSQUITAS 8 UNID
+                 4.00         10.00
+HALLS MINI CEREZA 15GR
+                 1.00          2.50
+HALLS STRONG LYPTUS 25.2 GR.
+                 2.00          3.00
+HAMILTON KENT FRESH 10 UND
+                 2.00         22.00
+HARI NATURA GRANOLA ALMENDRA Y CASTA&Nt
+                 1.00          3.00
+HOUSSY ALOE VERA PINA 500ML
+                 2.00         12.00
+INCA KOLA 500 ML      
+                 9.00         25.20
+**INKA CHIPS CAMOTE FRITO 40 GR
+                 1.00          2.50
+KARINTO CHIFLES ORIGINAL 200 GR
+                 1.00          7.00
+KARINTO MANI CLASICO 100G
+                 1.00          3.00
+KERO EXOTIC FRUITS NARANJA PIÑA CAMU CA
+                 2.00         11.00
+LAIVE YOGURT FRESA 340 GR
+                 4.00         12.00
+LAIVE YOGURT VAINILLA 340 GR
+                 1.00          3.00
+LAYS 85 GR            
+                 1.00          3.00
+LIPTON DURAZNO 400ML  
+                 1.00          3.00
+LIPTON TE VERDE LIMON 400ML
+                 2.00          6.00
+L&M ELECTRO FUSION X10
+                 1.00          8.00
+MARGARITA SAYON 55 GR 
+                 4.00          4.00
+MARLBORO RED 10       
+                 2.00         22.00
+MILKY WAY BAR 1.84 ONZA
+                 4.00         22.00
+MINI PICARAS 50G      
+                 1.00          1.50
+NABISCO CHIPS AHOY 45 GR
+                 1.00          1.30
+NABISCO CLUB SOCIAL ORIGINAL 26 GR
+                 2.00          1.80
+**NABISCO OREO 36 GR  
+                 1.00          0.90
+NESCAFE 16 ONZ        
+                 6.00         42.00
+NESCAFE 8ONZ          
+                 4.00         18.00
+NESTLE DORE TACO 230 GR
+                 3.00         12.60
+NESTLE MOROCHAS 34GR  
+                 1.00          1.00
+**OCB PREMIUM         
+                 3.00          7.50
+OREO ROLLO ORIGINAL 126 GR
+                 1.00          2.50
+**PALL MALL RED 10    
+                 1.00          8.50
+PANICORP ROSQUITAS 130GR
+                 3.00          6.60
+PEPSI GASEOSA 750ML   
+                 1.00          3.50
+PEPSI GASEOSA VARIADAS 500ML
+                 2.00          5.00
+PH SUAVE RINDEMAX NARANJA X2
+                 1.00          3.00
+PH SUAVE RINDEMAX VERDE/ROSA X 2
+                 2.00          7.00
+PIEL CON RETARDANTE PRESERVATIVO
+                 1.00          5.50
+PILSEN LATA 355 ML    
+                 9.00         36.00
+POWERADE 1 LT         
+                 1.00          5.00
+POWERADE MORA 500 ML  
+                 1.00          2.50
+PREZLET ORIGINAL 250G 
+                 1.00          7.00
+PRINGLES SABOR ORIGINAL 124 GR
+                 1.00         11.50
+PROMOCION 2 VINA LOS REYES + COPA
+                 1.00         29.00
+PULP NECTAR DURAZNO CAJITA X 315ML
+                 1.00          2.00
+PULP NECTAR MANGO 1 LT
+                 2.00          9.00
+RED BULL ENERGY 355ML 
+                 1.00         11.00
+RED BULL ENERGY DRINK 250ML
+                 5.00         42.50
+RITZ 22.4 GR          
+                 6.00          4.20
+RITZ TACO 67 GR       
+                 2.00          3.00
+SAN JORGE BLACKOUT 60GR
+                 1.00          0.90
+**SAN JORGE COCONUT 55G
+                 2.00          2.00
+SAN JORGE FAMILIAR 75 GR
+                 3.00          4.50
+SAN JORGE VAINILLA FAMILIAR
+                 1.00          1.50
+SAN LUIS AGUA C/G 625 ML 
+                 2.00          4.00
+SAN LUIS AGUA S/G 625ML
+                 3.00          6.00
+SAN LUIS SPORTL SIN GAS 1 L
+                 6.00         18.00
+SAN MATEO AGUA S/G 600ML
+                 4.00          8.00
+SMOKING AZUL TRADE MARK X60
+                 2.00          6.00
+SNICKERS MILK CHOCOLATE 53G
+                 1.00          5.00
+**SPORADE MANDARINA 475 ML VIDRIO
+                 1.00          3.00
+**SPORADE MARACUYA 475 ML VIDRIO
+                 2.00          6.00
+**SPORADE TROPICAL 475 ML VIDRIO
+                 4.00         12.00
+STEFANY GALLETA REDONDAS ZANAHORIA CON 
+                 1.00          2.50
+STEFANY LAMINAS DE YOGURT
+                 1.00          2.50
+STEFANY PALITOS CRISINO SALADITO
+                 2.00          5.00
+SUBLIME CHOCOLATE 30GR
+                 3.00          5.40
+SUBLIME POWER 30GR.   
+                 2.00          2.60
+TOR-TEES PICANTE 138GR
+                 1.00          3.00
+TRIDENT EVUP COOL BUBBLE 30.6 G.
+                 2.00          6.00
+TRIDENT SANDIA 10.2GR 
+                 1.00          1.50
+TRULULU GOMAS  VARIADOS X 90GR
+                 1.00          3.00
+VALLE ALTO COCKTAIL DE NUECES 90 GR
+                 1.00          8.00
+**VICTORIA GLACITAS DE TOFEE X 32 G
+                 1.00          0.90
+VICTORIA SODA V 35GR  
+                 5.00          4.00
+VINA LOS REYES VINO ROSE SEMI SECO 750
+                 1.00         14.50
+VOLT ENERGY DRINK 300ML
+                 1.00          3.00
+WATTS NECTAR NARANJA 350ML
+                 1.00          2.50
+----------------------------------------
+TOTAL         2587.06      18482.13
+
+DIA: 2020-08-01 00:00:00
+TURNO: 3
+----------------------------------------
+DESCRIPCION    CANTIDAD       TOTAL     
+----------------------------------------
+7UP 500 ML            
+                 1.00          2.50
+ADAMS HALLS MENTHO LYPTUS 25.2 GR
+                 1.00          1.50
+ADAMS TRIDENT TWIST YERBABUENA/SANDIA 1
+                 1.00          3.00
+ALOE VERA JUGO SABILA ORIGINAL 500 ML
+                 1.00          6.00
+AMBROSOLI CARAMELOS FULL 22.5GR
+                 1.00          1.00
+AMBROSOLI MELLOWS 230 GR
+                 2.00         10.00
+ANDREE EMPANADA       
+                 1.00          4.50
+ANDREE ENRROLLADO POLLO/JAMON QUESO/VEG
+                11.00         71.50
+ANDREE SANDWICHS CROISSANT
+                11.00         66.00
+ANDREE SANDWICHS POLLO PREMIUM
+                 5.00         30.00
+ANDREE SUBMARINO CON HOT DOG
+                 2.00         15.00
+ANDREE TRIPLES SURTIDO
+                 3.00         16.50
+ANDRE PANINI CON POLLO
+                 1.00          6.00
+ARCOR MOGUL ROLLO ASSORTED FRUITS 35 GR
+                 3.00          3.00
+BESO DE MOZA X 216GR  
+                 1.00         12.00
+BIMBO BIMBOLETES MARMOLEADO 3 UND - 90 
+                 1.00          2.00
+**BIMBO BIMBOLETES MARMOLEADO 55 GR
+                 3.00          5.40
+BIMBO BIMBOLETES VAINILLA 55GR
+                 2.00          3.60
+BIMBO MARINELA MANKEKE MANJAR 60 GR
+                 3.00          5.40
+BIMBO TOSTADAS CLASICAS X 8
+                 1.00          5.50
+BIO DRINK CAMU CAMU Y MANZANA 300 ML
+                 2.00          7.00
+BIO DRINK SABOR AGUAJE 300 ML
+                 4.00         14.00
+BLUNT WRAP PAPEL LIAR CHOCOLATE
+                 1.00          4.50
+BLUNT WRAP PAPEL LIAR FRENCH VANILLA
+                 1.00          4.50
+BRAEDT CABANOSSI      
+                 1.00          3.00
+BUDWAISER BOTELLA 343ML
+                 4.00         18.00
+CANCUN BIZCOCHO 30 GR 
+                 4.00          3.20
+CARGADOR USB AUTO DUAL 2.1 NEGRO
+                 1.00         24.90
+CEREAL BAR SABOR DURAZNO 18GR
+                 1.00          1.00
+CHEETOS MEGA QUESO X 34GR
+                 1.00          1.20
+CHEETOS SABOR MAIZ QUESO PICANTE X 69GR
+                 1.00          3.00
+CHICHARRON 21 GR      
+                 1.00          1.70
+CHIPY DORITOS VARIADOS 85 GR
+                 2.00          6.00
+CHIPY LAYS ONDAS PICANTES 150 GR
+                 2.00         14.00
+CHIPY TORTEES NATURAL  60 GR
+                 1.00          1.60
+CHIPY TORTEES PICANTE 60G
+                 3.00          4.80
+CHIZITO  40 GR        
+                 3.00          3.00
+CHOCO SODA FIELD X 36G
+                 3.00          3.00
+CIELO AGUA ALCALINA X 650 ML
+                 1.00          2.00
+CIELO AGUA  S/G 1 LT  
+                 9.00         27.00
+CIELO AGUA  S/G  2.5 LT
+                 1.00          4.00
+CIELO AGUA S/G 625 ML 
+                 4.00          6.00
+CIELO AGUA VARIADOS 625 ML
+                 2.00          3.00
+CIFRUT FRUIT PUNCH 500 ML
+                 2.00          4.00
+CIPYM PALIYUCA X 50G  
+                 2.00          8.00
+CLORETS MASTICABLE 16.8 GR
+                 1.00          1.00
+COCA COLA 1.5 LITRO   
+                 1.00          7.50
+COCA COLA 3 LT        
+                 1.00         12.50
+COCA COLA 500 ML      
+                15.00         42.00
+COCA COLA CLASSIC LATA 355 ML
+                 1.00          4.50
+COCA COLA ZERO 500 ML 
+                 4.00         11.20
+COMBOS PEPPERONI PIZZA 48.2 GR
+                 1.00          4.50
+CORONA EXTRA X 355 ML 
+                20.00        120.00
+CORONITA EXTRA 210ML  
+                 2.00          9.00
+COSTA AGUA LINE 44 GR 
+                 1.00          0.80
+COSTA CEREAL BAR MANZANA+CANELA 18GR
+                 3.00          3.00
+COSTA CHOCMAN 30 GR   
+                 2.00          1.60
+COSTA FRAC CLASICA 45.5GR
+                 2.00          1.60
+COSTA VIZZIO SOBRE 21 GR
+                11.00         13.20
+**COSTA WAFER NIK CHOCOLATE 77 GR
+                 1.00          1.50
+**COSTA WAFER NIK VAINILLA 77 GR
+                 3.00          4.50
+CREAM CRACKER 75 GR   
+                 1.00          1.80
+CRUSH LATA STRAWBERRY 355ML
+                 1.00          4.50
+CUSQUENA BOTELLA DORADA 330ML
+                12.00         54.00
+CUSQUENA MALTA 330 ML 
+                 3.00         13.50
+CUSQUEÑA MALTA 330 ML
+                 6.00         27.00
+CUSQUENA TRIGO 330 ML 
+                10.00         45.00
+Diesel B5 Max-D       
+               591.23       7679.91
+DONOFRIO BB SABORES VARIADOS
+                 1.00          1.30
+DONOFRIO DOLCETTO 80 ML.
+                 1.00          2.80
+DONOFRIO DONOSANDWICH 1LT
+                 1.00         17.50
+DONOFRIO FRIO RICO CAPUCCHINO 130ML
+                 3.00         15.00
+DONOFRIO MEGA ALMENDRA 90ML
+                 1.00          4.00
+DORITOS QUESO FUEGO 43G
+                 1.00          1.50
+EL ARTESANO CHIFLE 150 GR
+                 2.00         14.00
+EL ARTESANO PATACON VARIADOS CROCANTE 1
+                 1.00         12.00
+EL CRUCEÑITO PAPAS AL HILO 50GR
+                 1.00          1.50
+EL CRUCEÑITO PAPAS FRITAS 50GR
+                 2.00          3.00
+ENCENDEDOR CRISTALINO BRAZA
+                 6.00          9.00
+EVERVESS GINGER ALE 1.5LT
+                 1.00          6.50
+FANTA 500 ML          
+                 2.00          5.60
+FANTA KOLA INGLESA 500 ML
+                 2.00          5.60
+FANTA LATA ORANGE 355 ML
+                 2.00          9.00
+FERRERO ROCHER X 3    
+                 1.00          7.50
+FIBRA FRUT DURAZNO 475ML
+                 2.00          8.00
+FIBRA FRUT MARACUYA 475ML
+                 1.00          4.00
+FREE TEA LIMON 475 ML 
+                 5.00         17.50
+FREE TEA NEGRO FRUTOS ROJOS 450 ML
+                 1.00          3.50
+FRITO LAY CHICHARRON 41G
+                 1.00          3.00
+FRUGOS DEL VALLE DURAZNO 300ML.
+                 3.00          7.50
+FRUGOS DEL VALLE FRESH 500 ML
+                 2.00          4.00
+FRUGOS DEL VALLE NARANJA 1 LT
+                 2.00         12.00
+FRUGOS DEL VALLE NECTAR DURAZNO 1 LT.
+                 1.00          6.00
+FRUGOS DEL VALLE NECTAR DURAZNO 286 ML
+                 1.00          2.50
+**FRUGOS DURAZNO CAJA 235 ML
+                 1.00          2.00
+FRUGOS MANGO BOTELLA 286 ML
+                 2.00          5.00
+FRUTARIS MANZANA - UVA 500ML
+                 3.00          6.00
+GALLETAS CHAPLIN 90 GR
+                 1.00          2.00
+GAS LICUADO DE PETROLEO
+              1571.43       2969.81
+GASOHOL 90            
+               224.45       3139.94
+GASOHOL 95            
+               333.37       4997.13
+GATORADE COOL BLUE 500 ML
+                 5.00         15.00
+GATORADE MANDARINA 750ML
+                 2.00         10.00
+GATORADE MANDARINA DE 500 ML
+                 2.00          6.00
+GATORADE TROPICAL 500ML
+                 2.00          6.00
+GATORADE TROPICAL FRIUT 750 ML
+                 3.00         15.00
+GATORADE VARIADOS 500ML
+                 1.00          3.00
+GENTS PRESERVATIVO ANATOMICO X 3 UNID.
+                 1.00          3.50
+GLACITAS SABORES VARIADOS 32 GR
+                 1.00          0.90
+G-Prix 97             
+                84.51       1351.21
+GRETEL CHOCOLATE 34GR 
+                 1.00          0.80
+GUARANA 450 ML.       
+                 4.00         10.00
+GUARANA SABOR COPOAZU 450 ML
+                 3.00          7.50
+GUSTOS MARY ALFAJORES 14 UNID
+                 2.00         12.00
+**GUSTOS MARY ALFAJORES 8 UNID
+                 2.00          9.00
+**GUSTOS MARY ALFAJORES BAÑADOS EN CHOC
+                 1.00          8.50
+GUSTOS MARY ALFAJORES BANADOS EN CHOCOL
+                 2.00         17.00
+GUSTOS MARY ROSQUITAS 8 UNID
+                 3.00          7.50
+HALLS BLUEBERRY LYPTUS 25.2
+                 1.00          1.50
+HALLS CEREZA LYPTUS 25.2G.
+                 1.00          1.50
+HALLS SANDIA LYPTUS 25.2 G
+                 1.00          1.50
+HALLS STRONG LYPTUS 25.2 GR.
+                 5.00          7.50
+HAMILTON KENT 10 UND  
+                 1.00         11.00
+HAMILTON KENT FRESH 10 UND
+                 1.00         11.00
+HOUSSY ALOE VERA ORIGINAL 500ML
+                 2.00         12.00
+INCA KOLA 500 ML      
+                13.00         36.40
+INCA KOLA SABORES VARIADOS 1.5 LT.
+                 1.00          7.50
+INCA KOLA ZERO 500ML  
+                 5.00         14.00
+INKA CHIPS CAMOTE  130 GR
+                 3.00         21.00
+INKA CORN ORIGINAL 42 GR
+                 1.00          2.50
+KARINTO CHIFLES ORIGINAL 42 GR
+                 1.00          2.00
+KARINTO LOS CUATES PICANTE 71GR
+                 3.00          3.60
+KARINTO MANI CLASICO 100G
+                 1.00          3.00
+KARINTO MANI PICANTE 100 GR
+                 4.00         12.00
+KARINTO MANI SALADO 100 G
+                 2.00          6.00
+KARINTO TUBULAR MANI CLASICO 42G
+                 2.00          3.00
+KERO EXOTIC FRUITS NARANJA PIÑA CAMU CA
+                 1.00          5.50
+LACTA CUA CUA MINI 42 GR
+                 1.00          1.70
+LA IBERICA FONDY SEMIDULCE 50 G.
+                 3.00         15.00
+LA IBERICA MILKY 50 GR
+                 1.00          5.00
+**LAIVE BIO DEFENSA YOGURT FRESA 946 ML
+                 2.00         13.00
+LAIVE YOGURT VAINILLA 340 GR
+                 2.00          6.00
+LAYS 85 GR            
+                 1.00          3.00
+LIPTON TE VERDE LIMON 400ML
+                 1.00          3.00
+L&M ELECTRO FUSION X10
+                 1.00          8.00
+LUCKY CLICK & ROLL 10 
+                 4.00         52.00
+LUCKY STRIKE RED 20   
+                 2.00         46.00
+MARLBORO DOUBURST BLUE ICE X 10 UNID
+                 2.00         23.00
+MARLBORO FUSION DOBLE CKICK X 10
+                 2.00         22.00
+MARLBORO KRETEK MINT 20UNID
+                 1.00         22.00
+MARUCHAN VASO SOPA DE POLLO 64 GR.
+                 1.00          3.50
+**MENTOS FRESA 29.7 GR
+                 1.00          1.50
+MENTOS FRUTILLA 29.7G 
+                 2.00          3.00
+MENTOS TUTTI FRUTTI 29.5 GR
+                 3.00          4.50
+**MONSTER ENERGY DRINK 473 ML
+                 2.00         18.00
+MYM MILK CHOCOLATE CANDIES 1.69OZ
+                 1.00          5.00
+MYM PEANUT 1.74 ONZ 49.3 GR
+                 3.00         15.00
+NABISCO BELVITA KRAKER BRAN 28 GR
+                 1.00          0.80
+NATURALE CHICHA MORADA 1LT
+                 1.00          5.00
+NATURALE MARACUYA 500ML
+                 1.00          2.50
+NESCAFE 16 ONZ        
+                 3.00         21.00
+NESCAFE 8ONZ          
+                 2.00          9.00
+NESTLE DORE TACO 230 GR
+                 4.00         16.80
+NESTLE LENTEJAS CAJA 14GR
+                 1.00          1.30
+NESTLE PRINCESA CHOC. CAJA 128 GR
+                 1.00         14.50
+NESTLE SUBLIME BITTER SONRISA 40 GR
+                 1.00          2.50
+NESTLE SUBLIME BLANCO 40 GR
+                 1.00          2.30
+NESTLE SUBLIME SONRISA 40 GR.
+                 1.00          2.50
+**OCB PREMIUM         
+                 2.00          5.00
+**OCB X-PERT          
+                 2.00          5.00
+**PALL MALL BLUE 10   
+                 1.00          8.50
+PANICORP PIONONO ENVASADO
+                 2.00          4.00
+PANICORP ROSQUITAS 130GR
+                 3.00          6.60
+PEPSI 355 ML          
+                 1.00          1.50
+PEPSI GASEOSA 750ML   
+                 4.00         14.00
+PEPSI GASEOSA VARIADAS 500ML
+                 1.00          2.50
+PH SUAVE RINDEMAX NARANJA X2
+                 1.00          3.00
+PIEL SENSITIVO PRESERVATIVO
+                 1.00          4.50
+PILSEN BOTELLA 310 ML 
+                25.00        100.00
+PILSEN LATA 355 ML    
+                46.00        184.00
+PIQUEO SNAX 45 GR     
+                 2.00          3.60
+PISCANO CRANBERRY X 275ML
+                 2.00         15.00
+PISCANO LIMON 355 ML  
+                 1.00          7.50
+PISCANO NARANJA 355 ML
+                 4.00         30.00
+POWERADE 1 LT         
+                 1.00          5.00
+**PRINGLES ORIGINAL 40/37GR
+                 2.00          9.00
+**PRINGLES ORIGINAL 71 GR
+                 1.00          7.50
+PROMOCION 2 VINA LOS REYES + SACA CORCH
+                 1.00         29.00
+PUDIN VARIADOS        
+                 4.00         12.00
+RED BULL ENERGY 355ML 
+                 2.00         22.00
+RED BULL ENERGY DRINK 250ML
+                 3.00         25.50
+RITZ TACO 67 GR       
+                 1.00          1.50
+SAN JORGE BLACKOUT 60GR
+                 1.00          0.90
+**SAN JORGE FRUTA MIXTA 55G
+                 1.00          1.00
+SAN JORGE SODA 40 GR  
+                 3.00          2.40
+SAN LUIS AGUA C/G 625 ML 
+                 2.00          4.00
+SAN LUIS AGUA S/G 625ML
+                 7.00         14.00
+SAN LUIS SPORTL SIN GAS 1 L
+                 6.00         18.00
+SAN MATEO AGUA S/G 600ML
+                 7.00         14.00
+SAYAN FRESA BOTELLA 300 ML
+                 1.00          5.00
+SCHWEPPES CITRUS 500ML
+                 2.00          5.60
+SCHWEPPES GINGER 500ML
+                 2.00          5.60
+SENOR HIELO 3 KG      
+                 1.00          7.00
+SHELL RIMULA R4X 15W40 X 1LT
+                 2.00         56.00
+SMIRNOFF VODKA ROJO ICE ORIGINAL X 355 
+                 1.00          8.50
+SNICKERS MILK CHOCOLATE 53G
+                 1.00          5.00
+SPARKIES BUBBALLO 25GR
+                 1.00          1.30
+**SPORADE BLUE 475 ML VIDRIO
+                 1.00          3.00
+**SPORADE MANDARINA 475 ML VIDRIO
+                 1.00          3.00
+**SPORADE MARACUYA 475 ML VIDRIO
+                 2.00          6.00
+**SPORADE TROPICAL 475 ML VIDRIO
+                 5.00         15.00
+SPRITE ZERO 500 ML.   
+                 4.00         11.20
+STEFANY GALLETA REDONDAS VARIOS
+                 1.00          2.50
+STEFANY GALLETA REDONDAS ZANAHORIA CON 
+                 1.00          2.50
+STEFANY GALLETAS LAMINAS 100GR
+                 1.00          2.50
+STEFANY GALLETAS MANGAS YOGURT
+                 1.00          2.50
+STEFANY GALLETAS REDONDAS AJONJOLI Y MI
+                 1.00          2.50
+STEFANY PALITOS Y CRISINOS
+                 1.00          2.50
+SUBLIME CHOCOLATE 30GR
+                 4.00          7.20
+SUBLIME EXTREMO 55 GR 
+                 2.00          5.60
+SUBLIME POWER 30GR.   
+                 1.00          1.30
+TACAMA VINO BLANCO DE BLANCOS
+                 1.00         49.00
+TOPPS RING POP VARIADOS 14G
+                 1.00          2.50
+TOR-TEES PICANTE 138GR
+                 1.00          3.00
+TRAVESURAS 50 GR      
+                 1.00          1.80
+TRIDENT EVUP COOL BUBBLE 30.6 G.
+                 2.00          6.00
+TRIDENT EVUP SANDIA 30.6 GR
+                 1.00          3.00
+TRIDENT EVUP UVA LIMONADA 30.6 GR
+                 2.00          6.00
+TRIDENT MENTA 10.2G   
+                 2.00          3.00
+TRIDENT MORA AZUL SILVESTRE 10.2GR
+                 4.00          6.00
+TRIDENT SANDIA 10.2GR 
+                 2.00          3.00
+TRIDENT TROPICAL MIX 10.2GR
+                 1.00          1.50
+TRULULU GOMAS  VARIADOS X 90GR
+                 1.00          3.00
+VICTORIA MARQUESITAS COCO 42 GR
+                 1.00          0.80
+VICTORIA TENTACION NARANJA
+                 1.00          0.80
+**VILLA NATURA CHIFLE SALADO X 150 GR
+                 1.00          5.50
+VILLA NATURA COCKTAIL DE NUECES 80 GR
+                 1.00          6.00
+VISTONY LIQUIDO DE FRENO DE 8 ONZ
+                 1.00          8.00
+VIZZIO CAJA 131GR     
+                 1.00         11.00
+VOLT ENERGY DRINK 300ML
+                 1.00          3.00
+WATTS NECTAR MANGO 1LT
+                 7.00         35.00
+WATTS NECTAR NARANJA 350ML
+                 1.00          2.50
+----------------------------------------
+TOTAL         3420.97      22688.60
+
+DIA: 2020-08-01 00:00:00
+TURNO: 4
+----------------------------------------
+DESCRIPCION    CANTIDAD       TOTAL     
+----------------------------------------
+Diesel B5 Max-D       
+                78.52       1020.00
+GAS LICUADO DE PETROLEO
+                58.21        110.00
+GASOHOL 90            
+                 8.51        119.00
+GASOHOL 95            
+                20.88        313.00
+G-Prix 97             
+                 5.00         80.00
+----------------------------------------
+TOTAL          171.12       1642.00
+
+
+
+

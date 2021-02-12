@@ -1,0 +1,9 @@
+-lpr -H 172.18.5.68 -P tm300 /tmp/imprimir/acumula_turno.txt-
+-lpr -H 172.18.5.68 -P tm300 /tmp/imprimir/acumula_turno.txt-
+-lpr -H 172.18.5.68 -P tm300 /tmp/imprimir/acumula_turno.txt-
+-lpr -H 10.1.2.1 -P tm300 /sistemaweb/tmp/imprimir/acumula_turno.txt-
+-lpr -H 10.1.2.1 -P tm300 /sistemaweb/tmp/imprimir/acumula_turno.txt-
+-lpr -H 10.1.2.1 -P tm300 /sistemaweb/tmp/imprimir/acumula_turno.txt-
+-lpr -H 10.1.2.1 -P tm300 /sistemaweb/tmp/imprimir/acumula_turno.txt-
+-lpr -H 10.1.2.1 -P tm300 /sistemaweb/tmp/imprimir/acumula_turno.txt-
+-lpr -H 10.1.2.1 -P tm300 /sistemaweb/tmp/imprimir/acumula_turno.txt-

@@ -1,0 +1,80 @@
+body, th, table, form, select {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	/*line-height: 14px;
+	color: #336699;
+	font-weight: bold;*/
+}
+form {
+	padding: 0px;
+}
+
+th {
+	/*background-color: #CAC7BD;
+	background-color: #D3D0C7;
+	//	color: #666666;*/
+}
+
+a:hover, a:visited, a:link{
+	/*font-size: 12px;
+	color: #336600;*/
+	color: rgb(0,0,150);
+	text-decoration: none;
+}
+
+.title {
+	/*font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 18px;
+	line-height: 20px;
+ 	background-color: #99CC00; color: #003333;*/
+}
+
+.subtitle {
+	/*font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	line-height: 30px;
+ color: #003300;*/
+}
+
+/*input {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 9px;
+}*/
+
+.estilo_cajas_texto
+{
+	/*font-family: Arial, Helvetica, sans-serif;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 10 px;
+	//font-style: bold;
+	height: 17px;
+	background-color: #FFFFFF;
+	//border: 1px #888866 solid;
+	border: 1px #000000 solid;*/
+}
+
+
+.estilo_botones
+{
+	/**font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	//font-style: normal;
+	//border: #000000 solid;
+	border: #00000 solid;
+	font-weight: bold;
+	//background-color: #FFFFDD;
+	background-color: #CCCCCC;
+	cursor: 'hand';
+	border-width: 1px 2px 2px 1px;*/
+}
+
+
+
+
+.input.big {
+	width: 100px;
+}
+
+.input.small {
+	width: 50px;
+}

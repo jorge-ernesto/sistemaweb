@@ -1,0 +1,105 @@
+
+.contenedorprincipal{
+    width: 500px;float:left; margin-left: 500px;
+    
+}
+.contenedorprincipaltabla{
+    width: 1000px;
+    float:left;
+    margin-left: 200px; 
+    margin-top: 20px;
+
+}
+.td_tabla_selecinar{
+    text-align: right;  
+}
+.etiquetavales {
+    font-size: 9px;
+    margin-right: 15px;
+    width: 200px;
+}
+.fila{
+    margin-bottom: 10px;
+}
+.separacion{
+    float:left;
+    width: 500px;
+    margin: 5px;
+}
+.th_cabe{
+    /* width: 130px;*/
+    font-size: 13px;
+    font-weight: bold;
+    background: none repeat scroll 0 0 #30767F;
+    color: #FFFFFF;
+    border-bottom: 1px solid black;
+    cursor: pointer;
+    padding: 3px 18px 3px 10px;
+}
+.th_cabe_dos_cabe{
+    width: 18px;
+    font-size: 13px;
+    font-weight: bold;
+    background: none repeat scroll 0 0 #30767F;
+    color: #FFFFFF;
+    border-bottom: 1px solid black;
+    cursor: pointer;
+
+}
+.th_cabe_dos{
+    width: 18px;
+    font-size: 13px;
+    font-weight: bold;
+    background: none repeat scroll 0 0 #C4C4C4;
+    color: #FFFFFF;
+    border-bottom: 1px solid black;
+    cursor: pointer;
+
+}
+.th_cabe_images{
+    width: 70px;
+    font-size: 13px;
+    font-weight: bold;
+    background: none repeat scroll 0 0 #30767F;
+    color: #FFFFFF;
+    border-bottom: 1px solid black;
+    cursor: pointer;
+
+}
+.th_pie{
+    /* width: 131px;*/
+    font-size: 13px;
+    font-weight: bold;
+    background: none repeat scroll 0 0 #30767F;
+    color: #FFFFFF;
+    border-top: 1px solid black;
+    cursor: pointer;
+    padding: 3px 18px 3px 10px;
+}
+.fila_registro_par{
+    background-color: #DDFFDD;
+}
+.fila_registro_imppar{
+    background-color: #FFFFFF;
+}
+
+.fila_registro_par td{
+    color:#222222; 
+    padding: 3px 10px;
+    font: 65%/1.45em "Lucida Grande",Verdana,Arial,Helvetica,sans-serif;
+}
+.fila_registro_imppar td{
+    color:#222222; 
+    padding: 3px 10px;
+    font: 65%/2.45em "Lucida Grande",Verdana,Arial,Helvetica,sans-serif;
+}
+.fila_registro_imppar:hover{
+    background-color: #C4C4C4; 
+    font-weight: bold;
+
+}
+.fila_registro_par:hover{
+    background-color: #C4C4C4; 
+    font-weight: bold;
+
+}

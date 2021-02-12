@@ -1,0 +1,26 @@
+<?php
+  /*
+    Sistema de Contabilidad ACOSA
+    Principal
+    @TBCA
+  */
+
+  include('start.php');
+
+  $Controlador='';
+
+  switch (substr($rqst, 0 ,strcspn($rqst,'.'))){
+  case 'HELPER':
+    include('helper/c_helper.php');
+    $Controlador = new HelperController(substr($rqst, strcspn($rqst,'.')+1));
+    break;
+  default:
+    //Entrada de defecto o inicial
+    include('main/c_main.php');
+    $Controlador = new MainController(substr($rqst, strcspn($rqst,'.')+1));
+    break;
+  }
+
+  $Controlador->Run();
+  echo $Controlador->outputVisor();
+

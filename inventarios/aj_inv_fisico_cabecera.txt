@@ -1,0 +1,5 @@
+                                        AJUSTE DE INVENTARIO FISICO                              
+                             002 - AUGUSTO CURO BENITES  DIF.INVENTARIO(ENTRADA) - UBIC. 02                              
+ 
+CODIGO		NOMBRE				      PRECIO   CONTABLE     FISICO    VARIACION    COSTO     DIFEREN
+==================================================================================================================================

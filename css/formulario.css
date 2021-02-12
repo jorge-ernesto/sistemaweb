@@ -1,0 +1,157 @@
+
+.form 
+{
+   font-size:12px; 
+   margin:10px;
+}
+
+.form_body
+{
+   font-size:12px; 
+   border-width:1px; 
+   border-color:#000000; 
+   border-style:solid; 
+   margin:10px; 
+   margin-top:1px;
+}
+
+.form_title
+{ 
+   text-align:center; 
+   text-transform:uppercase; 
+   font-size:14px; 
+   font-weight:bold; 
+   /*background-color:#CDCE9C; */
+   background-color:rgb(215,234,255); 
+}
+
+.form_group
+{ 
+   background-color: rgb(215,234,255);
+}
+
+.form_group_title
+{ 
+   color:#336699;
+}
+
+.form_input
+{
+   text-align:left; 
+   font-size:12px; 
+   border-bottom-style:solid;
+}
+
+.form_input_numeric
+{
+   text-align:right; 
+   font-size:12px; 
+   border-bottom-style:solid;
+}
+
+.form_input_numeric_2
+{
+   text-align:right; 
+   font-size:12px; 
+   height:10;
+   border-bottom-style:solid;
+}
+
+.form_textonly
+{
+}
+
+.form_combo
+{
+   font-size:12px;
+}
+
+.form_radio
+{
+
+}
+
+.form_checkbox
+{
+
+}
+
+.form_textarea
+{
+   font-size:12px;
+}
+
+.form_button
+{ 
+   font-size:12px;
+}
+
+.form_file
+{
+
+}
+
+.form_label
+{ 
+   font-size:12px;
+}
+
+.grid
+{
+   font-size:12px; 
+   margin:10px;
+}
+
+.grid_body
+{
+   border-width:1px; 
+   border-color:#000000; 
+   margin:1px; 
+   margin-top:1px; 
+   background-color: rgb(215,234,255);
+   overflow: auto;
+   margin-top: 5px;
+   margin-bottom: 5px;
+   text-align:left;
+   font-size:12px;
+}
+
+.grid_title
+{
+   text-align:center; 
+   text-transform:uppercase; 
+   font-size:14px; 
+   font-weight:bold; 
+   background-color:rgb(215,234,255);/* #CDCE9C;*/
+}
+
+.grid_columtitle
+{
+   text-align:center; 
+   text-transform:uppercase; 
+   font-size:12px; 
+   background-color:rgb(215,234,255);/* #CDCE9C;*/
+}
+
+.grid_row
+{
+   /*background-color:#CDCE9C; */
+   background-color:rgb(215,234,255);/* #CDCE9C;*/
+   font-size:12px;
+}
+
+.grid_item
+{
+   padding:2px; 
+   font-size:12px;
+}
+
+br .break 
+{
+   clear:both;
+   width:1px;
+   font-size:1px;
+   line-height:1px;
+   height:1px;
+   overflow:hidden;
+}

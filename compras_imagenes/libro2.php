@@ -1,0 +1,1 @@
+<img src="getdata.php?id=1"> 

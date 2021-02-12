@@ -1,0 +1,151 @@
+<?php
+function showNumber($n) {
+	return number_format($n,2,".","");
+}
+
+function showInteger($n) {
+	return number_format($n,0,".","");
+}
+
+class SYFTurnoTemplate extends Template {
+	function titulo() {
+		return '<h2><b>Sobrantes y Faltantes por Turno</b></h2>';
+	}
+
+	function formReporte($tanques) {
+		$form = new Form('', "Agregar", FORM_METHOD_POST, "control.php", '', "control");
+		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("rqst", "REPORTES.SYFTURNO"));
+
+		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("<table border='0'>"));
+
+		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("<tr>"));
+		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("<td>Fecha inicio: </td>"));
+		$form->addElement(FORM_GROUP_MAIN, new form_element_anytext("<td align='left'>"));
+		//$form->addElement(FORM_GROUP_MAIN, new form_element_text("", "dia1", @date("d/m/Y"), '<a href="javascript:show_calendar(\'Agregar.dia1\');"><img src="/sistemaweb/images/showcalendar.gif" border=0></a><div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div></td></tr><tr><td style="text-align:right;">', '', 10, 10, false));
+		$form->addElement(FORM_GROUP_MAIN, new form_element_text("", "dia1", @date("d/m/Y"), '', '', 10, 10, false));
+		$form->addElement(FORM_GROUP_MAIN, new form_element_anytext("</td>"));
+
+		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("<td>Fecha Final: </td>"));
+		$form->addElement(FORM_GROUP_MAIN, new form_element_anytext("<td align='left'>"));
+		//$form->addElement(FORM_GROUP_MAIN, new form_element_text("", "dia2", @date("d/m/Y"), '<a href="javascript:show_calendar(\'Agregar.dia2\');"><img src="/sistemaweb/images/showcalendar.gif" border=0></a><div id="overDivx" style="position:absolute; visibility:hidden; z-index:1000;"></div></td></tr><tr><td style="text-align:right;">', '', 10, 10, false));
+		$form->addElement(FORM_GROUP_MAIN, new form_element_text("", "dia2", @date("d/m/Y"), '', '', 10, 10, false));
+		$form->addElement(FORM_GROUP_MAIN, new form_element_anytext("Tanque:</td><td style='text-align:left;'>"));
+		$form->addElement(FORM_GROUP_MAIN, new form_element_combo("", "tanque", "", '</td></tr><tr><td style="text-align:center;" colspan="2">', "", "", $tanques, false, ""));
+//		$form->addElement(FORM_GROUP_MAIN, new form_element_text("", "tanque", '', '</td></tr><tr><td style="text-align:center;" colspan="2">', '', 10, 10, false));
+
+		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("</tr>"));
+		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("<tr>"));
+		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("<td colspan='5' align='center'>"));
+		$form->addElement(FORM_GROUP_MAIN, new form_element_submit("action", "Procesar", '', '', 20));
+		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("</tr>"));
+		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("</td>"));
+
+		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("</table>"));
+
+		return $form->getForm();
+	}
+
+	function presentarReporte($reporte) {
+
+		if (!is_array($reporte)) {
+			$result = "<script language=\"javascript\">alert(\"No hay datos\");</script><!--MSG: $reporte -->\n";
+			return $result;
+		}
+
+		$result  = "<table align='center'>";
+		$result .= "<tr>";
+		/*$result .= "<td style=\"text-align: center; width:  6%;\" rowspan=\"2\">D&iacute;a</td>";
+		$result .= "<td style=\"text-align: center; width:  4%;\" rowspan=\"2\">Turno</td>";
+		$result .= "<td style=\"text-align: center; width:  5%;\" rowspan=\"2\">Saldo</td>";
+		$result .= "<td style=\"text-align: center; width: 22%;\" colspan=\"3\">Compra</td>";
+		$result .= "<td style=\"text-align: center; width:  5%;\" rowspan=\"2\">Medici&oacute;n</td>";
+		$result .= "<td style=\"text-align: center; width:  5%;\" rowspan=\"2\">Venta</td>";
+		$result .= "<td style=\"text-align: center; width:  5%;\" rowspan=\"2\">Parte</td>";
+		$result .= "<td style=\"text-align: center; width: 16%;\" colspan=\"2\">Stock F&iacute;sico</td>";
+		$result .= "<td style=\"text-align: center; width: 16%;\" colspan=\"2\">Diferencia</td>";
+		$result .= "<td style=\"text-align: center; width: 16%;\" colspan=\"2\">&#37;</td>";
+		$result .= "</tr><tr>";
+		$result .= "<td style=\"text-align: center; width:  8%;\">Factura</td>";
+		$result .= "<td style=\"text-align: center; width:  8%;\">SCOP</td>";
+		$result .= "<td style=\"text-align: center; width:  6%;\">Galones</td>";
+		$result .= "<td style=\"text-align: center; width:  8%;\">&#37;</td>";
+		$result .= "<td style=\"text-align: center; width:  8%;\">Varilla</td>";
+		$result .= "<td style=\"text-align: center; width:  8%;\">Diaria</td>";
+		$result .= "<td style=\"text-align: center; width:  8%;\">Acumulada</td>";
+		$result .= "<td style=\"text-align: center; width:  8%;\">Acumulado</td>";
+		$result .= "<td style=\"text-align: center; width:  8%;\">Diario</td>";*/
+		$result .= "<tr>";
+		$result .= "<td class='grid_cabecera' rowspan='2'>D&iacute;a</td>";
+		$result .= "<td class='grid_cabecera' rowspan='2'>Turno</td>";
+		$result .= "<td class='grid_cabecera' rowspan='2'>Saldo</td>";
+		$result .= "<td class='grid_cabecera' colspan='2'>Compra</td>";
+		$result .= "<td class='grid_cabecera' rowspan='2'>Medici&oacute;n</td>";
+		$result .= "<td class='grid_cabecera' rowspan='2'>Venta</td>";
+		$result .= "<td class='grid_cabecera' rowspan='2'>Parte</td>";
+		$result .= "<td class='grid_cabecera' colspan='2'>Stock F&iacute;sico</td>";
+		$result .= "<td class='grid_cabecera' colspan='2'>Diferencia</td>";
+		$result .= "<td class='grid_cabecera' colspan='3'>&#37;</td>";
+		$result .= "</tr>";
+		$result .= "<tr>";
+		$result .= "<td class='grid_cabecera'>Factura</td>";
+		$result .= "<td class='grid_cabecera'>SCOP</td>";
+		$result .= "<td class='grid_cabecera'>Galones</td>";
+		$result .= "<td class='grid_cabecera'>&#37;</td>";
+		$result .= "<td class='grid_cabecera'>Varilla</td>";
+		$result .= "<td class='grid_cabecera'>Diaria</td>";
+		$result .= "<td class='grid_cabecera'>Acumulada</td>";
+		$result .= "<td class='grid_cabecera'>Diario</td>";
+		$result .= "<td class='grid_cabecera'>Acumulado</td>";
+		$result .= "</tr><tr>";
+
+		for ($i = 0;$i < (count($reporte)-1);$i++) {
+
+			$color 	= ($i%2==0?"grid_detalle_par":"grid_detalle_impar");
+			$r 		= $reporte[$i];
+
+			$result .= '<tr>';
+			$result .= '<td class="'.$color.'" align ="center">'. htmlentities($r[0]) .'</td>';
+			$result .= '<td class="'.$color.'" align ="center">'. $r[1] .'</td>';
+			$result .= '<td class="'.$color.'" align ="right">' . showInteger($r[2]) . '</td>';
+			$result .= '<td class="'.$color.'" align ="center">'. $r[3] .'</td>';
+			$result .= '<td class="'.$color.'" align ="center">'. $r[4] .'</td>';
+			$result .= '<td class="'.$color.'" align ="right">' . showInteger($r[5]) . '</td>';
+			$result .= '<td class="'.$color.'" align ="right">' . showInteger($r[6]) . '</td>';
+			$result .= '<td class="'.$color.'" align ="right">' . showNumber($r[7]) . '</td>';
+			$result .= '<td class="'.$color.'" align ="right">' . showInteger($r[8]) . '</td>';
+			$result .= '<td class="'.$color.'" align ="right">' . showNumber($r[9]) . '</td>';
+
+			$result .= '<td class="'.$color.'" align ="right">' . showInteger($r[10]) . '</td>';
+			$result .= '<td class="'.$color.'" align ="right">' . showInteger($r[11]) . '</td>';
+			$result .= '<td class="'.$color.'" align ="right">' . showInteger($r[12]) . '</td>';
+			$result .= '<td class="'.$color.'" align ="right">' . showNumber($r[13]) . '</td>';
+			$result .= '<td class="'.$color.'" align ="right">' . showNumber($r[14]) . '</td>';
+
+			$result .= "</tr>";
+		}
+
+		$r = $reporte[$i];
+
+		$result .= "<tr>";
+
+		$result .= '<td class="grid_detalle_total" colspan="5" align ="right">Total: </td>';
+		$result .= '<td class="grid_detalle_total" align ="right">' . showInteger($r[5]) . '</td>';
+		$result .= '<td class="grid_detalle_total" align ="right">' . showInteger($r[6]) . '</td>';
+		$result .= '<td class="grid_detalle_total" align ="right">' . showNumber($r[7]) . '</td>';
+		$result .= '<td class="grid_detalle_total">&nbsp;</td>';
+		$result .= '<td class="grid_detalle_total">&nbsp;</td>';
+
+		$result .= '<td class="grid_detalle_total">&nbsp;</td>';
+		$result .= '<td class="grid_detalle_total" align ="right">' . showInteger($r[11]) . '</td>';
+		$result .= '<td class="grid_detalle_total">&nbsp;</td>';
+		$result .= '<td class="grid_detalle_total">&nbsp;</td>';
+		$result .= '<td class="grid_detalle_total">&nbsp;</td>';
+
+		$result .= "</tr>";
+
+		$result .= "</table>";
+		return $result;
+	}
+
+}
+

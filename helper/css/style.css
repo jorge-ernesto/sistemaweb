@@ -1,0 +1,11 @@
+/* Autocomplete */
+.ui-autocomplete{z-index:9999;list-style:none;margin:0;padding:0;position:absolute;background:white;border:1px solid #ccc;border-top:none;border-radius:0 0 4px 4px;}
+.ui-autocomplete .ui-helper-reset li{list-style:none;}
+.ui-autocomplete li a{color:#808080;padding:4px 12px;display:block;border:1px solid #eee;border-right:none;border-left:none;}
+.ui-autocomplete li a:hover{color:#000000;text-decoration:none;background:#eee;font-weight:bold;cursor:pointer;}
+.ui-helper-hidden-accessible{display:none;}
+.ui-autocomplete-loading{background:url(images/ui-autocomplete-loading.gif) #F9F7ED no-repeat 98% center;}
+/*Convertir a Mayuscula*/
+.mayuscula{  
+	text-transform: uppercase;  
+}

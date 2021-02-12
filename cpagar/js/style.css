@@ -1,0 +1,25 @@
+.letra_titulo
+{
+	font-family: verdana,arial,helvetica,sans-serif;
+	font-size: 12;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+
+.letra_cabecera
+{
+	font-family: verdana,arial,helvetica,sans-serif;
+	font-size: 11;
+	text-align: center;
+	font-style: italic;
+	background-color: #BBBBBB;
+	text-transform: uppercase;
+}
+
+.letra_detalle
+{
+	font-family: verdana,arial,helvetica,sans-serif;
+	font-size: 11;
+	background-color: white;
+}

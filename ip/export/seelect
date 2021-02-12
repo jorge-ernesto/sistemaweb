@@ -1,0 +1,74 @@
+SELECT	h.C_InvoiceHeader_ID,
+	h.c_org_id,
+	h.created,
+	h.c_bpartner_id,
+	h.documentserial,
+	h.c_doctype_id,
+	t.baseamount neto,
+	0 descuento,
+	t.baseamount subtotal,
+	t.taxamount impuesto,
+	SUM(d.LineTotal) linetotal
+FROM
+	C_InvoiceHeader h
+	INNER JOIN C_InvoiceDetail d ON (h.C_InvoiceHeader_ID = d.C_InvoiceHeader_ID) 
+	INNER JOIN C_InvoiceTax t ON (h.C_InvoiceHeader_ID = t.C_InvoiceHeader_ID)
+	
+WHERE
+	 h.IsSale=1 AND
+	 h.created BETWEEN '2012-11-16 00:00:00' AND '2012-11-16 23:59:59'
+                         AND h.c_org_id=7
+GROUP BY
+	h.C_InvoiceHeader_ID,
+	h.c_org_id,
+	h.created,
+	h.c_bpartner_id,
+	h.documentserial,
+	h.c_doctype_id,
+	subtotal,
+	impuesto
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	SELECT	h.C_InvoiceHeader_ID,
+	h.c_org_id,
+	h.created,
+	h.c_bpartner_id,
+	h.documentserial,
+	h.c_doctype_id,
+	t.baseamount neto,
+	0 descuento,
+	t.baseamount subtotal,
+	t.taxamount impuesto,
+	pa.taxid,
+	SUM(d.LineTotal) linetotal
+FROM
+	C_InvoiceHeader h
+	INNER JOIN C_InvoiceDetail d ON (h.C_InvoiceHeader_ID = d.C_InvoiceHeader_ID) 
+	INNER JOIN C_InvoiceTax t ON (h.C_InvoiceHeader_ID = t.C_InvoiceHeader_ID)
+	INNER JOIN c_bpartner pa  on pa.c_bpartner_id=h.c_bpartner_id
+WHERE
+	 h.IsSale=1 AND
+	 h.created BETWEEN '2012-11-16 00:00:00' AND '2012-11-16 23:59:59'
+                         AND h.c_org_id=7
+GROUP BY
+	h.C_InvoiceHeader_ID,
+	h.c_org_id,
+	h.created,
+	h.c_bpartner_id,
+	h.documentserial,
+	h.c_doctype_id,
+	subtotal,
+	impuesto,
+	pa.taxid;

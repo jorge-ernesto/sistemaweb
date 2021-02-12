@@ -1,0 +1,5 @@
+                             CONSISTENCIA DE MOVIMIENTOS DE ALMACEN DEL 01/03/2017 AL 06/03/2019                             
+                                                                  -                                                                   
+
+ FORMULARIO     FECHA    No.O/C  PROVEEDOR                  
+   CODIGO          DESCRIPCION                    CANTIDAD     COSTO     PRECIO      TOTAL      ORIGEN  -  DESTINO        DOC.REF.

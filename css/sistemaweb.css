@@ -1,0 +1,254 @@
+body {
+	/*background-color: #FFFFCC;*/
+	/*background: url("/sistemaweb/images/fondo.gif");*/
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px; 
+	line-height: 14px;
+}
+
+td {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 9px;
+	line-height: 14px;
+	color: #333333;
+	
+}
+
+th {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	line-height: 14px;
+	color: #333333;
+}
+
+a {
+	font-size: 12px;
+	color: #336600;
+}
+
+form {
+	background-color: #ffffff;
+}
+
+.title {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 18px;
+	line-height: 20px;
+	/*background-color: #99CC00; */
+	background-color: #ffffff;
+	color: #003333;
+}
+
+.subtitle {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	line-height: 30px;
+ color: #003300;}
+
+.header {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 20px;
+ color: #FFFF33;
+}
+
+.nav {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	font-weight: normal;
+}
+
+.navLink {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	font-weight: bold;
+	background-color: #DEDECA;
+}
+
+.sidebar {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	line-height: 14px;
+	padding: 3px;
+ color: #003333;
+}
+
+.sidebarHeader {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	line-height: 18px;
+	color: #003300;
+	background-color: #FFFF66;
+}
+
+.sidebarFooter {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	line-height: 18px;
+ font-style: italic;
+}
+
+.footer {
+  font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	font-weight: bold;
+	line-height: 22px;
+	color: #333333;
+}
+
+.legal {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 9px;
+	color: #333333;
+}
+
+.box1 {
+	border-width: thin;
+	border-color: #99FF99 #003300 #003300 #99FF99;
+ border-style: double;
+ }
+
+.promo {
+	font-family: "Times New Roman", Times, serif;
+	color: #000033;
+}
+
+.titlebar {
+	font-family: "Times New Roman", Times, serif;
+	font-size: 9px;
+	color: #FFFFFF;
+	background-color: #336699;
+}
+
+.dingbat {
+	font-family: Arial, Helvetica, sans-serif;
+	background-color: #FFFFFF;
+	color: #660000; font-weight: bolder; font-size: medium;
+ }
+ 
+ form {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	}
+
+input {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 9px;
+}
+
+textarea {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 9px;
+}
+
+select {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 9px;
+}
+
+
+input.big {
+	width: 100px;
+}
+
+input.small {
+	width: 50px;
+}
+
+
+.MsgError {
+        font-family: Verdana, Arial, Helvetica, sans-serif;
+        font-size: 10px;
+        font-weight: bold;
+	color:#ffffff;
+}
+
+div.dimmer {
+    visibility: hidden;
+    position:absolute;
+    left:0px;
+    top:0px;
+    font-family:verdana;
+    font-weight:bold;
+    padding:40px;
+
+    background-image:url(honey.png);
+    _background-image:none;
+    _filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=scale src='honey.png');
+}
+/*AGREGADO POR DANIEL 13/04/09*/
+.form_cabecera{
+font:Arial;
+font-size:10px;
+/*color:#000000;*/
+color:#FFFFFF;
+background:#30767F;
+
+}
+.form_pie{
+font:Arial;
+font-size:10px;
+font-weight: bold;
+color:#000000;
+}
+.form_texto{
+font:Arial;
+font-size:10px;
+color:#000000;
+}
+.form_valor_texto{
+font:Arial;
+font-size:10px;
+color:#006666;
+}
+
+/*ESTILOS PARA LISTAS*/
+
+.grid_cabecera{
+font:Arial;
+font-size:11px;
+font-weight       : bold;
+color:#FFFFFF;
+background:#30767F;
+}
+.grid_detalle_par{
+font:Arial;
+font-size:10px;
+color:#000000;
+background:#ffffff;
+}
+.grid_detalle_impar{
+font:Arial;
+font-size:10px;
+color:#000000;
+background:#C9F4D4;
+}
+
+.grid_detalle_especial{
+font:Arial;
+font-size:10px;
+color:#000000;
+background:#F8E6E0;
+}
+
+.grid_detalle_total{
+font:Arial;
+font-size:10px;
+color:#000000;
+background:#ABD3D2;
+}
+
+.msg_informacion{
+font:Verdana;
+font-size:12px;
+color:#003366;
+
+}
+
+/* PARA LISTAS DE LOS TOTALES */
+
+.grid_total{
+font:Arial;
+font-size:11px;
+color:#000000;
+background:#F8E6E0;
+}

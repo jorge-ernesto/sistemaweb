@@ -1,0 +1,149 @@
+/* GEANCARLOS */
+
+td.theader{
+	background:#B6DAF6;
+	color:black;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px; 
+	line-height: 20px;
+	font-weight:bold;
+}
+
+
+td.theader2{
+	background:#B6DAF6;
+	color:black;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px; 
+	font-weight:bold;
+
+}
+
+td.tbodypar{
+	background:#FFFFFF;
+	font:Arial;
+	font-size:10px;
+	color:black;
+}
+
+td.tbodyimpar{
+	background:#E2F1FD;
+	font:Arial;
+	font-size:10px;
+	color:black;
+}
+
+/* REGISTRO DE VENTAS POR SERIE FORMATO */
+
+table.RegistroVentas {
+	border-collapse	: separate;
+	width		: 70%;
+	margin-left	:auto;/* PARA PONERLO CENTRADO */
+	margin-right	:auto;
+	border-spacing	: 2px;
+}
+
+
+td.coluheader{
+	background	: #434040;
+	color		: white;
+	font-family	: Arial;
+	font-size	: 11px;
+	font-weight	: bold;
+	text-align	: center;
+}
+
+td.coluheaderTipo{
+	background	: #635F5F;
+	color		: white;
+	font-family	: Arial;
+	font-size	: 11px;
+	font-weight	: bold;
+	text-align	: center;
+}
+
+td.coluheaderSerie{
+	background	: #A59C9C;
+	color		: white;
+	font-family	: Arial;
+	font-size	: 11px;
+	font-weight	: bold;
+	text-align	: left;
+}
+
+td.coluheaderTotalSerie{
+	background	: #A59C9C;
+	color		: white;
+	font-family	: Arial;
+	font-size	: 11px;
+	font-weight	: bold;
+	text-align	: right;
+}
+
+td.coluheaderTotalTipo{
+	background	: #635F5F;
+	color		: white;
+	font-family	: Arial;
+	font-size	: 11px;
+	font-weight	: bold;
+	text-align	: right;
+}
+
+/*REGISTROS POR FILA */
+
+td.tbodyparRegistroVentas{
+	background-color	: #f2f2f2;
+	text-align		: left;
+	padding			: 3px;
+	font			: Arial;
+	text-align		: center;
+	font-size		: 10px;
+}
+
+td.RowImportePar{
+	background-color	: #f2f2f2;
+	text-align		: right;
+	padding			: 3px;
+	font			: Arial;
+	font-size		: 10px;
+}
+
+td.tbodyimparRegistroVentas{
+	background-color	: #FFFFFF;
+	text-align		: center;
+	padding			: 3px;
+	font			: Arial;
+	font-size		: 10px;
+}
+
+td.RowImporteImpar{
+	background-color	: #FFFFFF;
+	text-align		: right;
+	padding			: 3px;
+	font			: Arial;
+	font-size		: 10px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

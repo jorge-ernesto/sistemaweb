@@ -1,0 +1,55 @@
+/* 
+    Document   : mantenimientos
+    Created on : 08-mar-2012, 11:47:18
+    Author     :  Nestor Hernandez Loli
+    Description:
+    Agrupar estilos CSS comunes para mantenimientos
+*/
+.form1 {
+    width: 50%;
+    margin: auto;
+}
+.form1 .fila {
+    margin: .4em 0;
+}
+.form1 fieldset legend {
+    font-size:120%; font-weight:bold;
+}
+
+.form1 .fila .etiqueta {
+    width:30%;
+    float: left;
+}
+.form1 .fila .etiqueta2 {
+    height:17px;
+    padding-right: 1px;
+    padding-left: 1px;
+    display:block;
+    padding: .1em;
+    border-width: 1px;
+    width: 40%;
+    float:left;
+}
+.form1 .fila .campo1 {
+    width: 40%;
+    padding: .1em;
+}
+.tabla1 {
+    width: 95%;
+    border: 1px solid #000;
+    border-collapse: collapse;
+
+}
+.tabla1 th, .tabla1 td {
+    border: 1px solid #000; padding: 4px;
+}
+.tabla1 th {
+    background-color: #cccccc;
+}
+.tabla1 tr:hover {
+    background-color: #e5e5e5
+}
+.form1, .form1 input, .form1 select {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+}

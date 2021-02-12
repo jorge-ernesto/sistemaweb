@@ -1,0 +1,54 @@
+.selector_par {
+	text-align: left;
+}
+
+.borderedcell {
+	border-style: solid;
+	border-width: 1px;
+
+	text-align: left;
+	
+
+	font-size: 11px;
+	color: #404040;
+}
+
+.highvaluecell {
+	background-color: red;
+}
+
+.greencell {
+	background-color: green;
+}
+
+a.hiddenlink {
+	color: #FFFFFF;
+	text-decoration: none;
+	cursor: none;
+}
+
+a:link.hiddenlink {
+	color: #FFFFFF;
+	text-decoration: none;
+	cursor: none;
+}
+
+a:visited.hiddenlink {
+	color: #FFFFFF;
+	text-decoration: none;
+	cursor: none;
+}
+
+a:hover.hiddenlink {
+	color: #FFFFFF;
+	text-decoration: none;
+	cursor: none;
+}
+
+a:active.hiddenlink {
+	color: #FFFFFF;
+	text-decoration: none;
+	cursor: none;
+}
+
+
