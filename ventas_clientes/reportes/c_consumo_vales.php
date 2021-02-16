@@ -55,7 +55,7 @@ try {
 			'sPrecioPizarra' => $_REQUEST['sPrecioPizarra'],
 		);
 
-		$resultados = ConsumoValesModel::ObtenerReporte($almacen, $fdesde, $fhasta, $Nu_Documento_Identidad, $liquidacion, $factura, $hora, $arrRequest, array());
+		$resultados = ConsumoValesModel::ObtenerReporte($almacen, $fdesde, $fhasta, $Nu_Documento_Identidad, $liquidacion, $factura, '', $hora, $arrRequest);
 
 		if(!empty($resultados)){
 			$_SESSION['data_excel'] = $resultados;
