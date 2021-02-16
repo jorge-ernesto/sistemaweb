@@ -44,15 +44,17 @@
             }
             
             
-            function OrdenarChofer(data){
+            function ordenar(tipo, data){
+                console.log(tipo);
+                console.log(data);
 
                 //if( $('.chofer').is(':checked') ) {
-                if ($('.chofer').prop('checked')){
+                if ($('.chofer').prop('checked') || $('.preunit').prop('checked')){
 
                     var fecha_inicio = $('#fecha_inicio').val();
                     var fecha_final  = $('#fecha_final').val();
                     var ruc          = $('#idcodigoCliente').val();
-                    var orderchofer  = data.value;
+                    var order        = tipo;
 
                     var elemento   = $("#contenidoTablaSelecionar");
                     var posicion   = elemento.position();
@@ -66,11 +68,11 @@
                         type    : "POST",
                         url     : "c_liquidacion_vales_relacion_v2.php",
                         data    : {
-                                    accion          : 'ordenarchofer',
+                                    accion          : 'ordenar',
                                     fecha_inicio    : fecha_inicio,
                                     fecha_final     : fecha_final,
                                     ruc             : ruc,
-                                    orderchofer     : orderchofer
+                                    order           : order
                         },success:function(xm){
                             $('#contenidoTablaSelecionar').html(xm);
                             $('#cargardor').css({'display':'none'});
@@ -78,7 +80,11 @@
                             tamano=ventana_ancho_mitad-($('#contenidoTablaSelecionar').width()/2);
                             ventana_ancho_px=(tamano)+"px";
                             $('#contenidoTablaSelecionar').css({'margin-left':ventana_ancho_px})
-                            $( ".chofer" ).prop( "checked", true );
+                            if(tipo == "chofer"){
+                                $( ".chofer" ).prop( "checked", true );
+                            }else if(tipo == "precioUnitario"){
+                                $( ".preunit" ).prop( "checked", true );
+                            }
                             $( ".idselecAll" ).prop( "checked", false );
                             //$('.' + getnochofer).prop('checked', true );
                         }
@@ -89,7 +95,7 @@
                     var fecha_inicio    = $('#fecha_inicio').val();
                     var fecha_final     = $('#fecha_final').val();
                     var ruc             = $('#idcodigoCliente').val();
-                    var orderchofer     = null;
+                    var order           = null;
 
                     var elemento    = $("#contenidoTablaSelecionar");
                     var posicion    = elemento.position();
@@ -103,11 +109,11 @@
                         type    : "POST",
                         url     : "c_liquidacion_vales_relacion_v2.php",
                         data    : {
-                                    accion          : 'ordenarchofer',
+                                    accion          : 'ordenar',
                                     fecha_inicio    : fecha_inicio,
                                     fecha_final     : fecha_final,
                                     ruc             : ruc,
-                                    orderchofer     : orderchofer
+                                    order           : order
                         },success:function(xm){
                             $('#contenidoTablaSelecionar').html(xm);
                             $('#cargardor').css({'display':'none'});
@@ -116,6 +122,7 @@
                             ventana_ancho_px=(tamano)+"px";
                             $('#contenidoTablaSelecionar').css({'margin-left':ventana_ancho_px})
                             $( ".chofer" ).prop( "checked", false );
+                            $( ".preunit" ).prop( "checked", false );
                             $( ".idselecAll" ).prop( "checked", false );
                         }
                     });
@@ -123,7 +130,7 @@
 
             }
             
-                        
+
             function marcarHermanos(referencia, getnochofer){
 
                 var ch_vales    = referencia.value;

@@ -2203,11 +2203,18 @@ GROUP BY
         }
     }
 
-	function MostarValesDeUnCliente($fecha_inicio, $fecha_final, $ruc, $orderchofer) {
+	function MostarValesDeUnCliente($fecha_inicio, $fecha_final, $ruc, $order) {
         global $sqlca;
 
-        if(!empty($orderchofer))
-            $orderby = "pf.nomusu,";
+        $orderby = "";
+        if(!empty($order)){
+            if($order == "chofer"){
+                $orderby = "pf.nomusu,";
+            }elseif($order == "precioUnitario"){
+                $orderby = "art_precio,";
+            }
+        }
+            
 
         $consulta = "
         SELECT
@@ -2226,7 +2233,8 @@ GROUP BY
 	    	FIRST(ar.art_descripcion) as desproducto,
 	    	cab.ch_placa,
 	    	TO_CHAR(cab.fecha_replicacion, 'DD/MM/YYYY hh24:mi:ss') AS fecha_replicacion,
-            pf.nomusu AS nochofer
+            pf.nomusu AS nochofer,
+            (CASE WHEN SUM(det.nu_cantidad) > 0 THEN ROUND(det.nu_importe / SUM(det.nu_cantidad), 2) ELSE 0 END) AS art_precio
 	    FROM
             val_ta_cabecera cab
 	    	LEFT JOIN int_clientes cli ON (cli.cli_codigo = cab.ch_cliente)

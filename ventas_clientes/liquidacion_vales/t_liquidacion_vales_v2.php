@@ -180,7 +180,11 @@ class LiquidacionValesTemplate extends Template {
 	            	<th align="left"><?php echo $datos_cliente['cli_anticipo']; ?></th>
 	            <tr>
 	            	<th align="right"><p style="font-size:1.2em; color:black;"><b>Ordenar Chofer: </th>
-	            	<th align="left"><input type="checkbox" id="nochofer" name="nochofer" class="chofer" onclick="OrdenarChofer(this)" value="S"></th>
+	            	<th align="left"><input type="checkbox" id="nochofer" name="nochofer" class="chofer" onclick="ordenar('chofer', this)" value="S"></th>
+	            </tr>
+                <tr>
+	            	<th align="right"><p style="font-size:1.2em; color:black;"><b>Ordenar por Precio Unitario: </th>
+	            	<th align="left"><input type="checkbox" id="preunit" name="preunit" class="preunit" onclick="ordenar('precioUnitario', this)" value="S"></th>
 	            </tr>
             </table>
             <br/>
@@ -194,6 +198,7 @@ class LiquidacionValesTemplate extends Template {
                 <th class="th_cabe">Placa</th>
                 <th class="th_cabe">Producto</th>
                 <th class="th_cabe">Cantidad</th>
+                <th class="th_cabe">Precio</th>
                 <th class="th_cabe">Importe</th>
                 <th class="th_cabe"><input type="checkbox"  onclick="marcar(this)" /></th>
                 <th class="th_cabe"><button  onclick="GuardarValesCliente('<?php echo trim($datos_cliente['cli_codigo']); ?>')"  style=""><img align="center" src="/sistemaweb/images/Recordset.gif" />Guardar</button></th>
@@ -261,6 +266,7 @@ class LiquidacionValesTemplate extends Template {
                         echo "<td align='center'>" . $value['ch_placa'] . "</td>";
                         echo "<td align='left'>" . $value['art_codigo'] . " - " . $value['desproducto'] . "</td>";
                         echo "<td class='td_tabla_selecinar' align='right'>" . number_format($value['nu_cantidad'], 3, '.', ',') . "</td>";
+                        echo "<td class='td_tabla_selecinar' align='right'>" . number_format($value['art_precio'], 2, '.', ',') . "</td>";
                         echo "<td class='td_tabla_selecinar' align='right'>" . number_format($value['nu_importe'], 2, '.', ',') . "</td>";
                         echo "<td class='td_tabla_selecinar' style='text-align:center'><input type = 'checkbox' $ckecked id='".$value['ch_documento']."' class = 'idselecAll ".$nochofer."' cantidad = '" . $nu_cantidad . "' importe = '" . $nu_importe . "' onclick='marcarHermanos(this, \"" .$nochofer."\")' value='" . trim($value['ch_documento']) . "'/></td>";
                         echo "<td class='td_tabla_selecinar' style='background-color:white'></td>";

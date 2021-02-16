@@ -17,16 +17,17 @@ $accion = $_REQUEST['accion'];
 
 try {
 
-    if ($accion == "ordenarchofer") {
+    if ($accion == "ordenar") {
 
         $fecha_inicio   = $_REQUEST['fecha_inicio'];
         $fecha_final    = $_REQUEST['fecha_final'];
         $ruc            = $_REQUEST['ruc'];
         $vales_sele     = 'NOALL';
 
-        $orderchofer    = trim($_REQUEST['orderchofer']);
+        $order    = trim($_REQUEST['order']);
+        error_log($order);
 
-        $result         = LiquidacionValesModel::MostarValesDeUnCliente($fecha_inicio, $fecha_final, $ruc, $orderchofer);
+        $result         = LiquidacionValesModel::MostarValesDeUnCliente($fecha_inicio, $fecha_final, $ruc, $order);
         $datos_cliente  = LiquidacionValesModel::ObtenerdatosCliente($ruc);
 
         LiquidacionValesTemplate::CrearTablaVervales($result, $datos_cliente, $fecha_inicio, $fecha_final, $vales_sele);
