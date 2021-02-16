@@ -833,8 +833,8 @@
                     $reporte->definirColumna("BLANCO", $reporte->TIPO_TEXTO, 91, "R", "_nrovales");
                     $reporte->definirColumna("NROVALES2", $reporte->TIPO_TEXTO, 91, "L", "_nrovales");                    
 
-                    $archivo = "logocliente.jpg";
-                    // $archivo = $this->getArchivo();
+                    // $archivo = "logocliente.jpg";
+                    $archivo = $this->getArchivo();
                     $ruta = "/sistemaweb/$archivo";
  
                     //Comprueba si existe el archivo y la ubicacion del archivo
