@@ -171,8 +171,8 @@ class ConsumoValesTemplate extends Template {
 							}
 
 							if ( $arrRequest['sPrecioPizarra']=='true' ){
-								$fImportePizarra=$data[$i]['cantidad'] * $data[$i]['nu_precio_especial'];
-								$fImporteDiferencia=$data[$i]['importe'] - ($data[$i]['cantidad'] * $data[$i]['nu_precio_especial']);
+								$fImportePizarra= round($data[$i]['cantidad'] * $data[$i]['nu_precio_especial'],2);
+								$fImporteDiferencia= round($data[$i]['importe'],2) - $fImportePizarra;
 
 								$fTotImportePizarra+=$fImportePizarra;
 								$fTotImporteDiferencia+=$fImporteDiferencia;

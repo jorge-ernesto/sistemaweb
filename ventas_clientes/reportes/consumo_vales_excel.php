@@ -164,8 +164,8 @@ if ($session_data_excel != null) {
 			error_log("Paso 5");
 			error_log( json_encode($_SESSION) );
 			if ( $session_arrRequest['sPrecioPizarra']=='true' ){
-				$fImportePizarra=$data[$i]['cantidad'] * $data[$i]['nu_precio_especial'];
-				$fImporteDiferencia=$data[$i]['importe'] - ($data[$i]['cantidad'] * $data[$i]['nu_precio_especial']);
+				$fImportePizarra=round($data[$i]['cantidad'] * $data[$i]['nu_precio_especial'],2);
+				$fImporteDiferencia=round($data[$i]['importe'],2) - $fImportePizarra;
 
 				$fTotImportePizarra+=$fImportePizarra;
 				$fTotImporteDiferencia+=$fImporteDiferencia;

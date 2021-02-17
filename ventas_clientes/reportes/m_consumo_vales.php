@@ -127,7 +127,13 @@ class ConsumoValesModel extends Model {
 		}
 
 		//Columna
-		$sColumnPrecioPizarra = ($arrRequest['sPrecioPizarra'] == true) ? ', det.nu_precio_especial' : '';
+		//$sColumnPrecioPizarra = ($arrRequest['sPrecioPizarra'] == true) ? ', det.nu_precio_especial' : '';
+		if($arrRequest['sPrecioPizarra'] == true){
+			$sColumnPrecioPizarra = ",  CASE 
+											WHEN det.nu_cantidad = 0 THEN ROUND(0,4)
+											ELSE ROUND(com.nu_importe/det.nu_cantidad,4)
+										END AS nu_precio_especial"; 
+		}
 
 		try {
 			$registro = array();
@@ -160,10 +166,10 @@ when cli.cli_anticipo='S' then fac.cod_hermandad
  cli.cli_ndespacho_efectivo AS nu_tipo_efectivo,
  cli.cli_anticipo AS no_tipo_anticipo,
  CASE 
- WHEN det.nu_precio_unitario is NULL AND det.nu_importe != 0 AND det.nu_cantidad != 0 THEN ROUND(det.nu_importe/det.nu_cantidad,2)
- WHEN det.nu_precio_unitario is NULL AND det.nu_importe = 0 AND det.nu_cantidad = 0 THEN ROUND(0,2)
- ELSE 
- det.nu_precio_unitario  
+	WHEN det.nu_precio_unitario is NULL AND det.nu_importe != 0 AND det.nu_cantidad != 0 THEN ROUND(det.nu_importe/det.nu_cantidad,2)
+	WHEN det.nu_precio_unitario is NULL AND det.nu_importe = 0 AND det.nu_cantidad = 0 THEN ROUND(0,2)
+	ELSE 
+	det.nu_precio_unitario  
  END AS ss_precio_contratado
   " . $column_hora_select . "
  " . $sColumnPrecioPizarra . "
