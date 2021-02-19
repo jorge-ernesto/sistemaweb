@@ -6313,7 +6313,7 @@ FROM
 					'' as tarjeta,
 					'B'::text as tipo,
 					'BV'::TEXT AS doctype,
-					'COMBU'::TEXT AS No_Tipo_Producto,
+					'GLP'::TEXT AS No_Tipo_Producto,
 					''::TEXT AS documento_referencia
 				FROM 
 					$postrans t
