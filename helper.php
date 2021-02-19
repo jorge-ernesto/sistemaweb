@@ -166,11 +166,76 @@ WHERE
 ORDER BY
  " . $order_by);
 
+        $sql = "
+SELECT
+ *,
+ " . $campo_id . " AS id,
+ tab_descripcion AS name,
+ tab_desc_breve AS short_name
+FROM
+ int_tabla_general
+WHERE
+ tab_tabla = '" . $value . "'
+ AND tab_elemento != '000000'
+ " . $cond_tab_car_03 . "
+ORDER BY
+ " . $order_by;
+        error_log($sql);
+
         $arrResponse = array('iStatus' => $iStatus, 'sStatus' => 'danger', 'sMessage' => 'error SQL - function getGeneralTable()', 'arrData' => NULL);
         if ($iStatus == 0)
             $arrResponse = array('iStatus' => $iStatus, 'sStatus' => 'warning', 'sMessage' => 'Sin Datos', 'arrData' => 0);
         else if ((int)$iStatus > 0)
             $arrResponse = array('iStatus' => $iStatus, 'sStatus' => 'success', 'sMessage' => 'Registros Encontrados', 'arrData' => $sqlca->fetchAll());
+        return $arrResponse;
+    }
+
+    function getCatalogo09Sunat_NC(){
+        $catalogo = array("iStatus" => "", "sStatus" => "success", "sMessage" => "Registros Encontrados");
+        $catalogo['arrData'][] = array( "id" => "000001", "name" => "Anulación de la operación" );
+        $catalogo['arrData'][] = array( "id" => "000002", "name" => "Anulación por error en el RUC" );
+        $catalogo['arrData'][] = array( "id" => "000003", "name" => "Corrección por error en la descripción" );
+        $catalogo['arrData'][] = array( "id" => "000004", "name" => "Descuento global" );
+        $catalogo['arrData'][] = array( "id" => "000005", "name" => "Descuento por ítem" );
+        $catalogo['arrData'][] = array( "id" => "000006", "name" => "Devolución total" );
+        $catalogo['arrData'][] = array( "id" => "000007", "name" => "Devolución por ítem" );
+        $catalogo['arrData'][] = array( "id" => "000008", "name" => "Bonificación" );
+        $catalogo['arrData'][] = array( "id" => "000009", "name" => "Disminución en el valor" );
+        $catalogo['arrData'][] = array( "id" => "000010", "name" => "Otros Conceptos" );
+        $catalogo['arrData'][] = array( "id" => "000011", "name" => "Ajustes de operaciones de exportación" );
+        $catalogo['arrData'][] = array( "id" => "000012", "name" => "Ajustes afectos al IVAP" );
+        $catalogo['iStatus'] = count($catalogo['arrData']);
+        return $catalogo;
+    }
+
+    function getCatalogo10Sunat_ND(){
+        $catalogo = array("iStatus" => "", "sStatus" => "success", "sMessage" => "Registros Encontrados");
+        $catalogo['arrData'][] = array( "id" => "000001", "name" => "Intereses por mora" );
+        $catalogo['arrData'][] = array( "id" => "000002", "name" => "Aumento en el valor" );
+        $catalogo['arrData'][] = array( "id" => "000003", "name" => "Penalidades/ otros conceptos" );
+        $catalogo['arrData'][] = array( "id" => "000011", "name" => "Ajustes de operaciones de exportación" );
+        $catalogo['arrData'][] = array( "id" => "000012", "name" => "Ajustes afectos al IVAP" );
+        $catalogo['iStatus'] = count($catalogo['arrData']);
+        return $catalogo;
+    }
+
+    function executeCreacionCampo(){
+        global $sqlca;        
+        
+        //VALIDAMOS QUE EL CAMPO EXISTA        
+        $iStatus = $sqlca->query("SELECT EXISTS(SELECT ch_cat_sunat FROM fac_ta_factura_complemento);");
+        $arrResponse = array('iStatus' => $iStatus, 'sStatus' => 'danger', 'sMessage' => 'No se creo campo', 'arrData' => NULL);
+                
+        //NO EXISTE
+        if((int)$iStatus < 0){
+            //CREAMOS CAMPO
+            $iStatus = $sqlca->query("ALTER TABLE fac_ta_factura_complemento ADD COLUMN ch_cat_sunat CHARACTER VARYING(2);");            
+            
+            //SI SE EJECUTO CORRECTAMENTE
+            if((int)$iStatus == 0){
+                $arrResponse = array('iStatus' => $iStatus, 'sStatus' => 'success', 'sMessage' => 'Creamos campo correctamente', 'arrData' => NULL);
+            }
+        }
         return $arrResponse;
     }
 

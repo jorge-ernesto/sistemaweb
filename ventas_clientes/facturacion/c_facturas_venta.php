@@ -31,7 +31,10 @@ class controllerSalesInvoice {
 		if ($sTitle == 'Editar') {
 			$modelSalesInvoice = new modelSalesInvoice();
 			$arrDataEdit = $modelSalesInvoice->edit_sales_invoice($arrGet);
-		}
+		}		
+		// echo "<script>console.log('" . json_encode($arrDataHelper) . "')</script>";
+		// echo "<script>console.log('" . json_encode($sTitle) . "')</script>";
+		// echo "<script>console.log('" . json_encode($arrDataEdit) . "')</script>";
 		$templateSalesInvoice->page_add_sales_invoice($arrDataHelper, $sTitle, $arrDataEdit);
 	}
 
@@ -1002,7 +1005,8 @@ EOT;
 				!empty($arrData['arrHeader']['nu_tipo_documento_referencia']) &&
 				!empty($arrData['arrHeader']['txt_observaciones_referencia'])
 			) {
-				$sTipoDocumentoReferencia = $arrData['arrHeader']['nu_tipo_documento_referencia_sunat'];
+				//$sTipoDocumentoReferencia = $arrData['arrHeader']['nu_tipo_documento_referencia_sunat'];				
+				$sTipoDocumentoReferencia = (trim($arrData['arrHeader']['ch_cat_sunat']) == '' || $arrData['arrHeader']['ch_cat_sunat'] == NULL) ? $arrData['arrHeader']['nu_tipo_documento_referencia_sunat'] : $arrData['arrHeader']['ch_cat_sunat'];
 				$sSerieNumeroDocumentoReferencia = $arrData['arrHeader']['no_serie_documento_referencia'] . "-" . $arrData['arrHeader']['nu_numero_documento_referencia'];
 			}
 

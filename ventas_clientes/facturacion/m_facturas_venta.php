@@ -552,7 +552,7 @@ LIMIT 1
     	return $arrResponse;
   	}
 
-  	function add_sales_invoice($arrPost, $arrUserIp, $dHoraActual){
+  	function add_sales_invoice($arrPost, $arrUserIp, $dHoraActual){ //GUARDAR O MODIFICAR
   		// Verificando si el código de impuesto será inafecto
   		// Según lo acordado, no interesa si hay productos con IGV / EXO / ETC, basta con que haya un item de inafecto
   		// Todo el comprobante se vuelve como inafecto
@@ -806,7 +806,8 @@ SELECT
  ROUND(VC.nu_fac_descuento1, 2) AS ss_descuento,
  ROUND(VC.nu_fac_valortotal, 2) AS ss_total,
  VC.nu_fac_recargo3 AS nu_estado_documento_sunat,
- VC.ch_liquidacion AS nu_liquidacion
+ VC.ch_liquidacion AS nu_liquidacion,
+ TRIM(VCOM.ch_cat_sunat) AS ch_cat_sunat
 FROM
  fac_ta_factura_cabecera AS VC
  JOIN inv_ta_almacenes AS ALMA
@@ -1110,6 +1111,13 @@ INSERT INTO fac_ta_factura_detalle (
 	    	$sNumeroCuentaImportePorcentajeCodigoBienesServicio = strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iNumeroCuentaDetraccion'])) . '*' . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['fImporteDetraccion'])) . '*' . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iPorcentajeDetraccion'])) . '*' . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iCodigoBienServicioDetraccion']));
 	    }
 
+		$cat_sunat = NULL;
+		if( strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['iTipoDocumento'])) == '20' ){ //SI ES NC
+			$cat_sunat = strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['catalogo09Sunat_NC']));
+		}else if( strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['iTipoDocumento'])) == '11' ){ //SI ES ND
+			$cat_sunat = strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['catalogo10Sunat_ND']));
+		}
+
     $sql_complemento = "
 INSERT INTO fac_ta_factura_complemento (
  ch_fac_tipodocumento,
@@ -1127,7 +1135,8 @@ INSERT INTO fac_ta_factura_complemento (
  ch_fac_nombreclie,
  flg_replicacion,
  ch_usuario,
- ch_auditorpc
+ ch_auditorpc,
+ ch_cat_sunat
 ) VALUES (
  '" . strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['iTipoDocumento'])) . "',
  '" . strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sSerieDocumento'])) . "',
@@ -1144,7 +1153,8 @@ INSERT INTO fac_ta_factura_complemento (
  '" . strip_tags(stripslashes($this->text_clean_bd($arrPost['arrComplementarySaleInvoice']['sNombreCliente']))) . "',
  0,
  '" . strip_tags(stripslashes(substr($arrUserIp['sNombreUsuario'], -10))) . "',
- '" . strip_tags(stripslashes($arrUserIp['sIp'])) . "'
+ '" . strip_tags(stripslashes($arrUserIp['sIp'])) . "',
+ '" . $cat_sunat . "'
 );
 		";
 
@@ -1362,6 +1372,13 @@ INSERT INTO inv_movialma (
 	    	$sNumeroCuentaImportePorcentajeCodigoBienesServicio = strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iNumeroCuentaDetraccion'])) . '*' . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['fImporteDetraccion'])) . '*' . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iPorcentajeDetraccion'])) . '*' . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iCodigoBienServicioDetraccion']));
 	    }
 
+		$cat_sunat = NULL;
+		if( strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iTipoDocumento'])) == '20' ){ //SI ES NC
+			$cat_sunat = strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['catalogo09Sunat_NC']));
+		}else if( strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iTipoDocumento'])) == '11' ){ //SI ES ND
+			$cat_sunat = strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['catalogo10Sunat_ND']));
+		}
+
 	    $sql_cabecera = "
 UPDATE
  fac_ta_factura_cabecera
@@ -1389,7 +1406,8 @@ SET
  dt_fechactualizacion = now(),
  flg_replicacion = 0,
  ch_usuario = '" . strip_tags(stripslashes(substr($arrUserIp['sNombreUsuario'], -10))) . "',
- ch_auditorpc = '" . strip_tags(stripslashes($arrUserIp['sIp'])) . "'
+ ch_auditorpc = '" . strip_tags(stripslashes($arrUserIp['sIp'])) . "',
+ ch_cat_sunat = '" . $cat_sunat . "'
 WHERE
  ch_fac_tipodocumento = '" . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iTipoDocumento'])) . "'
  AND ch_fac_seriedocumento = '" . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['sSerieDocumento'])) . "'
@@ -1675,7 +1693,8 @@ SELECT
  (string_to_array(VCOM.nu_fac_complemento_direccion, '*'))[4] AS nu_codigo_bienes_servicio_detraccion,
  TRIM(VC.ch_fac_tiporecargo2) AS no_codigo_impuesto,
  VC.ch_liquidacion AS nu_liquidacion,
- VC.nu_fac_recargo3 AS nu_estado_documento_sunat
+ VC.nu_fac_recargo3 AS nu_estado_documento_sunat,
+ TRIM(VCOM.ch_cat_sunat) AS ch_cat_sunat
 FROM
  fac_ta_factura_cabecera AS VC
  LEFT JOIN fac_ta_factura_complemento AS VCOM

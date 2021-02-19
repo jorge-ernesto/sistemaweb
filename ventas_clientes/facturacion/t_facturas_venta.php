@@ -37,6 +37,11 @@ class templateSalesInvoice {
 	<section class="section">
 		<div class="container">
             <h1 align="center">Facturas de Venta</h1>
+			<?php
+				if ($arrDataHelper['creacionCampo']['sStatus'] == 'success') {					
+					echo "<h4 align='center'><span class='tag is-success'>Se creo campo correctamente</span></h4>";
+				}
+			?>
             <br>
             <div class="columns is-centered">
                 <div class="column">
@@ -1110,6 +1115,60 @@ class templateSalesInvoice {
 							    	</div><!-- ./ Mobile -->
 							    </div><!-- ./ is-3 -->
 							</div><!-- ./ Desktop Nota de Crédito / Débito-->
+
+							<div class="columns <?php echo (($bActivarDocumentoReferencia) && $arrDataEdit->arrData[0]["nu_tipo_documento"] == "20" ? '' : 'div-referencia_catalogo_09'); ?>">
+								<div class="column is-4">
+				            		<div class="columns is-mobile">									  	
+									  	<div class="column is-6 form-group">
+								            <label class="label">Tipo de Nota de Credito</label>
+							    			<span class="select">
+												<?php
+												if ($arrDataHelper['arrCat09']['sStatus'] == 'success') {
+													$arrData = $arrDataHelper['arrCat09']['arrData'];
+													$value_selected_bd = ($sTitle=='Agregar' ? null : $arrDataEdit->arrData[0]["ch_cat_sunat"]);
+													$use_substr = true;
+													//echo $this->Select('cbo-filtro-catalogo_09', 'id', 'name', $arrData, $value_selected_bd, false, null, null, $use_substr, $is_disabled);
+													$status = '';
+													if ( $arrDataEdit->arrData[0]["nu_estado_documento_sunat"] == "1" || $arrDataEdit->arrData[0]["nu_estado_documento_sunat"] == "3" )
+														$status = $is_disabled;
+													echo $this->Select('cbo-filtro-catalogo_09', 'id', 'name', $arrData, $value_selected_bd, false, null, null, $use_substr, $status);
+												} else {
+													echo '<option value="">Sin Valor</option>';
+												}
+												?>
+							    			</span>
+								            <p class="help is-danger"></p>
+							    		</div>
+							    	</div><!-- ./ Mobile -->
+							    </div>
+							</div><!-- ./Cat. 09 SUNAT para Nota de Credito -->
+
+							<div class="columns <?php echo (($bActivarDocumentoReferencia) && $arrDataEdit->arrData[0]["nu_tipo_documento"] == "11" ? '' : 'div-referencia_catalogo_10'); ?>">
+								<div class="column is-4">
+				            		<div class="columns is-mobile">									  	
+									  	<div class="column is-6 form-group">
+								            <label class="label">Tipo de Nota de Debito</label>
+							    			<span class="select">
+												<?php
+												if ($arrDataHelper['arrCat10']['sStatus'] == 'success') {
+													$arrData = $arrDataHelper['arrCat10']['arrData'];
+													$value_selected_bd = ($sTitle=='Agregar' ? null : $arrDataEdit->arrData[0]["ch_cat_sunat"]);
+													$use_substr = true;
+													//echo $this->Select('cbo-filtro-catalogo_10', 'id', 'name', $arrData, $value_selected_bd, false, null, null, $use_substr, $is_disabled);
+													$status = '';
+													if ( $arrDataEdit->arrData[0]["nu_estado_documento_sunat"] == "1" || $arrDataEdit->arrData[0]["nu_estado_documento_sunat"] == "3" )
+														$status = $is_disabled;
+													echo $this->Select('cbo-filtro-catalogo_10', 'id', 'name', $arrData, $value_selected_bd, false, null, null, $use_substr, $status);
+												} else {
+													echo '<option value="">Sin Valor</option>';
+												}
+												?>
+							    			</span>
+								            <p class="help is-danger"></p>
+							    		</div>
+							    	</div><!-- ./ Mobile -->
+							    </div>
+							</div><!-- ./Cat. 10 SUNAT para Nota de Debito -->
 
 				            <div class="columns">
 				                <div class="column is-12">

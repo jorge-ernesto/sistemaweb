@@ -8,7 +8,7 @@ require("facturacion/c_facturas_venta.php");
 if (!isset($_REQUEST['action'])) {
 	$_REQUEST['page'] = '1';//Para que funcione el paginador, siempre se inicia en la primera página 1
 
-	$objHelper = new HelperClass();
+	$objHelper = new HelperClass();	
 	$arrDataHelper = array(
 		'arrAlmacenes' => $objHelper->getWareHouse(),
 		'dInicial' => $objHelper->getAllDateFormat('fecha_inicial_dmy'),
@@ -20,6 +20,7 @@ if (!isset($_REQUEST['action'])) {
 		'iIdCliente' => '',
 		'sNombreCliente' => '',
 		'arrDocumentos' => $objHelper->getGeneralTable('08', "AND tab_car_03!=''", "tab_descripcion", ""),
+		'creacionCampo' => $objHelper->executeCreacionCampo(),
 	);
 	$controllerSalesInvoice = new controllerSalesInvoice();
 	$controllerSalesInvoice->index($arrDataHelper);
@@ -34,6 +35,8 @@ if (!isset($_REQUEST['action'])) {
 			'arrFormaPago' => $objHelper->getGeneralTable('05', "", "tab_elemento", ""),
 			'arrDiasPago' => $objHelper->getGeneralTable('96', "", "tab_elemento", "tab_num_01"),
 			'arrMonedas' => $objHelper->getGeneralTable('04', "", "tab_elemento", ""),
+			'arrCat09' => $objHelper->getCatalogo09Sunat_NC(),
+			'arrCat10' => $objHelper->getCatalogo10Sunat_ND(),
 			'fTipoCambioVenta' => $objHelper->getExchangeRate($objHelper->getAllDateFormat('fecha_ymd')),
 			'fImpuesto' => $objHelper->getTax(),
 			'iTipoImpuesto' => $objHelper->getParametersTable('taxoptional'),
@@ -78,10 +81,10 @@ if (!isset($_REQUEST['action'])) {
 				$controllerSalesInvoice->generate_printed_representation_pdf_FE_sunat($_REQUEST, $arrDataHelper);
 				break;
 
-			case 'save':
+			case 'save': //GUARDAR
 				//Guardar documentos de ventas manuales
 				// error_log("****** Analisis para guardar documentos, etapa 5 ******");
-        		// error_log(json_encode(array($_POST, $objHelper->getUserIP(), $objHelper->getAllDateFormat('hora'))));
+        		// error_log(json_encode(array($_POST, $objHelper->getUserIP(), $objHelper->getAllDateFormat('hora'))));								
 				$controllerSalesInvoice->save_sales_invoice($_POST, $objHelper->getUserIP(), $objHelper->getAllDateFormat('hora'));
 				break;
 
@@ -90,7 +93,7 @@ if (!isset($_REQUEST['action'])) {
 				$controllerSalesInvoice->save_sales_invoice_complementary($_POST, $objHelper->getUserIP());
 				break;
 
-			case 'modify':
+			case 'modify': //MODIFICAR
 				//Modificar documentos de ventas manuales
 				$controllerSalesInvoice->modify_sales_invoice($_POST, $objHelper->getUserIP(), $objHelper->getAllDateFormat('hora'));
 				break;

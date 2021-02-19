@@ -81,6 +81,8 @@ $(document).ready(function() {
 
 	//Ocultar elementos al cargar Facturas de Venta
 	$( '.div-referencia_documento' ).hide();
+	$( '.div-referencia_catalogo_09' ).hide();
+	$( '.div-referencia_catalogo_10' ).hide();
 	$( '.div-fecha_credito' ).hide();
 	$( '.div-complementarios' ).hide();
 	$( '.div-message-sale_invoice_referencia' ).hide();
@@ -286,14 +288,22 @@ $(document).ready(function() {
 		window.location = '/sistemaweb/ventas_clientes/facturas_venta.php?action=add';
 	});
 
+	/*Funcionalidad para mostrar div-complementarios desde el combo Tipo de Documento*/
 	$( '#cbo-filtro-tipo_documento' ).change(function() {
 		$( "#chk-activar_complemento" ).prop( "checked", false );
 		$( '.div-complementarios' ).hide();
 		$( '.div-referencia_documento' ).hide();
+		$( '.div-referencia_catalogo_09' ).hide();
+		$( '.div-referencia_catalogo_10' ).hide();
 		if ( $(this).val() == '20' || $(this).val() == '11' ) {
 			$( "#chk-activar_complemento" ).prop( "checked", true );
 			$( '.div-complementarios' ).show();
-			$( '.div-referencia_documento' ).show();
+			$( '.div-referencia_documento' ).show();	
+			if( $(this).val() == '20' ){ //Cat. 09 SUNAT para Nota de Credito
+				$( '.div-referencia_catalogo_09' ).show();
+			}else if( $(this).val() == '11' ){ //Cat. 10 SUNAT para Nota de Debido
+				$( '.div-referencia_catalogo_10' ).show();
+			}
 		}
 	});
 
@@ -604,7 +614,7 @@ $(document).ready(function() {
 	    }
     })
 
-	$( '#btn-save-sale_invoice' ).click(function() {
+	$( '#btn-save-sale_invoice' ).click(function() { //GUARDAR O MODIFICAR
 		saveSalesInvoice();
 	});
 	/** Fin Agregar **/
@@ -1166,6 +1176,8 @@ function saveSalesInvoice(){
 												iTipoDocumentoReferencia : $( '#cbo-filtro-referencia-tipo_documento' ).val(),
 												sSerieDocumentoReferencia : $( '#cbo-filtro-referencia-serie_documento' ).val(),
 												iNumeroDocumentoReferencia : $( '#txt-add-referencia-numero_documento' ).val(),
+												catalogo09Sunat_NC : $( '#cbo-filtro-catalogo_09' ).val(),
+												catalogo10Sunat_ND : $( '#cbo-filtro-catalogo_10' ).val(),
 												//Detracción
 												iDetraccion : $( '#cbo-add-detraccion' ).val(),
 												iNumeroCuentaDetraccion : $( '#txt-detraccion-nu_cuenta' ).val(),
@@ -1224,8 +1236,8 @@ function saveSalesInvoice(){
 												arrComplementarySaleInvoice : arrComplementarySaleInvoice,
 												arrDetailSaleInvoice : arrDetailSaleInvoice,
 											}
-											// console.log(params);
-											// return;
+											//console.log(params);
+											//return;
 
 											url = '/sistemaweb/ventas_clientes/facturas_venta.php';
 
@@ -1368,6 +1380,8 @@ function saveSalesInvoiceComplementary(){
 				sSerieDocumento : $( '#cbo-filtro-serie_documento' ).val(),
 				iNumeroDocumento : $( '#txt-add-numero_documento' ).val(),
 				dFechaEmision : sTypeDate('fecha_dmy', $( '#txt-fe_emision' ).val(), '/'),
+				catalogo09Sunat_NC : $( '#cbo-filtro-catalogo_09' ).val(),
+				catalogo10Sunat_ND : $( '#cbo-filtro-catalogo_10' ).val(),
 				//Modifcar fecha y forma de pago
 				iFormaPago : $( '#cbo-add-forma_pago' ).val(),
 				dFechaVencimiento : sTypeDate('fecha_dmy', $( '#txt-fe_vencimiento' ).val(), '/'),
@@ -1385,6 +1399,8 @@ function saveSalesInvoiceComplementary(){
 				iPorcentajeDetraccion : $( '#txt-detraccion-porcentaje' ).val(),
 				iCodigoBienServicioDetraccion : $( '#txt-detraccion-codigo_bienes_servicios' ).val(),
 			}
+			//console.log(arrComplementarySaleInvoice);
+			//return
 
 			var params = {
 				action: 'save_complementary',
