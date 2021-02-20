@@ -192,29 +192,29 @@ ORDER BY
 
     function getCatalogo09Sunat_NC(){
         $catalogo = array("iStatus" => "", "sStatus" => "success", "sMessage" => "Registros Encontrados");
-        $catalogo['arrData'][] = array( "id" => "000001", "name" => "Anulación de la operación" );
-        $catalogo['arrData'][] = array( "id" => "000002", "name" => "Anulación por error en el RUC" );
-        $catalogo['arrData'][] = array( "id" => "000003", "name" => "Corrección por error en la descripción" );
-        $catalogo['arrData'][] = array( "id" => "000004", "name" => "Descuento global" );
-        $catalogo['arrData'][] = array( "id" => "000005", "name" => "Descuento por ítem" );
-        $catalogo['arrData'][] = array( "id" => "000006", "name" => "Devolución total" );
-        $catalogo['arrData'][] = array( "id" => "000007", "name" => "Devolución por ítem" );
-        $catalogo['arrData'][] = array( "id" => "000008", "name" => "Bonificación" );
-        $catalogo['arrData'][] = array( "id" => "000009", "name" => "Disminución en el valor" );
-        $catalogo['arrData'][] = array( "id" => "000010", "name" => "Otros Conceptos" );
-        $catalogo['arrData'][] = array( "id" => "000011", "name" => "Ajustes de operaciones de exportación" );
-        $catalogo['arrData'][] = array( "id" => "000012", "name" => "Ajustes afectos al IVAP" );
+        $catalogo['arrData'][] = array( "id" => "000001", "name" => "01 - Anulación de la operación" );
+        $catalogo['arrData'][] = array( "id" => "000002", "name" => "02 - Anulación por error en el RUC" );
+        $catalogo['arrData'][] = array( "id" => "000003", "name" => "03 - Corrección por error en la descripción" );
+        $catalogo['arrData'][] = array( "id" => "000004", "name" => "04 - Descuento global" );
+        $catalogo['arrData'][] = array( "id" => "000005", "name" => "05 - Descuento por ítem" );
+        $catalogo['arrData'][] = array( "id" => "000006", "name" => "06 - Devolución total" );
+        $catalogo['arrData'][] = array( "id" => "000007", "name" => "07 - Devolución por ítem" );
+        $catalogo['arrData'][] = array( "id" => "000008", "name" => "08 - Bonificación" );
+        $catalogo['arrData'][] = array( "id" => "000009", "name" => "09 - Disminución en el valor" );
+        $catalogo['arrData'][] = array( "id" => "000010", "name" => "10 - Otros Conceptos" );
+        $catalogo['arrData'][] = array( "id" => "000011", "name" => "11 - Ajustes de operaciones de exportación" );
+        $catalogo['arrData'][] = array( "id" => "000012", "name" => "12 - Ajustes afectos al IVAP" );
         $catalogo['iStatus'] = count($catalogo['arrData']);
         return $catalogo;
     }
 
     function getCatalogo10Sunat_ND(){
         $catalogo = array("iStatus" => "", "sStatus" => "success", "sMessage" => "Registros Encontrados");
-        $catalogo['arrData'][] = array( "id" => "000001", "name" => "Intereses por mora" );
-        $catalogo['arrData'][] = array( "id" => "000002", "name" => "Aumento en el valor" );
-        $catalogo['arrData'][] = array( "id" => "000003", "name" => "Penalidades/ otros conceptos" );
-        $catalogo['arrData'][] = array( "id" => "000011", "name" => "Ajustes de operaciones de exportación" );
-        $catalogo['arrData'][] = array( "id" => "000012", "name" => "Ajustes afectos al IVAP" );
+        $catalogo['arrData'][] = array( "id" => "000001", "name" => "01 - Intereses por mora" );
+        $catalogo['arrData'][] = array( "id" => "000002", "name" => "02 - Aumento en el valor" );
+        $catalogo['arrData'][] = array( "id" => "000003", "name" => "03 - Penalidades/ otros conceptos" );
+        $catalogo['arrData'][] = array( "id" => "000011", "name" => "11 - Ajustes de operaciones de exportación" );
+        $catalogo['arrData'][] = array( "id" => "000012", "name" => "12 - Ajustes afectos al IVAP" );
         $catalogo['iStatus'] = count($catalogo['arrData']);
         return $catalogo;
     }
@@ -223,17 +223,32 @@ ORDER BY
         global $sqlca;        
         
         //VALIDAMOS QUE EL CAMPO EXISTA        
-        $iStatus = $sqlca->query("SELECT EXISTS(SELECT ch_cat_sunat FROM fac_ta_factura_complemento);");
+        $iStatus = $sqlca->query("
+            SELECT EXISTS(
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_schema='public'
+                AND table_name='fac_ta_factura_complemento'
+                AND column_name='ch_cat_sunat'            
+            );
+        ");
+
         $arrResponse = array('iStatus' => $iStatus, 'sStatus' => 'danger', 'sMessage' => 'No se creo campo', 'arrData' => NULL);
+
+        //SE EJECUTO LA FUNCTION EXISTS
+        if ((int)$iStatus > 0) {
+            $row = $sqlca->fetchRow();
+            $exists = $row['exists'];
+
+            //NO EXISTE
+            if($exists == "f"){
+                //CREAMOS CAMPO
+                $iStatus = $sqlca->query("ALTER TABLE fac_ta_factura_complemento ADD COLUMN ch_cat_sunat CHARACTER VARYING(2);");            
                 
-        //NO EXISTE
-        if((int)$iStatus < 0){
-            //CREAMOS CAMPO
-            $iStatus = $sqlca->query("ALTER TABLE fac_ta_factura_complemento ADD COLUMN ch_cat_sunat CHARACTER VARYING(2);");            
-            
-            //SI SE EJECUTO CORRECTAMENTE
-            if((int)$iStatus == 0){
-                $arrResponse = array('iStatus' => $iStatus, 'sStatus' => 'success', 'sMessage' => 'Creamos campo correctamente', 'arrData' => NULL);
+                //SE EJECUTO CORRECTAMENTE
+                if((int)$iStatus == 0){
+                    $arrResponse = array('iStatus' => $iStatus, 'sStatus' => 'success', 'sMessage' => 'Creamos campo correctamente', 'arrData' => NULL);
+                }
             }
         }
         return $arrResponse;
