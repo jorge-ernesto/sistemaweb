@@ -718,7 +718,7 @@ FROM
 			echo $comprimido;
 		break;
 
-		case 'STOCK_COMB':
+		case 'STOCK_COMB': //AQUI
 			argRangedCheck();
 			//pg_escape_string
 			$warehouse_id = $_REQUEST['warehouse_id'];
@@ -732,19 +732,26 @@ FROM
 				contometros.ch_tanque,
 				mediciondiaria.nu_medicion,
 				CASE
-			WHEN tanques.nu_capacidad > 0 THEN
-				(mediciondiaria.nu_medicion / tanques.nu_capacidad) * 100
-			ELSE
-				0
-			END AS porcentaje_existente,
-			 --mediciondiaria.nu_medicion / ((tanques.nu_capacidad - mediciondiaria.nu_medicion) / $days) AS dias,
-			 mediciondiaria.nu_medicion / ((SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days) AS tiempo,
-			 (SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) AS suma,
-			 $days AS dia,
-			 compra.mov_cantidad AS cantidad_ultima_compra,
-			 compra.mov_fecha AS fecha_ultima_compra,
-			 '$BeginDate' AS BeginDate,
-			 '$EndDate' AS EndDate
+					WHEN tanques.nu_capacidad > 0 THEN
+						(mediciondiaria.nu_medicion / tanques.nu_capacidad) * 100
+					ELSE
+						0
+				END AS porcentaje_existente,
+			 	--mediciondiaria.nu_medicion / ((tanques.nu_capacidad - mediciondiaria.nu_medicion) / $days) AS dias,
+
+			 	--mediciondiaria.nu_medicion / ((SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days) AS tiempo,			
+			 	CASE
+					WHEN ((SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / 7) > 0 THEN
+						mediciondiaria.nu_medicion / ((SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / 7)
+					ELSE
+						0
+				END AS tiempo, --Calculamos tiempo pero validando error de division / 0
+				(SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) AS suma,
+				$days AS dia,
+				compra.mov_cantidad AS cantidad_ultima_compra,
+				compra.mov_fecha AS fecha_ultima_compra,
+				'$BeginDate' AS BeginDate,
+				'$EndDate' AS EndDate
 			FROM
 				comb_ta_contometros contometros
 			JOIN comb_ta_tanques tanques ON (contometros.ch_tanque = tanques.ch_tanque AND tanques.ch_sucursal = '$warehouse_id' )
