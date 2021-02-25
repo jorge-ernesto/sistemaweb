@@ -635,7 +635,7 @@ class MovimientoAlmacenCRUDTemplate extends Template {
 
 				        <div class="column is-2">
 					        <div class="field">
-					        	<label class="label">Total I.G.V.</label>
+					        	<label class="label">Total Con I.G.V. (Referencial)</label>
 					        	<p class="control has-icon">
 					        		<input type="hidden" class="input" id="txt-Nu_Total_CIGV" name="Nu_Total_CIGV" autocomplete="off" required/>
 						        	<input type="text" class="input" id="label-Nu_Total_CIGV" autocomplete="off" required/>

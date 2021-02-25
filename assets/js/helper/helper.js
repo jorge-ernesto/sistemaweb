@@ -496,6 +496,7 @@ $( function() {
 	    //}
 
 	   	/* Campos de texto para ingresar Cantida, Costo y total del Articulo */
+		/*Campo cantidad*/
 		var Nu_Cantidad_Compra 	= $( "#txt-Nu_Cantidad_Compra" );
 		if(Nu_Cantidad_Compra.val() !== undefined){
 		    $("#txt-Nu_Cantidad_Compra").keydown(function (e) {
@@ -510,6 +511,7 @@ $( function() {
 			Nu_Cantidad_Compra.keyup (function() { calculateTotalSIGVCompra(Nu_IGV) });
 		}
 
+		/*Campo costo*/
 		var Nu_Costo_Unitario 	= $( "#txt-Nu_Costo_Unitario" );
 		if(Nu_Costo_Unitario.val() !== undefined){
 		    $("#txt-Nu_Costo_Unitario").keydown(function (e) {
@@ -524,6 +526,7 @@ $( function() {
 			Nu_Costo_Unitario.keyup (function() { calculateAmountsCompra(Nu_IGV) });
 		}
 
+		/*Campo total sin igv*/
 		var Nu_Total_SIGV 	= $( "#txt-Nu_Total_SIGV" );
 		if(Nu_Total_SIGV.val() !== undefined){
 		    $("#txt-Nu_Total_SIGV").keydown(function (e) {
@@ -538,6 +541,7 @@ $( function() {
 			Nu_Total_SIGV.keyup (function() { calculateCostoUnitarioCompra(Nu_IGV) });
 		}
 
+		/*Campo total con igv*/
 		var Nu_Total_CIGV = $('#label-Nu_Total_CIGV');
 		if (Nu_Total_CIGV.val() !== undefined) {
 			Nu_Total_CIGV.keydown(function (e) {
@@ -952,6 +956,8 @@ function verifyExistDocument(block_loding_modal, $Fe_Emision){
 */
 
 function calculateAmounts(){
+	console.log('calculateAmounts');
+
 	var Nu_Cantidad = null;
     var Nu_Precio 	= null;
     
@@ -979,6 +985,8 @@ function calculateAmounts(){
 }
 
 function calculateAmountsCompra(Nu_IGV){
+	console.log('calculateAmountsCompra');
+
 	var Nu_Cantidad_Compra 	= null;
     var Nu_Costo_Unitario 	= null;
 
@@ -994,6 +1002,8 @@ function calculateAmountsCompra(Nu_IGV){
 }
 
 function calculateCostoUnitarioCompra(Nu_IGV){
+	console.log('calculateCostoUnitarioCompra');	
+
 	var Nu_Cantidad_Compra 	= null;
     var Nu_Costo_Unitario 	= null;
     var Nu_Total_SIGV 		= null;
@@ -1010,6 +1020,8 @@ function calculateCostoUnitarioCompra(Nu_IGV){
 }
 
 function calculateMontosPorTotalIGV(Nu_IGV) {
+	console.log('calculateMontosPorTotalIGV');	
+
 	//console.log('calculateMontosPorTotalIGV');
 	var Nu_Cantidad_Compra = null;
 	var Nu_Costo_Unitario = null;
@@ -1030,6 +1042,8 @@ function calculateMontosPorTotalIGV(Nu_IGV) {
 }
 
 function calculateTotalSIGVCompra(Nu_IGV){
+	console.log('calculateTotalSIGVCompra');
+
 	var Nu_Cantidad_Compra 	= null;
     var Nu_Costo_Unitario 	= null;
 
