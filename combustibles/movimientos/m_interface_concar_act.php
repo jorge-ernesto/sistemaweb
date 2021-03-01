@@ -9328,7 +9328,8 @@ FROM
 						WHEN t.ch_fac_tipodocumento = '20' THEN 'D'::text 
 						ELSE 'H'
 					END AS ddh,
-					CASE WHEN sum(d.nu_fac_importeneto) is null THEN cast(0.00 as decimal) ELSE round(FIRST(t.nu_fac_valortotal),2)-round(FIRST(t.nu_fac_impuesto1),2) END as importe, --Agregado para que redondee correctamente
+					--CASE WHEN sum(d.nu_fac_importeneto) is null THEN cast(0.00 as decimal) ELSE round(FIRST(t.nu_fac_valortotal),2)-round(FIRST(t.nu_fac_impuesto1),2) END as importe, --Agregado para que redondee correctamente
+					CASE WHEN sum(d.nu_fac_importeneto) is null THEN cast(0.00 as decimal) ELSE round(sum(d.nu_fac_valortotal) - sum(d.nu_fac_impuesto1),2) END as importe, --CAMBIO
 					'VENTA MANUALES ' || substring(t.dt_fac_fecha::text from 9 for 2) || '-' || substring(t.dt_fac_fecha::text from 6 for 2) || '-' || substring(t.dt_fac_fecha::text from 3 for 2) ||' '::text as venta, 
 					t.ch_almacen as sucursal , 
 					t.ch_fac_seriedocumento || '-' ||  substr(t.ch_fac_numerodocumento,2)::text as dnumdoc,
@@ -9391,7 +9392,7 @@ FROM
 		ORDER BY dia, tip2, tip, tipodoc, dnumdoc, DCUENTA, ddh;";
 
 		echo "<pre>";
-		echo "VENTAS MANUALES: \n\n".$sql."\n\n";
+		echo "VENTAS MANUALES: \n\n".$sql."\n\n";	
 		echo "</pre>";
 
 		$centimo = "CREATE TABLE tmp_concar_centimo (dsubdia character varying(7), dcompro character varying(6), dsecue character varying(7), dfeccom character varying(6), dcuenta character varying(12), dcodane character varying(18),
@@ -10275,7 +10276,7 @@ FROM
 					c.pro_cab_numdocumento::text as trans,
 					'1'::text as tip,
 					'H'::text as ddh,
-					round(sum(pro_cab_imptotal), 2) as importe,
+					round(sum(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_imptotal ELSE c.pro_cab_imptotal + pro_cab_impinafecto END), 2) as importe,
 					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
 					c.pro_cab_almacen as sucursal,
 					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
@@ -10378,7 +10379,9 @@ FROM
 			ORDER BY dia, trans, pro, ddh DESC;
 		";
 			
+		echo "<pre>";		
 		echo "COMPRAS: \n\n".$sql."\n\n";	
+		echo "</pre>";
 		
 		$q1 = "CREATE TABLE tmp_concar (dsubdia character varying(7), dcompro character varying(6), dsecue character varying(7), dfeccom character varying(6), dcuenta character varying(12), dcodane character varying(18),
 			dcencos character varying(6), dcodmon character varying(2), ddh character varying(1), dimport numeric(14,2), dtipdoc character varying(2), dnumdoc character varying(20), 
