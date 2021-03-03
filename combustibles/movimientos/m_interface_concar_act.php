@@ -7459,7 +7459,7 @@ FROM
 			return false;	
 	
 		$a = $sqlca->fetchRow();
-		$vcsubdiario = $a[0]; //Esto puede traerse de forma dinamica, ya sea ventas, cobranzas, etc
+		$vcsubdiario = '71'; //Esto puede traerse de forma dinamica, ya sea ventas, cobranzas, etc
 		//$vccliente   = $a[1];
 		//$vcimpuesto  = $a[2];
 		//$vcventas    = $a[3];	
@@ -7484,6 +7484,10 @@ FROM
 		$cuenta_tarjeta_cheques_otros    = "162407";
 		$cuenta_tarjeta_cheques_bbva     = "162408";
 		$cuenta_tarjeta_metroplazos      = "162409";
+
+		$combustible_cod_anexo = "0001";
+		$glp_cod_anexo         = "0002";
+		$market_cod_anexo      = "0003";
 		//CUENTAS PARA LOS ASIENTOS
 
 		//OBTENEMOS WHERE PARA ASIENTOS MARKET
@@ -7910,7 +7914,7 @@ FROM
 		//******************************** ASIENTOS LIQUIDACION CAJA *****************************	
 		// Datos de asientos liquidacion caja
 
-		$sql_cc = "SELECT venta_subdiario, codane, subdiario_dia FROM concar_config;";
+		$sql_cc = "SELECT codane, subdiario_dia FROM concar_config;";
 
 		if ($sqlca->query($sql_cc) < 0){
 			error_log('Etapa 1: Obtenemos datos de cuenta por cobrar');
@@ -7918,9 +7922,8 @@ FROM
 		}
 
 		$a = $sqlca->fetchRow();
-		$vcsubdiario 	= $a[0];
-		$codane 		= $a[1];
-		$opcion         = $a[2];
+		$codane 		= $a[0];
+		$opcion         = $a[1];
 
 		$sqlcc = "
 			SELECT * FROM(		
@@ -7928,11 +7931,13 @@ FROM
 					dfeccom as dfeccom,
 					dcuenta AS dcuenta,
 					(CASE WHEN no_tipo_producto = 'COMBU' THEN '0002' WHEN no_tipo_producto = 'GLP' THEN '0004' WHEN no_tipo_producto = 'MKT' THEN '0006' END) as dsecue,
-					dcodane as dcodane,
+					--dcodane as dcodane,
+					(CASE WHEN no_tipo_producto = 'COMBU' THEN '$combustible_cod_anexo' WHEN no_tipo_producto = 'GLP' THEN '$glp_cod_anexo' WHEN no_tipo_producto = 'MKT' THEN '$market_cod_anexo' END) as dcodane,
 					dcencos as dcencos,
 					'D' as ddh,	
 					dimport as dimport,
-					dnumdoc as dnumdoc,
+					--dnumdoc as dnumdoc,
+					dfeccom as dnumdoc,
 					'LIQ. '||(CASE WHEN no_tipo_producto = 'COMBU' THEN 'COMBUSTIBLES' WHEN no_tipo_producto = 'GLP' THEN 'GLP' WHEN no_tipo_producto = 'MKT' THEN 'MARKET' END) || ' ' || TO_CHAR(ddate, 'DD/MM/YYYY')  as dxglosa,
 					'$vcsubdiario'::text as subday,
 					'' as doctype,
@@ -7954,11 +7959,13 @@ FROM
 						WHEN no_tipo_producto = 'MKT' THEN '$market_cuenta_caja'::text        
 					END as dcuenta,
 					(CASE WHEN no_tipo_producto = 'COMBU' THEN '0001' WHEN no_tipo_producto = 'GLP' THEN '0003' WHEN no_tipo_producto = 'MKT' THEN '0005' END) as dsecue,
-					'$codane' as dcodane,
+					--'$codane' as dcodane,
+					(CASE WHEN no_tipo_producto = 'COMBU' THEN '$combustible_cod_anexo' WHEN no_tipo_producto = 'GLP' THEN '$glp_cod_anexo' WHEN no_tipo_producto = 'MKT' THEN '$market_cod_anexo' END) as dcodane,
 					t.dcencos as dcencos,
 					'H' as ddh,
 					SUM(t.dimport) as dimport, 
-					'000000' as dnumdoc,
+					--'000000' as dnumdoc,
+					dfeccom as dnumdoc,
 					'LIQ. '||(CASE WHEN no_tipo_producto = 'COMBU' THEN 'COMBUSTIBLES' WHEN no_tipo_producto = 'GLP' THEN 'GLP' WHEN no_tipo_producto = 'MKT' THEN 'MARKET' END) || ' ' || TO_CHAR(ddate, 'DD/MM/YYYY')  as dxglosa,
 					'$vcsubdiario'::text as subday,
 					'' as doctype,
