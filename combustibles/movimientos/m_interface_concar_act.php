@@ -10262,9 +10262,9 @@ FROM
 	
 		$a = $sqlca->fetchRow();
 		$vcsubdiario = $a[0];
-		$vccliente   = $a[1];
-		$vcimpuesto  = $a[2];
-		$vcventas    = $a[3];
+		// $vccliente   = $a[1];
+		// $vcimpuesto  = $a[2];
+		// $vcventas    = $a[3];
 		$vccencos    = $a[4];
 		$opcion      = $a[5];
 		$vclienteglp = $a[6];
@@ -10273,12 +10273,24 @@ FROM
 		$cod_cliente = $a[9];
 		$cod_caja    = $a[10];
 
+		//CUENTAS PARA LOS ASIENTOS
+		$compra_combustible_cuenta_proveedor = "421201";
+		$compra_combustible_cuenta_bi        = "201101";
+
+		$compra_glp_cuenta_proveedor = "421202";
+		$compra_glp_cuenta_bi        = "201102";
+
+		$compra_market_cuenta_proveedor = "421203";
+		$compra_cuenta_impuesto         = "401101";
+		$compra_market_cuenta_bi        = "201103";
+		//CUENTAS PARA LOS ASIENTOS
+
 		$sql = "
 			SELECT * FROM(
 				--COMPRAS DE COMBUSTIBLE
 				SELECT
 					to_char(date(c.pro_cab_fechaemision),'YYMMDD') as dia,
-					'$vccliente'::text as DCUENTA,
+					'$compra_combustible_cuenta_proveedor'::text as DCUENTA,
 					c.pro_codigo::text as pro,
 					c.pro_cab_numdocumento::text as trans,
 					'1'::text as tip,
@@ -10296,9 +10308,11 @@ FROM
 					cpag_ta_cabecera c
 					INNER JOIN cpag_ta_detalle d ON (c.pro_cab_tipdocumento = d.pro_cab_tipdocumento AND c.pro_cab_seriedocumento = d.pro_cab_seriedocumento AND c.pro_cab_numdocumento = d.pro_cab_numdocumento AND c.pro_codigo = d.pro_codigo)
 					LEFT JOIN cpag_ta_rubros rubro ON(rubro.ch_codigo_rubro = c.pro_cab_rubrodoc)
+					LEFT JOIN inv_movialma AS MOVI ON (c.pro_cab_tipdocumento = MOVI.mov_tipdocuref AND c.pro_cab_seriedocumento || '' || c.pro_cab_numdocumento = MOVI.mov_docurefe)
 				WHERE
 					date(c.pro_cab_fechaemision) BETWEEN '$FechaIni' AND '$FechaFin'
 					AND c.pro_cab_almacen = '$almacen'
+					AND TRIM(MOVI.art_codigo) IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles WHERE ch_codigocombustible != '11620307')
 				GROUP BY
 					dia,
 					pro,
@@ -10315,7 +10329,7 @@ FROM
 				(
 				SELECT
 					to_char(date(c.pro_cab_fechaemision),'YYMMDD') as dia,
-					'$vcimpuesto'::text as DCUENTA,	
+					'$compra_cuenta_impuesto'::text as DCUENTA,	
 					c.pro_codigo::text as pro,
 					c.pro_cab_numdocumento::text as trans,
 					'1'::text as tip,
@@ -10333,9 +10347,11 @@ FROM
 					cpag_ta_cabecera c
 					INNER JOIN cpag_ta_detalle d ON (c.pro_cab_tipdocumento = d.pro_cab_tipdocumento AND c.pro_cab_seriedocumento = d.pro_cab_seriedocumento AND c.pro_cab_numdocumento = d.pro_cab_numdocumento AND c.pro_codigo = d.pro_codigo)
 					LEFT JOIN cpag_ta_rubros rubro ON(rubro.ch_codigo_rubro = c.pro_cab_rubrodoc)
+					LEFT JOIN inv_movialma AS MOVI ON (c.pro_cab_tipdocumento = MOVI.mov_tipdocuref AND c.pro_cab_seriedocumento || '' || c.pro_cab_numdocumento = MOVI.mov_docurefe)
 				WHERE
 					date(c.pro_cab_fechaemision) BETWEEN '$FechaIni' AND '$FechaFin'
 					AND c.pro_cab_almacen = '$almacen'
+					AND TRIM(MOVI.art_codigo) IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles WHERE ch_codigocombustible != '11620307')
 				GROUP BY
 					dia,
 					pro,
@@ -10352,7 +10368,7 @@ FROM
 				(
 				SELECT
 					to_char(date(c.pro_cab_fechaemision),'YYMMDD') as dia,
-					'$vcventas'::text as DCUENTA,	
+					'$compra_combustible_cuenta_bi'::text as DCUENTA,	
 					c.pro_codigo::text as pro,
 					c.pro_cab_numdocumento::text as trans,
 					'1'::text as tip,
@@ -10370,9 +10386,247 @@ FROM
 					cpag_ta_cabecera c
 					INNER JOIN cpag_ta_detalle d ON (c.pro_cab_tipdocumento = d.pro_cab_tipdocumento AND c.pro_cab_seriedocumento = d.pro_cab_seriedocumento AND c.pro_cab_numdocumento = d.pro_cab_numdocumento AND c.pro_codigo = d.pro_codigo)
 					LEFT JOIN cpag_ta_rubros rubro ON(rubro.ch_codigo_rubro = c.pro_cab_rubrodoc)
+					LEFT JOIN inv_movialma AS MOVI ON (c.pro_cab_tipdocumento = MOVI.mov_tipdocuref AND c.pro_cab_seriedocumento || '' || c.pro_cab_numdocumento = MOVI.mov_docurefe)
 				WHERE
 					date(c.pro_cab_fechaemision) BETWEEN '$FechaIni' AND '$FechaFin'
 					AND c.pro_cab_almacen = '$almacen'
+					AND TRIM(MOVI.art_codigo) IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles WHERE ch_codigocombustible != '11620307')
+				GROUP BY
+					dia,
+					pro,
+					subdiario,
+					c.pro_cab_almacen,
+					trans,
+					c.pro_cab_seriedocumento,
+					rubro.ch_descripcion_breve,
+					c.pro_cab_tipdocumento
+				)
+
+				UNION 
+
+				(
+				--COMPRA DE GLP
+				SELECT
+					to_char(date(c.pro_cab_fechaemision),'YYMMDD') as dia,
+					'$compra_glp_cuenta_proveedor'::text as DCUENTA,
+					c.pro_codigo::text as pro,
+					c.pro_cab_numdocumento::text as trans,
+					'1'::text as tip,
+					'H'::text as ddh,
+					round(sum(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_imptotal ELSE c.pro_cab_imptotal + pro_cab_impinafecto END), 2) as importe,
+					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
+					c.pro_cab_almacen as sucursal,
+					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
+					'$vcsubdiario'::TEXT AS subdiario,
+					--'$vcsubdiario'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
+					''::text as DCENCOS,
+					'C'::text as tip2,
+					c.pro_cab_tipdocumento::TEXT AS nutd
+				FROM
+					cpag_ta_cabecera c
+					INNER JOIN cpag_ta_detalle d ON (c.pro_cab_tipdocumento = d.pro_cab_tipdocumento AND c.pro_cab_seriedocumento = d.pro_cab_seriedocumento AND c.pro_cab_numdocumento = d.pro_cab_numdocumento AND c.pro_codigo = d.pro_codigo)
+					LEFT JOIN cpag_ta_rubros rubro ON(rubro.ch_codigo_rubro = c.pro_cab_rubrodoc)
+					LEFT JOIN inv_movialma AS MOVI ON (c.pro_cab_tipdocumento = MOVI.mov_tipdocuref AND c.pro_cab_seriedocumento || '' || c.pro_cab_numdocumento = MOVI.mov_docurefe)
+				WHERE
+					date(c.pro_cab_fechaemision) BETWEEN '$FechaIni' AND '$FechaFin'
+					AND c.pro_cab_almacen = '$almacen'
+					AND TRIM(MOVI.art_codigo) IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles WHERE ch_codigocombustible = '11620307')
+				GROUP BY
+					dia,
+					pro,
+					subdiario,
+					c.pro_cab_almacen,
+					trans,
+					c.pro_cab_seriedocumento,
+					rubro.ch_descripcion_breve,
+					c.pro_cab_tipdocumento
+				)
+
+				UNION 
+
+				(
+				SELECT
+					to_char(date(c.pro_cab_fechaemision),'YYMMDD') as dia,
+					'$compra_cuenta_impuesto'::text as DCUENTA,	
+					c.pro_codigo::text as pro,
+					c.pro_cab_numdocumento::text as trans,
+					'1'::text as tip,
+					'D'::text as ddh,
+					round(sum(c.pro_cab_impto1), 2) as importe,
+					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
+					c.pro_cab_almacen as sucursal,
+					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
+					'$vcsubdiario'::TEXT AS subdiario,
+					--'$vcsubdiario'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
+					''::text as DCENCOS,
+					'C'::text as tip2,
+					c.pro_cab_tipdocumento::TEXT AS nutd
+				FROM
+					cpag_ta_cabecera c
+					INNER JOIN cpag_ta_detalle d ON (c.pro_cab_tipdocumento = d.pro_cab_tipdocumento AND c.pro_cab_seriedocumento = d.pro_cab_seriedocumento AND c.pro_cab_numdocumento = d.pro_cab_numdocumento AND c.pro_codigo = d.pro_codigo)
+					LEFT JOIN cpag_ta_rubros rubro ON(rubro.ch_codigo_rubro = c.pro_cab_rubrodoc)
+					LEFT JOIN inv_movialma AS MOVI ON (c.pro_cab_tipdocumento = MOVI.mov_tipdocuref AND c.pro_cab_seriedocumento || '' || c.pro_cab_numdocumento = MOVI.mov_docurefe)
+				WHERE
+					date(c.pro_cab_fechaemision) BETWEEN '$FechaIni' AND '$FechaFin'
+					AND c.pro_cab_almacen = '$almacen'
+					AND TRIM(MOVI.art_codigo) IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles WHERE ch_codigocombustible = '11620307')
+				GROUP BY
+					dia,
+					pro,
+					subdiario,
+					c.pro_cab_almacen,
+					trans,
+					c.pro_cab_seriedocumento,
+					rubro.ch_descripcion_breve,
+					c.pro_cab_tipdocumento
+				)
+
+				UNION 
+
+				(
+				SELECT
+					to_char(date(c.pro_cab_fechaemision),'YYMMDD') as dia,
+					'$compra_glp_cuenta_bi'::text as DCUENTA,	
+					c.pro_codigo::text as pro,
+					c.pro_cab_numdocumento::text as trans,
+					'1'::text as tip,
+					'D'::text as ddh,
+					round(sum(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_impafecto ELSE c.pro_cab_impafecto + pro_cab_impinafecto END), 2) as importe,
+					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
+					c.pro_cab_almacen as sucursal,
+					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
+					'$vcsubdiario'::TEXT AS subdiario,
+					--'$vcsubdiario'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
+					''::text as DCENCOS,
+					'C'::text as tip2,
+					c.pro_cab_tipdocumento::TEXT AS nutd
+				FROM
+					cpag_ta_cabecera c
+					INNER JOIN cpag_ta_detalle d ON (c.pro_cab_tipdocumento = d.pro_cab_tipdocumento AND c.pro_cab_seriedocumento = d.pro_cab_seriedocumento AND c.pro_cab_numdocumento = d.pro_cab_numdocumento AND c.pro_codigo = d.pro_codigo)
+					LEFT JOIN cpag_ta_rubros rubro ON(rubro.ch_codigo_rubro = c.pro_cab_rubrodoc)
+					LEFT JOIN inv_movialma AS MOVI ON (c.pro_cab_tipdocumento = MOVI.mov_tipdocuref AND c.pro_cab_seriedocumento || '' || c.pro_cab_numdocumento = MOVI.mov_docurefe)
+				WHERE
+					date(c.pro_cab_fechaemision) BETWEEN '$FechaIni' AND '$FechaFin'
+					AND c.pro_cab_almacen = '$almacen'
+					AND TRIM(MOVI.art_codigo) IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles WHERE ch_codigocombustible = '11620307')
+				GROUP BY
+					dia,
+					pro,
+					subdiario,
+					c.pro_cab_almacen,
+					trans,
+					c.pro_cab_seriedocumento,
+					rubro.ch_descripcion_breve,
+					c.pro_cab_tipdocumento
+				)
+
+				UNION 
+
+				(
+				--COMPRA DE MARKET
+				SELECT
+					to_char(date(c.pro_cab_fechaemision),'YYMMDD') as dia,
+					'$compra_market_cuenta_proveedor'::text as DCUENTA,
+					c.pro_codigo::text as pro,
+					c.pro_cab_numdocumento::text as trans,
+					'1'::text as tip,
+					'H'::text as ddh,
+					round(sum(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_imptotal ELSE c.pro_cab_imptotal + pro_cab_impinafecto END), 2) as importe,
+					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
+					c.pro_cab_almacen as sucursal,
+					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
+					'$vcsubdiario'::TEXT AS subdiario,
+					--'$vcsubdiario'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
+					''::text as DCENCOS,
+					'C'::text as tip2,
+					c.pro_cab_tipdocumento::TEXT AS nutd
+				FROM
+					cpag_ta_cabecera c
+					INNER JOIN cpag_ta_detalle d ON (c.pro_cab_tipdocumento = d.pro_cab_tipdocumento AND c.pro_cab_seriedocumento = d.pro_cab_seriedocumento AND c.pro_cab_numdocumento = d.pro_cab_numdocumento AND c.pro_codigo = d.pro_codigo)
+					LEFT JOIN cpag_ta_rubros rubro ON(rubro.ch_codigo_rubro = c.pro_cab_rubrodoc)
+					LEFT JOIN inv_movialma AS MOVI ON (c.pro_cab_tipdocumento = MOVI.mov_tipdocuref AND c.pro_cab_seriedocumento || '' || c.pro_cab_numdocumento = MOVI.mov_docurefe)
+				WHERE
+					date(c.pro_cab_fechaemision) BETWEEN '$FechaIni' AND '$FechaFin'
+					AND c.pro_cab_almacen = '$almacen'
+					AND TRIM(MOVI.art_codigo) NOT IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles)
+				GROUP BY
+					dia,
+					pro,
+					subdiario,
+					c.pro_cab_almacen,
+					trans,
+					c.pro_cab_seriedocumento,
+					rubro.ch_descripcion_breve,
+					c.pro_cab_tipdocumento
+				)
+
+				UNION 
+
+				(
+				SELECT
+					to_char(date(c.pro_cab_fechaemision),'YYMMDD') as dia,
+					'$compra_cuenta_impuesto'::text as DCUENTA,	
+					c.pro_codigo::text as pro,
+					c.pro_cab_numdocumento::text as trans,
+					'1'::text as tip,
+					'D'::text as ddh,
+					round(sum(c.pro_cab_impto1), 2) as importe,
+					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
+					c.pro_cab_almacen as sucursal,
+					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
+					'$vcsubdiario'::TEXT AS subdiario,
+					--'$vcsubdiario'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
+					''::text as DCENCOS,
+					'C'::text as tip2,
+					c.pro_cab_tipdocumento::TEXT AS nutd
+				FROM
+					cpag_ta_cabecera c
+					INNER JOIN cpag_ta_detalle d ON (c.pro_cab_tipdocumento = d.pro_cab_tipdocumento AND c.pro_cab_seriedocumento = d.pro_cab_seriedocumento AND c.pro_cab_numdocumento = d.pro_cab_numdocumento AND c.pro_codigo = d.pro_codigo)
+					LEFT JOIN cpag_ta_rubros rubro ON(rubro.ch_codigo_rubro = c.pro_cab_rubrodoc)
+					LEFT JOIN inv_movialma AS MOVI ON (c.pro_cab_tipdocumento = MOVI.mov_tipdocuref AND c.pro_cab_seriedocumento || '' || c.pro_cab_numdocumento = MOVI.mov_docurefe)
+				WHERE
+					date(c.pro_cab_fechaemision) BETWEEN '$FechaIni' AND '$FechaFin'
+					AND c.pro_cab_almacen = '$almacen'
+					AND TRIM(MOVI.art_codigo) NOT IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles)
+				GROUP BY
+					dia,
+					pro,
+					subdiario,
+					c.pro_cab_almacen,
+					trans,
+					c.pro_cab_seriedocumento,
+					rubro.ch_descripcion_breve,
+					c.pro_cab_tipdocumento
+				)
+
+				UNION 
+
+				(
+				SELECT
+					to_char(date(c.pro_cab_fechaemision),'YYMMDD') as dia,
+					'$compra_market_cuenta_bi'::text as DCUENTA,	
+					c.pro_codigo::text as pro,
+					c.pro_cab_numdocumento::text as trans,
+					'1'::text as tip,
+					'D'::text as ddh,
+					round(sum(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_impafecto ELSE c.pro_cab_impafecto + pro_cab_impinafecto END), 2) as importe,
+					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
+					c.pro_cab_almacen as sucursal,
+					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
+					'$vcsubdiario'::TEXT AS subdiario,
+					--'$vcsubdiario'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
+					''::text as DCENCOS,
+					'C'::text as tip2,
+					c.pro_cab_tipdocumento::TEXT AS nutd
+				FROM
+					cpag_ta_cabecera c
+					INNER JOIN cpag_ta_detalle d ON (c.pro_cab_tipdocumento = d.pro_cab_tipdocumento AND c.pro_cab_seriedocumento = d.pro_cab_seriedocumento AND c.pro_cab_numdocumento = d.pro_cab_numdocumento AND c.pro_codigo = d.pro_codigo)
+					LEFT JOIN cpag_ta_rubros rubro ON(rubro.ch_codigo_rubro = c.pro_cab_rubrodoc)
+					LEFT JOIN inv_movialma AS MOVI ON (c.pro_cab_tipdocumento = MOVI.mov_tipdocuref AND c.pro_cab_seriedocumento || '' || c.pro_cab_numdocumento = MOVI.mov_docurefe)
+				WHERE
+					date(c.pro_cab_fechaemision) BETWEEN '$FechaIni' AND '$FechaFin'
+					AND c.pro_cab_almacen = '$almacen'
+					AND TRIM(MOVI.art_codigo) NOT IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles)
 				GROUP BY
 					dia,
 					pro,
@@ -10422,8 +10676,9 @@ FROM
 				if($opcion==0) {
 					$reg[10]=substr($reg[10],0,-2);
 				}
-											
-				if (substr($reg[1],0,3) == substr($vccliente,0,3)) { 
+				
+				//if (substr($reg[1],0,3) == substr($vccliente,0,3)) { 
+				if (substr($reg[1],0,3) == substr($compra_combustible_cuenta_proveedor,0,3) || substr($reg[1],0,3) == substr($compra_glp_cuenta_proveedor,0,3) || substr($reg[1],0,3) == substr($compra_market_cuenta_proveedor,0,3)) { 
 					$correlativo 	= $correlativo + 1;
 					$k=1;
 					if($FechaDiv[1]>=1 && $FechaDiv[1]<10){
@@ -10469,7 +10724,8 @@ FROM
 		$que = "SELECT * FROM tmp_concar ORDER BY dsubdia, dcompro, dsecue;  ";
 		if ($sqlca->query($que)>0){
 			while ($reg = $sqlca->fetchRow()){
-				if (substr($reg[4],0,3) == substr($vccliente,0,3)){
+				//if (substr($reg[4],0,3) == substr($vccliente,0,3)){
+				if (substr($reg[4],0,3) == substr($compra_combustible_cuenta_proveedor,0,3) || substr($reg[4],0,3) == substr($compra_glp_cuenta_proveedor,0,3) || substr($reg[4],0,3) == substr($compra_market_cuenta_proveedor,0,3)){
 					if ($flag == 1) {
 						$vec[$c] = $imp;
 						$c = $c + 1;
@@ -10487,10 +10743,11 @@ FROM
 		$k = 0;
 		if ($sqlca->query($que)>0){
 			while ($reg = $sqlca->fetchRow()){
-				if (trim($reg[4] == $vcimpuesto)){
+				//if (trim($reg[4] == $vcimpuesto)){
+				if (trim($reg[4] == $compra_cuenta_impuesto)){
 					$dif = $reg[9] + $vec[$k];
 					$k = $k + 1;
-					$sale = $sqlca->query("UPDATE tmp_concar SET dimport = ".$dif." WHERE dcompro = '".trim($reg[1])."' AND dcuenta='$vcimpuesto' and trim(dcodane)='' AND dsubdia = '".trim($reg[0])."';", "queryaux1"); // antes: dcodane='99999999999', con ultimo cambio : dcodane=''
+					$sale = $sqlca->query("UPDATE tmp_concar SET dimport = ".$dif." WHERE dcompro = '".trim($reg[1])."' AND dcuenta='$compra_cuenta_impuesto' and trim(dcodane)='' AND dsubdia = '".trim($reg[0])."';", "queryaux1"); // antes: dcodane='99999999999', con ultimo cambio : dcodane=''
 				}
 			}
 		}
@@ -10534,7 +10791,8 @@ FROM
 					$reg[10]=substr($reg[10],0,-2);
 				}
 
-				if (substr($reg[1],0,3) == substr($vccliente,0,3)) {
+				//if (substr($reg[1],0,3) == substr($vccliente,0,3)) {
+				if (substr($reg[1],0,3) == substr($compra_combustible_cuenta_proveedor,0,3) || substr($reg[1],0,3) == substr($compra_glp_cuenta_proveedor,0,3) || substr($reg[1],0,3) == substr($compra_market_cuenta_proveedor,0,3)) {
 
 					$correlativo = $correlativo + 1;
 
