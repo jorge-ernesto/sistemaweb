@@ -117,6 +117,295 @@ function ejecutarInsert($inserts, $tabcab, $tabdet, $tabcan) {
 
 class InterfaceConcarActModel extends Model {
 
+	function getMigracionConcar() {
+		global $sqlca;
+
+		//OBTENEMOS PARAMETROS PARA MIGRACION
+		$iStatus = $sqlca->query("SELECT par_valor FROM int_parametros WHERE par_nombre = 'migracion_concar' LIMIT 1;");				
+
+		//SE EJECUTO LA QUERY
+		if ((int)$iStatus > 0) {					
+			$row = $sqlca->fetchRow();
+			return $row['par_valor'];
+		}
+
+		return 0;
+	} 
+
+	function delete_concar_confignew() {
+		global $sqlca;
+
+		//INICIAMOS TRANSACCION
+		$sqlca->query("BEGIN;");
+
+		//ELIMINAMOS TABLA Y SECUENCIA
+		$iStatus = $sqlca->query("
+			DROP TABLE concar_confignew;
+			DROP SEQUENCE seq_concar_confignew_id;
+		");
+
+		if ((int)$iStatus < 0) {
+			$sqlca->query("ROLLBACK;");							
+		}else{
+			$sqlca->query("COMMIT;");			
+		}
+	} 
+
+	function create_concar_confignew() {
+		global $sqlca;
+
+		//INICIAMOS TRANSACCION
+		$sqlca->query("BEGIN;");		               
+
+		//VERIFICAMOS SI EXISTE TABLA	
+        $iStatus = $sqlca->query("
+            SELECT EXISTS(
+                SELECT column_name
+                FROM   information_schema.columns
+                WHERE  table_schema='public'
+                AND    table_name='concar_confignew'
+                AND    column_name='concar_confignew_id'            
+            );
+        ");
+
+		//SE EJECUTO LA FUNCTION EXISTS
+		if ((int)$iStatus > 0) {
+            $row = $sqlca->fetchRow();
+            $exists = $row['exists'];
+
+            //NO EXISTE
+            if($exists == "f"){
+                //CREAMOS SECUENCIA Y TABLA
+                $iStatus = $sqlca->query("
+					-- SEQUENCE: public.seq_concar_confignew_id
+					-- DROP SEQUENCE public.seq_concar_confignew_id;
+					CREATE SEQUENCE public.seq_concar_confignew_id
+						INCREMENT 1
+						START 1
+						MINVALUE 1
+						MAXVALUE 9223372036854775807
+						CACHE 1;
+					ALTER SEQUENCE public.seq_concar_confignew_id
+						OWNER TO postgres;	
+						
+					-- Table: public.concar_confignew
+					-- DROP TABLE public.concar_confignew;				
+					CREATE TABLE public.concar_confignew
+					(
+						concar_confignew_id numeric(20,0) NOT NULL DEFAULT nextval('seq_concar_confignew_id'::regclass),
+						ch_sucursal character varying(3) COLLATE pg_catalog.".'default'." NOT NULL,
+						module numeric(2,0) NOT NULL,
+						category numeric(2,0) NOT NULL,
+						subcategory numeric(2,0),
+						account character varying(12) COLLATE pg_catalog.".'default'." NOT NULL,
+						CONSTRAINT concar_confignew_pkey PRIMARY KEY (concar_confignew_id)
+					)				
+					TABLESPACE pg_default;				
+					ALTER TABLE public.concar_confignew
+						OWNER to postgres;
+				");
+								
+				//SE EJECUTO CORRECTAMENTE
+				if((int)$iStatus == 0){
+					$sqlca->query("COMMIT;");		
+					return array('iStatus' => $iStatus, 'sStatus' => 'success', 'sMessage' => 'Creamos secuencia y tabla correctamente', 'arrData' => NULL);
+                }else{
+					$sqlca->query("ROLLBACK;");		
+					return array('iStatus' => $iStatus, 'sStatus' => 'danger', 'sMessage' => 'No se pudo crear secuencia y tabla correctamente', 'arrData' => NULL);
+				}
+            }
+        }
+	}
+
+	/*
+	concar_confignew Values
+		module Values
+		0
+			category
+			0 Codigos Globales Empresa
+						0 Codigo de Empresa
+			1 Codigos Globales 
+						0 Subdiario dia							
+						1 Codigo de Cliente
+						2 Codigo de Caja
+			2 Codigos Globales Centro de Costo
+						0 Centro de Costo Combustible
+						1 Centro de Costo GLP
+						2 Centro de Costo Market
+						3 Centro de Costo Documentos Manuales
+			3 Codigos Globales Codigo de Anexo
+						0 Codigo de Anexo
+						1 Codigo de Anexo Lubricante
+						2 Codigo de Anexo GLP
+						
+	*/
+	function insert_module_global() {
+		global $sqlca;
+
+		//VERIFICAMOS QUE NO HAYA DATA INSERTADA PARA EL MODULO LIQUIDACION DE CAJA		
+		$iStatus = $sqlca->query("SELECT count(*) as resultado_cantidad FROM concar_confignew WHERE module = '0'");
+
+		//SE EJECUTO LA QUERY
+		if ((int)$iStatus > 0) {
+			$row = $sqlca->fetchRow();
+			$resultado_cantidad = $row['resultado_cantidad'];
+
+			//SI LA CANTIDAD ES 0, INSERTAMOS
+			if($resultado_cantidad == 0){
+
+				//OBTENEMOS SUCURSALES
+				$iStatus = $sqlca->query("SELECT ch_sucursal FROM int_ta_sucursales LIMIT 1");				
+
+				//SE EJECUTO LA QUERY
+				if ((int)$iStatus > 0) {					
+					$row = $sqlca->fetchRow();
+					$ch_sucursal = $row['ch_sucursal'];										
+
+					//OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO DE CUENTAS GLOBALES, ES IMPORTANTE ASEGURARNOS DE QUE ESTOS CAMPOS TENGAN DATA					
+					$iStatus = $sqlca->query("SELECT 	
+													cod_empresa
+													,subdiario_dia													
+													,cod_cliente													
+													,cod_caja										
+													,id_cencos_comb
+													,id_centro_costo_glp
+													,id_centrocosto
+													,id_centro_cos_dMa
+													,codane
+													,codane_lubri
+													,codane_glp2										
+												FROM concar_config;");	
+						
+					//SE EJECUTO LA QUERY
+					if ((int)$iStatus > 0) {
+						$row = $sqlca->fetchRow();
+						$cod_empresa         = $row['cod_empresa'];
+						$subdiario_dia       = $row['subdiario_dia'];	
+						$cod_cliente         = $row['cod_cliente'];											
+						$cod_caja            = $row['cod_caja'];
+						$id_cencos_comb      = $row['id_cencos_comb'];
+						$id_centro_costo_glp = $row['id_centro_costo_glp'];
+						$id_centrocosto      = $row['id_centrocosto'];
+						$id_centro_cos_dMa   = $row['id_centro_cos_dMa'];
+						$codane              = $row['codane'];
+						$codane_lubri        = $row['codane_lubri'];
+						$codane_glp2         = $row['codane_glp2'];
+
+						//INICIAMOS TRANSACCION
+						$sqlca->query("BEGIN;");
+
+						//INSERTAMOS DATA
+						$iStatus = $sqlca->query("
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 0, 0, 0, '$cod_empresa');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 0, 1, 0, '$subdiario_dia');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 0, 1, 1, '$cod_cliente');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 0, 1, 2, '$cod_caja');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 0, 2, 0, '$id_cencos_comb');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 0, 2, 1, '$id_centro_costo_glp');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 0, 2, 2, '$id_centrocosto');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 0, 2, 3, '$id_centro_cos_dMa');							
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 0, 3, 0, '$codane');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 0, 3, 1, '$codane_lubri');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 0, 3, 2, '$codane_glp2');
+						");
+
+						if ((int)$iStatus < 0) {
+							$sqlca->query("ROLLBACK;");							
+						}else{
+							$sqlca->query("COMMIT;");			
+						}
+					}
+				}
+			}
+		}		
+	}
+
+	/*
+	concar_confignew Values
+		module Values
+		8
+			category
+			0 Cuentas Configuracion
+						0 Subdiario de Liquidacion de Caja
+			1 Cuentas Caja
+						0 Cuenta Caja Combustible  
+						1 Cuenta Caja GLP 		  
+						2 Cuenta Caja Market       
+			2 Cuentas Efectivo
+						0 Cuenta Ticket Efectivo	 					
+			3 Cuentas Tarjeta
+						0 Cuenta Tarjetas Credito
+						1 Cuenta Tarjeta Visa
+						2 Cuenta Tarjeta American Express
+						3 Cuenta Tarjeta Mastercard
+						4 Cuenta Tarjeta Dinners
+						5 Cuenta Tarjeta CMR
+						6 Cuenta Tarjeta Ripley
+						7 Cuenta Tarjeta Cheques Otros
+						8 Cuenta Tarjeta Cheques BBVA
+						9 Cuenta Tarjeta Metroplazos	
+			4 Cuentas Codigo Anexo
+						0 Codigo de Anexo de Combustible
+						1 Codigo de Anexo de GLP
+						2 Codigo de Anexo de Market		
+	*/
+	function insert_module_liquidacion_caja() {
+		global $sqlca;
+			
+		//VERIFICAMOS QUE NO HAYA DATA INSERTADA PARA EL MODULO LIQUIDACION DE CAJA		
+		$iStatus = $sqlca->query("SELECT count(*) as resultado_cantidad FROM concar_confignew WHERE module = '8'");
+
+		//SE EJECUTO LA QUERY
+		if ((int)$iStatus > 0) {
+			$row = $sqlca->fetchRow();
+			$resultado_cantidad = $row['resultado_cantidad'];
+
+			//SI LA CANTIDAD ES 0, INSERTAMOS
+			if($resultado_cantidad == 0){
+
+				//OBTENEMOS SUCURSALES
+				$iStatus = $sqlca->query("SELECT ch_sucursal FROM int_ta_sucursales LIMIT 1");				
+
+				//SE EJECUTO LA QUERY
+				if ((int)$iStatus > 0) {					
+					$row = $sqlca->fetchRow();
+					$ch_sucursal = $row['ch_sucursal'];
+
+					//INICIAMOS TRANSACCION
+					$sqlca->query("BEGIN;");		
+
+					//INSERTAMOS DATA
+					$iStatus = $sqlca->query("
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 0, 0, '71');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 1, 0, '101101');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 1, 1, '101102');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 1, 2, '101103');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 2, 0, '103101');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 3, 0, '-');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 3, 1, '162401');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 3, 2, '162402');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 3, 3, '162403');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 3, 4, '162404');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 3, 5, '162405');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 3, 6, '162406');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 3, 7, '162407');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 3, 8, '162408');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 3, 9, '162409');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 4, 0, '0001');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 4, 1, '0002');
+						INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 8, 4, 2, '0003');
+					");
+
+					if ((int)$iStatus < 0) {
+						$sqlca->query("ROLLBACK;");							
+					}else{
+						$sqlca->query("COMMIT;");			
+					}
+				}
+			}			
+		}
+	}
+
 	function obtenerParametros() {
 		global $sqlca;
 
@@ -204,7 +493,7 @@ WHERE
 	function Empresa() {
 		global $sqlca;
 		
-		$sql = "SELECT cod_empresa FROM concar_config;";
+		$sql = "SELECT TRIM(account) as cod_empresa FROM concar_confignew WHERE module = 0 and category = 0 and subcategory = 0;";
 
 		if ($sqlca->query($sql) < 0) 
 			return false;
@@ -7441,54 +7730,126 @@ FROM
 		if ($val == 5)
 			return 5;
 
+// 		$sql = "
+// SELECT 
+//  venta_subdiario,
+//  --venta_cuenta_cliente,
+//  --venta_cuenta_impuesto,
+//  --venta_cuenta_ventas,
+//  id_cencos_comb,
+//  subdiario_dia,
+//  cod_cliente,
+//  cod_caja
+// FROM
+//  concar_config;
+// 		";
+
+// 		if ($sqlca->query($sql) < 0) 
+// 			return false;	
+	
+// 		$a = $sqlca->fetchRow();
+// 		$vcsubdiario = '71'; //Esto puede traerse de forma dinamica, ya sea ventas, cobranzas, etc
+// 		//$vccliente   = $a[1];
+// 		//$vcimpuesto  = $a[2];
+// 		//$vcventas    = $a[3];
+// 		$vccencos    = $a[1];
+// 		$opcion      = $a[2];
+// 		$cod_cliente = $a[3];
+// 		$cod_caja    = $a[4];
+
+		//OBTENEMOS CUENTAS DEL MODULO GLOBALES
 		$sql = "
-SELECT 
- venta_subdiario,
- --venta_cuenta_cliente,
- --venta_cuenta_impuesto,
- --venta_cuenta_ventas,
- id_cencos_comb,
- subdiario_dia,
- cod_cliente,
- cod_caja
-FROM
- concar_config;
+			SELECT
+				TRIM(c1.account) as subdiario_liquidacion
+				,TRIM(c2.account) as id_cencos_comb 
+				,TRIM(c3.account) as subdiario_dia 
+				,TRIM(c4.account) as cod_cliente
+				,TRIM(c5.account) as cod_caja
+			FROM
+				concar_confignew c1 
+				LEFT JOIN concar_confignew c2 ON   c2.module = 0   AND c2.category = 2   AND c2.subcategory = 0   --Centro de Costo Combustible
+				LEFT JOIN concar_confignew c3 ON   c3.module = 0   AND c3.category = 1   AND c3.subcategory = 0   --Subdiario dia
+				LEFT JOIN concar_confignew c4 ON   c4.module = 0   AND c4.category = 1   AND c4.subcategory = 1   --Codigo de Cliente
+				LEFT JOIN concar_confignew c5 ON   c5.module = 0   AND c5.category = 1   AND c5.subcategory = 2   --Codigo de Caja
+			WHERE
+				c1.module = 8   AND c1.category = 0   AND c1.subcategory = 0;   --Subdiario de Liquidacion de Caja
 		";
 
 		if ($sqlca->query($sql) < 0) 
 			return false;	
 	
 		$a = $sqlca->fetchRow();
-		$vcsubdiario = '71'; //Esto puede traerse de forma dinamica, ya sea ventas, cobranzas, etc
-		//$vccliente   = $a[1];
-		//$vcimpuesto  = $a[2];
-		//$vcventas    = $a[3];	
+		$vcsubdiario = $a[0];
 		$vccencos    = $a[1];
 		$opcion      = $a[2];
 		$cod_cliente = $a[3];
-		$cod_caja    = $a[4];
+		$cod_caja    = $a[4];	
+		//CERRAR OBTENEMOS CUENTAS DEL MODULO GLOBALES	
 
-		//CUENTAS PARA LOS ASIENTOS
-		$combustible_cuenta_caja = "101101";
-		$glp_cuenta_caja         = "101102";
-		$market_cuenta_caja      = "101103";
+		//OBTENEMOS CUENTAS DEL MODULO LIQUIDACION DE CAJA
+		$sql = "
+			SELECT
+				TRIM(c1.account) as combustible_cuenta_caja
+				,TRIM(c2.account) as glp_cuenta_caja
+				,TRIM(c3.account) as market_cuenta_caja
+				,TRIM(c4.account) as cuenta_ticket_efectivo
+				,TRIM(c5.account) as cuenta_tarjeta_visa
+				,TRIM(c6.account) as cuenta_tarjeta_american_express
+				,TRIM(c7.account) as cuenta_tarjeta_mastercard
+				,TRIM(c8.account) as cuenta_tarjeta_dinners
+				,TRIM(c9.account) as cuenta_tarjeta_cmr
+				,TRIM(c10.account) as cuenta_tarjeta_ripley
+				,TRIM(c11.account) as cuenta_tarjeta_cheques_otros
+				,TRIM(c12.account) as cuenta_tarjeta_cheques_bbva
+				,TRIM(c13.account) as cuenta_tarjeta_metroplazos
+				,TRIM(c14.account) as combustible_cod_anexo
+				,TRIM(c15.account) as glp_cod_anexo
+				,TRIM(c16.account) as market_cod_anexo				
+			FROM
+				concar_confignew c1 
+				LEFT JOIN concar_confignew c2 ON   c2.module = 8   AND c2.category = 1   AND c2.subcategory = 1   --Cuenta Caja GLP
+				LEFT JOIN concar_confignew c3 ON   c3.module = 8   AND c3.category = 1   AND c3.subcategory = 2   --Cuenta Caja Market				
+				LEFT JOIN concar_confignew c4 ON   c4.module = 8   AND c4.category = 2   AND c4.subcategory = 0   --Cuenta Ticket Efectivo				
+				LEFT JOIN concar_confignew c5 ON   c5.module = 8   AND c5.category = 3   AND c5.subcategory = 1   --Cuenta Tarjeta Visa
+				LEFT JOIN concar_confignew c6 ON   c6.module = 8   AND c6.category = 3   AND c6.subcategory = 2   --Cuenta Tarjeta American Express
+				LEFT JOIN concar_confignew c7 ON   c7.module = 8   AND c7.category = 3   AND c7.subcategory = 3   --Cuenta Tarjeta Mastercard
+				LEFT JOIN concar_confignew c8 ON   c8.module = 8   AND c8.category = 3   AND c8.subcategory = 4   --Cuenta Tarjeta Dinners
+				LEFT JOIN concar_confignew c9 ON   c9.module = 8   AND c9.category = 3   AND c9.subcategory = 5   --Cuenta Tarjeta CMR
+				LEFT JOIN concar_confignew c10 ON   c10.module = 8   AND c10.category = 3   AND c10.subcategory = 6   --Cuenta Tarjeta Ripley
+				LEFT JOIN concar_confignew c11 ON   c11.module = 8   AND c11.category = 3   AND c11.subcategory = 7   --Cuenta Tarjeta Cheques Otros
+				LEFT JOIN concar_confignew c12 ON   c12.module = 8   AND c12.category = 3   AND c12.subcategory = 8   --Cuenta Tarjeta Cheques BBVA
+				LEFT JOIN concar_confignew c13 ON   c13.module = 8   AND c13.category = 3   AND c13.subcategory = 9   --Cuenta Tarjeta Metroplazos				
+				LEFT JOIN concar_confignew c14 ON   c14.module = 8   AND c14.category = 4   AND c14.subcategory = 0   --Codigo de Anexo de Combustible
+				LEFT JOIN concar_confignew c15 ON   c15.module = 8   AND c15.category = 4   AND c15.subcategory = 1   --Codigo de Anexo de GLP
+				LEFT JOIN concar_confignew c16 ON   c16.module = 8   AND c16.category = 4   AND c16.subcategory = 2   --Codigo de Anexo de Market
+			WHERE
+				c1.module = 8   AND c1.category = 1   AND c1.subcategory = 0; --Cuenta Caja Combustible  
+		";
 
-		$cuenta_ticket_efectivo  = "103101";
+		if ($sqlca->query($sql) < 0) 
+			return false;	
+			
+		$a = $sqlca->fetchRow();				
+		$combustible_cuenta_caja         = $a['combustible_cuenta_caja'];
+		$glp_cuenta_caja                 = $a['glp_cuenta_caja'];
+		$market_cuenta_caja              = $a['market_cuenta_caja'];
 
-		$cuenta_tarjeta_visa             = "162401";
-		$cuenta_tarjeta_american_express = "162402";
-		$cuenta_tarjeta_mastercard       = "162403";
-		$cuenta_tarjeta_dinners          = "162404";
-		$cuenta_tarjeta_cmr              = "162405";
-		$cuenta_tarjeta_ripley           = "162406";
-		$cuenta_tarjeta_cheques_otros    = "162407";
-		$cuenta_tarjeta_cheques_bbva     = "162408";
-		$cuenta_tarjeta_metroplazos      = "162409";
+		$cuenta_ticket_efectivo          = $a['cuenta_ticket_efectivo'];
 
-		$combustible_cod_anexo = "0001";
-		$glp_cod_anexo         = "0002";
-		$market_cod_anexo      = "0003";
-		//CUENTAS PARA LOS ASIENTOS
+		$cuenta_tarjeta_visa             = $a['cuenta_tarjeta_visa'];
+		$cuenta_tarjeta_american_express = $a['cuenta_tarjeta_american_express'];
+		$cuenta_tarjeta_mastercard       = $a['cuenta_tarjeta_mastercard'];
+		$cuenta_tarjeta_dinners          = $a['cuenta_tarjeta_dinners'];
+		$cuenta_tarjeta_cmr              = $a['cuenta_tarjeta_cmr'];
+		$cuenta_tarjeta_ripley           = $a['cuenta_tarjeta_ripley'];
+		$cuenta_tarjeta_cheques_otros    = $a['cuenta_tarjeta_cheques_otros'];
+		$cuenta_tarjeta_cheques_bbva     = $a['cuenta_tarjeta_cheques_bbva'];
+		$cuenta_tarjeta_metroplazos      = $a['cuenta_tarjeta_metroplazos'];
+
+		$combustible_cod_anexo           = $a['combustible_cod_anexo'];
+		$glp_cod_anexo                   = $a['glp_cod_anexo'];
+		$market_cod_anexo                = $a['market_cod_anexo'];
+		//CERRAR OBTENEMOS CUENTAS DEL MODULO LIQUIDACION DE CAJA
 
 		//OBTENEMOS WHERE PARA ASIENTOS MARKET
 		$sqlD0 = "
@@ -7914,16 +8275,36 @@ FROM
 		//******************************** ASIENTOS LIQUIDACION CAJA *****************************	
 		// Datos de asientos liquidacion caja
 
-		$sql_cc = "SELECT codane, subdiario_dia FROM concar_config;";
+		// $sql_cc = "SELECT codane, subdiario_dia FROM concar_config;";
+
+		// if ($sqlca->query($sql_cc) < 0){
+		// 	error_log('Etapa 1: Obtenemos datos de cuenta por cobrar');
+		// 	return false;	
+		// }
+
+		// $a = $sqlca->fetchRow();
+		// $codane 		= $a[0];
+		// $opcion      = $a[1];
+
+		$sql_cc = "
+			SELECT
+				TRIM(c1.account) as codane
+				,TRIM(c2.account) as subdiario_dia
+			FROM
+				concar_confignew c1 
+				LEFT JOIN concar_confignew c2 ON   c2.module = 0   AND c2.category = 1   AND c2.subcategory = 0   --Subdiario dia
+			WHERE
+				c1.module = 0   AND c1.category = 3   AND c1.subcategory = 0;   --Codigo de Anexo
+		";
 
 		if ($sqlca->query($sql_cc) < 0){
 			error_log('Etapa 1: Obtenemos datos de cuenta por cobrar');
 			return false;	
-		}
+		}	
 
 		$a = $sqlca->fetchRow();
-		$codane 		= $a[0];
-		$opcion         = $a[1];
+		$codane    = $a[0];
+		$opcion    = $a[1];
 
 		$sqlcc = "
 			SELECT * FROM(		

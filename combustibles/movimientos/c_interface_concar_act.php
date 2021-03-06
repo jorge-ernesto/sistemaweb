@@ -26,6 +26,38 @@ class InterfaceConcarActController extends Controller {
 		$this->visor->addComponent('ContentT', 'content_title', $objTemplate->titulo());
 
 		$result = '';
+		
+		//CONFIGURACION AUTOMATICA PARA MIGRAR INFORMACION CONCAR_CONFIG A CONCAR_CONFIGNEW
+		//Obtenemos parametro de int_parametros
+		$realizar_migracion_concar = $objModel->getMigracionConcar();
+		
+		if($realizar_migracion_concar == 1):
+			//Eliminamos tabla concar_confignew
+			$objModel->delete_concar_confignew();	
+
+			//Creacion de tabla concar_confignew
+			$res = $objModel->create_concar_confignew();
+			if($res['sStatus'] == 'success'):
+				echo "<script>alert('".$res['sMessage']."');</script>";			
+			endif;
+			
+			/*
+			concar_confignew Values
+				module Values
+				0 Global
+				1 Ventas Combustible
+				2 Ventas Market
+				6 Ventas Manuales	
+				3 Cta. Cobrar Combustible
+				4 Cta. Cobrar Market
+				5 Compras
+				8 Liquidacion de Caja			
+			*/		
+							
+			$objModel->insert_module_global();
+			$objModel->insert_module_liquidacion_caja();
+		endif;
+		//CERRAR CONFIGURACION AUTOMATICA PARA MIGRAR INFORMACION CONCAR_CONFIG A CONCAR_CONFIGNEW	
 
 		switch ($this->task) {
 			case 'INTERFAZCONCARACT':
@@ -36,7 +68,7 @@ class InterfaceConcarActController extends Controller {
 		           		$almacen  		= @$_REQUEST['datos']['sucursal'];
 		           		$comboempresas 	= @$_REQUEST['datos']['empresa'];
 		           		$num_actual 	= @$_REQUEST['num_actual'];
-		           		$tipo			= @$_REQUEST['comboTipo'];
+		           		$tipo			= @$_REQUEST['comboTipo'];						
 
 		           		switch ($tipo) {
 		           			case "1":
