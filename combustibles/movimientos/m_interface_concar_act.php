@@ -493,7 +493,8 @@ WHERE
 	function Empresa() {
 		global $sqlca;
 		
-		$sql = "SELECT TRIM(account) as cod_empresa FROM concar_confignew WHERE module = 0 and category = 0 and subcategory = 0;";
+		$sql = "SELECT cod_empresa FROM concar_config;";
+		//$sql = "SELECT TRIM(account) as cod_empresa FROM concar_confignew WHERE module = 0 and category = 0 and subcategory = 0;";
 
 		if ($sqlca->query($sql) < 0) 
 			return false;
@@ -7617,7 +7618,7 @@ FROM
 			
 			if($detalle_boletas_pagadas_efectivo == true){
 				//SI ES BOLETA O FACTURA Y SI PAGO CON TARJETA
-				if(($reg['td'] == 'B' || $reg['td'] == 'F') && $reg['tarjeta'] != '0'){ 
+				if(($reg['td'] == 'B' || $reg['td'] == 'F') && $reg['tarjeta'] != '0' && $reg['doctype'] != 'NA'){ 
 					//reiniciar el numerador cuando sea diferente dia DSECUE
 					$cons++;
 					if($cons>0 and $cons<=9) {
