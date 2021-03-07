@@ -225,7 +225,7 @@ class InterfaceConcarActModel extends Model {
 			0 Codigos Globales Empresa
 						0 Codigo de Empresa
 			1 Codigos Globales 
-						0 Subdiario dia							
+						0 Subdiario dia
 						1 Codigo de Cliente
 						2 Codigo de Caja
 			2 Codigos Globales Centro de Costo
@@ -318,6 +318,88 @@ class InterfaceConcarActModel extends Model {
 				}
 			}
 		}		
+	}
+
+	/*
+	concar_confignew Values
+		module Values
+		5
+			category
+			0 Cuentas Configuracion
+						0 Subdiario de Compra
+			1 Cuentas Combustible
+						0 Cuenta Combustible Compra Proveedor
+						1 Cuenta Combustible Compra BI
+			2 Cuentas GLP
+						0 Cuenta GLP Compra Proveedor
+						1 Cuenta GLP Compra BI
+			3 Cuentas Market
+						0 Cuenta Market Compra Proveedor
+						1 Cuenta Compra Impuesto
+						2 Cuenta Market Compra Mercaderia
+	*/
+	function insert_module_compras() {
+		global $sqlca;
+			
+		//VERIFICAMOS QUE NO HAYA DATA INSERTADA PARA EL MODULO COMPRAS
+		$iStatus = $sqlca->query("SELECT count(*) as resultado_cantidad FROM concar_confignew WHERE module = '5'");
+
+		//SE EJECUTO LA QUERY
+		if ((int)$iStatus > 0) {
+			$row = $sqlca->fetchRow();
+			$resultado_cantidad = $row['resultado_cantidad'];
+
+			//SI LA CANTIDAD ES 0, INSERTAMOS
+			if($resultado_cantidad == 0){
+
+				//OBTENEMOS SUCURSALES
+				$iStatus = $sqlca->query("SELECT ch_sucursal FROM int_ta_sucursales LIMIT 1");				
+
+				//SE EJECUTO LA QUERY
+				if ((int)$iStatus > 0) {					
+					$row = $sqlca->fetchRow();
+					$ch_sucursal = $row['ch_sucursal'];										
+
+					// //OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO DE COMPRAS
+					$iStatus = $sqlca->query("SELECT 
+													compra_subdiario
+													,compra_cuenta_proveedor
+													,compra_cuenta_impuesto
+													,compra_cuenta_mercaderia
+												FROM concar_config;");	
+						
+					// //SE EJECUTO LA QUERY
+					if ((int)$iStatus > 0) {
+						$row = $sqlca->fetchRow();
+						$compra_subdiario         = $row['compra_subdiario'];
+						$compra_cuenta_proveedor  = $row['compra_cuenta_proveedor'];	
+						$compra_cuenta_impuesto   = $row['compra_cuenta_impuesto'];											
+						$compra_cuenta_mercaderia = $row['compra_cuenta_mercaderia'];
+
+						//INICIAMOS TRANSACCION
+						$sqlca->query("BEGIN;");
+
+						//INSERTAMOS DATA
+						$iStatus = $sqlca->query("
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 0, 0, '$compra_subdiario');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 1, 0, '421201');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 1, 1, '201101');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 2, 0, '421202');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 2, 1, '201102');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 3, 0, '$compra_cuenta_proveedor');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 3, 1, '$compra_cuenta_impuesto');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 3, 2, '$compra_cuenta_mercaderia');
+						");
+
+						if ((int)$iStatus < 0) {
+							$sqlca->query("ROLLBACK;");							
+						}else{
+							$sqlca->query("COMMIT;");			
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/*
@@ -10622,21 +10704,78 @@ FROM
 		$TabSqlDet = "CD".$codEmpresa.$Anio; // Tabla SQL Detalle
 		$TabCan    = "CAN".$codEmpresa;
 
+		// $sql = "
+		// 	SELECT 
+		// 		compra_subdiario,
+		// 		id_cencos_comb, 
+		// 		subdiario_dia,
+		// 		id_centro_costo_glp,
+		// 		cod_cliente,
+		// 		cod_caja    
+		// 	FROM 
+		// 		concar_config;
+		// ";
+
+		// if ($sqlca->query($sql) < 0) 
+		// 	return false;	
+	
+		// $a = $sqlca->fetchRow();
+		// $vcsubdiario = $a[0];
+		// $vccencos    = $a[1];
+		// $opcion      = $a[2];
+		// $cencosglp   = $a[3];
+		// $cod_cliente = $a[4];
+		// $cod_caja    = $a[5];
+
+		//CUENTAS PARA LOS ASIENTOS
+		// $compra_combustible_cuenta_proveedor = "421201";
+		// $compra_combustible_cuenta_bi        = "201101";
+
+		// $compra_glp_cuenta_proveedor         = "421202";
+		// $compra_glp_cuenta_bi                = "201102";
+
+		// $compra_market_cuenta_proveedor      = "421203";
+		// $compra_cuenta_impuesto              = "401101";
+		// $compra_market_cuenta_bi             = "201103";
+		//CUENTAS PARA LOS ASIENTOS
+
 		$sql = "
 			SELECT 
-				compra_subdiario,
-				compra_cuenta_proveedor,
-				compra_cuenta_impuesto,
-				compra_cuenta_mercaderia,
-				id_cencos_comb, 
-				subdiario_dia,
-				venta_cuenta_cliente_glp,
-				venta_cuenta_ventas_glp,
-				id_centro_costo_glp,
-				cod_cliente,
-				cod_caja    
+				c1.account AS compra_subdiario
+				,c2.account AS id_cencos_comb
+				,c3.account AS subdiario_dia
+				,c4.account AS id_centro_costo_glp
+				,c5.account AS cod_cliente
+				,c6.account AS cod_caja 
+
+				,c7.account AS compra_combustible_cuenta_proveedor 
+				,c8.account AS compra_combustible_cuenta_bi 
+
+				,c9.account AS compra_glp_cuenta_proveedor 
+				,c10.account AS compra_glp_cuenta_bi
+
+				,c11.account AS compra_market_cuenta_proveedor 
+				,c12.account AS compra_cuenta_impuesto 
+				,c13.account AS compra_market_cuenta_bi 
 			FROM 
-				concar_config;
+				concar_confignew c1
+				LEFT JOIN concar_confignew c2 ON   c2.module = 0   AND c2.category = 2   AND c2.subcategory = 0   --Centro de Costo Combustible
+				LEFT JOIN concar_confignew c3 ON   c3.module = 0   AND c3.category = 1   AND c3.subcategory = 0   --Subdiario dia
+				LEFT JOIN concar_confignew c4 ON   c4.module = 0   AND c4.category = 2   AND c4.subcategory = 1   --Centro de Costo GLP
+				LEFT JOIN concar_confignew c5 ON   c5.module = 0   AND c5.category = 1   AND c5.subcategory = 1   --Codigo de Cliente
+				LEFT JOIN concar_confignew c6 ON   c6.module = 0   AND c6.category = 1   AND c6.subcategory = 2   --Codigo de Caja
+			
+				LEFT JOIN concar_confignew c7 ON   c7.module = 5   AND c7.category = 1   AND c7.subcategory = 0   --Cuenta Combustible Compra Proveedor  
+				LEFT JOIN concar_confignew c8 ON   c8.module = 5   AND c8.category = 1   AND c8.subcategory = 1   --Cuenta Combustible Compra BI
+				
+				LEFT JOIN concar_confignew c9 ON   c9.module = 5   AND c9.category = 2   AND c9.subcategory = 0   --Cuenta GLP Compra Proveedor
+				LEFT JOIN concar_confignew c10 ON   c10.module = 5   AND c10.category = 2   AND c10.subcategory = 1   --Cuenta GLP Compra BI
+
+				LEFT JOIN concar_confignew c11 ON   c11.module = 5   AND c11.category = 3   AND c11.subcategory = 0   --Cuenta Market Compra Proveedor
+				LEFT JOIN concar_confignew c12 ON   c12.module = 5   AND c12.category = 3   AND c12.subcategory = 1   --Cuenta Compra Impuesto
+				LEFT JOIN concar_confignew c13 ON   c13.module = 5   AND c13.category = 3   AND c13.subcategory = 2   --Cuenta Market Compra Mercaderia
+			WHERE
+				c1.module = 5   AND c1.category = 0   AND c1.subcategory = 0;   --Subdiario de Compra
 		";
 
 		if ($sqlca->query($sql) < 0) 
@@ -10644,28 +10783,22 @@ FROM
 	
 		$a = $sqlca->fetchRow();
 		$vcsubdiario = $a[0];
-		// $vccliente   = $a[1];
-		// $vcimpuesto  = $a[2];
-		// $vcventas    = $a[3];
-		$vccencos    = $a[4];
-		$opcion      = $a[5];
-		$vclienteglp = $a[6];
-		$vventasglp  = $a[7];
-		$cencosglp   = $a[8];
-		$cod_cliente = $a[9];
-		$cod_caja    = $a[10];
+		$vccencos    = $a[1];
+		$opcion      = $a[2];
+		$cencosglp   = $a[3];
+		$cod_cliente = $a[4];
+		$cod_caja    = $a[5];
 
-		//CUENTAS PARA LOS ASIENTOS
-		$compra_combustible_cuenta_proveedor = "421201";
-		$compra_combustible_cuenta_bi        = "201101";
 
-		$compra_glp_cuenta_proveedor = "421202";
-		$compra_glp_cuenta_bi        = "201102";
+		$compra_combustible_cuenta_proveedor = $a[6];
+		$compra_combustible_cuenta_bi        = $a[7];
 
-		$compra_market_cuenta_proveedor = "421203";
-		$compra_cuenta_impuesto         = "401101";
-		$compra_market_cuenta_bi        = "201103";
-		//CUENTAS PARA LOS ASIENTOS
+		$compra_glp_cuenta_proveedor         = $a[8];
+		$compra_glp_cuenta_bi                = $a[9];
+
+		$compra_market_cuenta_proveedor      = $a[10];
+		$compra_cuenta_impuesto              = $a[11];
+		$compra_market_cuenta_bi             = $a[12];
 
 		$sql = "
 			SELECT * FROM(

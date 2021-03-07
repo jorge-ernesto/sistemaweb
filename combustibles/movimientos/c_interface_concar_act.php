@@ -37,9 +37,9 @@ class InterfaceConcarActController extends Controller {
 
 			//Creacion de tabla concar_confignew
 			$res = $objModel->create_concar_confignew();
-			if($res['sStatus'] == 'success'):
-				echo "<script>alert('".$res['sMessage']."');</script>";			
-			endif;
+			// if($res['sStatus'] == 'success'):
+			// 	echo "<script>alert('".$res['sMessage']."');</script>";			
+			// endif;
 			
 			/*
 			concar_confignew Values
@@ -55,6 +55,7 @@ class InterfaceConcarActController extends Controller {
 			*/		
 							
 			$objModel->insert_module_global();
+			$objModel->insert_module_compras();
 			$objModel->insert_module_liquidacion_caja();
 		endif;
 		//CERRAR CONFIGURACION AUTOMATICA PARA MIGRAR INFORMACION CONCAR_CONFIG A CONCAR_CONFIGNEW	
