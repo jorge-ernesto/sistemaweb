@@ -220,7 +220,7 @@ class InterfaceConcarActModel extends Model {
 	/*
 	concar_confignew Values
 		module Values
-		0
+		0 Global
 			category
 			0 Codigos Globales Empresa
 						0 Codigo de Empresa
@@ -242,7 +242,7 @@ class InterfaceConcarActModel extends Model {
 	function insert_module_global() {
 		global $sqlca;
 
-		//VERIFICAMOS QUE NO HAYA DATA INSERTADA PARA EL MODULO LIQUIDACION DE CAJA		
+		//VERIFICAMOS QUE NO HAYA DATA INSERTADA
 		$iStatus = $sqlca->query("SELECT count(*) as resultado_cantidad FROM concar_confignew WHERE module = '0'");
 
 		//SE EJECUTO LA QUERY
@@ -261,7 +261,7 @@ class InterfaceConcarActModel extends Model {
 					$row = $sqlca->fetchRow();
 					$ch_sucursal = $row['ch_sucursal'];										
 
-					//OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO DE CUENTAS GLOBALES, ES IMPORTANTE ASEGURARNOS DE QUE ESTOS CAMPOS TENGAN DATA					
+					//OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO GLOBAL, ES IMPORTANTE ASEGURARNOS DE QUE ESTOS CAMPOS TENGAN DATA					
 					$iStatus = $sqlca->query("SELECT 	
 													cod_empresa
 													,subdiario_dia													
@@ -323,7 +323,7 @@ class InterfaceConcarActModel extends Model {
 	/*
 	concar_confignew Values
 		module Values
-		1
+		1 Ventas Combustible
 			category
 			0 Cuentas Configuracion
 						0 Subdiario de Venta Combustible
@@ -338,7 +338,7 @@ class InterfaceConcarActModel extends Model {
 	function insert_module_ventas_combustible() {
 		global $sqlca;
 			
-		//VERIFICAMOS QUE NO HAYA DATA INSERTADA PARA EL MODULO COMPRAS
+		//VERIFICAMOS QUE NO HAYA DATA INSERTADA
 		$iStatus = $sqlca->query("SELECT count(*) as resultado_cantidad FROM concar_confignew WHERE module = '1'");
 
 		//SE EJECUTO LA QUERY
@@ -357,7 +357,7 @@ class InterfaceConcarActModel extends Model {
 					$row = $sqlca->fetchRow();
 					$ch_sucursal = $row['ch_sucursal'];										
 
-					//OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO DE VENTAS COMBUSTIBLE
+					//OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO VENTAS COMBUSTIBLE
 					$iStatus = $sqlca->query("SELECT 
 													venta_subdiario
 													,venta_cuenta_cliente 
@@ -367,7 +367,7 @@ class InterfaceConcarActModel extends Model {
 													,venta_cuenta_ventas_glp
 												FROM concar_config;");	
 						
-					// //SE EJECUTO LA QUERY
+					//SE EJECUTO LA QUERY
 					if ((int)$iStatus > 0) {
 						$row = $sqlca->fetchRow();
 						$venta_subdiario          = $row['venta_subdiario'];
@@ -404,7 +404,7 @@ class InterfaceConcarActModel extends Model {
 	/*
 	concar_confignew Values
 		module Values
-		2
+		2 Ventas Market
 			category
 			0 Cuentas Configuracion
 						0 Subdiario de Venta Market
@@ -419,7 +419,7 @@ class InterfaceConcarActModel extends Model {
 	function insert_module_ventas_market() {
 		global $sqlca;
 			
-		//VERIFICAMOS QUE NO HAYA DATA INSERTADA PARA EL MODULO VENTAS MARKET
+		//VERIFICAMOS QUE NO HAYA DATA INSERTADA
 		$iStatus = $sqlca->query("SELECT count(*) as resultado_cantidad FROM concar_confignew WHERE module = '2'");
 
 		//SE EJECUTO LA QUERY
@@ -438,7 +438,7 @@ class InterfaceConcarActModel extends Model {
 					$row = $sqlca->fetchRow();
 					$ch_sucursal = $row['ch_sucursal'];										
 
-					// //OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO DE COMPRAS
+					//OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO VENTAS MARKET
 					$iStatus = $sqlca->query("SELECT
 													venta_subdiario_market
 													,venta_cuenta_cliente_mkt
@@ -449,7 +449,7 @@ class InterfaceConcarActModel extends Model {
 												FROM
 													concar_config;");	
 						
-					// //SE EJECUTO LA QUERY
+					//SE EJECUTO LA QUERY
 					if ((int)$iStatus > 0) {
 						$row = $sqlca->fetchRow();
 						$venta_subdiario_market     = $row['venta_subdiario_market'];
@@ -486,7 +486,90 @@ class InterfaceConcarActModel extends Model {
 	/*
 	concar_confignew Values
 		module Values
-		5
+		6 Ventas Documentos Manuales
+			category
+			0 Cuentas Configuracion
+						0 Subdiario de Ventas Documentos Manuales
+			1 Cuentas Documentos Manuales Combustible
+						0 Cuenta Documentos Manuales Combustible Cliente
+						1 Cuenta Documentos Manuales BI
+						2 Cuenta Documentos Manuales Combustible Ventas
+			2 Cuentas Documentos Manuales GLP
+						0 Cuenta Documentos Manuales GLP Cliente
+						1 Cuenta Documentos Manuales GLP Ventas
+	*/
+	function insert_module_ventas_documentos_manuales() {
+		global $sqlca;
+			
+		//VERIFICAMOS QUE NO HAYA DATA INSERTADA
+		$iStatus = $sqlca->query("SELECT count(*) as resultado_cantidad FROM concar_confignew WHERE module = '6'");
+
+		//SE EJECUTO LA QUERY
+		if ((int)$iStatus > 0) {
+			$row = $sqlca->fetchRow();
+			$resultado_cantidad = $row['resultado_cantidad'];
+
+			//SI LA CANTIDAD ES 0, INSERTAMOS
+			if($resultado_cantidad == 0){
+
+				//OBTENEMOS SUCURSALES
+				$iStatus = $sqlca->query("SELECT ch_sucursal FROM int_ta_sucursales LIMIT 1");				
+
+				//SE EJECUTO LA QUERY
+				if ((int)$iStatus > 0) {					
+					$row = $sqlca->fetchRow();
+					$ch_sucursal = $row['ch_sucursal'];										
+
+					//OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO VENTAS DOCUMENTOS MANUALES
+					$iStatus = $sqlca->query("SELECT
+													venta_subdiario_docManual
+													,venta_cuenta_cliente_dMa
+													,venta_cuenta_impuesto
+													,venta_cuenta_ventas_dMa
+													,venta_cuenta_cliente_glp2
+													,venta_cuenta_ventas_glp2
+												FROM
+													concar_config;");	
+						
+					//SE EJECUTO LA QUERY
+					if ((int)$iStatus > 0) {
+						$row = $sqlca->fetchRow();
+						error_log( json_encode( $row ) ); //Usamos el indice numerico, ya que Postgres retorna el nombre del dato en minusculas
+						$venta_subdiario_docManual = $row[0];
+						$venta_cuenta_cliente_dMa  = $row[1];	
+						$venta_cuenta_impuesto     = $row[2];											
+						$venta_cuenta_ventas_dMa   = $row[3];
+						$venta_cuenta_cliente_glp2 = $row[4];
+						$venta_cuenta_ventas_glp2  = $row[5];
+
+						//INICIAMOS TRANSACCION
+						$sqlca->query("BEGIN;");
+
+						//INSERTAMOS DATA
+						$iStatus = $sqlca->query("
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 0, 0, '$venta_subdiario_docManual');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 1, 0, '$venta_cuenta_cliente_dMa');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 1, 1, '$venta_cuenta_impuesto');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 1, 2, '$venta_cuenta_ventas_dMa');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 2, 0, '$venta_cuenta_cliente_glp2');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 2, 1, '$venta_cuenta_ventas_glp2');
+						");
+
+						if ((int)$iStatus < 0) {
+							$sqlca->query("ROLLBACK;");							
+						}else{
+							$sqlca->query("COMMIT;");			
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/*
+	concar_confignew Values
+		module Values
+		5 Compras
 			category
 			0 Cuentas Configuracion
 						0 Subdiario de Compra
@@ -504,7 +587,7 @@ class InterfaceConcarActModel extends Model {
 	function insert_module_compras() {
 		global $sqlca;
 			
-		//VERIFICAMOS QUE NO HAYA DATA INSERTADA PARA EL MODULO COMPRAS
+		//VERIFICAMOS QUE NO HAYA DATA INSERTADA
 		$iStatus = $sqlca->query("SELECT count(*) as resultado_cantidad FROM concar_confignew WHERE module = '5'");
 
 		//SE EJECUTO LA QUERY
@@ -523,7 +606,7 @@ class InterfaceConcarActModel extends Model {
 					$row = $sqlca->fetchRow();
 					$ch_sucursal = $row['ch_sucursal'];										
 
-					// //OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO DE COMPRAS
+					//OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO COMPRAS
 					$iStatus = $sqlca->query("SELECT 
 													compra_subdiario
 													,compra_cuenta_proveedor
@@ -531,7 +614,7 @@ class InterfaceConcarActModel extends Model {
 													,compra_cuenta_mercaderia
 												FROM concar_config;");	
 						
-					// //SE EJECUTO LA QUERY
+					//SE EJECUTO LA QUERY
 					if ((int)$iStatus > 0) {
 						$row = $sqlca->fetchRow();
 						$compra_subdiario         = $row['compra_subdiario'];
@@ -568,7 +651,7 @@ class InterfaceConcarActModel extends Model {
 	/*
 	concar_confignew Values
 		module Values
-		8
+		8 Liquidacion de Caja
 			category
 			0 Cuentas Configuracion
 						0 Subdiario de Liquidacion de Caja
@@ -597,7 +680,7 @@ class InterfaceConcarActModel extends Model {
 	function insert_module_liquidacion_caja() {
 		global $sqlca;
 			
-		//VERIFICAMOS QUE NO HAYA DATA INSERTADA PARA EL MODULO LIQUIDACION DE CAJA		
+		//VERIFICAMOS QUE NO HAYA DATA INSERTADA
 		$iStatus = $sqlca->query("SELECT count(*) as resultado_cantidad FROM concar_confignew WHERE module = '8'");
 
 		//SE EJECUTO LA QUERY
@@ -9857,20 +9940,65 @@ FROM
 		if ($val == 5)
 			return 5;		
 		
+// 		$sql = "
+// SELECT
+//  venta_subdiario_docManual, 	
+//  venta_cuenta_cliente_dMa, 	
+//  venta_cuenta_impuesto, 	
+//  venta_cuenta_ventas_dMa, 	
+//  id_centro_cos_dMa, 	
+//  subdiario_dia,	
+//  venta_cuenta_cliente_glp2,
+//  codane_glp2,
+//  venta_cuenta_ventas_glp2,
+//  cod_cliente 
+// FROM 
+//  concar_config;
+// 		";
+
+// 		if ($sqlca->query($sql) < 0) 
+// 			return false;	
+	
+// 		$a = $sqlca->fetchRow();
+// 		$vmsubdiario = $a[0];
+// 		$vmcliente   = $a[1];
+// 		$vmimpuesto  = $a[2];
+// 		$vmventas    = $a[3];	
+// 		$vmcencos    = $a[4];	
+// 		$opcion      = $a[5];				
+// 		$cuentalub   = $a[6];
+// 		$codanelub   = $a[7];
+// 		$ventaslub   = $a[8];
+// 		$codcliente  = $a[9];
+
 		$sql = "
 SELECT
- venta_subdiario_docManual, 	
- venta_cuenta_cliente_dMa, 	
- venta_cuenta_impuesto, 	
- venta_cuenta_ventas_dMa, 	
- id_centro_cos_dMa, 	
- subdiario_dia,	
- venta_cuenta_cliente_glp2,
- codane_glp2,
- venta_cuenta_ventas_glp2,
- cod_cliente 
+	c1.account AS venta_subdiario_docManual
+	,c2.account AS venta_cuenta_cliente_dMa
+	,c3.account AS venta_cuenta_impuesto
+	,c4.account AS venta_cuenta_ventas_dMa
+	,c5.account AS id_centro_cos_dMa
+	,c6.account AS subdiario_dia
+	,c7.account AS venta_cuenta_cliente_glp2
+	,c8.account AS codane_glp2
+	,c9.account AS venta_cuenta_ventas_glp2
+	,c10.account AS cod_cliente
 FROM 
- concar_config;
+ 	concar_confignew c1
+	LEFT JOIN concar_confignew c2 ON   c2.module = 6   AND c2.category = 1   AND c2.subcategory = 0   --Cuenta Documentos Manuales Combustible Cliente
+	LEFT JOIN concar_confignew c3 ON   c3.module = 6   AND c3.category = 1   AND c3.subcategory = 1   --Cuenta Documentos Manuales BI
+	LEFT JOIN concar_confignew c4 ON   c4.module = 6   AND c4.category = 1   AND c4.subcategory = 2   --Cuenta Documentos Manuales Combustible Ventas
+
+	LEFT JOIN concar_confignew c5 ON   c5.module = 0   AND c5.category = 2   AND c5.subcategory = 3   --Centro de Costo Documentos Manuales
+	LEFT JOIN concar_confignew c6 ON   c6.module = 0   AND c6.category = 1   AND c6.subcategory = 0   --Subdiario dia
+
+	LEFT JOIN concar_confignew c7 ON   c7.module = 6   AND c7.category = 2   AND c7.subcategory = 0   --Cuenta Documentos Manuales GLP Cliente
+	LEFT JOIN concar_confignew c8 ON   c8.module = 0   AND c8.category = 3   AND c8.subcategory = 2   --Codigo de Anexo GLP
+	LEFT JOIN concar_confignew c9 ON   c9.module = 6   AND c9.category = 2   AND c9.subcategory = 1   --Cuenta Documentos Manuales GLP Ventas
+	
+	LEFT JOIN concar_confignew c10 ON   c10.module = 0   AND c10.category = 1   AND c10.subcategory = 1   --Codigo de Cliente
+WHERE
+	c1.module = 6   AND c1.category = 0   AND c1.subcategory = 0;   --Subdiario de Ventas Documentos Manuales
 		";
 
 		if ($sqlca->query($sql) < 0) 

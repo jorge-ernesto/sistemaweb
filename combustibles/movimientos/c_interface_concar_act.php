@@ -48,7 +48,7 @@ class InterfaceConcarActController extends Controller {
 			0 Global
 			1 Ventas Combustible
 			2 Ventas Market
-			6 Ventas Manuales	
+			6 Ventas Documentos Manuales	
 			3 Cta. Cobrar Combustible
 			4 Cta. Cobrar Market
 			5 Compras
@@ -58,6 +58,7 @@ class InterfaceConcarActController extends Controller {
 		$objModel->insert_module_global();
 		$objModel->insert_module_ventas_combustible();
 		$objModel->insert_module_ventas_market();
+		$objModel->insert_module_ventas_documentos_manuales();
 		$objModel->insert_module_compras();
 		$objModel->insert_module_liquidacion_caja();
 		//CERRAR CONFIGURACION AUTOMATICA PARA MIGRAR INFORMACION CONCAR_CONFIG A CONCAR_CONFIGNEW	
