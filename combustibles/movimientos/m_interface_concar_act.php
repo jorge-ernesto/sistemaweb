@@ -357,7 +357,7 @@ class InterfaceConcarActModel extends Model {
 					$row = $sqlca->fetchRow();
 					$ch_sucursal = $row['ch_sucursal'];										
 
-					// //OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO DE COMPRAS
+					//OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO DE VENTAS COMBUSTIBLE
 					$iStatus = $sqlca->query("SELECT 
 													venta_subdiario
 													,venta_cuenta_cliente 
@@ -388,6 +388,88 @@ class InterfaceConcarActModel extends Model {
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 1, 1, 2, '$venta_cuenta_ventas');
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 1, 2, 0, '$venta_cuenta_cliente_glp');
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 1, 2, 1, '$venta_cuenta_ventas_glp');
+						");
+
+						if ((int)$iStatus < 0) {
+							$sqlca->query("ROLLBACK;");							
+						}else{
+							$sqlca->query("COMMIT;");			
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/*
+	concar_confignew Values
+		module Values
+		2
+			category
+			0 Cuentas Configuracion
+						0 Subdiario de Venta Market
+			1 Cuentas Market
+						0 Cuenta Market Cliente
+						1 Cuenta Market BI
+						2 Cuenta Market Ventas
+			2 Cuentas Lubricante
+						0 Cuenta Lubricante Cliente
+						1 Cuenta Lubricante Ventas
+	*/
+	function insert_module_ventas_market() {
+		global $sqlca;
+			
+		//VERIFICAMOS QUE NO HAYA DATA INSERTADA PARA EL MODULO VENTAS MARKET
+		$iStatus = $sqlca->query("SELECT count(*) as resultado_cantidad FROM concar_confignew WHERE module = '2'");
+
+		//SE EJECUTO LA QUERY
+		if ((int)$iStatus > 0) {
+			$row = $sqlca->fetchRow();
+			$resultado_cantidad = $row['resultado_cantidad'];
+
+			//SI LA CANTIDAD ES 0, INSERTAMOS
+			if($resultado_cantidad == 0){
+
+				//OBTENEMOS SUCURSALES
+				$iStatus = $sqlca->query("SELECT ch_sucursal FROM int_ta_sucursales LIMIT 1");				
+
+				//SE EJECUTO LA QUERY
+				if ((int)$iStatus > 0) {					
+					$row = $sqlca->fetchRow();
+					$ch_sucursal = $row['ch_sucursal'];										
+
+					// //OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO DE COMPRAS
+					$iStatus = $sqlca->query("SELECT
+													venta_subdiario_market
+													,venta_cuenta_cliente_mkt
+													,venta_cuenta_impuesto
+													,venta_cuenta_ventas_mkt
+													,venta_cuenta_cliente_lubri
+													,venta_cuenta_ventas_lubri
+												FROM
+													concar_config;");	
+						
+					// //SE EJECUTO LA QUERY
+					if ((int)$iStatus > 0) {
+						$row = $sqlca->fetchRow();
+						$venta_subdiario_market     = $row['venta_subdiario_market'];
+						$venta_cuenta_cliente_mkt   = $row['venta_cuenta_cliente_mkt'];	
+						$venta_cuenta_impuesto      = $row['venta_cuenta_impuesto'];											
+						$venta_cuenta_ventas_mkt    = $row['venta_cuenta_ventas_mkt'];
+						$venta_cuenta_cliente_lubri = $row['venta_cuenta_cliente_lubri'];
+						$venta_cuenta_ventas_lubri  = $row['venta_cuenta_ventas_lubri'];
+
+						//INICIAMOS TRANSACCION
+						$sqlca->query("BEGIN;");
+
+						//INSERTAMOS DATA
+						$iStatus = $sqlca->query("
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 2, 0, 0, '$venta_subdiario_market');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 2, 1, 0, '$venta_cuenta_cliente_mkt');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 2, 1, 1, '$venta_cuenta_impuesto');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 2, 1, 2, '$venta_cuenta_ventas_mkt');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 2, 2, 0, '$venta_cuenta_cliente_lubri');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 2, 2, 1, '$venta_cuenta_ventas_lubri');
 						");
 
 						if ((int)$iStatus < 0) {
@@ -3582,21 +3664,69 @@ GROUP BY
 		if ($val == 5)
 			return 5;		
 		
+// 		$sql = "
+// SELECT
+//  venta_subdiario_market,
+//  venta_cuenta_cliente_mkt,
+//  venta_cuenta_impuesto,
+//  venta_cuenta_ventas_mkt,
+//  id_centrocosto,
+//  subdiario_dia,
+//  venta_cuenta_cliente_lubri,
+//  codane_lubri,
+//  venta_cuenta_ventas_lubri,
+//  cod_cliente,
+//  cod_caja
+// FROM
+//  concar_config;
+// 		";
+
+// 		if ($sqlca->query($sql) < 0) 
+// 			return false;	
+	
+// 		$a = $sqlca->fetchRow();
+// 		$vmsubdiario = $a[0];
+// 		$vmcliente   = $a[1];
+// 		$vmimpuesto  = $a[2];
+// 		$vmventas    = $a[3];	
+// 		$vmcencos    = $a[4];	
+// 		$opcion      = $a[5];				
+// 		$cuentalub   = $a[6];
+// 		$codanelub   = $a[7];
+// 		$ventaslub   = $a[8];
+// 		$cod_cliente = $a[9];
+// 		$cod_caja    = $a[10];
+
 		$sql = "
 SELECT
- venta_subdiario_market,
- venta_cuenta_cliente_mkt,
- venta_cuenta_impuesto,
- venta_cuenta_ventas_mkt,
- id_centrocosto,
- subdiario_dia,
- venta_cuenta_cliente_lubri,
- codane_lubri,
- venta_cuenta_ventas_lubri,
- cod_cliente,
- cod_caja
+	c1.account AS venta_subdiario_market
+	,c2.account AS venta_cuenta_cliente_mkt
+	,c3.account AS venta_cuenta_impuesto
+	,c4.account AS venta_cuenta_ventas_mkt
+	,c5.account AS id_centrocosto
+	,c6.account AS subdiario_dia
+	,c7.account AS venta_cuenta_cliente_lubri
+	,c8.account AS codane_lubri
+	,c9.account AS venta_cuenta_ventas_lubri
+	,c10.account AS cod_cliente
+	,c11.account AS cod_caja
 FROM
- concar_config;
+	concar_confignew c1
+	LEFT JOIN concar_confignew c2 ON   c2.module = 2   AND c2.category = 1   AND c2.subcategory = 0   --Cuenta Market Cliente
+	LEFT JOIN concar_confignew c3 ON   c3.module = 2   AND c3.category = 1   AND c3.subcategory = 1   --Cuenta Market BI
+	LEFT JOIN concar_confignew c4 ON   c4.module = 2   AND c4.category = 1   AND c4.subcategory = 2   --Cuenta Market Ventas
+
+	LEFT JOIN concar_confignew c5 ON   c5.module = 0   AND c5.category = 2   AND c5.subcategory = 2   --Centro de Costo Market
+	LEFT JOIN concar_confignew c6 ON   c6.module = 0   AND c6.category = 1   AND c6.subcategory = 0   --Subdiario dia
+
+	LEFT JOIN concar_confignew c7 ON   c7.module = 2   AND c7.category = 2   AND c7.subcategory = 0   --Cuenta Lubricante Cliente
+	LEFT JOIN concar_confignew c8 ON   c8.module = 0   AND c8.category = 3   AND c8.subcategory = 1   --Codigo de Anexo Lubricante
+	LEFT JOIN concar_confignew c9 ON   c9.module = 2   AND c9.category = 2   AND c9.subcategory = 1   --Cuenta Lubricante Ventas
+
+	LEFT JOIN concar_confignew c10 ON   c10.module = 0   AND c10.category = 1   AND c10.subcategory = 1   --Codigo de Cliente
+	LEFT JOIN concar_confignew c11 ON   c11.module = 0   AND c11.category = 1   AND c11.subcategory = 2   --Codigo de Caja
+WHERE
+	c1.module = 2   AND c1.category = 0   AND c1.subcategory = 0;   --Subdiario de Venta Market
 		";
 
 		if ($sqlca->query($sql) < 0) 

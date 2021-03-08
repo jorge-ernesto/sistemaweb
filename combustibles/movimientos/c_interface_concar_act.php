@@ -34,31 +34,32 @@ class InterfaceConcarActController extends Controller {
 		if($realizar_migracion_concar == 1):
 			//Eliminamos tabla concar_confignew
 			$objModel->delete_concar_confignew();	
-
-			//Creacion de tabla concar_confignew
-			$res = $objModel->create_concar_confignew();
-			// if($res['sStatus'] == 'success'):
-			// 	echo "<script>alert('".$res['sMessage']."');</script>";			
-			// endif;
-			
-			/*
-			concar_confignew Values
-				module Values
-				0 Global
-				1 Ventas Combustible
-				2 Ventas Market
-				6 Ventas Manuales	
-				3 Cta. Cobrar Combustible
-				4 Cta. Cobrar Market
-				5 Compras
-				8 Liquidacion de Caja			
-			*/		
-							
-			$objModel->insert_module_global();
-			$objModel->insert_module_ventas_combustible();
-			$objModel->insert_module_compras();
-			$objModel->insert_module_liquidacion_caja();
 		endif;
+
+		//Creacion de tabla concar_confignew
+		$res = $objModel->create_concar_confignew();
+		// if($res['sStatus'] == 'success'):
+		// 	echo "<script>alert('".$res['sMessage']."');</script>";			
+		// endif;
+		
+		/*
+		concar_confignew Values
+			module Values
+			0 Global
+			1 Ventas Combustible
+			2 Ventas Market
+			6 Ventas Manuales	
+			3 Cta. Cobrar Combustible
+			4 Cta. Cobrar Market
+			5 Compras
+			8 Liquidacion de Caja			
+		*/		
+						
+		$objModel->insert_module_global();
+		$objModel->insert_module_ventas_combustible();
+		$objModel->insert_module_ventas_market();
+		$objModel->insert_module_compras();
+		$objModel->insert_module_liquidacion_caja();
 		//CERRAR CONFIGURACION AUTOMATICA PARA MIGRAR INFORMACION CONCAR_CONFIG A CONCAR_CONFIGNEW	
 
 		switch ($this->task) {
