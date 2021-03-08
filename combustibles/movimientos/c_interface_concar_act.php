@@ -55,6 +55,7 @@ class InterfaceConcarActController extends Controller {
 			*/		
 							
 			$objModel->insert_module_global();
+			$objModel->insert_module_ventas_combustible();
 			$objModel->insert_module_compras();
 			$objModel->insert_module_liquidacion_caja();
 		endif;

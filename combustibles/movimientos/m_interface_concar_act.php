@@ -323,6 +323,87 @@ class InterfaceConcarActModel extends Model {
 	/*
 	concar_confignew Values
 		module Values
+		1
+			category
+			0 Cuentas Configuracion
+						0 Subdiario de Venta Combustible
+			1 Cuentas Combustible
+						0 Cuenta Combustible Cliente
+						1 Cuenta Combustible BI
+						2 Cuenta Combustible Ventas
+			2 Cuentas GLP
+						0 Cuenta GLP Cliente
+						1 Cuenta GLP Ventas
+	*/
+	function insert_module_ventas_combustible() {
+		global $sqlca;
+			
+		//VERIFICAMOS QUE NO HAYA DATA INSERTADA PARA EL MODULO COMPRAS
+		$iStatus = $sqlca->query("SELECT count(*) as resultado_cantidad FROM concar_confignew WHERE module = '1'");
+
+		//SE EJECUTO LA QUERY
+		if ((int)$iStatus > 0) {
+			$row = $sqlca->fetchRow();
+			$resultado_cantidad = $row['resultado_cantidad'];
+
+			//SI LA CANTIDAD ES 0, INSERTAMOS
+			if($resultado_cantidad == 0){
+
+				//OBTENEMOS SUCURSALES
+				$iStatus = $sqlca->query("SELECT ch_sucursal FROM int_ta_sucursales LIMIT 1");				
+
+				//SE EJECUTO LA QUERY
+				if ((int)$iStatus > 0) {					
+					$row = $sqlca->fetchRow();
+					$ch_sucursal = $row['ch_sucursal'];										
+
+					// //OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO DE COMPRAS
+					$iStatus = $sqlca->query("SELECT 
+													venta_subdiario
+													,venta_cuenta_cliente 
+													,venta_cuenta_impuesto
+													,venta_cuenta_ventas
+													,venta_cuenta_cliente_glp
+													,venta_cuenta_ventas_glp
+												FROM concar_config;");	
+						
+					// //SE EJECUTO LA QUERY
+					if ((int)$iStatus > 0) {
+						$row = $sqlca->fetchRow();
+						$venta_subdiario          = $row['venta_subdiario'];
+						$venta_cuenta_cliente     = $row['venta_cuenta_cliente'];	
+						$venta_cuenta_impuesto    = $row['venta_cuenta_impuesto'];											
+						$venta_cuenta_ventas      = $row['venta_cuenta_ventas'];
+						$venta_cuenta_cliente_glp = $row['venta_cuenta_cliente_glp'];
+						$venta_cuenta_ventas_glp  = $row['venta_cuenta_ventas_glp'];
+
+						//INICIAMOS TRANSACCION
+						$sqlca->query("BEGIN;");
+
+						//INSERTAMOS DATA
+						$iStatus = $sqlca->query("
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 1, 0, 0, '$venta_subdiario');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 1, 1, 0, '$venta_cuenta_cliente');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 1, 1, 1, '$venta_cuenta_impuesto');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 1, 1, 2, '$venta_cuenta_ventas');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 1, 2, 0, '$venta_cuenta_cliente_glp');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 1, 2, 1, '$venta_cuenta_ventas_glp');
+						");
+
+						if ((int)$iStatus < 0) {
+							$sqlca->query("ROLLBACK;");							
+						}else{
+							$sqlca->query("COMMIT;");			
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/*
+	concar_confignew Values
+		module Values
 		5
 			category
 			0 Cuentas Configuracion
@@ -885,21 +966,69 @@ WHERE
 		$TabSqlDet = "CD".$codEmpresa.$Anio; // Tabla SQL Detalle
 		$TabCan    = "CAN".$codEmpresa;
 
+// 		$sql = "
+// SELECT
+//  venta_subdiario, 
+//  venta_cuenta_cliente, 
+//  venta_cuenta_impuesto, 
+//  venta_cuenta_ventas, 
+//  id_cencos_comb, 
+//  subdiario_dia,
+//  venta_cuenta_cliente_glp,
+//  venta_cuenta_ventas_glp,
+//  id_centro_costo_glp,
+//  cod_cliente,
+//  cod_caja    
+// FROM 
+//  concar_config;
+// 		";
+
+// 		if ($sqlca->query($sql) < 0) 
+// 			return false;	
+	
+// 		$a = $sqlca->fetchRow();
+// 		$vcsubdiario = $a[0];
+// 		$vccliente   = $a[1];
+// 		$vcimpuesto  = $a[2];
+// 		$vcventas    = $a[3];	
+// 		$vccencos    = $a[4]; 
+// 		$opcion      = $a[5];
+// 		$vclienteglp = $a[6];
+// 		$vventasglp  = $a[7];
+// 		$cencosglp   = $a[8];
+// 		$cod_cliente = $a[9];
+// 		$cod_caja    = $a[10];
+
 		$sql = "
 SELECT
- venta_subdiario, 
- venta_cuenta_cliente, 
- venta_cuenta_impuesto, 
- venta_cuenta_ventas, 
- id_cencos_comb, 
- subdiario_dia,
- venta_cuenta_cliente_glp,
- venta_cuenta_ventas_glp,
- id_centro_costo_glp,
- cod_cliente,
- cod_caja    
+ 	c1.account AS venta_subdiario
+	,c2.account AS venta_cuenta_cliente
+	,c3.account AS venta_cuenta_impuesto
+	,c4.account AS venta_cuenta_ventas
+	,c5.account AS id_cencos_comb
+	,c6.account AS subdiario_dia
+	,c7.account AS venta_cuenta_cliente_glp
+	,c8.account AS venta_cuenta_ventas_glp
+	,c9.account AS id_centro_costo_glp
+	,c10.account AS cod_cliente
+	,c11.account AS cod_caja
 FROM 
- concar_config;
+ 	concar_confignew c1
+ 	LEFT JOIN concar_confignew c2 ON   c2.module = 1   AND c2.category = 1   AND c2.subcategory = 0   --Cuenta Combustible Cliente
+	LEFT JOIN concar_confignew c3 ON   c3.module = 1   AND c3.category = 1   AND c3.subcategory = 1   --Cuenta Combustible BI
+	LEFT JOIN concar_confignew c4 ON   c4.module = 1   AND c4.category = 1   AND c4.subcategory = 2   --Cuenta Combustible Ventas
+
+	LEFT JOIN concar_confignew c5 ON   c5.module = 0   AND c5.category = 2   AND c5.subcategory = 0   --Centro de Costo Combustible
+	LEFT JOIN concar_confignew c6 ON   c6.module = 0   AND c6.category = 1   AND c6.subcategory = 0   --Subdiario dia
+	
+	LEFT JOIN concar_confignew c7 ON   c7.module = 1   AND c7.category = 2   AND c7.subcategory = 0   --Cuenta GLP Cliente
+	LEFT JOIN concar_confignew c8 ON   c8.module = 1   AND c8.category = 2   AND c8.subcategory = 1   --Cuenta GLP Ventas
+
+	LEFT JOIN concar_confignew c9 ON   c9.module = 0   AND c9.category = 2   AND c9.subcategory = 1   --Centro de Costo GLP
+	LEFT JOIN concar_confignew c10 ON   c10.module = 0   AND c10.category = 1   AND c10.subcategory = 1   --Codigo de Cliente
+	LEFT JOIN concar_confignew c11 ON   c11.module = 0   AND c11.category = 1   AND c11.subcategory = 2   --Codigo de Caja
+WHERE   
+	c1.module = 1   AND c1.category = 0   AND c1.subcategory = 0;   --Subdiario de Venta Combustible
 		";
 
 		if ($sqlca->query($sql) < 0) 
