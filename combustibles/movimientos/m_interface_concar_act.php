@@ -329,7 +329,7 @@ class InterfaceConcarActModel extends Model {
 						0 Subdiario de Venta Combustible
 			1 Cuentas Combustible
 						0 Cuenta Combustible Cliente
-						1 Cuenta Combustible BI
+						1 Cuenta Combustible Impuesto
 						2 Cuenta Combustible Ventas
 			2 Cuentas GLP
 						0 Cuenta GLP Cliente
@@ -410,7 +410,7 @@ class InterfaceConcarActModel extends Model {
 						0 Subdiario de Venta Market
 			1 Cuentas Market
 						0 Cuenta Market Cliente
-						1 Cuenta Market BI
+						1 Cuenta Market Impuesto
 						2 Cuenta Market Ventas
 			2 Cuentas Lubricante
 						0 Cuenta Lubricante Cliente
@@ -492,7 +492,7 @@ class InterfaceConcarActModel extends Model {
 						0 Subdiario de Ventas Documentos Manuales
 			1 Cuentas Documentos Manuales Combustible
 						0 Cuenta Documentos Manuales Combustible Cliente
-						1 Cuenta Documentos Manuales BI
+						1 Cuenta Documentos Manuales Impuesto
 						2 Cuenta Documentos Manuales Combustible Ventas
 			2 Cuentas Documentos Manuales GLP
 						0 Cuenta Documentos Manuales GLP Cliente
@@ -602,7 +602,7 @@ class InterfaceConcarActModel extends Model {
 					$row = $sqlca->fetchRow();
 					$ch_sucursal = $row['ch_sucursal'];										
 
-					//OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO VENTAS DOCUMENTOS MANUALES
+					//OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO CTA. COBRAR COMBUSTIBLE
 					$iStatus = $sqlca->query("SELECT
 													ccobrar_subdiario
 													,ccobrar_cuenta_cliente
@@ -631,6 +631,75 @@ class InterfaceConcarActModel extends Model {
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 3, 1, 1, '$ccobrar_cuenta_caja');
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 3, 2, 0, '$ccobrar_cuenta_cliente_new');
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 3, 2, 1, '$ccobrar_cuenta_caja_new');
+						");
+
+						if ((int)$iStatus < 0) {
+							$sqlca->query("ROLLBACK;");							
+						}else{
+							$sqlca->query("COMMIT;");			
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/*
+	concar_confignew Values
+		module Values
+		4 Cta. Cobrar Market
+			category
+			0 Cuentas Configuracion
+						0 Subdiario de Cta Cobrar Market
+			1 Cuentas Cobrar Market
+						0 Cuenta Cobrar Market Cliente
+						1 Cuenta Cobrar Market Caja
+	*/
+	function insert_module4_cta_cobrar_market() {
+		global $sqlca;
+			
+		//VERIFICAMOS QUE NO HAYA DATA INSERTADA
+		$iStatus = $sqlca->query("SELECT count(*) as resultado_cantidad FROM concar_confignew WHERE module = '4'");
+
+		//SE EJECUTO LA QUERY
+		if ((int)$iStatus > 0) {
+			$row = $sqlca->fetchRow();
+			$resultado_cantidad = $row['resultado_cantidad'];
+
+			//SI LA CANTIDAD ES 0, INSERTAMOS
+			if($resultado_cantidad == 0){
+
+				//OBTENEMOS SUCURSALES
+				$iStatus = $sqlca->query("SELECT ch_sucursal FROM int_ta_sucursales LIMIT 1");				
+
+				//SE EJECUTO LA QUERY
+				if ((int)$iStatus > 0) {					
+					$row = $sqlca->fetchRow();
+					$ch_sucursal = $row['ch_sucursal'];										
+
+					//OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO CTA. COBRAR MARKET
+					$iStatus = $sqlca->query("SELECT
+													ccobrar_subdiario_mkt
+													,ccobrar_cuenta_cliente_mkt
+													,ccobrar_cuenta_caja_mkt
+												FROM
+													concar_config;");	
+						
+					//SE EJECUTO LA QUERY
+					if ((int)$iStatus > 0) {
+						$row = $sqlca->fetchRow();
+						$ccobrar_subdiario_mkt      = $row['ccobrar_subdiario_mkt'];
+						$ccobrar_cuenta_cliente_mkt = $row['ccobrar_cuenta_cliente_mkt'];	
+						$ccobrar_cuenta_caja_mkt    = $row['ccobrar_cuenta_caja_mkt'];											
+
+						//INICIAMOS TRANSACCION
+						$sqlca->query("BEGIN;");
+
+						//INSERTAMOS DATA
+						$iStatus = $sqlca->query("
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 4, 0, 0, '$ccobrar_subdiario_mkt');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 4, 1, 0, '$ccobrar_cuenta_cliente_mkt');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 4, 1, 1, '$ccobrar_cuenta_caja_mkt');
 						");
 
 						if ((int)$iStatus < 0) {
@@ -1258,7 +1327,7 @@ SELECT
 FROM 
  	concar_confignew c1
  	LEFT JOIN concar_confignew c2 ON   c2.module = 1   AND c2.category = 1   AND c2.subcategory = 0   --Cuenta Combustible Cliente
-	LEFT JOIN concar_confignew c3 ON   c3.module = 1   AND c3.category = 1   AND c3.subcategory = 1   --Cuenta Combustible BI
+	LEFT JOIN concar_confignew c3 ON   c3.module = 1   AND c3.category = 1   AND c3.subcategory = 1   --Cuenta Combustible Impuesto
 	LEFT JOIN concar_confignew c4 ON   c4.module = 1   AND c4.category = 1   AND c4.subcategory = 2   --Cuenta Combustible Ventas
 
 	LEFT JOIN concar_confignew c5 ON   c5.module = 0   AND c5.category = 2   AND c5.subcategory = 0   --Centro de Costo Combustible
@@ -3874,7 +3943,7 @@ SELECT
 FROM
 	concar_confignew c1
 	LEFT JOIN concar_confignew c2 ON   c2.module = 2   AND c2.category = 1   AND c2.subcategory = 0   --Cuenta Market Cliente
-	LEFT JOIN concar_confignew c3 ON   c3.module = 2   AND c3.category = 1   AND c3.subcategory = 1   --Cuenta Market BI
+	LEFT JOIN concar_confignew c3 ON   c3.module = 2   AND c3.category = 1   AND c3.subcategory = 1   --Cuenta Market Impuesto
 	LEFT JOIN concar_confignew c4 ON   c4.module = 2   AND c4.category = 1   AND c4.subcategory = 2   --Cuenta Market Ventas
 
 	LEFT JOIN concar_confignew c5 ON   c5.module = 0   AND c5.category = 2   AND c5.subcategory = 2   --Centro de Costo Market
@@ -9092,18 +9161,56 @@ WHERE
 		if ($val == 5)
 			return 5;		
 		
+// 		$sql = "
+// SELECT
+//  ccobrar_subdiario_mkt,
+//  venta_cuenta_cliente_mkt,
+//  venta_cuenta_impuesto,
+//  venta_cuenta_ventas_mkt,
+//  id_centrocosto,
+//  subdiario_dia,
+//  cod_cliente,
+//  cod_caja
+// FROM
+//  concar_config;
+// 		";
+
+// 		if ($sqlca->query($sql) < 0) 
+// 			return false;	
+	
+// 		$a = $sqlca->fetchRow();
+// 		$vmsubdiario = $a[0];
+// 		$vmcliente   = $a[1];
+// 		$vmimpuesto  = $a[2];
+// 		$vmventas    = $a[3];	
+// 		$vmcencos    = $a[4];	
+// 		$opcion      = $a[5];
+// 		$cod_cliente = $a[6];				
+// 		$cod_caja    = $a[7];
+
 		$sql = "
 SELECT
- ccobrar_subdiario_mkt,
- venta_cuenta_cliente_mkt,
- venta_cuenta_impuesto,
- venta_cuenta_ventas_mkt,
- id_centrocosto,
- subdiario_dia,
- cod_cliente,
- cod_caja
+	c1.account AS ccobrar_subdiario_mkt
+	,c2.account AS venta_cuenta_cliente_mkt
+	,c3.account AS venta_cuenta_impuesto
+	,c4.account AS venta_cuenta_ventas_mkt
+	,c5.account AS id_centrocosto
+	,c6.account AS subdiario_dia
+	,c7.account AS cod_cliente
+	,c8.account AS cod_caja
 FROM
- concar_config;
+ 	concar_confignew c1
+	LEFT JOIN concar_confignew c2 ON   c2.module = 2   AND c2.category = 1   AND c2.subcategory = 0   --Cuenta Market Cliente
+	LEFT JOIN concar_confignew c3 ON   c3.module = 2   AND c3.category = 1   AND c3.subcategory = 1   --Cuenta Market Impuesto
+	LEFT JOIN concar_confignew c4 ON   c4.module = 2   AND c4.category = 1   AND c4.subcategory = 2   --Cuenta Market Ventas
+
+	LEFT JOIN concar_confignew c5 ON   c5.module = 0   AND c5.category = 2   AND c5.subcategory = 2   --Centro de Costo Market
+	LEFT JOIN concar_confignew c6 ON   c6.module = 0   AND c6.category = 1   AND c6.subcategory = 0   --Subdiario dia
+
+	LEFT JOIN concar_confignew c7 ON   c7.module = 0   AND c7.category = 1   AND c7.subcategory = 1   --Codigo de Cliente
+	LEFT JOIN concar_confignew c8 ON   c8.module = 0   AND c8.category = 1   AND c8.subcategory = 2   --Codigo de Caja
+WHERE
+	c1.module = 4   AND c1.category = 0   AND c1.subcategory = 0;   --Subdiario de Cta Cobrar Market
 		";
 
 		if ($sqlca->query($sql) < 0) 
@@ -9926,18 +10033,54 @@ FROM
 
 		//******************************** CUENTAS POR COBRAR *****************************
 
-		$sql_cc = "SELECT ccobrar_subdiario_mkt, ccobrar_cuenta_cliente_mkt, ccobrar_cuenta_caja_mkt, codane, subdiario_dia FROM concar_config;";
+		// $sql_cc = "SELECT 
+		// 				ccobrar_subdiario_mkt, 
+		// 				ccobrar_cuenta_cliente_mkt, 
+		// 				ccobrar_cuenta_caja_mkt, 
+		// 				codane, 
+		// 				subdiario_dia 
+		// 			FROM 
+		// 				concar_config;";
+
+		// if ($sqlca->query($sql_cc) < 0) 
+		// 	return false;
+
+		// $a = $sqlca->fetchRow();
+
+		// $ccsubdiario = $a[0];
+		// $cchaber     = $a[1];
+		// $ccdebe 		= $a[2];		
+		// $codane 		= $a[3];
+		// $opcion      = $a[4];
+
+		$sql_cc = "
+					SELECT 
+						c1.account AS ccobrar_subdiario_mkt
+						,c2.account AS ccobrar_cuenta_cliente_mkt
+						,c3.account AS ccobrar_cuenta_caja_mkt
+						,c4.account AS codane
+						,c5.account AS subdiario_dia 
+					FROM 
+						concar_confignew c1
+						LEFT JOIN concar_confignew c2 ON   c2.module = 4   AND c2.category = 1   AND c2.subcategory = 0   --Cuenta Cobrar Market Cliente
+						LEFT JOIN concar_confignew c3 ON   c3.module = 4   AND c3.category = 1   AND c3.subcategory = 1   --Cuenta Cobrar Market Caja
+
+						LEFT JOIN concar_confignew c4 ON   c4.module = 0   AND c4.category = 3   AND c4.subcategory = 0   --Codigo de Anexo
+						LEFT JOIN concar_confignew c5 ON   c5.module = 0   AND c5.category = 1   AND c5.subcategory = 0   --Subdiario dia
+					WHERE 
+						c1.module = 4   AND c1.category = 0   AND c1.subcategory = 0;   --Subdiario de Cta Cobrar Market
+					";
 
 		if ($sqlca->query($sql_cc) < 0) 
 			return false;
 
 		$a = $sqlca->fetchRow();
 
-		$ccsubdiario 	= $a[0];
-		$cchaber 		= $a[1];
-		$ccdebe 		= $a[2];		
-		$codane 		= $a[3];
-		$opcion         = $a[4];
+		$ccsubdiario = $a[0];
+		$cchaber 	 = $a[1];
+		$ccdebe 	 = $a[2];		
+		$codane 	 = $a[3];
+		$opcion      = $a[4];
 
 		$sqlcc = "
 		SELECT * FROM(		
@@ -10148,7 +10291,7 @@ SELECT
 FROM 
  	concar_confignew c1
 	LEFT JOIN concar_confignew c2 ON   c2.module = 6   AND c2.category = 1   AND c2.subcategory = 0   --Cuenta Documentos Manuales Combustible Cliente
-	LEFT JOIN concar_confignew c3 ON   c3.module = 6   AND c3.category = 1   AND c3.subcategory = 1   --Cuenta Documentos Manuales BI
+	LEFT JOIN concar_confignew c3 ON   c3.module = 6   AND c3.category = 1   AND c3.subcategory = 1   --Cuenta Documentos Manuales Impuesto
 	LEFT JOIN concar_confignew c4 ON   c4.module = 6   AND c4.category = 1   AND c4.subcategory = 2   --Cuenta Documentos Manuales Combustible Ventas
 
 	LEFT JOIN concar_confignew c5 ON   c5.module = 0   AND c5.category = 2   AND c5.subcategory = 3   --Centro de Costo Documentos Manuales

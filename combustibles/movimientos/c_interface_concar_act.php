@@ -60,6 +60,7 @@ class InterfaceConcarActController extends Controller {
 		$objModel->insert_module2_ventas_market();
 		$objModel->insert_module6_ventas_documentos_manuales();
 		$objModel->insert_module3_cta_cobrar_combustible();
+		$objModel->insert_module4_cta_cobrar_market();
 		$objModel->insert_module5_compras();
 		$objModel->insert_module8_liquidacion_caja();
 		//CERRAR CONFIGURACION AUTOMATICA PARA MIGRAR INFORMACION CONCAR_CONFIG A CONCAR_CONFIGNEW	
