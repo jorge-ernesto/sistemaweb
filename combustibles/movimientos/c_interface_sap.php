@@ -140,8 +140,9 @@ class InterfaceSAPController extends Controller {
 				'sGenerarBoleta' => $sGenerarBoleta,
 			);
 			
-			// echo "<script>console.log('" . json_encode(array($sGenerate, $sGenerarBoleta)) . "')</script>";
+			// echo "<script>console.log('" . json_encode($_POST) . "')</script>";
 			// echo "<script>console.log('" . json_encode($arrPOST) . "')</script>";
+			// echo "<script>console.log('" . json_encode(array($sGenerate, $sGenerarBoleta)) . "')</script>";
 
 			if ( ($sGenerate=='Cabecera' || $sGenerate=='Detalle') && $sGenerarBoleta=='D') {
 				$arrResultDR = $objModel->getHeader($arrPOST);

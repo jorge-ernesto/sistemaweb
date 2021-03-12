@@ -410,35 +410,43 @@ class InterfaceSAPTemplate extends Template {
 		$result .= '<div id="div-detail" style="overflow-x:auto;margin-left:30px; margin-right:30px;"><h2><b>Información de '.$sGenerate.'</b></h2>';
 		$result .= '<table id="table-detail" border="0" align="center" class="report_CRUD">';
 			$result .= '<tr bgcolor="#FFFFCD">';
-				$result .= '<th class="grid_cabecera">ParentKey</th>';
-				$result .= '<th class="grid_cabecera">LineNum</th>';
-				$result .= '<th class="grid_cabecera">ItemCode</th>';
-				$result .= '<th class="grid_cabecera">WarehouseCode</th>';
-				$result .= '<th class="grid_cabecera">Quantity</th>';
-				$result .= '<th class="grid_cabecera">Price</th>';
-				$result .= '<th class="grid_cabecera">TaxCode</th>';
-				$result .= '<th class="grid_cabecera">U_EXX_GRUPOPER</th>';
-				$result .= '<th class="grid_cabecera">CostingCode</th>';
-				$result .= '<th class="grid_cabecera">CostingCode3</th>';
-				$result .= '<th class="grid_cabecera">UnitsOfMeasurment</th>';
-				$result .= '<th class="grid_cabecera">U_EXX_PERDGHDCM</th>';
-				$result .= '<th class="grid_cabecera">MeasureUnit</th>';
+				$result .= '<th class="grid_cabecera">ParentKey</th>'; //1
+				$result .= '<th class="grid_cabecera">LineNum</th>'; //2
+				$result .= '<th class="grid_cabecera">ItemCode</th>'; //3
+				$result .= '<th class="grid_cabecera">WarehouseCode</th>'; //4
+				$result .= '<th class="grid_cabecera">Quantity</th>'; //5
+				$result .= '<th class="grid_cabecera">Price</th>'; //6
+				$result .= '<th class="grid_cabecera">TaxCode</th>'; //7		
+
+				$result .= '<th class="grid_cabecera">CostingCode</th>'; //9
+				$result .= '<th class="grid_cabecera">CostingCode2</th>'; //14
+				$result .= '<th class="grid_cabecera">CostingCode3</th>'; //10		
+				$result .= '<th class="grid_cabecera">CostingCode4</th>'; //15
+
+				// $result .= '<th class="grid_cabecera">U_EXX_GRUPOPER</th>'; //8
+				// $result .= '<th class="grid_cabecera">U_EXX_PERDGHDCM</th>'; //12
+				$result .= '<th class="grid_cabecera">UnitsOfMeasurment</th>'; //11
+				$result .= '<th class="grid_cabecera">MeasureUnit</th>'; //13
 			$result .= '</tr>';
 
 			$result .= '<tr bgcolor="#FFFFCD">';
-				$result .= '<th class="grid_cabecera">Num SAP</th>';
-				$result .= '<th class="grid_cabecera">Num Linea</th>';
-				$result .= '<th class="grid_cabecera">Codigo Articulo</th>';
-				$result .= '<th class="grid_cabecera">Almacen</th>';
-				$result .= '<th class="grid_cabecera">Cantidad</th>';
-				$result .= '<th class="grid_cabecera">Precio</th>';
-				$result .= '<th class="grid_cabecera">Indicador Impuesto</th>';
-				$result .= '<th class="grid_cabecera">Grupo Percepcion</th>';
-				$result .= '<th class="grid_cabecera">Establecimiento</th>';
-				$result .= '<th class="grid_cabecera">Unidad Negocio</th>';
-				$result .= '<th class="grid_cabecera">Factor Conversion</th>';
-				$result .= '<th class="grid_cabecera">Dispensador combustible</th>';
-				$result .= '<th class="grid_cabecera">Unidad Medida</th>';
+				$result .= '<th class="grid_cabecera">Num SAP</th>'; //1
+				$result .= '<th class="grid_cabecera">Num Linea</th>'; //2
+				$result .= '<th class="grid_cabecera">Codigo Articulo</th>'; //3
+				$result .= '<th class="grid_cabecera">Almacen</th>'; //4
+				$result .= '<th class="grid_cabecera">Cantidad</th>'; //5
+				$result .= '<th class="grid_cabecera">Precio</th>'; //6
+				$result .= '<th class="grid_cabecera">Indicador Impuesto</th>'; //7
+				
+				$result .= '<th class="grid_cabecera">Establecimiento</th>'; //9
+				$result .= '<th class="grid_cabecera">Centro de Costo</th>'; //14
+				$result .= '<th class="grid_cabecera">Unidad Negocio</th>'; //10
+				$result .= '<th class="grid_cabecera">Destino</th>'; //15
+
+				// $result .= '<th class="grid_cabecera">Grupo Percepcion</th>'; //8				
+				// $result .= '<th class="grid_cabecera">Dispensador combustible</th>'; //12
+				$result .= '<th class="grid_cabecera">Factor Conversion</th>'; //11
+				$result .= '<th class="grid_cabecera">Unidad Medida</th>'; //13
 			$result .= '</tr>';
 
 			$result .= '<tbody>';
@@ -462,19 +470,23 @@ class InterfaceSAPTemplate extends Template {
 
 					$color = ($counter%2) == 0 ? ' grid_detalle_par' : ' grid_detalle_impar';
 			    	$result .= '<tr class="'. $color. '">';
-			    		$result .= '<td align="center">' . $iCorrelativo . '</td>';
-			    		$result .= '<td align="center">0</td>';
-			    		$result .= '<td align="center">' . $row['itemcode'] . '</td>';
-			    		$result .= '<td align="center">' . $row['warehousecode'] . '</td>';
-			    		$result .= '<td align="center">' . round($fQuantity, 3) . '</td>';
-			    		$result .= '<td align="center">' . round($fPrice, 3) . '</td>';
-			    		$result .= '<td align="center">IGV</td>';
-			    		$result .= '<td align="center">0000</td>';
-			    		$result .= '<td align="center">' . $row['costingcode'] . '</td>';
-			    		$result .= '<td align="center">' . $row['costingcode3'] . '</td>';
-			    		$result .= '<td align="center">' . $row['unitsofmeasurment'] . '</td>';
-			    		$result .= '<td align="center">' . $row['u_exx_perdghdcm'] . '</td>';
-			    		$result .= '<td align="center">' . $row['measureunit'] . '</td>';
+			    		$result .= '<td align="center">' . $iCorrelativo . '</td>'; //1
+			    		$result .= '<td align="center">0</td>'; //2
+			    		$result .= '<td align="center">' . $row['itemcode'] . '</td>'; //3
+			    		$result .= '<td align="center">' . $row['warehousecode'] . '</td>'; //4
+			    		$result .= '<td align="center">' . round($fQuantity, 3) . '</td>'; //5
+			    		$result .= '<td align="center">' . round($fPrice, 3) . '</td>'; //6
+			    		$result .= '<td align="center">IGV</td>'; //7
+
+						$result .= '<td align="center">' . $row['costingcode'] . '</td>'; //9
+						$result .= '<td align="center">' . $row['costingcode2'] . '</td>'; //14
+			    		$result .= '<td align="center">' . $row['costingcode3'] . '</td>'; //10
+						$result .= '<td align="center">' . $row['costingcode4'] . '</td>'; //15
+
+			    		// $result .= '<td align="center">0000</td>'; //8			    		
+						// $result .= '<td align="center">' . $row['u_exx_perdghdcm'] . '</td>'; //12
+			    		$result .= '<td align="center">' . $row['unitsofmeasurment'] . '</td>'; //11			    		
+			    		$result .= '<td align="center">' . $row['measureunit'] . '</td>'; //13
 				    $result .= '</tr>';
 				    ++$counter;
 				    ++$iCorrelativo;
@@ -554,34 +566,42 @@ class InterfaceSAPTemplate extends Template {
 		$worksheet1->write_string($fila, 6, "Informacion de " . $sGenerate, $formato0);
 
 		$fila = 2;
-		$worksheet1->write_string($fila, 0, "ParentKey", $formato2);
-		$worksheet1->write_string($fila, 1, "LineNum", $formato2);
-		$worksheet1->write_string($fila, 2, "ItemCode", $formato2);
-		$worksheet1->write_string($fila, 3, "WarehouseCode", $formato2);
-		$worksheet1->write_string($fila, 4, "Quantity", $formato2);
-		$worksheet1->write_string($fila, 5, "Price", $formato2);
-		$worksheet1->write_string($fila, 6, "TaxCode", $formato2);
-		$worksheet1->write_string($fila, 7, "U_EXX_GRUPOPER", $formato2);
-		$worksheet1->write_string($fila, 8, "CostingCode", $formato2);
-		$worksheet1->write_string($fila, 9, "CostingCode3", $formato2);
-		$worksheet1->write_string($fila, 10, "UnitsOfMeasurment", $formato2);
-		$worksheet1->write_string($fila, 11, "U_EXX_PERDGHDCM", $formato2);
-		$worksheet1->write_string($fila, 12, "MeasureUnit", $formato2);
+		$worksheet1->write_string($fila, 0, "ParentKey", $formato2); //1
+		$worksheet1->write_string($fila, 1, "LineNum", $formato2); //2
+		$worksheet1->write_string($fila, 2, "ItemCode", $formato2); //3
+		$worksheet1->write_string($fila, 3, "WarehouseCode", $formato2); //4
+		$worksheet1->write_string($fila, 4, "Quantity", $formato2); //5
+		$worksheet1->write_string($fila, 5, "Price", $formato2); //6
+		$worksheet1->write_string($fila, 6, "TaxCode", $formato2); //7
+	
+		$worksheet1->write_string($fila, 7, "CostingCode", $formato2); //9
+		$worksheet1->write_string($fila, 8, "CostingCode2", $formato2); //14
+		$worksheet1->write_string($fila, 9, "CostingCode3", $formato2); //10
+		$worksheet1->write_string($fila, 10, "CostingCode4", $formato2); //15
+
+		// $worksheet1->write_string($fila, 11, "U_EXX_GRUPOPER", $formato2); //8
+		// $worksheet1->write_string($fila, 12, "U_EXX_PERDGHDCM", $formato2); //12
+		$worksheet1->write_string($fila, 11, "UnitsOfMeasurment", $formato2); //11
+		$worksheet1->write_string($fila, 12, "MeasureUnit", $formato2); //13
 
 		$fila++;
-		$worksheet1->write_string($fila, 0, "Num SAP", $formato2);
-		$worksheet1->write_string($fila, 1, "Num Linea", $formato2);
-		$worksheet1->write_string($fila, 2, "Codigo Articulo", $formato2);
-		$worksheet1->write_string($fila, 3, "Almacen", $formato2);
-		$worksheet1->write_string($fila, 4, "Cantidad", $formato2);
-		$worksheet1->write_string($fila, 5, "Precio", $formato2);
-		$worksheet1->write_string($fila, 6, "Indicador Impuesto", $formato2);
-		$worksheet1->write_string($fila, 7, "Grupo Percepcion", $formato2);
-		$worksheet1->write_string($fila, 8, "Establecimiento", $formato2);
-		$worksheet1->write_string($fila, 9, "Unidad Negocio", $formato2);
-		$worksheet1->write_string($fila, 10, "Factor Conversion", $formato2);
-		$worksheet1->write_string($fila, 11, "Dispensador combustible", $formato2);
-		$worksheet1->write_string($fila, 12, "Unidad Medida", $formato2);
+		$worksheet1->write_string($fila, 0, "Num SAP", $formato2); //1
+		$worksheet1->write_string($fila, 1, "Num Linea", $formato2); //2
+		$worksheet1->write_string($fila, 2, "Codigo Articulo", $formato2); //3
+		$worksheet1->write_string($fila, 3, "Almacen", $formato2); //4
+		$worksheet1->write_string($fila, 4, "Cantidad", $formato2); //5
+		$worksheet1->write_string($fila, 5, "Precio", $formato2); //6
+		$worksheet1->write_string($fila, 6, "Indicador Impuesto", $formato2); //7
+
+		$worksheet1->write_string($fila, 7, "Establecimiento", $formato2); //9
+		$worksheet1->write_string($fila, 8, "Centro de Costo", $formato2); //14
+		$worksheet1->write_string($fila, 9, "Unidad Negocio", $formato2); //10
+		$worksheet1->write_string($fila, 10, "Destino", $formato2); //15
+
+		// $worksheet1->write_string($fila, 11, "Grupo Percepcion", $formato2); //8
+		// $worksheet1->write_string($fila, 12, "Dispensador combustible", $formato2); //12
+		$worksheet1->write_string($fila, 11, "Factor Conversion", $formato2); //11
+		$worksheet1->write_string($fila, 12, "Unidad Medida", $formato2); //13
 
 		++$fila;
 		if($arrResult['bStatus']) {
@@ -601,19 +621,23 @@ class InterfaceSAPTemplate extends Template {
 
 				$fPrice = $fPrice / $fTax['tax'];
 
-				$worksheet1->write_string($fila, 0, $iCorrelativo, $formato_string);
-				$worksheet1->write_string($fila, 1, '0', $formato_string);
-				$worksheet1->write_string($fila, 2, $row['itemcode'], $formato_string);
-				$worksheet1->write_string($fila, 3, $row['warehousecode'], $formato_string);
-				$worksheet1->write_string($fila, 4, round($fQuantity, 3), $formato_string);
-				$worksheet1->write_string($fila, 5, round($fPrice, 3), $formato_string);
-				$worksheet1->write_string($fila, 6, 'IGV', $formato_string);
-				$worksheet1->write_string($fila, 7, '0000', $formato_string);
-				$worksheet1->write_string($fila, 8, $row['costingcode'], $formato_string);
-				$worksheet1->write_string($fila, 9, $row['costingcode3'], $formato_string);
-				$worksheet1->write_string($fila, 10, $row['unitsofmeasurment'], $formato_string);
-				$worksheet1->write_string($fila, 11, $row['u_exx_perdghdcm'], $formato_string);
-				$worksheet1->write_string($fila, 12, $row['measureunit'], $formato_string);
+				$worksheet1->write_string($fila, 0, $iCorrelativo, $formato_string); //1
+				$worksheet1->write_string($fila, 1, '0', $formato_string); //2
+				$worksheet1->write_string($fila, 2, $row['itemcode'], $formato_string); //3
+				$worksheet1->write_string($fila, 3, $row['warehousecode'], $formato_string); //4
+				$worksheet1->write_string($fila, 4, round($fQuantity, 3), $formato_string); //5
+				$worksheet1->write_string($fila, 5, round($fPrice, 3), $formato_string); //6
+				$worksheet1->write_string($fila, 6, 'IGV', $formato_string); //7
+				
+				$worksheet1->write_string($fila, 7, $row['costingcode'], $formato_string); //9
+				$worksheet1->write_string($fila, 8, $row['costingcode2'], $formato_string); //14
+				$worksheet1->write_string($fila, 9, $row['costingcode3'], $formato_string); //10
+				$worksheet1->write_string($fila, 10, $row['costingcode4'], $formato_string); //15
+
+				// $worksheet1->write_string($fila, 11, '0000', $formato_string); //8
+				// $worksheet1->write_string($fila, 12, $row['u_exx_perdghdcm'], $formato_string); //12
+				$worksheet1->write_string($fila, 11, $row['unitsofmeasurment'], $formato_string); //11
+				$worksheet1->write_string($fila, 12, $row['measureunit'], $formato_string); //13
 				++$iCorrelativo;
 				++$fila;
 			}
