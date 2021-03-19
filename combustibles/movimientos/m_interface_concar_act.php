@@ -719,7 +719,9 @@ class InterfaceConcarActModel extends Model {
 		5 Compras
 			category
 			0 Cuentas Configuracion
-						0 Subdiario de Compra
+						0 Subdiario de Compra Combustible
+						1 Subdiario de Compra GLP
+						2 Subdiario de Compra Market
 			1 Cuentas Combustible
 						0 Cuenta Combustible Compra Proveedor
 						1 Cuenta Combustible Compra BI
@@ -775,6 +777,8 @@ class InterfaceConcarActModel extends Model {
 						//INSERTAMOS DATA
 						$iStatus = $sqlca->query("
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 0, 0, '$compra_subdiario');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 0, 1, '$compra_subdiario');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 0, 2, '$compra_subdiario');
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 1, 0, '421201');
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 1, 1, '201111');
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 2, 0, '421202');
@@ -11449,6 +11453,9 @@ WHERE
 				,c11.account AS compra_market_cuenta_proveedor 
 				,c12.account AS compra_cuenta_impuesto 
 				,c13.account AS compra_market_cuenta_bi 
+
+				,c14.account AS compra_subdiario_glp
+				,c15.account AS compra_subdiario_market
 			FROM 
 				concar_confignew c1
 				LEFT JOIN concar_confignew c2 ON   c2.module = 0   AND c2.category = 2   AND c2.subcategory = 0   --Centro de Costo Combustible
@@ -11466,8 +11473,11 @@ WHERE
 				LEFT JOIN concar_confignew c11 ON   c11.module = 5   AND c11.category = 3   AND c11.subcategory = 0   --Cuenta Market Compra Proveedor
 				LEFT JOIN concar_confignew c12 ON   c12.module = 5   AND c12.category = 3   AND c12.subcategory = 1   --Cuenta Compra Impuesto
 				LEFT JOIN concar_confignew c13 ON   c13.module = 5   AND c13.category = 3   AND c13.subcategory = 2   --Cuenta Market Compra Mercaderia
+
+				LEFT JOIN concar_confignew c14 ON   c14.module = 5   AND c14.category = 0   AND c14.subcategory = 1   --Subdiario de Compra GLP
+				LEFT JOIN concar_confignew c15 ON   c15.module = 5   AND c15.category = 0   AND c15.subcategory = 2   --Subdiario de Compra Market
 			WHERE
-				c1.module = 5   AND c1.category = 0   AND c1.subcategory = 0;   --Subdiario de Compra
+				c1.module = 5   AND c1.category = 0   AND c1.subcategory = 0;   --Subdiario de Compra Combustible
 		";
 
 		if ($sqlca->query($sql) < 0) 
@@ -11492,6 +11502,9 @@ WHERE
 		$compra_cuenta_impuesto              = $a[11];
 		$compra_market_cuenta_bi             = $a[12];
 
+		$vcsubdiario_glp                     = $a[13];
+		$vcsubdiario_market                  = $a[14];
+
 		$sql = "
 			SELECT * FROM(
 				--COMPRAS DE COMBUSTIBLE
@@ -11502,7 +11515,7 @@ WHERE
 					c.pro_cab_numdocumento::text as trans,
 					'1'::text as tip,
 					'H'::text as ddh,
-					round(sum(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_imptotal ELSE c.pro_cab_imptotal + pro_cab_impinafecto END), 2) as importe,
+					round(FIRST(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_imptotal ELSE c.pro_cab_imptotal + pro_cab_impinafecto END), 2) as importe,
 					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
 					c.pro_cab_almacen as sucursal,
 					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
@@ -11541,7 +11554,7 @@ WHERE
 					c.pro_cab_numdocumento::text as trans,
 					'1'::text as tip,
 					'D'::text as ddh,
-					round(sum(c.pro_cab_impto1), 2) as importe,
+					round(FIRST(c.pro_cab_impto1), 2) as importe,
 					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
 					c.pro_cab_almacen as sucursal,
 					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
@@ -11580,7 +11593,7 @@ WHERE
 					c.pro_cab_numdocumento::text as trans,
 					'1'::text as tip,
 					'D'::text as ddh,
-					round(sum(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_impafecto ELSE c.pro_cab_impafecto + pro_cab_impinafecto END), 2) as importe,
+					round(FIRST(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_impafecto ELSE c.pro_cab_impafecto + pro_cab_impinafecto END), 2) as importe,
 					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
 					c.pro_cab_almacen as sucursal,
 					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
@@ -11620,12 +11633,12 @@ WHERE
 					c.pro_cab_numdocumento::text as trans,
 					'1'::text as tip,
 					'H'::text as ddh,
-					round(sum(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_imptotal ELSE c.pro_cab_imptotal + pro_cab_impinafecto END), 2) as importe,
+					round(FIRST(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_imptotal ELSE c.pro_cab_imptotal + pro_cab_impinafecto END), 2) as importe,
 					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
 					c.pro_cab_almacen as sucursal,
 					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
-					'$vcsubdiario'::TEXT AS subdiario,
-					--'$vcsubdiario'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
+					'$vcsubdiario_glp'::TEXT AS subdiario,
+					--'$vcsubdiario_glp'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
 					''::text as DCENCOS,
 					'C'::text as tip2,
 					c.pro_cab_tipdocumento::TEXT AS nutd
@@ -11659,12 +11672,12 @@ WHERE
 					c.pro_cab_numdocumento::text as trans,
 					'1'::text as tip,
 					'D'::text as ddh,
-					round(sum(c.pro_cab_impto1), 2) as importe,
+					round(FIRST(c.pro_cab_impto1), 2) as importe,
 					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
 					c.pro_cab_almacen as sucursal,
 					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
-					'$vcsubdiario'::TEXT AS subdiario,
-					--'$vcsubdiario'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
+					'$vcsubdiario_glp'::TEXT AS subdiario,
+					--'$vcsubdiario_glp'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
 					''::text as DCENCOS,
 					'C'::text as tip2,
 					c.pro_cab_tipdocumento::TEXT AS nutd
@@ -11698,12 +11711,12 @@ WHERE
 					c.pro_cab_numdocumento::text as trans,
 					'1'::text as tip,
 					'D'::text as ddh,
-					round(sum(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_impafecto ELSE c.pro_cab_impafecto + pro_cab_impinafecto END), 2) as importe,
+					round(FIRST(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_impafecto ELSE c.pro_cab_impafecto + pro_cab_impinafecto END), 2) as importe,
 					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
 					c.pro_cab_almacen as sucursal,
 					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
-					'$vcsubdiario'::TEXT AS subdiario,
-					--'$vcsubdiario'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
+					'$vcsubdiario_glp'::TEXT AS subdiario,
+					--'$vcsubdiario_glp'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
 					''::text as DCENCOS,
 					'C'::text as tip2,
 					c.pro_cab_tipdocumento::TEXT AS nutd
@@ -11738,12 +11751,12 @@ WHERE
 					c.pro_cab_numdocumento::text as trans,
 					'1'::text as tip,
 					'H'::text as ddh,
-					round(sum(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_imptotal ELSE c.pro_cab_imptotal + pro_cab_impinafecto END), 2) as importe,
+					round(FIRST(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_imptotal ELSE c.pro_cab_imptotal + pro_cab_impinafecto END), 2) as importe,
 					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
 					c.pro_cab_almacen as sucursal,
 					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
-					'$vcsubdiario'::TEXT AS subdiario,
-					--'$vcsubdiario'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
+					'$vcsubdiario_market'::TEXT AS subdiario,
+					--'$vcsubdiario_market'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
 					''::text as DCENCOS,
 					'C'::text as tip2,
 					c.pro_cab_tipdocumento::TEXT AS nutd
@@ -11777,12 +11790,12 @@ WHERE
 					c.pro_cab_numdocumento::text as trans,
 					'1'::text as tip,
 					'D'::text as ddh,
-					round(sum(c.pro_cab_impto1), 2) as importe,
+					round(FIRST(c.pro_cab_impto1), 2) as importe,
 					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
 					c.pro_cab_almacen as sucursal,
 					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
-					'$vcsubdiario'::TEXT AS subdiario,
-					--'$vcsubdiario'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
+					'$vcsubdiario_market'::TEXT AS subdiario,
+					--'$vcsubdiario_market'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
 					''::text as DCENCOS,
 					'C'::text as tip2,
 					c.pro_cab_tipdocumento::TEXT AS nutd
@@ -11816,12 +11829,12 @@ WHERE
 					c.pro_cab_numdocumento::text as trans,
 					'1'::text as tip,
 					'D'::text as ddh,
-					round(sum(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_impafecto ELSE c.pro_cab_impafecto + pro_cab_impinafecto END), 2) as importe,
+					round(FIRST(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_impafecto ELSE c.pro_cab_impafecto + pro_cab_impinafecto END), 2) as importe,
 					'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
 					c.pro_cab_almacen as sucursal,
 					c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
-					'$vcsubdiario'::TEXT AS subdiario,
-					--'$vcsubdiario'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
+					'$vcsubdiario_market'::TEXT AS subdiario,
+					--'$vcsubdiario_market'||substring(c.pro_cab_fechaemision::text from 9 for 2)::text as subdiario,
 					''::text as DCENCOS,
 					'C'::text as tip2,
 					c.pro_cab_tipdocumento::TEXT AS nutd
