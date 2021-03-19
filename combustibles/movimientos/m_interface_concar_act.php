@@ -7235,7 +7235,7 @@ WHERE
 					cfp.nu_posz_z_serie,
 					cfp.ch_posz_pos,
 					SUBSTR(TRIM(usr), 0, 5)
-			)--FIN DE BOLETAS ELECTRONICAS DE VENTAS ¡¡¡AGRUPADAS COMO ASIENTOS DE VENTAS!!!
+			)--FIN DE BOLETAS ELECTRONICAS DE VENTAS ¡¡¡AGRUPADAS COMO ASIENTOS DE VENTAS!!!			
 			UNION--INICIO DE TICKETS FACTURAS DE VENTAS
 			(
 				SELECT 
@@ -10643,6 +10643,7 @@ WHERE
 				$centimo2 = $sqlca->query("INSERT INTO tmp_concar_centimo VALUES ('".trim($reg[10])."', '".trim($correlativo2)."', '".trim($contador)."', '".trim($reg[0])."', '".trim($reg[1])."', '".trim($reg[2])."', '".trim($reg[11])."', 'MN', '".trim($reg[5])."', '".trim($reg[6])."', '".trim($tipodoc)."', '".trim($reg[9])."', '".trim($reg[0])."', '".trim($reg[0])."','".trim($serieref)."', 'S', '".$dfecdoc."', '".trim($reg[7])."', '0', '".trim($reg[6])."', 'X', '".$dfecdoc."', '".$dfecdoc."', 'P', '".trim($docuref)."', '".trim($tiporef)."');", "concar_insert");
 			}
 		}
+		error_log("PASO 1: Creacion de tmp_concar_centimo");
 
 		// creando el vector de diferencia
 		$c = 0;
@@ -10679,6 +10680,7 @@ WHERE
 				}
 			}
 		}
+		error_log("PASO 2: Actualizamos tmp_concar_centimo");
 
 		// return false;
 
@@ -10720,6 +10722,7 @@ WHERE
 		        }
 		    }
 		}
+		error_log("PASO 3: Actualizamos tmp_concar_centimo");
 
 		// pasando la nueva tabla a texto2
 		$qfinal = "SELECT * FROM tmp_concar_centimo ORDER BY dsubdia, dcodane2, dcompro, dcuenta, dsecue; ";
@@ -10745,6 +10748,12 @@ WHERE
 				}
 			}
 		}
+		error_log("PASO 4: Verificamos reftip, refserie, refnum");
+		error_log(json_encode( array( 
+			"reftip" => $reftip, 
+			"refserie" => $refserie, 
+			"refnum" => $refnum 
+		) ));
 
 		/* ESTO ES PARA SACAR EL IGV Y BASE IMPONIBLE DE UNA NOTA DE CREDITO AMARRADA A UNA FACTURA MANUAL */
 
@@ -10772,6 +10781,8 @@ WHERE
 				$complemento .= "'" . pg_escape_string($serdocu) . "'";
 			}
 			$complemento .= ") ";
+		}else{
+			$complemento .= "ch_fac_tipodocumento||ch_fac_seriedocumento||ch_fac_numerodocumento IN('-')";
 		}
 
 		$complemento .= "
@@ -10804,6 +10815,9 @@ WHERE
 				$complemento .= "'" . pg_escape_string($serdocu) . "'";
 			}
 			$complemento .= ")";
+		}else{
+			$complemento .= "'10'||SUBSTR(TRIM(usr), 0, 5)||SUBSTR(TRIM(usr), 6) IN ('-')";
+			$complemento .= " OR '35'||SUBSTR(TRIM(usr), 0, 5)||SUBSTR(TRIM(usr), 6) IN ('-')";
 		}
 
 		$complemento .= "
@@ -10812,7 +10826,9 @@ WHERE
 			orden;
 		";
 
-//		echo "Complemento: ".$complemento;
+		echo "<pre>";
+		echo "Complemento: \n\n".$complemento."\n\n";		
+		echo "</pre>";
 
 		$sqlca->query($complemento);
 
@@ -10833,11 +10849,12 @@ WHERE
 		$fe_emision_ref = "''";
 		$compleigv 		= 0.00;
 		$complebi 		= 0.00;
-/*
-		echo "<pre>";
-		var_dump($datos);
+
+		echo "datos:";
+		echo "<pre>";		
+		print_r($datos);
 		echo "</pre>";
-*/
+
 		if ($sqlca->query($qfinal)>0) {
 			while ($reg = $sqlca->fetchRow()){
 				if($reg[9] <= 0)
