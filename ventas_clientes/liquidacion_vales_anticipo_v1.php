@@ -10,6 +10,7 @@
 		<script src="/sistemaweb/js/jquery-2.0.3.js" type="text/javascript"></script>
 		<link rel="stylesheet" href="/sistemaweb/css/jquery-ui.css" />
 		<script src="/sistemaweb/js/jquery-ui.js"></script>
+        <script type="text/javascript" src="/sistemaweb/assets/js/helper/autocomplete.js"></script>
 		<script type="text/javascript">
 			var distancia=300;
 			var int_contador=0,int_contador_monto_modif=0;
@@ -66,7 +67,7 @@
        
                     $.ajax({
                         type    : "POST",
-                        url     : "c_liquidacion_vales_relacion_v2.php",
+                        url     : "c_liquidacion_vales_relacion_anticipo_v1.php",
                         data    : {
                                     accion          : 'ordenar',
                                     fecha_inicio    : fecha_inicio,
@@ -107,7 +108,7 @@
        
                     $.ajax({
                         type    : "POST",
-                        url     : "c_liquidacion_vales_relacion_v2.php",
+                        url     : "c_liquidacion_vales_relacion_anticipo_v1.php",
                         data    : {
                                     accion          : 'ordenar',
                                     fecha_inicio    : fecha_inicio,
@@ -380,7 +381,7 @@
                 $('#cargardor').css({'left':left,'top':top,'display':'block'});
                 $.ajax({
                     type: "POST",
-                    url: "c_liquidacion_vales_relacion_v2.php",
+                    url: "c_liquidacion_vales_relacion_anticipo_v1.php",
                     data: { accion:'ver_vales',fecha_inicio:$( "#fecha_inicio" ).val(),fecha_final:$( "#fecha_final" ).val(),ruc:cliente,valesselecionada:cade_vales,transacciones:$( "#txt-transacciones" ).val()},
                     success:function(xm){
                             
@@ -506,7 +507,7 @@
 
                     $.ajax({
                         type: "POST",
-                        url: "c_liquidacion_vales_relacion_v2.php",
+                        url: "c_liquidacion_vales_relacion_anticipo_v1.php",
                         data: { accion:'buscar_liquidacion',fecha_inicio:$("#fecha_inicio").val(),fecha_final:$("#fecha_final").val()
                         },
                         success:function(xm){
@@ -624,7 +625,7 @@
 
                             $.ajax({
                                 type    : "POST",
-                                url     : "c_liquidacion_vales_relacion_v2.php",
+                                url     : "c_liquidacion_vales_relacion_anticipo_v1.php",
                                 data    : arrDataPOST,
                                 success:function(xm){
                                     /* Validacion de envio de data */
@@ -683,7 +684,7 @@
 
                     $.ajax({
                         type: "POST",
-                        url: "c_liquidacion_vales_relacion_v2.php",
+                        url: "c_liquidacion_vales_relacion_anticipo_v1.php",
                         data: {
                             accion:'selecionabtn',
                             fecha_inicio:$( "#fecha_inicio" ).val(),
@@ -717,6 +718,13 @@
                     });
                 });
 
+                $('#btnseleccionar_verrerportevales').click(function(){
+                    var cliente = $('#txt-Nu_Documento_Identidad').val();
+                    cliente = cliente.trim();
+                    console.log(cliente);
+                    verreportevales(cliente);
+                });
+
                 $( 'input[name=td]' ).click(function(){
                     var tipodoc=$(this).val();
                     var elemento = $("#contenidoTablaSelecionar");
@@ -729,7 +737,7 @@
 
                     $.ajax({
                         type: "POST",
-                        url: "c_liquidacion_vales_relacion_v2.php",
+                        url: "c_liquidacion_vales_relacion_anticipo_v1.php",
                         data: {accion:'tipodocumento', documento:tipodoc},
                         success:function(xm){
                             $('#serie').html(xm);
@@ -757,9 +765,9 @@
         <div id="cargardor" style="position: absolute;display: none"><img src="/sistemaweb/images/cg.gif" /></div>
             <?php
             include('/sistemaweb/include/mvc_sistemaweb.php');
-            include('liquidacion_vales/t_liquidacion_anticipo_v1.php');
-            include('liquidacion_vales/m_liquidacion_anticipo_v1.php');
-            include('liquidacion_vales/c_liquidacion_anticipo_v1.php');
+            include('liquidacion_vales/t_liquidacion_vales_anticipo_v1.php');
+            include('liquidacion_vales/m_liquidacion_vales_anticipo_v1.php');
+            include('liquidacion_vales/c_liquidacion_vales_anticipo_v1.php');
             $objtem = new LiquidacionValesTemplate();
             $selectexonerada = LiquidacionValesModel::GetTaxOptional();
 
