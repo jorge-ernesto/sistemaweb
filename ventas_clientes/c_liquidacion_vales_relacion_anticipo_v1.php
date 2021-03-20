@@ -5,9 +5,9 @@ include_once('/sistemaweb/include/dbsqlca.php');
 $sqlca = new pgsqlDB('localhost', 'postgres', 'postgres', 'integrado');
 include('/sistemaweb/include/mvc_sistemaweb.php');
 
-include('liquidacion_vales/m_liquidacion_vales_v2.php');
-include('liquidacion_vales/c_liquidacion_vales_v2.php');
-include('liquidacion_vales/t_liquidacion_vales_v2.php');
+include('liquidacion_vales/m_liquidacion_vales_anticipo_v1.php');
+include('liquidacion_vales/c_liquidacion_vales_anticipo_v1.php');
+include('liquidacion_vales/t_liquidacion_vales_anticipo_v1.php');
 
 $objmodel = new LiquidacionValesModel();
 $objtem = new LiquidacionValesTemplate();

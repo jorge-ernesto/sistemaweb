@@ -15,6 +15,13 @@ $objcomn = new LiquidacionValesController("");
 
 $accion = $_REQUEST['accion'];
 
+function obtenemosTransaccionesFormateadas($transacciones) {    
+    foreach ($transacciones as $key => $value) {        
+        $transacciones_formateadas .= "'".trim($value)."',";
+    }    
+    return substr($transacciones_formateadas, 0, -1);
+}
+
 try {
 
     if ($accion == "ordenar") {
@@ -60,8 +67,16 @@ try {
         $vales_sele = $_REQUEST['valesselecionada'];
         $vales_sele = str_replace("'", "", $vales_sele);
 
-        $result = LiquidacionValesModel::MostarValesDeUnCliente($fecha_inicio, $fecha_final, $ruc, NULL);
-        $datos_cliente = LiquidacionValesModel::ObtenerdatosCliente($ruc);
+        //OBTENEMOS TRANSACCIONES      
+        $transacciones = trim($_REQUEST['transacciones']);
+        if($transacciones != ''){
+            $transacciones = explode(",", $transacciones);        
+            $transacciones = obtenemosTransaccionesFormateadas($transacciones);            
+        }
+        //CERRAMOS OBTENEMOS TRANSACCIONES
+
+        $result = LiquidacionValesModel::MostarValesDeUnCliente($fecha_inicio, $fecha_final, $ruc, NULL, $transacciones);
+        $datos_cliente = LiquidacionValesModel::ObtenerdatosCliente($ruc);                
         LiquidacionValesTemplate::CrearTablaVervales($result, $datos_cliente, $fecha_inicio, $fecha_final, $vales_sele);
 
 	} else if ($accion == "buscar_liquidacion") {
@@ -102,7 +117,7 @@ try {
         U = Gratuita + Exonerada
         */
         $sCodigoImpuesto = $_POST['sCodigoImpuesto'];
-        $sSerieNumeroDocumento = $_POST['sSerieNumeroDocumento'];
+        $sSerieNumeroDocumento = $_POST['sSerieNumeroDocumento']; //Documento Ref. (Solo para anticipos)
 
 		$aregloOficialClientes	= array();
         foreach ($arrVales as $key => $value) {
@@ -129,16 +144,35 @@ try {
         }
 
         /* Validacion de envio de data */
-        // echo json_encode( array($aregloOficialClientes, $_POST) );
-        // return;
+        error_log("************************************** POST **************************************");
+        error_log( json_encode( array( 
+            "POST" => $_POST 
+        ) ) );
+
+        error_log("************************************** aregloOficialClientes **************************************");
+        error_log( json_encode( array( 
+            "aregloOficialClientes" => $aregloOficialClientes 
+        ) ) );
         /* Fin Validacion de envio de data */
 
        	foreach ($aregloOficialClientes as $ruc_cli => $cadena_vales) {
 	    	$ruc                  = $ruc_cli;
-	    	$tipo_operacion       = strip_tags(stripslashes($_POST['tipo_opeacion']));
-	    	$tipo_doc_numero      = strip_tags(stripslashes($_POST['documento']));
-	    	$num_seriedocumento   = strip_tags(stripslashes($_POST['serie_actual']));
-	    	$fecha_liqui          = strip_tags(stripslashes($_POST['fecha_liqui']));
+	    	$tipo_operacion       = strip_tags(stripslashes($_POST['tipo_opeacion'])); //TIPO OPERACION
+	    	$tipo_doc_numero      = strip_tags(stripslashes($_POST['documento']));     //TIPO DE COMPROBANTE
+	    	$num_seriedocumento   = strip_tags(stripslashes($_POST['serie_actual']));  //SERIE DE DOCUMENTO
+	    	$fecha_liqui          = strip_tags(stripslashes($_POST['fecha_liqui']));   //FECHA LIQUIDACION
+
+            /* Validacion de envio de data */
+            error_log("************************************** Elementos de array clientes **************************************");
+            error_log( json_encode( array( 
+                "ruc"                => $ruc, 
+                "tipo_operacion"     => $tipo_operacion, 
+                "tipo_doc_numero"    => $tipo_doc_numero, 
+                "num_seriedocumento" => $num_seriedocumento, 
+                "fecha_liqui"        => $fecha_liqui,
+                "cadena_vales"       => $cadena_vales
+            ) ) ); 
+            /* Fin Validacion de envio de data */
 
 			//COMIENZA LA CREACION DE LA FACTURA
             $falg_anticipo = false;
@@ -151,13 +185,13 @@ try {
 			    	$datoscliente              = LiquidacionValesModel::ObtenerdatosCliente($ruc_cli);
 			    	$sucursal                  = LiquidacionValesModel::ObtenerdatosSucurasles();
                     $listo_para_facturar       = LiquidacionValesController::AgruparRegistoFacturaNormal($rsdata, $sucursal);
-                    
+                
                     /* Validacion de envio de data */
                     // echo json_encode( array($rsdata, $datos_inicales_documento, $datoscliente, $sucursal, $listo_para_facturar, ) );
                     // return;
                     /* Fin Validacion de envio de data */
 
-					if (array_key_exists('N', $listo_para_facturar)) {
+					if (array_key_exists('N', $listo_para_facturar)) { //SOLO REALIZA LA OPERACION SI NO ES UN CLIENTE ANTICIPO
             			$fecha_liqui = $fecha_liqui;
 
                         $datosweb = LiquidacionValesModel::procesoDocumnetoLiquidarUnicoClienteXNormal($tipo_doc_numero, $num_seriedocumento, $fecha_liqui, $listo_para_facturar, $datoscliente, $datos_inicales_documento, $cadena_vales, $fecha_inicio, $fecha_final, $codigo_hermandad, $sCodigoImpuesto);                        
@@ -338,15 +372,43 @@ try {
                 }
             }
 
-            //si es anticipo
+            //SI ES UN CLIENTE ANTICIPO
             if ($falg_anticipo == false) {
+                error_log("************************************** ENTRO A ANTICIPO **************************************");
+
                 try {
                     LiquidacionValesModel::IniciarTransaccion(); //INICIAR TRANSACION 
                     
+                    /* Validacion de envio de data */
+                    error_log("************************************** Validacion para facturar **************************************");
+                    error_log( json_encode( array( 
+                        "fecha_inicio" => $fecha_inicio, 
+                        "fecha_final"  => $fecha_final, 
+                        "ruc"          => $ruc, 
+                        "cadena_vales" => $cadena_vales 
+                    ) ) );            
+                    error_log( json_encode( array( 
+                        "tipo_doc_numero"    => $tipo_doc_numero, 
+                        "num_seriedocumento" => $num_seriedocumento 
+                    ) ) );   
+                    error_log( json_encode( array( 
+                        "ruc_cli" => $ruc_cli 
+                    ) ) );                       
+                    /* Fin Validacion de envio de data */
+
                     $rsdata                     = LiquidacionValesModel::LiquidacionValesUnicoCliente($fecha_inicio, $fecha_final, $ruc, $cadena_vales);
                     $datos_inicales_documento   = LiquidacionValesModel::ObtenerdatosFactura($tipo_doc_numero, $num_seriedocumento);
                     $datoscliente               = LiquidacionValesModel::ObtenerdatosCliente($ruc_cli);
                 
+                    /* Validacion de envio de data */
+                    error_log("************************************** Validacion para facturar **************************************");
+                    error_log( json_encode( array( 
+                        "rsdata"                   => $rsdata, 
+                        "datos_inicales_documento" => $datos_inicales_documento, 
+                        "datoscliente"             => $datoscliente 
+                    ) ) );                                
+                    /* Fin Validacion de envio de data */
+
                     $cod_cliente    = trim($datoscliente['cli_ruc']);
                     $estado         = LiquidacionValesModel::Verificar_nota_despacho_efectivo($cod_cliente);
                     if ($estado['cli_ndespacho_efectivo'] == "1") {
@@ -354,7 +416,13 @@ try {
                     }
 
                     $listo_para_facturar = LiquidacionValesController::AgruparRegistoFacturaNormal($rsdata);
-                    if (array_key_exists('S', $listo_para_facturar)) {
+                    /* Validacion de envio de data */
+                    error_log("************************************** Validacion para facturar **************************************");
+                    error_log( json_encode( array( 
+                        "listo_para_facturar" => $listo_para_facturar                        
+                    ) ) );                                
+                    /* Fin Validacion de envio de data */
+                    if (array_key_exists('S', $listo_para_facturar)) { //SOLO REALIZA LA OPERACION SI ES UN CLIENTE ANTICIPO
                         $fecha_liqui = $fecha_liqui;
 
                         $rsdata                     = LiquidacionValesModel::LiquidacionValesUnicoCliente($fecha_inicio, $fecha_final, $ruc, $cadena_vales);
@@ -376,6 +444,20 @@ try {
                                 }
                             }
                         }
+                        /* Validacion de envio de data */
+                        error_log("************************************** Validacion para facturar **************************************");
+                        error_log( json_encode( array( 
+                            "ccob_documento" => $ccob_documento,
+                        ) ) );
+                        error_log( json_encode( array(                             
+                            "SERIE"                 => $num_seriedocumento,
+                            "NUMERO_DOCUMENTO_ANTI" => $NUMERO_DOCUMENTO_ANTI, //NUM. DOC. ANTICIPO
+                            "codigo_cliente"        => $codigo_cliente,
+                            "FEC_LIQUIDACION"       => $fecha_liqui,
+                            "ch_liquidacion"        => $num_liquidacion,
+                            "totalimporte"          => $totalimporte,                            
+                        ) ) );                                
+                        /* Fin Validacion de envio de data */
 
                         $codigo_cliente = trim($datoscliente['cli_codigo']);
                         $datosweb = array();
@@ -390,14 +472,37 @@ try {
                                 "totalimporte" => $totalimporte,
                                 "rz" => $datoscliente['cli_razsocial']
                             );
-                        }
-                        
+                        }                        
+                        /* Validacion de envio de data */
+                        error_log("************************************** Validacion para facturar **************************************");                        
+                        error_log( json_encode( array(
+                            "datosweb" => $datosweb
+                        ) ) );                        
+                        /* Fin Validacion de envio de data */                        
+
+                        /* Validacion de envio de data */
+                        error_log("************************************** Validacion para facturar **************************************");                        
+                        error_log( json_encode( array(
+                            "tipo_doc_numero"       => $tipo_doc_numero,
+                            "fecha_inicio"          => $fecha_inicio,
+                            "fecha_final"           => $fecha_final,
+                            "ruc"                   => $ruc,
+                            "cadena_vales"          => $cadena_vales,
+                            "num_seriedocumento"    => $num_seriedocumento,
+                            "NUMERO_DOCUMENTO_ANTI" => $NUMERO_DOCUMENTO_ANTI,
+                            "articulo"              => $articulo,
+                            "NUM_LIQUI_CADE"        => str_pad($num_liquidacion, 10, '0', STR_PAD_LEFT),
+                            "fecha_liqui"           => $fecha_liqui,
+                            "codigo_hermandad"      => $codigo_hermandad,
+                            "sSerieNumeroDocumento" => $sSerieNumeroDocumento,
+                        ) ) );
+                        /* Fin Validacion de envio de data */                        
                         foreach ($listo_para_facturar as $anticipo => $cliente) {
                             foreach ($cliente as $clie => $sucursal) {
                                 foreach ($sucursal as $sucur => $articulos) {
                                     foreach ($articulos as $articulo => $valores) {
                                         $NUM_LIQUI_CADE = str_pad($num_liquidacion, 10, '0', STR_PAD_LEFT);
-                                        LiquidacionValesModel::ActualizarVales_LiquidacionXcobrar($tipo_doc_numero, $fecha_inicio, $fecha_final, $ruc, $cadena_vales, $num_seriedocumento, $NUMERO_DOCUMENTO_ANTI, $articulo, $NUM_LIQUI_CADE, $fecha_liqui, $codigo_hermandad, $sSerieNumeroDocumento);
+                                        LiquidacionValesModel::ActualizarVales_LiquidacionXcobrar($tipo_doc_numero, $fecha_inicio, $fecha_final, $ruc, $cadena_vales, $num_seriedocumento, $NUMERO_DOCUMENTO_ANTI, $articulo, $NUM_LIQUI_CADE, $fecha_liqui, $codigo_hermandad, $sSerieNumeroDocumento); //Documento Ref. (Solo para anticipos)
                                     }
                                 }
                             }

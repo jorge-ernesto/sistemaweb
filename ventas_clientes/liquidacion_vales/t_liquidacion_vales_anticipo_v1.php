@@ -15,7 +15,7 @@ class LiquidacionValesTemplate extends Template {
 
 	<div class='contenedorprincipal'>
 		<div>
-            <h3 style="color: #336699; text-align: center;">PROCESO DE LIQUIDACION DE VALES</h3>
+            <h3 style="color: #336699; text-align: center;">PROCESO DE LIQUIDACION DE VALES CLIENTE ANTICIPO</h3>
         </div>
 		<div class="separacion">
             <div class='fila'>
@@ -32,28 +32,9 @@ class LiquidacionValesTemplate extends Template {
         </div>
 	</div>
     <div class="separacion">
-        <div class='etiquetavales' style="float: left;">Tipo de Comprobante</div>
-            <span style="font-size: 9px">Factura</span> <input type='radio' name='td' value='10' id="tdf"/>
-            <span style="font-size: 9px">Boleta</span> <input type='radio' name='td' value='35' id="tdb"/>
-        </div>
-
-        <div class="separacion">
-            <div class='etiquetavales' style="float: left;">Serie de Documento</div>
-            <label id='serie'>---</label>
-        </div>
-
-        <div class="separacion">
-            <div class='fila'>
-                <div class='etiquetavales' style="float: left;">Tipo Operacion</div>
-                <div style="float: left;">
-                    <select id="cmbtipooperacion">
-                        <option value="01">Cliente Normal</option>
-                        <option value="02">Cliente Nota Despacho</option>
-                        <option value="03">Cliente Placa</option>
-                        <option value="04">Cliente Producto</option>
-                    </select>
-                </div>
-            </div>
+        <div class='etiquetavales' style="float: left;">Codigo Cliente:</div>
+            <input type="hidden" id="txt-Nu_Documento_Identidad" name="Nu_Documento_Identidad" />
+			<input type="text" maxlength="50" id="txt-No_Razsocial" name="No_Razsocial" autocomplete="off" placeholder="Ingresar Codigo o Nombre del Cliente" class='fecha_formato' />
         </div>
 
         <div class="separacion">
@@ -62,24 +43,6 @@ class LiquidacionValesTemplate extends Template {
                 <div style="float: left;">
                     <input type='text' id='fecha_liqui' class='fecha_formato'/>
                 </div>
-            </div>
-        </div>
-
-        <?php
-        $css_display_exonerado = 'display: none;';
-        if ($selectexonerada==true)//Si es TRUE, mostramos el campo EXONERADO.
-            $css_display_exonerado = '';
-        ?>
-        <div class="separacion">
-            <div class='fila'>
-                <!-- Verificar si la empresa esta exonerada -->
-                <div style="<?php echo $css_display_exonerado; ?>; float: left;" class='etiquetavales'>Exonerado </div>
-                <div style="<?php echo $css_display_exonerado; ?>; float: center;"><input type='checkbox' id='sin_igv' class='fecha_formato' /></div>
-                <!-- /. Verificar si la empresa esta exonerada -->
-                <div style="float: left;" class='etiquetavales'>Transferencia Gratuita </div>
-                <div style="float: center;"><input type='checkbox' id='trans_gratis'  class='fecha_formato' /></div>
-                <div style="float: left;" class='etiquetavales'>Considerar Negativos </div>
-                <div style="float: center;"><input type='checkbox' id='cons_nega' class='fecha_formato'/></div>
             </div>
         </div>
 
@@ -109,14 +72,14 @@ class LiquidacionValesTemplate extends Template {
                     <img align="right" src="/sistemaweb/images/search.png"/>Buscar Clientes
                 </button>
             </div>
-            <div class='etiquetavales' style="float: left;margin-bottom: 2px;margin-right: 2px;text-align: center;width: auto;">
+            <div class='etiquetavales' style="float: left;margin-bottom: 2px;text-align: center;width: auto;">
                 <button id="btnbuscarliquidacion">
                     <img align="right" src="/sistemaweb/images/search.png">Buscar Liquidaciones
                 </button>
             </div>
             <div class='etiquetavales' style="float: left;margin-bottom: 5px;text-align: center;width: auto;">
                 <button id="btnliquidar">
-                    <img align="right" src="/sistemaweb/images/MasterDetail.gif">Liquidar vales
+                    <img align="right" src="/sistemaweb/images/MasterDetail.gif" width="12">Liquidar vales
                 </button>
             </div>
 		</div>
