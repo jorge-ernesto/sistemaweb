@@ -354,7 +354,7 @@
                     int_contador_monto_modif++;
                 }
 
-                $('#btnseleccionar').click();                
+                // $('#btnseleccionar').click();                
             }
 
             function verreportevales(cliente){
@@ -719,6 +719,7 @@
                 });
 
                 $('#btnseleccionar_verrerportevales').click(function(){
+                    console.log('** BUTTON SELECCIONAR ID -> #btnseleccionar_verrerportevales **');
                     var cliente = $('#txt-Nu_Documento_Identidad').val();
                     cliente = cliente.trim();
                     console.log(cliente);
