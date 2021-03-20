@@ -68,8 +68,8 @@ class LiquidacionValesTemplate extends Template {
 
 		<div class="separacion">
             <div class='etiquetavales' style="float: left;margin-bottom: 5px;text-align: center;width: auto;">
-                <button id="btnseleccionar">
-                    <img align="right" src="/sistemaweb/images/search.png"/>Buscar Clientes
+                <button id="btnseleccionar_verrerportevales">
+                    <img align="right" src="/sistemaweb/images/search.png"/>Buscar Vales
                 </button>
             </div>
             <div class='etiquetavales' style="float: left;margin-bottom: 2px;text-align: center;width: auto;">
@@ -146,7 +146,7 @@ class LiquidacionValesTemplate extends Template {
 	            	<th align="right"><p style="font-size:1.2em; color:black;"><b>RUC: </th>
 	            	<th align="left"><?php echo $datos_cliente['cli_ruc']; ?></th>
 	            <tr>
-	            	<th align="rigth"><p style="font-size:1.2em; color:black;"><b>Razon Social: </th>
+	            	<th align="right"><p style="font-size:1.2em; color:black;"><b>Razon Social: </th>
 	            	<th align="left"><?php echo $datos_cliente['cli_razsocial']; ?></th>
 	            <tr>
 	            	<th align="right"><p style="font-size:1.2em; color:black;"><b>Anticipo: </th>
