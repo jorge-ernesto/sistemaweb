@@ -1268,6 +1268,24 @@ EOT;
 					return $arrLineXEstablecimiento = array('sStatus' => 'danger', 'sMessage' => 'Problemas al obtener dirección del establecimiento - Linea X', 'sContent' => $arrLineXEstablecimiento["line"]);
 				$arrCadenaFESUNAT .= "\n" . $arrLineXEstablecimiento["line"];
 			}
+			
+			// OPENSOFT-59: R.S. 193-2020/SUNAT 
+			// X|X0038|ID_CUOTA|MONTO|FECHA_PAGO
+			// ID_CUOTA será siempre 001, pues sólo se calcularán cronogramas con una cuota; MONTO es el importe total del comprobante; y FECHA_PAGO es la fecha calculada a partir de la fecha de emisión + los días de crédito.
+			if( TRIM($arrData["arrHeader"]["nu_tipo_pago"]) == "06" && TRIM($arrData["arrHeader"]["no_nombre_forma_pago"]) == "CREDITO" ){ //SI ES DOCUMENTO CON FORMA DE PAGO CREDITO
+				$arrCuotaDePago = array(
+					'X',
+					'X0038',
+					'001',
+					(float)$arrData['arrHeader']['ss_total'],
+					$arrData["arrHeader"]["fe_vencimiento"]
+				);
+
+				$arrLineXCuotaDePago = $this->schemaLine($arrCuotaDePago);
+				if ( !($arrLineXCuotaDePago["valid"]) )
+					return $arrLineXCuotaDePago = array('sStatus' => 'danger', 'sMessage' => 'Problemas al obtener cuotas de pago - Linea X', 'sContent' => $arrLineXCuotaDePago["line"]);
+				$arrCadenaFESUNAT .= "\n" . $arrLineXCuotaDePago["line"];
+			}
 
 			/**
 			* Línea Tipo "E" – Leyenda/Propiedad

@@ -1694,7 +1694,8 @@ SELECT
  TRIM(VC.ch_fac_tiporecargo2) AS no_codigo_impuesto,
  VC.ch_liquidacion AS nu_liquidacion,
  VC.nu_fac_recargo3 AS nu_estado_documento_sunat,
- TRIM(VCOM.ch_cat_sunat) AS ch_cat_sunat
+ TRIM(VCOM.ch_cat_sunat) AS ch_cat_sunat,
+ TRIM(VC.nu_tipo_pago) AS nu_tipo_pago
 FROM
  fac_ta_factura_cabecera AS VC
  LEFT JOIN fac_ta_factura_complemento AS VCOM
