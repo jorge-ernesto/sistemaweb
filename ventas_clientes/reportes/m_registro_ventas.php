@@ -205,6 +205,8 @@ class RegistroVentasModel extends Model {
         	T.caja,
         	T.usr
 		ORDER BY
+			--tipo desc,
+			--nserie,
 			2,
 			1;
 		";
