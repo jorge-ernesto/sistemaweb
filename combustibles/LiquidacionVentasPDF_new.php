@@ -161,7 +161,7 @@
 	$sql="
 		SELECT 
 			g.tab_descripcion as descripciontarjeta,
-			SUM(t.importe) as importe
+			SUM(t.importe)-SUM(COALESCE(t.km,0)) as importe
 		FROM
 			pos_trans" . $anio . $mes . " t
 			JOIN int_tabla_general g ON (g.tab_tabla='95' AND g.tab_elemento='00000'||t.at)

@@ -79,7 +79,7 @@
 	
 	$sql = "SELECT 
 			g.tab_descripcion as descripciontarjeta,
-			SUM(t.importe) as importetarjeta
+			SUM(t.importe)-SUM(COALESCE(t.km,0)) as importetarjeta
 		FROM
 			pos_trans" . $ano_del . $mes_del . " t
 			JOIN int_tabla_general g ON (g.tab_tabla='95' AND g.tab_elemento='00000'||t.at)
@@ -93,7 +93,7 @@
 	$x_tarjetas_credito_detalle = pg_query($conector_id, $sql);
 	
 	$sql = "SELECT
-			SUM(CASE WHEN t.fpago='2' THEN t.importe ELSE 0 END) AS tarjetascredito
+			SUM(CASE WHEN t.fpago='2' THEN t.importe-COALESCE(t.km,0) ELSE 0 END) AS tarjetascredito
 		FROM
 			pos_trans" . $ano_del . $mes_del . " t
 			LEFT JOIN int_clientes c on c.cli_ruc = t.ruc AND c.cli_ndespacho_efectivo != 1

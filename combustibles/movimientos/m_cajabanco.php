@@ -168,7 +168,7 @@ SELECT
 	LEFT JOIN
 	(SELECT
 	 	t.dia, 
-		SUM(t.importe) AS tarjetascredito
+		SUM(t.importe)-SUM(COALESCE(t.km)) AS tarjetascredito
 	FROM 
 		" . $pos_transYM . " AS t
 	WHERE 

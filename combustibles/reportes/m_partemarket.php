@@ -47,7 +47,7 @@ class ParteMarketModel extends Model {
 		//TARJETAS DETALLE
 		$sqlAa = "SELECT
 						g.tab_descripcion as descripciontarjeta,
-						SUM(t.importe) as importetarjeta
+						SUM(t.importe)-SUM(COALESCE(t.km,0)) as importetarjeta
 					FROM
 						pos_trans". substr($desde,6,4) . substr($desde,3,2) . " t
 					JOIN
@@ -65,7 +65,7 @@ class ParteMarketModel extends Model {
 
 		//TARJETAS TOTAL
 		$sqlA1 = "SELECT 
-						SUM(CASE WHEN t.fpago='2' THEN t.importe ELSE 0 END) AS tarjetascredito,
+						SUM(CASE WHEN t.fpago='2' THEN t.importe-COALESCE(t.km,0) ELSE 0 END) AS tarjetascredito,
 						SUM(CASE WHEN t.tm='V' THEN (CASE WHEN t.importe<0 THEN t.importe ELSE 0 END) ELSE 0 END) AS descuentos
 					FROM
 						pos_trans". substr($desde,6,4) . substr($desde,3,2) . " t LEFT JOIN int_clientes c on c.cli_ruc = t.ruc AND c.cli_ndespacho_efectivo != 1

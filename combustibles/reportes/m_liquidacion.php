@@ -19,7 +19,7 @@ class LiquidacionModel extends Model {
 						pos_trans".substr($desde,6,4).substr($desde,3,2) . " t
 					WHERE	
 						t.es = '" . pg_escape_string($estaciones) . "' 
-						AND t.fpago = '2' 
+						AND t.fpago = '2'
 						AND t.dia between to_date('".pg_escape_string($desde)."', 'DD/MM/YYYY') and to_date('".pg_escape_string($hasta)."', 'DD/MM/YYYY') 
 					GROUP BY 
 						date(t.dia)";
@@ -377,7 +377,7 @@ class LiquidacionModel extends Model {
 		
 				LEFT JOIN (SELECT
 						to_char(date(t.dia), 'DD/MM/YYYY') as dia, 
-						SUM(t.importe) as importetarjeta ".$cond2.") T ON DD.dia = T.dia	
+						SUM(t.importe)-SUM(COALESCE(t.km,0)) as importetarjeta ".$cond2.") T ON DD.dia = T.dia	
 
 				LEFT JOIN (SELECT
 						to_char(VaCa.dt_fecha, 'DD/MM/YYYY') as dia,
@@ -465,7 +465,7 @@ class LiquidacionModel extends Model {
 
 				LEFT JOIN (SELECT 
 							to_char(t.dia, 'DD/MM/YYYY') as dia, 
-							SUM(CASE WHEN t.fpago='2'  AND td!='N' THEN t.importe ELSE 0 END) AS tarjetascredito,
+							SUM(CASE WHEN t.fpago='2'  AND td!='N' THEN t.importe-COALESCE(t.km,0) ELSE 0 END) AS tarjetascredito,
 							ABS(SUM(CASE WHEN t.td IN('B', 'F') AND t.grupo='D' THEN t.importe ELSE 0 END)) AS descuentos_factura,
 							SUM(CASE WHEN t.td='N' AND t.grupo='D' THEN t.importe*-1 ELSE 0 END) AS descuentos_nota_despacho
 					     FROM 
@@ -520,8 +520,9 @@ class LiquidacionModel extends Model {
 					     ) TC on TC.dia = AF.dia
 */
 
-
+		echo "<pre>";
 		echo "\n".'- LIQUIDACION: '.$sql.' -';
+		echo "</pre>";
 		//echo $sql;
 		if ($sqlca->query($sql) < 0) 
 			return false;
@@ -644,7 +645,7 @@ class LiquidacionModel extends Model {
 		
 				LEFT JOIN (SELECT
 						to_char(date(t.dia), 'DD/MM/YYYY') as dia, 
-						SUM(t.importe) as importetarjeta , tipo
+						SUM(t.importe)-SUM(COALESCE(t.km,0)) as importetarjeta , tipo
 					   FROM
 						".$con1."
 					   LEFT JOIN
@@ -811,7 +812,7 @@ class LiquidacionModel extends Model {
 						dt_fechaparte) TT  ON  TT.dia = DD.dia
 				LEFT JOIN (SELECT 
 							to_char(t.dia, 'DD/MM/YYYY') as dia, 
-							SUM(CASE WHEN t.fpago='2'  AND td!='N' THEN t.importe ELSE 0 END) AS tarjetascredito,
+							SUM(CASE WHEN t.fpago='2'  AND td!='N' THEN t.importe-COALESCE(t.km,0) ELSE 0 END) AS tarjetascredito,
 							SUM(CASE WHEN t.tm='V' THEN (CASE WHEN (t.importe<0) THEN  -1*t.importe ELSE (CASE WHEN (t.importe>0 and t.grupo='D') THEN -1*t.importe ELSE 0 END)  END) END) AS descuentos
 					     FROM 
 							".$con1."
@@ -835,7 +836,9 @@ class LiquidacionModel extends Model {
 				ORDER BY
 					DD.dia ASC;";
 
+		echo "<pre>";
 		echo "\n".'- GLP: '.$sql.' -';
+		echo "</pre>";
 
 		if ($sqlca->query($sql) < 0) 
 			return false;

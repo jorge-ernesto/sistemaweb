@@ -292,7 +292,7 @@ class ParteLiquidacionModel extends Model {
 				(
 					SELECT 
 						t.codigo, 
-						SUM(CASE WHEN t.td != 'N' AND t.fpago='2' THEN t.importe ELSE 0 END) AS tarjetascredito,
+						SUM(CASE WHEN t.td != 'N' AND t.fpago='2' THEN t.importe-COALESCE(t.km,0) ELSE 0 END) AS tarjetascredito,
 							SUM(CASE 
 							WHEN t.tm='V' 
 							THEN 
@@ -482,6 +482,9 @@ class ParteLiquidacionModel extends Model {
 
 		echo "\n".'- JARCORRRRRRRRRRRRRRRRRRRRR:'.$raro.' -';
 
+		echo "<pre>";
+		echo "\n".'- COMBUSTIBLE:'.$sqlA.' -';
+		echo "</pre>";
 		if ($sqlca->query($sqlA) < 0) 
 			return false;
 		$result = Array();
@@ -604,7 +607,7 @@ class ParteLiquidacionModel extends Model {
 
 			LEFT JOIN (SELECT
 					t.codigo,
-					SUM(CASE WHEN t.fpago='2' THEN t.importe ELSE 0 END) AS tarjetascredito,
+					SUM(CASE WHEN t.fpago='2' THEN t.importe-COALESCE(t.km,0) ELSE 0 END) AS tarjetascredito,
 					SUM(CASE WHEN t.tm='V' THEN (CASE WHEN (t.importe<0) THEN  -1*t.importe ELSE (CASE WHEN (t.importe>0 and t.grupo='D') THEN -1*t.importe ELSE 0 END)  END) END) AS descuentos
 				    FROM
 					pos_trans". substr($desde,6,4) . substr($desde,3,2) . " t LEFT JOIN int_clientes k on k.cli_ruc = t.ruc AND k.cli_ndespacho_efectivo != 1
@@ -733,7 +736,9 @@ class ParteLiquidacionModel extends Model {
 				ON CD.ch_codigo_trabajador=LT.ch_codigo_trabajador and CD.turno=LT.ch_posturno and CD.dia=LT.dt_dia
 			WHERE 	importe>0 and es='" . pg_escape_string($estaciones) . "' and dia between to_date('" . pg_escape_string($desde) . "', 'DD/MM/YYYY') and to_date('" . pg_escape_string($hasta) . "', 'DD/MM/YYYY')";
 
+		echo "<pre>";
 		echo "\n".'- GLP:'.$sqlA.' -';
+		echo "</pre>";
 		if ($sqlca->query($sqlA) < 0) 
 			return false;
 		$result = Array();
@@ -822,7 +827,7 @@ class ParteLiquidacionModel extends Model {
 			F.dt_fac_fecha BETWEEN to_date('" . pg_escape_string($desde) . "', 'DD/MM/YYYY') AND to_date('" . pg_escape_string($hasta) . "', 'DD/MM/YYYY')";
 
 	$sqlA1 = "SELECT
-			SUM(CASE WHEN t.fpago='2' THEN t.importe ELSE 0 END) AS tarjetascredito,
+			SUM(CASE WHEN t.fpago='2' THEN t.importe-COALESCE(t.km,0) ELSE 0 END) AS tarjetascredito,
 			SUM(CASE WHEN t.tm='V' THEN (CASE WHEN t.importe<0 THEN t.importe ELSE 0 END) ELSE 0 END) AS descuentos
 		 FROM
 			pos_trans". substr($desde,6,4) . substr($desde,3,2) . " t LEFT JOIN int_clientes k on k.cli_ruc = t.ruc AND k.cli_ndespacho_efectivo != 1

@@ -116,7 +116,7 @@ ORDER BY
 				p.text1 numtar,
 				p.at||' - '||tar.tab_descripcion nomtar,
 				p.caja caja,
-				ROUND(p.importe,2) importe,
+				ROUND(p.importe-COALESCE(p.km,0),2) importe,
 				p.trans ticket,
 				to_char(p.fecha,'DD/MM/YYYY') fecha,
 				to_char(p.fecha,'HH24:MI') hora,

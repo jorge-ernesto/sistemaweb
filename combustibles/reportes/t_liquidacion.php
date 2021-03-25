@@ -86,7 +86,7 @@ class LiquidacionTemplate extends Template {
 
 	}
 
-    function reporteGLP($results1, $results2, $results3, $results4, $results5, $desde, $hasta, $estacion) {
+    function reporteGLP($results1, $desde, $hasta, $estacion) {
 
 	$result = '<table align="center" border="0">';
         $result .= '<tr><td colspan="15"></td></tr>';

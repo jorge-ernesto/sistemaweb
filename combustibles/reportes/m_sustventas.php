@@ -168,7 +168,7 @@ class SustentoVentasModel extends Model {
 		if ($tipo == 'T') {
 			$sql = "SELECT 
 					g.tab_descripcion as descripciontarjeta,
-					SUM(t.importe) as importetarjeta
+					SUM(t.importe)-SUM(COALESCE(t.km,0)) as importetarjeta
 				FROM
 					pos_trans". substr($desde,6,4) . substr($desde,3,2) . " t
 					JOIN int_tabla_general g ON (g.tab_tabla='95' AND g.tab_elemento='00000'||t.at) 
@@ -186,7 +186,7 @@ class SustentoVentasModel extends Model {
 		} else if ($tipo == 'C') {
 			$sql = "SELECT 
 					g.tab_descripcion as descripciontarjeta,
-					SUM(CASE WHEN t.td != 'N' AND t.fpago='2' THEN t.importe ELSE 0 END) AS tarjetascredito
+					SUM(CASE WHEN t.td != 'N' AND t.fpago='2' THEN t.importe-COALESCE(t.km,0) ELSE 0 END) AS tarjetascredito
 				FROM
 					pos_trans". substr($desde,6,4) . substr($desde,3,2) . " t
 					JOIN int_tabla_general g ON (g.tab_tabla='95' AND g.tab_elemento='00000'||t.at) 
@@ -203,7 +203,7 @@ class SustentoVentasModel extends Model {
 		} else {
 			$sql = "SELECT 
 					g.tab_descripcion as descripciontarjeta,
-					SUM(t.importe) as importetarjeta,
+					SUM(t.importe)-SUM(COALESCE(t.km,0)) as importetarjeta,
 					t.tipo 
 				FROM
 					pos_trans". substr($desde,6,4) . substr($desde,3,2) . " t
@@ -220,7 +220,9 @@ class SustentoVentasModel extends Model {
 					g.tab_descripcion";
 		}
 
+		echo "<pre>";
 		echo 'TARJETA:'.$sql;
+		echo "</pre>";
 		if ($sqlca->query($sql) < 0) 
 			return false;
 
@@ -245,7 +247,7 @@ class SustentoVentasModel extends Model {
 
 		$query = "SELECT 
 				g.tab_descripcion as descripciontarjeta,
-				SUM(t.importe) as importetarjeta,
+				SUM(t.importe)-SUM(COALESCE(t.km,0)) as importetarjeta,
 				t.tipo 
 			FROM
 				pos_trans". substr($desde,6,4) . substr($desde,3,2) . " t
@@ -262,7 +264,9 @@ class SustentoVentasModel extends Model {
 			ORDER BY 
 				g.tab_descripcion";
 
+		echo "<pre>";
 		echo 'TARJETA:'.$query;
+		echo "</pre>";
 
 		if ($sqlca->query($query) < 0) 
 			return false;

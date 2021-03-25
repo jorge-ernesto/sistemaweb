@@ -118,7 +118,7 @@ $x_vales_credito_detalle = pg_query($conector_id, $sql);
 
 $sql = "SELECT 
 		g.tab_descripcion as descripciontarjeta,
-		SUM(t.importe) as importetarjeta
+		SUM(t.importe)-SUM(COALESCE(t.km,0)) as importetarjeta
 	FROM
 		pos_trans" . $ano_del . $mes_del . " t
 		LEFT JOIN int_tabla_general g ON (trim(t.at) = substring(g.tab_elemento,6,6) AND g.tab_tabla='95' AND g.tab_elemento != '000000')
@@ -128,17 +128,23 @@ $sql = "SELECT
 		AND t.dia BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
 	GROUP BY
 		1";
+// echo "<pre>";
+// echo $sql;
+// echo "</pre>";
 
 $x_tarjetas_credito_detalle = pg_query($conector_id, $sql);
 
 $sql = "SELECT
-		SUM(t.importe) AS tarjetascredito
+		SUM(t.importe)-SUM(COALESCE(t.km,0)) AS tarjetascredito
 	FROM
 		pos_trans" . $ano_del . $mes_del . " t
 	WHERE
 		t.es 		= '" . pg_escape_string($almacen) . "'
 		AND t.fpago	= '2'
 		AND t.dia BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "' ";
+// echo "<pre>";
+// echo $sql;
+// echo "</pre>";
 
 $x_tarjetas_credito_total = pg_query($conector_id, $sql);
 
