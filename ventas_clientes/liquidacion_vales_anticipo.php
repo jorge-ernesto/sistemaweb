@@ -575,6 +575,11 @@
                         return;
                     }
 
+                    //OBTENEMOS SERIE INDICADO EN EL DOCUMENTO DE REFERENCIA
+                    var porciones_documentoRef = documentoRef.split('-');
+                    var serieRef = porciones_documentoRef[0]
+                    serieRef = serieRef.trim();
+
                     // Verificar consolidación
                     // Parametros (día, turno y fecha)
                     var params = {
@@ -643,7 +648,7 @@
                                 fecha_inicio    : $("#fecha_inicio").val(),
                                 fecha_final     : $( "#fecha_final" ).val(),
                                 documento       : tipodoc,
-                                serie_actual    : $('#serie_doc').val(),
+                                serie_actual    : serieRef,
                                 tipo_opeacion   : $('#cmbtipooperacion').val(),
                                 fecha_liqui     : $('#fecha_liqui').val(),
                                 estado_negativo : valor_negativo,

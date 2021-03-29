@@ -39,7 +39,7 @@ try {
 
         LiquidacionValesTemplate::CrearTablaVervales($result, $datos_cliente, $fecha_inicio, $fecha_final, $vales_sele);
 
-    }else if ($accion == "tipodocumento") {
+    }else if ($accion == "tipodocumento") { //OBTENEMOS SERIES POR FACTURA O BOLETA
         $tipo_doc_numero = trim($_REQUEST['documento']);
         $result = LiquidacionValesModel::obtenerTiposDocumento($tipo_doc_numero);
         $cmb_serie = "<select id='serie_doc'>";
@@ -103,6 +103,11 @@ try {
 		}
 
 	} else if ($accion == "liquidar_vales") {
+
+        //VALIDAMOS SERIE INDICADO EN EL DOCUMENTO DE REFERENCIA
+        $dataSerieDocumentoRef = LiquidacionValesModel::validarSerieDocumentoRef($_POST['serie_actual']);
+        $_POST['documento'] = $dataSerieDocumentoRef['num_tipdocumento'];
+        $_POST['serie_actual'] = $dataSerieDocumentoRef['num_seriedocumento'];
 
 		$notas_depacho_efectivo   = array();
 		$fecha_inicio		      = strip_tags(stripslashes($_POST['fecha_inicio']));

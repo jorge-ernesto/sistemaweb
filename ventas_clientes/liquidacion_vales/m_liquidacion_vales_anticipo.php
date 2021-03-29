@@ -401,6 +401,28 @@ WHERE
         return $tipos;
     }
 
+    function validarSerieDocumentoRef($serieRef) {
+        global $sqlca;
+        try {
+            $sql = "SELECT num_seriedocumento, num_numactual, ch_almacen, num_tipdocumento FROM int_num_documentos WHERE num_tipdocumento IN ('10','35') AND TRIM(num_seriedocumento) = '". TRIM($serieRef) ."' LIMIT 1";
+            error_log($sql);
+     
+            if ($sqlca->query($sql) < 0) {
+                throw new Exception("ERROR_:Error al obtener datos de la serie del documento de referencia");
+            }
+
+            if ($sqlca->query($sql) == 0) {
+                throw new Exception("ERROR_:Serie '". $serieRef ."' del documento de referencia no existe");
+            }
+                          
+            $registro = $sqlca->firstRow($sql);
+            error_log(json_encode($registro));
+            return $registro;           
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
     function MostarClienteVales_rangoFecha($fecha_inicio, $fecha_final) {
         global $sqlca;
 

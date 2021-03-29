@@ -50,7 +50,7 @@ class LiquidacionValesTemplate extends Template {
             <div class='fila'>
                 <div class='etiquetavales' style="float: left;" title="Este valor solo será usado para el reporte de kardex SUNAT columna Liquidación">Documento Ref. (Solo para anticipos)</div>
                 <div style="float: left;">
-                    <input type='text' id='txt-documentoRef' placeholder="SERIE-NUMERO" title="formato: F001-00000001" alt="formato: F001-00000001" maxlength="30" class='fecha_formato'/> (opcional)
+                    <input type='text' id='txt-documentoRef' placeholder="SERIE-NUMERO" title="formato: F001-00000001" alt="formato: F001-00000001" maxlength="30" class='fecha_formato'/>
                 </div>
                 <div style="float: left;"></div>
             </div>
@@ -60,8 +60,9 @@ class LiquidacionValesTemplate extends Template {
             <div class='fila'>
                 <div class='etiquetavales' style="float: left;" title="Buscar por transacciones">Buscar por transacciones</div>
                 <div style="float: left;">
-                    <input type='text' id='txt-transacciones' placeholder="Buscar por transacciones" title="formato: 3-410315,3-410417,3-410518" alt="formato: 3-410315,3-410417,3-410518" class='fecha_formato'/> (opcional)
-                </div>
+                    <!-- <input type='text' id='txt-transacciones' placeholder="Buscar por transacciones" title="formato: 3-410315,3-410417,3-410518" alt="formato: 3-410315,3-410417,3-410518" class='fecha_formato'/> -->
+                    <textarea id="txt-transacciones"  placeholder="Buscar por transacciones" title="formato: 3-410315,3-410417,3-410518" alt="formato: 3-410315,3-410417,3-410518" class='fecha_formato' rows="7" cols="20"></textarea>
+                </div>                
                 <div style="float: left;"></div>
             </div>
         </div>
