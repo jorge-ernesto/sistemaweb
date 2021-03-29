@@ -589,6 +589,7 @@
                         iAlmacen: $( '#serie_doc' ).find(':selected').data('ialmacen'),
                     }
                     console.log( JSON.stringify(params) );
+                    // return;
 
                     url = '/sistemaweb/ventas_clientes/facturas_venta.php';
                    
@@ -656,7 +657,6 @@
                                 iIdCliente : $( '#idcodigoCliente' ).val(),
                                 sSerieNumeroDocumento : $( '#txt-documentoRef' ).val(),
                             };
-
                             /* Validacion de envio de data */
                             console.log("Vales");
                             console.log( JSON.stringify(arrDataPOST) );

@@ -473,7 +473,6 @@ GROUP BY
  cli.cli_ndespacho_efectivo,
  cli.cli_anticipo;
         ";
-
         // error_log("MostarClienteVales_rangoFecha");
         // error_log($sql);
 
@@ -1047,7 +1046,7 @@ INSERT INTO fac_ta_factura_detalle(
         }
     }
 
-    function procesoDocumnetoLiquidarConAnticipo($SERIE, $NUMERO_DOCUMENTO_ANTI, $codigo_cliente, $FEC_LIQUIDACION, $ch_liquidacion, $totalimporte) { //AQUI
+    function procesoDocumnetoLiquidarConAnticipo($SERIE, $NUMERO_DOCUMENTO_ANTI, $codigo_cliente, $FEC_LIQUIDACION, $ch_liquidacion, $totalimporte) { //PROCESO DE LIQUIDACION CLIENTE ANTICIPO
         global $sqlca;
         try {
             $codigo_cliente = trim($codigo_cliente);
@@ -2248,9 +2247,6 @@ GROUP BY
                 $orderby = "art_precio,";
             }
         }
-                
-        // error_log("Transacciones");
-        // error_log($transacciones);
 
         $whereTransacciones = "";
         if(($transacciones) != ''){
@@ -2296,7 +2292,6 @@ GROUP BY
             cab.dt_fecha,
 	    	cab.ch_documento;
         ";
-
 // echo "<pre>";
 // echo $consulta;
 // echo "</pre>";

@@ -73,7 +73,6 @@ try {
             $transacciones = explode(",", $transacciones);        
             $transacciones = obtenemosTransaccionesFormateadas($transacciones);            
         }
-        //CERRAMOS OBTENEMOS TRANSACCIONES
 
         $result = LiquidacionValesModel::MostarValesDeUnCliente($fecha_inicio, $fecha_final, $ruc, NULL, $transacciones);
         $datos_cliente = LiquidacionValesModel::ObtenerdatosCliente($ruc);                
@@ -122,7 +121,7 @@ try {
         U = Gratuita + Exonerada
         */
         $sCodigoImpuesto = $_POST['sCodigoImpuesto'];
-        $sSerieNumeroDocumento = $_POST['sSerieNumeroDocumento']; //Documento Ref. (Solo para anticipos)
+        $sSerieNumeroDocumento = $_POST['sSerieNumeroDocumento']; //DOCUMENTO DE REFERENCIA (SOLO PARA ANTICIPOS)
 
 		$aregloOficialClientes	= array();
         foreach ($arrVales as $key => $value) {
@@ -507,7 +506,7 @@ try {
                                 foreach ($sucursal as $sucur => $articulos) {
                                     foreach ($articulos as $articulo => $valores) {
                                         $NUM_LIQUI_CADE = str_pad($num_liquidacion, 10, '0', STR_PAD_LEFT);
-                                        LiquidacionValesModel::ActualizarVales_LiquidacionXcobrar($tipo_doc_numero, $fecha_inicio, $fecha_final, $ruc, $cadena_vales, $num_seriedocumento, $NUMERO_DOCUMENTO_ANTI, $articulo, $NUM_LIQUI_CADE, $fecha_liqui, $codigo_hermandad, $sSerieNumeroDocumento); //Documento Ref. (Solo para anticipos)
+                                        LiquidacionValesModel::ActualizarVales_LiquidacionXcobrar($tipo_doc_numero, $fecha_inicio, $fecha_final, $ruc, $cadena_vales, $num_seriedocumento, $NUMERO_DOCUMENTO_ANTI, $articulo, $NUM_LIQUI_CADE, $fecha_liqui, $codigo_hermandad, $sSerieNumeroDocumento); //DOCUMENTO DE REFERENCIA (SOLO PARA ANTICIPOS)
                                     }
                                 }
                             }
