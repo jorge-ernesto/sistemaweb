@@ -10,6 +10,7 @@
 		<script src="/sistemaweb/js/jquery-2.0.3.js" type="text/javascript"></script>
 		<link rel="stylesheet" href="/sistemaweb/css/jquery-ui.css" />
 		<script src="/sistemaweb/js/jquery-ui.js"></script>
+        <script type="text/javascript" src="/sistemaweb/assets/js/helper/autocomplete.js"></script>
 		<script type="text/javascript">
 			var distancia=300;
 			var int_contador=0,int_contador_monto_modif=0;
@@ -66,7 +67,7 @@
        
                     $.ajax({
                         type    : "POST",
-                        url     : "c_liquidacion_vales_relacion_v2.php",
+                        url     : "c_liquidacion_vales_relacion_anticipo.php",
                         data    : {
                                     accion          : 'ordenar',
                                     fecha_inicio    : fecha_inicio,
@@ -107,7 +108,7 @@
        
                     $.ajax({
                         type    : "POST",
-                        url     : "c_liquidacion_vales_relacion_v2.php",
+                        url     : "c_liquidacion_vales_relacion_anticipo.php",
                         data    : {
                                     accion          : 'ordenar',
                                     fecha_inicio    : fecha_inicio,
@@ -311,6 +312,14 @@
             function GuardarValesCliente(cliente){
                 console.log('** function GuardarValesCliente ID -> ' + cliente + '**');
 
+                var elemento=$("#contenidoTablaSelecionar");
+                var posicion=elemento.position();
+                var marginleft=parseInt($('#contenidoTablaSelecionar').css('margin-left'));
+                var left=''+(posicion.left+marginleft+distancia)+'px';
+                var top=''+posicion.top+'px';
+
+                $('#cargardor').css({'left':left,'top':top,'display':'block'});
+
                 var cadenavales='';
                 var posicion_repl_tmp=0;
                 var flagencontrado=false;
@@ -353,7 +362,9 @@
                     int_contador_monto_modif++;
                 }
 
-                $('#btnseleccionar').click();                
+                setTimeout(() => { $('#cargardor').css({'display':'none'}); }, 300);
+                marcarCliente();
+                // $('#btnseleccionar').click();                
             }
 
             function verreportevales(cliente){
@@ -380,9 +391,15 @@
                 $('#cargardor').css({'left':left,'top':top,'display':'block'});
                 $.ajax({
                     type: "POST",
-                    url: "c_liquidacion_vales_relacion_v2.php",
-                    data: { accion:'ver_vales',fecha_inicio:$( "#fecha_inicio" ).val(),fecha_final:$( "#fecha_final" ).val(),ruc:cliente,valesselecionada:cade_vales},
+                    url: "c_liquidacion_vales_relacion_anticipo.php",
+                    data: { accion:'ver_vales',fecha_inicio:$( "#fecha_inicio" ).val(),fecha_final:$( "#fecha_final" ).val(),ruc:cliente,valesselecionada:cade_vales,transacciones:$( "#txt-transacciones" ).val()},
                     success:function(xm){
+                        $('#contenidoTablaSelecionar').html('');
+                        if(xm == "Debe elegir un cliente anticipo"){
+                            $('#cargardor').css({'display':'none'});
+                            alert(xm);
+                            return;
+                        }
                             
                         $('#contenidoTablaSelecionar').html(xm);
                            
@@ -506,7 +523,7 @@
 
                     $.ajax({
                         type: "POST",
-                        url: "c_liquidacion_vales_relacion_v2.php",
+                        url: "c_liquidacion_vales_relacion_anticipo.php",
                         data: { accion:'buscar_liquidacion',fecha_inicio:$("#fecha_inicio").val(),fecha_final:$("#fecha_final").val()
                         },
                         success:function(xm){
@@ -539,6 +556,25 @@
                 });
 
                 $('#btnliquidar').click(function(){
+                    //VALIDAR QUE HAYA INGRESADO FECHA DE LIQUIDACION
+                    var fecha_liqui = $('#fecha_liqui').val();                    
+                    console.log("fecha_liqui:", fecha_liqui);
+
+                    if(fecha_liqui == ""){
+                        alert("Debe ingresar fecha de liquidacion");
+                        return;
+                    }                    
+
+                    //VALIDAR QUE HAYA INGRESADO DOCUMENTO DE REFERENCIA
+                    var documentoRef = $('#txt-documentoRef').val();
+                    documentoRef = documentoRef.trim();
+                    console.log("documentoRef:", documentoRef);
+
+                    if(documentoRef == ""){
+                        alert("Debe ingresar documento de referencia");
+                        return;
+                    }
+
                     // Verificar consolidación
                     // Parametros (día, turno y fecha)
                     var params = {
@@ -547,10 +583,13 @@
                         iTurno: 0,
                         iAlmacen: $( '#serie_doc' ).find(':selected').data('ialmacen'),
                     }
+                    console.log( JSON.stringify(params) );
 
                     url = '/sistemaweb/ventas_clientes/facturas_venta.php';
                    
                     $.post( url, params, function( response ) {
+                        console.log( JSON.stringify(response) );
+                        // return;
                         if (response.sStatus == 'success') {
                             var elemento = $("#contenidoTablaSelecionar");
                             var posicion = elemento.position();
@@ -615,17 +654,17 @@
 
                             /* Validacion de envio de data */
                             console.log("Vales");
-                            console.log(arrDataPOST);
+                            console.log( JSON.stringify(arrDataPOST) );
                             // return;
                             /* Fin Validacion de envio de data */
 
                             $.ajax({
                                 type    : "POST",
-                                url     : "c_liquidacion_vales_relacion_v2.php",
+                                url     : "c_liquidacion_vales_relacion_anticipo.php",
                                 data    : arrDataPOST,
                                 success:function(xm){
                                     /* Validacion de envio de data */
-                                    // console.log(xm);
+                                    console.log( JSON.stringify(xm) );
                                     // return;
                                     /* Fin Validacion de envio de data */
 
@@ -680,7 +719,7 @@
 
                     $.ajax({
                         type: "POST",
-                        url: "c_liquidacion_vales_relacion_v2.php",
+                        url: "c_liquidacion_vales_relacion_anticipo.php",
                         data: {
                             accion:'selecionabtn',
                             fecha_inicio:$( "#fecha_inicio" ).val(),
@@ -714,6 +753,22 @@
                     });
                 });
 
+                $('#btnseleccionar_verrerportevales').click(function(){
+                    console.log('** BUTTON SELECCIONAR ID -> #btnseleccionar_verrerportevales **');
+                    
+                    //VALIDAR QUE SE HAYA INGRESADO CLIENTE
+                    var cliente = $('#txt-Nu_Documento_Identidad').val();
+                    cliente = cliente.trim();
+                    console.log(cliente);
+
+                    if(cliente == ""){
+                        alert("Debe ingresar un cliente");
+                        return;
+                    }
+
+                    verreportevales(cliente);
+                });
+
                 $( 'input[name=td]' ).click(function(){
                     var tipodoc=$(this).val();
                     var elemento = $("#contenidoTablaSelecionar");
@@ -726,7 +781,7 @@
 
                     $.ajax({
                         type: "POST",
-                        url: "c_liquidacion_vales_relacion_v2.php",
+                        url: "c_liquidacion_vales_relacion_anticipo.php",
                         data: {accion:'tipodocumento', documento:tipodoc},
                         success:function(xm){
                             $('#serie').html(xm);
@@ -754,9 +809,9 @@
         <div id="cargardor" style="position: absolute;display: none"><img src="/sistemaweb/images/cg.gif" /></div>
             <?php
             include('/sistemaweb/include/mvc_sistemaweb.php');
-            include('liquidacion_vales/t_liquidacion_vales_v2.php');
-            include('liquidacion_vales/m_liquidacion_vales_v2.php');
-            include('liquidacion_vales/c_liquidacion_vales_v2.php');
+            include('liquidacion_vales/t_liquidacion_vales_anticipo.php');
+            include('liquidacion_vales/m_liquidacion_vales_anticipo.php');
+            include('liquidacion_vales/c_liquidacion_vales_anticipo.php');
             $objtem = new LiquidacionValesTemplate();
             $selectexonerada = LiquidacionValesModel::GetTaxOptional();
 

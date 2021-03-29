@@ -15,7 +15,7 @@ class LiquidacionValesTemplate extends Template {
 
 	<div class='contenedorprincipal'>
 		<div>
-            <h3 style="color: #336699; text-align: center;">PROCESO DE LIQUIDACION DE VALES</h3>
+            <h3 style="color: #336699; text-align: center;">PROCESO DE LIQUIDACION DE VALES CLIENTE ANTICIPO</h3>
         </div>
 		<div class="separacion">
             <div class='fila'>
@@ -32,28 +32,9 @@ class LiquidacionValesTemplate extends Template {
         </div>
 	</div>
     <div class="separacion">
-        <div class='etiquetavales' style="float: left;">Tipo de Comprobante</div>
-            <span style="font-size: 9px">Factura</span> <input type='radio' name='td' value='10' id="tdf"/>
-            <span style="font-size: 9px">Boleta</span> <input type='radio' name='td' value='35' id="tdb"/>
-        </div>
-
-        <div class="separacion">
-            <div class='etiquetavales' style="float: left;">Serie de Documento</div>
-            <label id='serie'>---</label>
-        </div>
-
-        <div class="separacion">
-            <div class='fila'>
-                <div class='etiquetavales' style="float: left;">Tipo Operacion</div>
-                <div style="float: left;">
-                    <select id="cmbtipooperacion">
-                        <option value="01">Cliente Normal</option>
-                        <option value="02">Cliente Nota Despacho</option>
-                        <option value="03">Cliente Placa</option>
-                        <option value="04">Cliente Producto</option>
-                    </select>
-                </div>
-            </div>
+        <div class='etiquetavales' style="float: left;">Codigo Cliente:</div>
+            <input type="hidden" id="txt-Nu_Documento_Identidad" name="Nu_Documento_Identidad" />
+			<input type="text" maxlength="50" id="txt-No_Razsocial" name="No_Razsocial" autocomplete="off" placeholder="Ingresar Codigo o Nombre del Cliente" class='fecha_formato' />
         </div>
 
         <div class="separacion">
@@ -62,24 +43,6 @@ class LiquidacionValesTemplate extends Template {
                 <div style="float: left;">
                     <input type='text' id='fecha_liqui' class='fecha_formato'/>
                 </div>
-            </div>
-        </div>
-
-        <?php
-        $css_display_exonerado = 'display: none;';
-        if ($selectexonerada==true)//Si es TRUE, mostramos el campo EXONERADO.
-            $css_display_exonerado = '';
-        ?>
-        <div class="separacion">
-            <div class='fila'>
-                <!-- Verificar si la empresa esta exonerada -->
-                <div style="<?php echo $css_display_exonerado; ?>; float: left;" class='etiquetavales'>Exonerado </div>
-                <div style="<?php echo $css_display_exonerado; ?>; float: center;"><input type='checkbox' id='sin_igv' class='fecha_formato' /></div>
-                <!-- /. Verificar si la empresa esta exonerada -->
-                <div style="float: left;" class='etiquetavales'>Transferencia Gratuita </div>
-                <div style="float: center;"><input type='checkbox' id='trans_gratis'  class='fecha_formato' /></div>
-                <div style="float: left;" class='etiquetavales'>Considerar Negativos </div>
-                <div style="float: center;"><input type='checkbox' id='cons_nega' class='fecha_formato'/></div>
             </div>
         </div>
 
@@ -93,20 +56,30 @@ class LiquidacionValesTemplate extends Template {
             </div>
         </div>
 
+        <div  class="separacion">
+            <div class='fila'>
+                <div class='etiquetavales' style="float: left;" title="Buscar por transacciones">Buscar por transacciones</div>
+                <div style="float: left;">
+                    <input type='text' id='txt-transacciones' placeholder="Buscar por transacciones" title="formato: 3-410315,3-410417,3-410518" alt="formato: 3-410315,3-410417,3-410518" class='fecha_formato'/> (opcional)
+                </div>
+                <div style="float: left;"></div>
+            </div>
+        </div>
+
 		<div class="separacion">
             <div class='etiquetavales' style="float: left;margin-bottom: 5px;text-align: center;width: auto;">
-                <button id="btnseleccionar">
-                    <img align="right" src="/sistemaweb/images/search.png"/>Buscar Clientes
+                <button id="btnseleccionar_verrerportevales">
+                    <img align="right" src="/sistemaweb/images/search.png"/>Buscar Vales
                 </button>
             </div>
-            <div class='etiquetavales' style="float: left;margin-bottom: 2px;margin-right: 2px;text-align: center;width: auto;">
+            <div class='etiquetavales' style="float: left;margin-bottom: 2px;text-align: center;width: auto;">
                 <button id="btnbuscarliquidacion">
                     <img align="right" src="/sistemaweb/images/search.png">Buscar Liquidaciones
                 </button>
             </div>
             <div class='etiquetavales' style="float: left;margin-bottom: 5px;text-align: center;width: auto;">
                 <button id="btnliquidar">
-                    <img align="right" src="/sistemaweb/images/MasterDetail.gif">Liquidar vales
+                    <img align="right" src="/sistemaweb/images/MasterDetail.gif" width="12">Liquidar vales
                 </button>
             </div>
 		</div>
@@ -173,7 +146,7 @@ class LiquidacionValesTemplate extends Template {
 	            	<th align="right"><p style="font-size:1.2em; color:black;"><b>RUC: </th>
 	            	<th align="left"><?php echo $datos_cliente['cli_ruc']; ?></th>
 	            <tr>
-	            	<th align="rigth"><p style="font-size:1.2em; color:black;"><b>Razon Social: </th>
+	            	<th align="right"><p style="font-size:1.2em; color:black;"><b>Razon Social: </th>
 	            	<th align="left"><?php echo $datos_cliente['cli_razsocial']; ?></th>
 	            <tr>
 	            	<th align="right"><p style="font-size:1.2em; color:black;"><b>Anticipo: </th>
@@ -193,6 +166,7 @@ class LiquidacionValesTemplate extends Template {
                 <th class="th_cabe">Almacen</th>
                 <th class="th_cabe">Fecha Emision</th>
                 <th class="th_cabe">Fecha Registro</th>
+                <th class="th_cabe"># Despacho</th>
                 <th class="th_cabe"># Vale</th>
                 <th class="th_cabe">Chofer</th>
                 <th class="th_cabe">Placa</th>
@@ -262,6 +236,7 @@ class LiquidacionValesTemplate extends Template {
                         echo "<td align='center'>" . $value['dt_fecha'] . "</td>";
                         echo "<td align='center'>" . $value['fecha_replicacion'] . "</td>";
                         echo "<td align='center'>" . $value['ch_documento'] . "</td>";
+                        echo "<td align='center'>" . $value['vale'] . "</td>";
                         echo "<td align='center'>" . $nochofer . "</td>";
                         echo "<td align='center'>" . $value['ch_placa'] . "</td>";
                         echo "<td align='left'>" . $value['art_codigo'] . " - " . $value['desproducto'] . "</td>";

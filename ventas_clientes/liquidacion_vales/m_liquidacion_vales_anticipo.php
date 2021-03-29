@@ -329,6 +329,7 @@ FROM
  int_clientes
 WHERE
  TRIM(cli_codigo)=TRIM('" . $codigo . "') LIMIT 1;";
+            error_log($sql);
 
             if ($sqlca->query($sql) < 0) {
                 throw new Exception("Error al Obtener datos del cliente.");
@@ -336,6 +337,11 @@ WHERE
             
             while ($reg = $sqlca->fetchRow()) {
                 $registro[] = $reg;
+            }
+
+            error_log(json_encode($registro));
+            if(TRIM($registro[0]['cli_anticipo']) != "S"){
+                throw new Exception("Debe elegir un cliente anticipo");
             }
 
             return $registro[0];//Problema
@@ -438,12 +444,16 @@ FROM
 WHERE
  ca.dt_fecha BETWEEN '" . $fecha_inicio . "' AND '" . $fecha_final . "'
  AND (ca.ch_liquidacion IS NULL OR ca.ch_liquidacion='')
+ --AND cli.cli_anticipo = 'S' --Solo buscara clientes anticipos
 GROUP BY
  ca.ch_cliente,
  rz,
  cli.cli_ndespacho_efectivo,
  cli.cli_anticipo;
         ";
+
+        // error_log("MostarClienteVales_rangoFecha");
+        // error_log($sql);
 
         $sqlca->query($sql);
         $numrows = $sqlca->numrows();
@@ -945,6 +955,7 @@ INSERT INTO fac_ta_factura_detalle(
 							    'VEN_LIQ_VALES'
 		     				);
                     ";
+            error_log($consulta);
 
             //echo $consulta;
             $in = $sqlca->query($consulta);
@@ -1002,6 +1013,7 @@ INSERT INTO fac_ta_factura_detalle(
                       				);
                       
                     ";
+            error_log($consulta);
 
             //echo $consulta;
             $in = $sqlca->query($consulta);
@@ -1013,7 +1025,7 @@ INSERT INTO fac_ta_factura_detalle(
         }
     }
 
-    function procesoDocumnetoLiquidarConAnticipo($SERIE, $NUMERO_DOCUMENTO_ANTI, $codigo_cliente, $FEC_LIQUIDACION, $ch_liquidacion, $totalimporte) {
+    function procesoDocumnetoLiquidarConAnticipo($SERIE, $NUMERO_DOCUMENTO_ANTI, $codigo_cliente, $FEC_LIQUIDACION, $ch_liquidacion, $totalimporte) { //AQUI
         global $sqlca;
         try {
             $codigo_cliente = trim($codigo_cliente);
@@ -2203,7 +2215,7 @@ GROUP BY
         }
     }
 
-	function MostarValesDeUnCliente($fecha_inicio, $fecha_final, $ruc, $order) {
+	function MostarValesDeUnCliente($fecha_inicio, $fecha_final, $ruc, $order, $transacciones) {
         global $sqlca;
 
         $orderby = "";
@@ -2214,7 +2226,14 @@ GROUP BY
                 $orderby = "art_precio,";
             }
         }
-            
+                
+        // error_log("Transacciones");
+        // error_log($transacciones);
+
+        $whereTransacciones = "";
+        if(($transacciones) != ''){
+            $whereTransacciones = "AND cab.ch_documento IN ($transacciones)";
+        }
 
         $consulta = "
         SELECT
@@ -2234,17 +2253,20 @@ GROUP BY
 	    	cab.ch_placa,
 	    	TO_CHAR(cab.fecha_replicacion, 'DD/MM/YYYY hh24:mi:ss') AS fecha_replicacion,
             pf.nomusu AS nochofer,
-            (CASE WHEN SUM(det.nu_cantidad) > 0 THEN ROUND(det.nu_importe / SUM(det.nu_cantidad), 2) ELSE 0 END) AS art_precio
+            (CASE WHEN SUM(det.nu_cantidad) > 0 THEN ROUND(det.nu_importe / SUM(det.nu_cantidad), 2) ELSE 0 END) AS art_precio,
+            FIRST(com.ch_numeval) AS vale
 	    FROM
             val_ta_cabecera cab
 	    	LEFT JOIN int_clientes cli ON (cli.cli_codigo = cab.ch_cliente)
 	    	LEFT JOIN val_ta_detalle det ON (det.ch_sucursal = cab.ch_sucursal AND det.dt_fecha = cab.dt_fecha AND det.ch_documento = cab.ch_documento)
             LEFT JOIN int_articulos ar ON (ar.art_codigo = det.ch_articulo)
             LEFT JOIN pos_fptshe1 pf ON (pf.numtar = cab.ch_tarjeta)
+            LEFT JOIN val_ta_complemento AS com ON(cab.ch_sucursal = com.ch_sucursal AND cab.ch_documento = com.ch_documento AND cab.dt_fecha = com.dt_fecha)
 	    WHERE
 	    	TRIM(cab.ch_cliente) = TRIM('$ruc')
 	    	AND cab.dt_fecha BETWEEN TO_DATE('" . $fecha_inicio . "', 'YYYY-MM-DD') AND TO_DATE('" . $fecha_final . "', 'YYYY-MM-DD')
-	    	AND cab.ch_liquidacion IS NULL
+	    	AND cab.ch_liquidacion IS NULL    
+            $whereTransacciones
 	    GROUP BY
 	    	1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12,cab.ch_placa,cab.dt_fecha,cab.fecha_replicacion, pf.nomusu
 	    ORDER BY
@@ -2252,12 +2274,12 @@ GROUP BY
             cab.dt_fecha,
 	    	cab.ch_documento;
         ";
-/*
-echo "<pre>";
-echo $consulta;
-echo "</pre>";
-echo "<br>";
-*/
+
+// echo "<pre>";
+// echo $consulta;
+// echo "</pre>";
+// echo "<br>";
+
     	$sqlca->query($consulta);
 
     	while ($reg = $sqlca->fetchRow()) {
