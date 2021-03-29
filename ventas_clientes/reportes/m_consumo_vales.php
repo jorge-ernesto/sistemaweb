@@ -72,7 +72,7 @@ class ConsumoValesModel extends Model {
 			return "INVALID_DATE";
 		} 
 		
-		if ($hora == true) {						
+		if ($hora == "true") {						
 			$column_hora = ", TO_CHAR(PT.fecha, 'HH12:MI:SS') AS hora";
 			$pos_transYM = "pos_trans" . $a . $m;
 			//$left_join_pos_trans = "LEFT JOIN " . $pos_transYM . " AS PT ON(PT.caja||'-'||PT.trans = cab.ch_documento OR PT.trans::VARCHAR = cab.ch_documento)";
@@ -88,7 +88,6 @@ class ConsumoValesModel extends Model {
 						1,2
 				) AS PT ON(PT.caja||'-'||PT.trans = cab.ch_documento OR PT.trans::VARCHAR = cab.ch_documento)
 			";
-
 			$orderby_hora = ", hora DESC";
 			
 			$column_hora_select = ", (SELECT TO_CHAR(PT.fecha, 'HH12:MI:SS') FROM " . $pos_transYM . " PT WHERE PT.caja||'-'||PT.trans = cab.ch_documento OR PT.trans::VARCHAR = cab.ch_documento LIMIT 1) as hora";
@@ -147,20 +146,21 @@ SELECT
  fac2.ch_liquidacion liquidacion,
  --fac.ch_fac_numerodocumento AS documento,
  CASE
-when cli.cli_anticipo='S' then fac.cod_hermandad 
- else
- fac.ch_fac_seriedocumento||'-'||fac.ch_fac_numerodocumento
- end AS documento,
+	when cli.cli_anticipo='S' then fac.cod_hermandad 
+ 	else
+ 	fac.ch_fac_seriedocumento||'-'||fac.ch_fac_numerodocumento
+ end AS documento, --AQUI OBTIENE EL CAMPO #FACTURA
  fac2.ch_fac_numerodocumento AS documento2,
  cab.ch_documento AS numero,
  fac.cod_hermandad AS referencia,--cai
  TO_CHAR(cab.dt_fecha, 'DD/MM/YYYY') AS fecha,
  cab.ch_placa AS placa,
+ art.art_codigo AS codigo,
  art.art_descbreve AS producto,
  cab.nu_odometro AS odometro,
  det.nu_cantidad AS cantidad,
  det.nu_importe AS importe,
- com.ch_numeval AS vale,
+ com.ch_numeval AS vale, --Numero de vale
  pf.nomusu AS chofer,
  cab.ch_turno,
  cli.cli_ndespacho_efectivo AS nu_tipo_efectivo,
@@ -173,11 +173,37 @@ when cli.cli_anticipo='S' then fac.cod_hermandad
  END AS ss_precio_contratado
   " . $column_hora_select . "
  " . $sColumnPrecioPizarra . "
+ ,CASE
+	WHEN cli.cli_anticipo='S' then --CLIENTES ANTICIPO
+		(
+		SELECT 
+			nu_fac_valortotal 
+		FROM 
+			fac_ta_factura_cabecera
+		WHERE 
+			ch_fac_seriedocumento = (string_to_array(fac.cod_hermandad, '-'))[1]
+			AND ch_fac_numerodocumento = (string_to_array(fac.cod_hermandad, '-'))[2]
+			AND ch_fac_anticipo = 'S'
+		LIMIT 1
+		)
+	ELSE --CLIENTES QUE NO SEAN ANTICIPO (CREDITO, EFECTIVO)
+		(
+		SELECT 
+			nu_fac_valortotal 
+		FROM 
+			fac_ta_factura_cabecera
+		WHERE 
+			ch_fac_seriedocumento = fac.ch_fac_seriedocumento
+			AND ch_fac_numerodocumento = fac.ch_fac_numerodocumento
+			AND ch_fac_anticipo != 'S'
+		LIMIT 1
+		)
+	END AS importe_factura_anticipo
 FROM
  val_ta_cabecera AS cab
  LEFT JOIN val_ta_detalle AS det
   ON(cab.ch_sucursal = det.ch_sucursal AND cab.ch_documento = det.ch_documento AND cab.dt_fecha = det.dt_fecha)
- LEFT JOIN val_ta_complemento AS com
+ LEFT JOIN val_ta_complemento AS com --Numero de vale
   ON(cab.ch_sucursal = com.ch_sucursal AND cab.ch_documento = com.ch_documento AND cab.dt_fecha = com.dt_fecha)
  LEFT JOIN val_ta_complemento_documento AS fac
   ON(fac.art_codigo = det.ch_articulo AND fac.ch_numeval = cab.ch_documento AND fac.ch_cliente = cab.ch_cliente AND cab.ch_sucursal = cab.ch_sucursal AND fac.dt_fecha = cab.dt_fecha)
@@ -201,22 +227,153 @@ WHERE
 ORDER BY
  cab.ch_cliente,
  cab.ch_sucursal,
+ 6, --documento
+ art.art_codigo,
  cab.dt_fecha DESC
  " . $orderby_hora . "
 			";
-		error_log( json_encode( $sql ) );
+		error_log( json_encode( $sql ) );			
 
 			if ($sqlca->query($sql) <= 0)
 				throw new Exception("No hay ningun registro en este rango de fecha: ".$fdesde." - ".$fhasta);
        
-			while ($reg = $sqlca->fetchRow())
-				$registro[] = $reg;
+			$nueva_logica = true;
+
+			if($nueva_logica){
+				while ($reg = $sqlca->fetchRow()){
+					$dataVales[] = $reg;
+				}
+
+				foreach ($dataVales as $key => $reg) {
+					//VERIFICAR TIPO DE CLIENTE
+					$sTipoCliente = 'EFECTIVO';
+					if ( $reg['nu_tipo_efectivo'] == '0' && $reg['no_tipo_anticipo'] == 'N' ){
+						$sTipoCliente = 'CREDITO';
+					} else if ( $reg['nu_tipo_efectivo'] == '0' && $reg['no_tipo_anticipo'] == 'S' ){
+						$sTipoCliente = 'ANTICIPO';
+					}
+					
+					//ARMAMOS ARRAY DE DATOS AGRUPADOS
+					$cliente   = $reg['codcliente'] . "|" . $reg['nomcliente'] . "|" . $sTipoCliente;
+					$documento = $reg['documento'];
+					$item      = $reg['codigo'] . "|" . $reg['producto'];
+					$registro[ $cliente ][ $documento ][ $item ][] = $reg;									
+					
+					//AGRUPAMOS CANTIDADES GENERALES
+					$registro['total_general']['cantidad_general'] += $reg['cantidad'];					
+					$registro['total_general']['importe_general'] += $reg['importe'];					
+
+					//AGRUPAMOS CANTIDADES POR CLIENTES
+					$registro[ $cliente ]['total_cliente']['cantidad_cliente'] += $reg['cantidad'];					
+					$registro[ $cliente ]['total_cliente']['importe_cliente'] += $reg['importe'];				
+
+					//AGRUPAMOS CANTIDADES POR FACTURAS DENTRO DE CLIENTE
+					$registro[ $cliente ][ $documento ]['total_factura']['cantidad_factura'] += $reg['cantidad'];
+					$registro[ $cliente ][ $documento ]['total_factura']['importe_factura'] += $reg['importe'];
+					
+					//AGRUPAMOS CANTIDADES POR ITEMS DENTRO DE FACTURAS DENTRO DE CLIENTES
+					$registro[ $cliente ][ $documento ][ $item ]['total_item']['cantidad_item'] += $reg['cantidad'];
+					$registro[ $cliente ][ $documento ][ $item ]['total_item']['importe_item'] += $reg['importe'];
+				}
+			}else{
+				while ($reg = $sqlca->fetchRow()){
+					$registro[] = $reg;
+				}
+			}
 
 			return $registro;
 
 		}catch(Exception $e){
 			throw $e;
 		}
+	}
+
+	function getTotalItemByFactura($sTipoCliente, $documento, $codigo_item){
+		global $sqlca;
+
+		//OBTENEMOS DATOS DE FACTURA
+		$documento_porciones = explode("-", $documento);
+		$serie  = $documento_porciones[0];
+		$numero = $documento_porciones[1];
+
+		//VERIFICACION DE TIPO DE CLIENTE
+		if($sTipoCliente == "ANTICIPO"){
+			$sql = "
+				SELECT 
+					SUM(nu_fac_cantidad) as nu_fac_cantidad,
+					SUM(nu_fac_valortotal) as nu_fac_valortotal
+				FROM 
+					fac_ta_factura_detalle
+				WHERE 
+					ch_fac_seriedocumento = '". $serie ."'
+					AND ch_fac_numerodocumento = '". $numero ."'
+					AND art_codigo = '". $codigo_item ."'
+				GROUP BY 
+					art_codigo
+				LIMIT 1
+			";
+
+			return $sqlca->firstRow($sql);
+		}
+		
+		return NULL;
+	}
+
+	function getTotalFactura($sTipoCliente, $documento){
+		global $sqlca;
+
+		//OBTENEMOS DATOS DE FACTURA
+		$documento_porciones = explode("-", $documento);
+		$serie  = $documento_porciones[0];
+		$numero = $documento_porciones[1];
+
+		//VERIFICACION DE TIPO DE CLIENTE
+		$where = "";
+		if($sTipoCliente == "ANTICIPO"){
+			$where = " AND ch_fac_anticipo = 'S'";
+		}else{
+			$where = " AND ch_fac_anticipo != 'S'";
+		}
+
+		//OBTENEMOS VALOR TOTAL
+		$sql = "				
+			SELECT 
+				nu_fac_valortotal 
+			FROM 
+				fac_ta_factura_cabecera
+			WHERE 
+				ch_fac_seriedocumento = '". $serie ."'
+				AND ch_fac_numerodocumento = '". $numero ."'
+				$where
+			LIMIT 1;
+		";
+		$reg = $sqlca->firstRow($sql);
+		$nu_fac_valortotal = $reg['nu_fac_valortotal'];
+
+		//OBTENEMOS CANTIDAD TOTAL
+		$sql2 = "				
+			SELECT 
+				SUM(nu_fac_cantidad) as nu_fac_cantidad
+			FROM 
+				fac_ta_factura_detalle fd
+				INNER JOIN fac_ta_factura_cabecera fc ON (fd.ch_fac_seriedocumento = fc.ch_fac_seriedocumento AND fd.ch_fac_numerodocumento = fc.ch_fac_numerodocumento)
+			WHERE 
+				fd.ch_fac_seriedocumento = '". $serie ."'
+				AND fd.ch_fac_numerodocumento = '". $numero ."'
+				$where
+		";
+		$reg = $sqlca->firstRow($sql2);
+		$nu_fac_cantidad = $reg['nu_fac_cantidad'];
+
+		//OBTENEMOS RESPONSE
+		$response = array(
+			0                   => $nu_fac_cantidad,
+			1                   => $nu_fac_valortotal,
+			"nu_fac_cantidad"   => $nu_fac_cantidad,
+			"nu_fac_valortotal" => $nu_fac_valortotal
+		);			
+		
+		return $response;
 	}
 }
 

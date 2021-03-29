@@ -38,6 +38,12 @@ try {
 			'sPrecioPizarra' => $_REQUEST['sPrecioPizarra'],
 		);
 		$datars = ConsumoValesModel::ObtenerReporte($almacen, $fdesde, $fhasta, $Nu_Documento_Identidad, $liquidacion, $factura, '', $hora, $arrRequest);
+		echo "<script>console.log('" . json_encode( array(
+			"data" => $datars, 
+			"myorden" => $orden, 
+			"hora" => $hora, 
+			"arrRequest" => $arrRequest
+		) ) . "')</script>";
 
 		ConsumoValesTemplate::CrearTablaReporte($datars, $orden, $hora, $arrRequest);
 
