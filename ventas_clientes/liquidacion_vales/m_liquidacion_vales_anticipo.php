@@ -423,6 +423,42 @@ WHERE
         }
     }
 
+    function validarSerieNumeroDocumentoRef($serieNumeroRef) {
+        $porciones = explode("-", $serieNumeroRef);
+        $serieRef  = trim($porciones[0]);
+        $numeroRef = trim($porciones[1]);
+        
+        global $sqlca;
+        try {
+            $sql = "SELECT 
+                        * 
+                    FROM 
+                        fac_ta_factura_cabecera 
+                    WHERE 
+                        ch_fac_seriedocumento = '". TRIM($serieRef) ."' 
+                        AND ch_fac_numerodocumento = '". TRIM($numeroRef) ."'
+                    LIMIT 1;                        
+                    ";
+            error_log($sql);
+     
+            if ($sqlca->query($sql) < 0) {
+                throw new Exception("ERROR_:Error al validar el documento de referencia <br><br>
+                                     <span style='display:none'>SQL: " . $sql . "</span>");
+            }
+
+            if ($sqlca->query($sql) == 0) {
+                throw new Exception("ERROR_:Documento de referencia '". $serieNumeroRef ."' no existe <br><br>
+                                     <span style='display:none'>SQL: " . $sql . "</span>");
+            }                          
+                          
+            $registro = $sqlca->firstRow($sql);
+            error_log(json_encode($registro));
+            return $registro;           
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
     function MostarClienteVales_rangoFecha($fecha_inicio, $fecha_final) {
         global $sqlca;
 

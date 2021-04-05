@@ -73,7 +73,8 @@
                                     fecha_inicio    : fecha_inicio,
                                     fecha_final     : fecha_final,
                                     ruc             : ruc,
-                                    order           : order
+                                    order           : order,
+                                    transacciones   : $( "#txt-transacciones" ).val()
                         },success:function(xm){
                             $('#contenidoTablaSelecionar').html(xm);
                             $('#cargardor').css({'display':'none'});
@@ -114,7 +115,8 @@
                                     fecha_inicio    : fecha_inicio,
                                     fecha_final     : fecha_final,
                                     ruc             : ruc,
-                                    order           : order
+                                    order           : order,
+                                    transacciones   : $( "#txt-transacciones" ).val()
                         },success:function(xm){
                             $('#contenidoTablaSelecionar').html(xm);
                             $('#cargardor').css({'display':'none'});
@@ -575,7 +577,7 @@
                         return;
                     }
 
-                    //OBTENEMOS SERIE INDICADO EN EL DOCUMENTO DE REFERENCIA
+                    //OBTENEMOS SERIE INDICADA EN EL DOCUMENTO DE REFERENCIA
                     var porciones_documentoRef = documentoRef.split('-');
                     var serieRef = porciones_documentoRef[0]
                     serieRef = serieRef.trim();
@@ -654,8 +656,9 @@
                                 fecha_liqui     : $('#fecha_liqui').val(),
                                 estado_negativo : valor_negativo,
                                 sCodigoImpuesto : sCodigoImpuesto,
-                                iIdCliente : $( '#idcodigoCliente' ).val(),
+                                iIdCliente      : $( '#idcodigoCliente' ).val(),
                                 sSerieNumeroDocumento : $( '#txt-documentoRef' ).val(),
+                                transacciones   : $( "#txt-transacciones" ).val()
                             };
                             /* Validacion de envio de data */
                             console.log("Vales");

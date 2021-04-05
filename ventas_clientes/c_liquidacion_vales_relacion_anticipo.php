@@ -34,7 +34,14 @@ try {
         $order    = trim($_REQUEST['order']);
         error_log($order);
 
-        $result         = LiquidacionValesModel::MostarValesDeUnCliente($fecha_inicio, $fecha_final, $ruc, $order);
+        //OBTENEMOS TRANSACCIONES      
+        $transacciones = trim($_REQUEST['transacciones']);
+        if($transacciones != ''){
+            $transacciones = explode(",", $transacciones);        
+            $transacciones = obtenemosTransaccionesFormateadas($transacciones);            
+        }
+
+        $result         = LiquidacionValesModel::MostarValesDeUnCliente($fecha_inicio, $fecha_final, $ruc, $order, $transacciones);
         $datos_cliente  = LiquidacionValesModel::ObtenerdatosCliente($ruc);
 
         LiquidacionValesTemplate::CrearTablaVervales($result, $datos_cliente, $fecha_inicio, $fecha_final, $vales_sele);
@@ -103,10 +110,13 @@ try {
 
 	} else if ($accion == "liquidar_vales") {
 
-        //VALIDAMOS SERIE INDICADO EN EL DOCUMENTO DE REFERENCIA
+        //VALIDAMOS SERIE INDICADA EN EL DOCUMENTO DE REFERENCIA
         $dataSerieDocumentoRef = LiquidacionValesModel::validarSerieDocumentoRef($_POST['serie_actual']);
         $_POST['documento'] = $dataSerieDocumentoRef['num_tipdocumento'];
         $_POST['serie_actual'] = $dataSerieDocumentoRef['num_seriedocumento'];
+
+        //VERIFICAMOS QUE DOCUMENTO DE REFERENCIA EXISTA
+        LiquidacionValesModel::validarSerieNumeroDocumentoRef(trim($_POST['sSerieNumeroDocumento']));
 
 		$notas_depacho_efectivo   = array();
 		$fecha_inicio		      = strip_tags(stripslashes($_POST['fecha_inicio']));
@@ -121,7 +131,7 @@ try {
         U = Gratuita + Exonerada
         */
         $sCodigoImpuesto = $_POST['sCodigoImpuesto'];
-        $sSerieNumeroDocumento = $_POST['sSerieNumeroDocumento']; //DOCUMENTO DE REFERENCIA (SOLO PARA ANTICIPOS)
+        $sSerieNumeroDocumento = trim($_POST['sSerieNumeroDocumento']); //DOCUMENTO DE REFERENCIA (SOLO PARA ANTICIPOS)
 
 		$aregloOficialClientes	= array();
         foreach ($arrVales as $key => $value) {
@@ -132,7 +142,14 @@ try {
 			if (strcmp($vales, 'NOALL') == 0) {
                 continue;
             } else if (strcmp($vales, 'ALL') == 0) {
-        		$datosrs = LiquidacionValesModel::MostarValesDeUnCliente($fecha_inicio, $fecha_final, $cod_cliente, NULL);
+                //OBTENEMOS TRANSACCIONES      
+                $transacciones = trim($_REQUEST['transacciones']);
+                if($transacciones != ''){
+                    $transacciones = explode(",", $transacciones);        
+                    $transacciones = obtenemosTransaccionesFormateadas($transacciones);            
+                }
+
+        		$datosrs = LiquidacionValesModel::MostarValesDeUnCliente($fecha_inicio, $fecha_final, $cod_cliente, NULL, $transacciones);
         		$cadena_vales = "(";
                 foreach ($datosrs as $key => $value)
 					$cadena_vales.= "'" . trim($value['ch_documento']) . "',";
@@ -455,10 +472,10 @@ try {
                         ) ) );
                         error_log( json_encode( array(                             
                             "SERIE"                 => $num_seriedocumento,
-                            "NUMERO_DOCUMENTO_ANTI" => $NUMERO_DOCUMENTO_ANTI, //NUM. DOC. ANTICIPO
+                            "NUMERO_DOCUMENTO_ANTI" => $NUMERO_DOCUMENTO_ANTI, //NUM. DOCUMENTO ANTICIPO EN CCOB_TA_CABECERA
                             "codigo_cliente"        => $codigo_cliente,
                             "FEC_LIQUIDACION"       => $fecha_liqui,
-                            "ch_liquidacion"        => $num_liquidacion,
+                            "ch_liquidacion"        => $num_liquidacion, //NUM. LIQUIDACION
                             "totalimporte"          => $totalimporte,                            
                         ) ) );                                
                         /* Fin Validacion de envio de data */
