@@ -2135,6 +2135,7 @@ class v_sap_1 {
 					<th>vatsum</th>
 					<th>doctotal</th>
 					<th>transaccion</th>
+					<th>indicator</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -2149,6 +2150,7 @@ class v_sap_1 {
 					<th><?php echo $row['vatsum'] ?></th>
 					<th><?php echo $row['doctotal'] ?></th>
 					<th><?php echo $row['transaccion'] ?></th>
+					<th><?php echo $row['indicator'] ?></th>
 				</tr>
 				<?php } ?>
 			</tbody>

@@ -411,7 +411,7 @@ class c_sap_1 {
 			$data['documentDetailTicket']['isViewTableName'] = $m_sap_1->isViewTableName;
 			$v_sap_1->tableDocumentDetailTicket($data['documentDetailTicket']);
 		}
-		die();
+		// die();
 
 		if($_SESSION['es_requerimiento_sap_energigas'] == true){
 			/* Requerimiento Energigas distinguir documentos mayores a 700 y agrupacion por Turno y Efectivo */
