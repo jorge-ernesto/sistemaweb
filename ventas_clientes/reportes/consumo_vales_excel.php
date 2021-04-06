@@ -126,7 +126,11 @@ if ($session_data_excel != null) {
 	error_log( json_encode($_SESSION) );
 
 	$objmodel 	= new ConsumoValesModel();
-	$nueva_logica = true;
+
+	$nueva_logica = false;
+	if($session_arrRequest['iTipoVersion'] == 1){
+		$nueva_logica = true;
+	}
 
 	if($nueva_logica == true){
 		if (count($data) > 0) {

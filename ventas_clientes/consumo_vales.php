@@ -75,6 +75,7 @@
 							hora: $("#chk-hora").prop("checked"),
 							sPrecioPizarra: $("#chk-precio_pizarra").prop("checked"),
 					        iTipoCliente:$('#cbo-tipo-cliente').val(),
+							  iTipoVersion:$('#cbo-tipo-version').val(),
 						},
 						success:function(xm){
 							$('#cargardor').css({'display':'none'});
@@ -107,6 +108,7 @@
 							hora: $("#chk-hora").prop("checked"),
 							sPrecioPizarra: $("#chk-precio_pizarra").prop("checked"),
 					        iTipoCliente:$('#cbo-tipo-cliente').val(),
+							  iTipoVersion:$('#cbo-tipo-version').val(),
 						},
 						success:function(xm){
 							$('#cargardor').css({'display':'none'});

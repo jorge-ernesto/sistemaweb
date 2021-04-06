@@ -134,6 +134,16 @@ class ConsumoValesModel extends Model {
 										END AS nu_precio_especial"; 
 		}
 
+		$orderByVersion = "";
+		$nueva_logica = false;
+		if($arrRequest['iTipoVersion'] == 1){
+			$orderByVersion = "
+				6, --documento
+				art.art_codigo,
+			"; 
+			$nueva_logica = true;
+		}
+
 		try {
 			$registro = array();
 
@@ -227,8 +237,7 @@ WHERE
 ORDER BY
  cab.ch_cliente,
  cab.ch_sucursal,
- 6, --documento
- art.art_codigo,
+ " . $orderByVersion . "
  cab.dt_fecha DESC
  " . $orderby_hora . "
 			";
@@ -236,8 +245,6 @@ ORDER BY
 
 			if ($sqlca->query($sql) <= 0)
 				throw new Exception("No hay ningun registro en este rango de fecha: ".$fdesde." - ".$fhasta);
-       
-			$nueva_logica = true;
 
 			if($nueva_logica){
 				while ($reg = $sqlca->fetchRow()){

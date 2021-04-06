@@ -75,6 +75,15 @@ class ConsumoValesTemplate extends Template {
 					    </select>
 					</td>
 			    </tr>
+					<tr>
+						<td align="right">Orden: </td>
+						<td >
+							<select id="cbo-tipo-version">
+								<option value="0">Cliente - Fecha</option>
+								<option value="1">Cliente - Documento</option>
+							</select>
+						</td>
+					</tr>
                 <tr>
                     <td colspan="2" align="center"><button id="buscar"><img src="/sistemaweb/images/search.png" align="right" />Buscar</button>
                     <button id="excel"><img src="/sistemaweb/images/excel_icon.png" align="right" />Excel</button></td>
@@ -88,6 +97,11 @@ class ConsumoValesTemplate extends Template {
 
 	function CrearTablaReporte($data, $myorden, $hora, $arrRequest) { ?>
 		<?php
+			$nueva_logica = false;
+			if($arrRequest['iTipoVersion'] == 1){
+				$nueva_logica = true;
+			}
+
 			if(is_array($data)) {
 		?>
 		<div style="width: auto;border: 1px;">
@@ -120,7 +134,6 @@ class ConsumoValesTemplate extends Template {
 				<tbody>
 					<?php
 						$objmodel 	= new ConsumoValesModel();
-						$nueva_logica = true;
 						
 						if($nueva_logica){
 

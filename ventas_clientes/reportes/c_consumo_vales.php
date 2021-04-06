@@ -36,6 +36,7 @@ try {
 		$arrRequest = array(
 			'iTipoCliente' => $_REQUEST['iTipoCliente'],
 			'sPrecioPizarra' => $_REQUEST['sPrecioPizarra'],
+			'iTipoVersion' => $_REQUEST['iTipoVersion'],
 		);
 		$datars = ConsumoValesModel::ObtenerReporte($almacen, $fdesde, $fhasta, $Nu_Documento_Identidad, $liquidacion, $factura, '', $hora, $arrRequest);
 		echo "<script>console.log('" . json_encode( array(
@@ -59,6 +60,7 @@ try {
 		$arrRequest = array(
 			'iTipoCliente' => $_REQUEST['iTipoCliente'],
 			'sPrecioPizarra' => $_REQUEST['sPrecioPizarra'],
+			'iTipoVersion' => $_REQUEST['iTipoVersion'],
 		);
 
 		$resultados = ConsumoValesModel::ObtenerReporte($almacen, $fdesde, $fhasta, $Nu_Documento_Identidad, $liquidacion, $factura, '', $hora, $arrRequest);
