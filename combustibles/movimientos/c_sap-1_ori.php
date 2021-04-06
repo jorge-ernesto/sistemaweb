@@ -195,16 +195,16 @@ class c_sap_1 {
 		echo "<script>console.log('req: " . json_encode($req) . "')</script>"; //Agregado 2020-01-10
 
 
-		// if($_SESSION['es_requerimiento_sap_energigas'] == false){
+		// if($_SESSION['es_requerimiento_sap_energigas'] == true){
 		// 	$req['tableName'] = 'INTOCRD';
-		// 	$data['bpartner'] = $m_sap_1->getBPartner($hanaInstance, $req);
+		// 	$data['bpartner'] = $m_sap_1->getBPartnerRequerimientoEnergigas($hanaInstance, $req);
 		// 	//$data['bpartner'] = $m_sap_1->getBPartner($req); cai				
 		// 	$data['bpartner']['isViewTableName'] = $m_sap_1->isViewTableName;
 		// 	//echo "<script>console.log('INTOCRD: " . json_encode($data['bpartner']) . "')</script>"; //Agregado 2020-01-10
 		// 	$v_sap_1->tableBpartner($data['bpartner']);
-		// }else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+		// }else if($_SESSION['es_requerimiento_sap_energigas'] == false){		
 		// 	$req['tableName'] = 'INTOCRD';
-		// 	$data['bpartner'] = $m_sap_1->getBPartnerRequerimientoEnergigas($hanaInstance, $req);
+		// 	$data['bpartner'] = $m_sap_1->getBPartner($hanaInstance, $req);
 		// 	//$data['bpartner'] = $m_sap_1->getBPartner($req); cai				
 		// 	$data['bpartner']['isViewTableName'] = $m_sap_1->isViewTableName;
 		// 	//echo "<script>console.log('INTOCRD: " . json_encode($data['bpartner']) . "')</script>"; //Agregado 2020-01-10
