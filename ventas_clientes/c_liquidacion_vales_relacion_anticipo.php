@@ -110,13 +110,24 @@ try {
 
 	} else if ($accion == "liquidar_vales") {
 
-        //VALIDAMOS SERIE INDICADA EN EL DOCUMENTO DE REFERENCIA
-        $dataSerieDocumentoRef = LiquidacionValesModel::validarSerieDocumentoRef($_POST['serie_actual']);
+        //VALIDAMOS QUE SERIE INDICADA EN EL DOCUMENTO DE REFERENCIA EXISTA
+        $dataSerieDocumentoRef = LiquidacionValesModel::validarSerieDocumentoRef(TRIM($_POST['serie_actual']));
         $_POST['documento'] = $dataSerieDocumentoRef['num_tipdocumento'];
         $_POST['serie_actual'] = $dataSerieDocumentoRef['num_seriedocumento'];
 
-        //VERIFICAMOS QUE DOCUMENTO DE REFERENCIA EXISTA
-        LiquidacionValesModel::validarSerieNumeroDocumentoRef(trim($_POST['sSerieNumeroDocumento']));
+        //VALIDAMOS QUE DOCUMENTO DE REFERENCIA EXISTA
+        $dataSerieNumeroDocumentoRef = LiquidacionValesModel::validarSerieNumeroDocumentoRef(TRIM($_POST['sSerieNumeroDocumento']));
+        $cliCodigoRef = $dataSerieNumeroDocumentoRef['cli_codigo'];
+
+        //VALIDAMOS QUE DOCUMENTO DE REFERENCIA SE GENERO CON FORMA DE PAGO "OTROS" Y ANTICIPO "SI"
+        $es_documentoRefOtrosAnticipo = LiquidacionValesModel::validarSerieNumeroDocumentoRef_otrosAnticipo(TRIM($_POST['sSerieNumeroDocumento']));
+        //VALIDAMOS QUE DOCUMENTO DE REFERENCIA TENGA SALDO 0, PARA ESTO EN CCOB_TA_CABECERA VALIDAMOS QUE EL CAMPO "NU_IMPORTESALDO" SEA 0
+        $es_DocumentoRefIngresoCaja = LiquidacionValesModel::validarSerieNumeroDocumentoRef_ingresoCaja(TRIM($_POST['sSerieNumeroDocumento']), TRIM($cliCodigoRef));
+
+        $ingresarCobranzaTipo22 = true;
+        if($es_documentoRefOtrosAnticipo || $es_DocumentoRefIngresoCaja){ //SI CUALQUIERA ES TRUE NO INSERTARA COBRANZA TIPO 22 EN CCOB_TA_CABECERA
+            $ingresarCobranzaTipo22 = false;
+        }
 
 		$notas_depacho_efectivo   = array();
 		$fecha_inicio		      = strip_tags(stripslashes($_POST['fecha_inicio']));
@@ -131,7 +142,7 @@ try {
         U = Gratuita + Exonerada
         */
         $sCodigoImpuesto = $_POST['sCodigoImpuesto'];
-        $sSerieNumeroDocumento = trim($_POST['sSerieNumeroDocumento']); //DOCUMENTO DE REFERENCIA (SOLO PARA ANTICIPOS)
+        $sSerieNumeroDocumento = TRIM($_POST['sSerieNumeroDocumento']); //DOCUMENTO DE REFERENCIA (SOLO PARA ANTICIPOS)
 
 		$aregloOficialClientes	= array();
         foreach ($arrVales as $key => $value) {
@@ -483,7 +494,7 @@ try {
                         $codigo_cliente = trim($datoscliente['cli_codigo']);
                         $datosweb = array();
                         foreach ($ccob_documento as $keysucursal => $totalimporte) {
-                            LiquidacionValesModel::procesoDocumnetoLiquidarConAnticipo($num_seriedocumento, $NUMERO_DOCUMENTO_ANTI, $codigo_cliente, $fecha_liqui, $num_liquidacion, $totalimporte);
+                            LiquidacionValesModel::procesoDocumnetoLiquidarConAnticipo($num_seriedocumento, $NUMERO_DOCUMENTO_ANTI, $codigo_cliente, $fecha_liqui, $num_liquidacion, $totalimporte, $ingresarCobranzaTipo22); 
                             $datosweb[$keysucursal][$num_liquidacion] = array(
                                 "num_docu" => $NUMERO_DOCUMENTO_ANTI,
                                 "num_serie" => $num_seriedocumento,

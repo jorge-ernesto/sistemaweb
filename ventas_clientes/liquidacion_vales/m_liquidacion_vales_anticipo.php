@@ -66,6 +66,38 @@ class LiquidacionValesModel extends Model {
         }
     }
 
+    function ActualizarInt_documnetoAnticipo_22($num_acta_lv, $num_acta_documento, $tipo_doc, $serie_doc) {
+        global $sqlca;
+        try {
+
+            $sql = "update  int_num_documentos set num_numactual='$num_acta_documento' WHERE num_tipdocumento='22'  ;";
+            if ($sqlca->query($sql) < 0) {
+                throw new Exception("No se pudo actualizar Numero de Documento");
+                //shell_exec("echo 'No se pudo actualizar Numero de Documento' >>log_liquidacion.log");
+            }
+
+            return $registro;
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    function ActualizarInt_documnetoAnticipo_LV($num_acta_lv, $num_acta_documento, $tipo_doc, $serie_doc) {
+        global $sqlca;
+        try {
+
+            $sql = "update int_num_documentos set  num_numactual='$num_acta_lv'   where num_tipdocumento='LV' ;";
+
+            if ($sqlca->query($sql) < 0) {
+                throw new Exception("No se pudo actualizar Numero de Liquidacion");
+            }
+         
+            return $registro;
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
     function ActualizarInt_documneto($num_acta_lv, $num_acta_documento, $tipo_doc, $serie_doc) {
         global $sqlca;
         try {
@@ -425,8 +457,8 @@ WHERE
 
     function validarSerieNumeroDocumentoRef($serieNumeroRef) {
         $porciones = explode("-", $serieNumeroRef);
-        $serieRef  = trim($porciones[0]);
-        $numeroRef = trim($porciones[1]);
+        $serieRef  = $porciones[0];
+        $numeroRef = $porciones[1];
         
         global $sqlca;
         try {
@@ -435,8 +467,8 @@ WHERE
                     FROM 
                         fac_ta_factura_cabecera 
                     WHERE 
-                        ch_fac_seriedocumento = '". TRIM($serieRef) ."' 
-                        AND ch_fac_numerodocumento = '". TRIM($numeroRef) ."'
+                        TRIM(ch_fac_seriedocumento) = '". TRIM($serieRef) ."' 
+                        AND TRIM(ch_fac_numerodocumento) = '". TRIM($numeroRef) ."'
                     LIMIT 1;                        
                     ";
             error_log($sql);
@@ -454,6 +486,85 @@ WHERE
             $registro = $sqlca->firstRow($sql);
             error_log(json_encode($registro));
             return $registro;           
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    function validarSerieNumeroDocumentoRef_otrosAnticipo($serieNumeroRef) {
+        $porciones = explode("-", $serieNumeroRef);
+        $serieRef  = $porciones[0];
+        $numeroRef = $porciones[1];
+        
+        global $sqlca;
+        try {
+            $sql = "SELECT 
+                        TRIM(nu_tipo_pago) AS nu_tipo_pago,
+                        TRIM(ch_fac_anticipo) as ch_fac_anticipo
+                    FROM 
+                        fac_ta_factura_cabecera 
+                    WHERE 
+                        TRIM(ch_fac_seriedocumento) = '". TRIM($serieRef) ."' 
+                        AND TRIM(ch_fac_numerodocumento) = '". TRIM($numeroRef) ."'
+                        AND TRIM(nu_tipo_pago) = '07'   --FORMA DE PAGO: OTROS
+                        AND TRIM(ch_fac_anticipo) = 'S' --ANTICIPO: SI
+                    LIMIT 1;
+                    ";
+            error_log($sql);
+     
+            if ($sqlca->query($sql) < 0) {
+                return false;
+            }
+
+            if ($sqlca->query($sql) == 0) {
+                return false;
+            }                          
+                          
+            $registro = $sqlca->firstRow($sql);
+            if($registro['nu_tipo_pago'] == '07' && $registro['ch_fac_anticipo'] == 'S'){
+                return true;
+            } 
+            
+            return false;
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    function validarSerieNumeroDocumentoRef_ingresoCaja($serieNumeroRef, $cliCodigoRef) {
+        $porciones = explode("-", $serieNumeroRef);
+        $serieRef  = $porciones[0];
+        $numeroRef = $porciones[1];
+        
+        global $sqlca;
+        try {
+            $sql = "SELECT 
+                        nu_importesaldo
+                    FROM 
+                        ccob_ta_cabecera
+                    WHERE 
+                        TRIM(ch_seriedocumento) = '". TRIM($serieRef) ."' 
+                        AND TRIM(ch_numdocumento) = '". TRIM($numeroRef) ."'
+                        AND TRIM(cli_codigo) = '". TRIM($cliCodigoRef) ."'
+                        AND nu_importesaldo = 0
+                    LIMIT 1;
+                    ";
+            error_log($sql);
+     
+            if ($sqlca->query($sql) < 0) {
+                return false;
+            }
+
+            if ($sqlca->query($sql) == 0) {
+                return false;
+            }                          
+                          
+            $registro = $sqlca->firstRow($sql);
+            if($registro['nu_importesaldo'] == 0){
+                return true;
+            } 
+            
+            return false;
         } catch (Exception $e) {
             throw $e;
         }
@@ -1082,14 +1193,17 @@ INSERT INTO fac_ta_factura_detalle(
         }
     }
 
-    function procesoDocumnetoLiquidarConAnticipo($SERIE, $NUMERO_DOCUMENTO_ANTI, $codigo_cliente, $FEC_LIQUIDACION, $ch_liquidacion, $totalimporte) { //PROCESO DE LIQUIDACION CLIENTE ANTICIPO
+    function procesoDocumnetoLiquidarConAnticipo($SERIE, $NUMERO_DOCUMENTO_ANTI, $codigo_cliente, $FEC_LIQUIDACION, $ch_liquidacion, $totalimporte, $ingresarCobranzaTipo22 = true) { //PROCESO DE LIQUIDACION CLIENTE ANTICIPO
         global $sqlca;
         try {
             $codigo_cliente = trim($codigo_cliente);
 
-            LiquidacionValesModel::InsertarDocumentoCCob_Cabecera($SERIE, $NUMERO_DOCUMENTO_ANTI, $codigo_cliente, $FEC_LIQUIDACION, $ch_liquidacion, $totalimporte);
-            LiquidacionValesModel::InsertarDocumentoCCob_CabeceraDetalle($SERIE, $NUMERO_DOCUMENTO_ANTI, $codigo_cliente, $FEC_LIQUIDACION, $ch_liquidacion, $totalimporte);
-            LiquidacionValesModel::ActualizarInt_documnetoAnticipo($ch_liquidacion, $NUMERO_DOCUMENTO_ANTI, '22', $SERIE);
+            if($ingresarCobranzaTipo22){
+                LiquidacionValesModel::InsertarDocumentoCCob_Cabecera($SERIE, $NUMERO_DOCUMENTO_ANTI, $codigo_cliente, $FEC_LIQUIDACION, $ch_liquidacion, $totalimporte);
+                LiquidacionValesModel::InsertarDocumentoCCob_CabeceraDetalle($SERIE, $NUMERO_DOCUMENTO_ANTI, $codigo_cliente, $FEC_LIQUIDACION, $ch_liquidacion, $totalimporte);
+                LiquidacionValesModel::ActualizarInt_documnetoAnticipo_22($ch_liquidacion, $NUMERO_DOCUMENTO_ANTI, '22', $SERIE);
+            }
+            LiquidacionValesModel::ActualizarInt_documnetoAnticipo_LV($ch_liquidacion, $NUMERO_DOCUMENTO_ANTI, '22', $SERIE);
         } catch (Exception $e) {
             return $e;
         }
