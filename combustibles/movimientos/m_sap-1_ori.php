@@ -1637,7 +1637,7 @@ WHERE
  AND pt.td IN ('F')
  AND pt.tm = 'V'
  --AND pt.es = '".$param['warehouse']."'
- --AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
+ AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
 GROUP BY
  PT.es,
  PT.caja,
@@ -5404,7 +5404,7 @@ WHERE
  AND pt.td IN ('B')
  AND pt.tm = 'V'
  --AND pt.es = '".$param['warehouse']."'
- --AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
+ AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
 GROUP BY
  PT.es,
  PT.caja,
@@ -8492,6 +8492,76 @@ movialma.mov_numero, movialma.tran_codigo;";
 	}
 
 	/**
+	 * Factura de proveedores - Cabecera
+	 */
+	public function getHeadInvoicePurchaseWithGuiasRemision($param) {
+		global $sqlca;
+
+		$res = array();
+		$sql = "SELECT
+ movialma.mov_numero || movialma.tran_codigo AS noperacion,
+ (CASE WHEN FIRST(proveedor.pro_ruc) IS NULL OR FIRST(proveedor.pro_ruc) = '' THEN 'C00099999999' ELSE FIRST(proveedor.pro_ruc) END)  AS cardcode,
+ FIRST(movialma.mov_fecha) AS docdate,
+ substring(FIRST(mov_docurefe) FROM 1 for 4) AS foliopref,
+ substring(FIRST(mov_docurefe) FROM 5 for 12) AS folionum,
+ '' AS extempno,
+ FIRST(tipodocumento.tab_car_03) AS indicator,
+ ROUND(((SUM(movialma.mov_costototal) * " . $param['tax'] . ") - SUM(movialma.mov_costototal)), 2) AS vatsum,
+ ROUND((SUM(movialma.mov_costototal) * " . $param['tax'] . "), 2) AS doctotal
+FROM inv_movialma movialma
+JOIN inv_tipotransa tipotransa ON (movialma.tran_codigo = tipotransa.tran_codigo)
+LEFT JOIN int_proveedores proveedor ON (movialma.mov_entidad = proveedor.pro_codigo)
+LEFT JOIN int_tabla_general AS tipodocumento ON (
+ movialma.mov_tipdocuref = substring(TRIM(tipodocumento.tab_elemento) for 2 FROM length(TRIM(tipodocumento.tab_elemento))-1)
+ AND tipodocumento.tab_tabla = '08'
+ AND tipodocumento.tab_elemento <> '000000'
+)
+JOIN inv_ta_almacenes al_origen ON (movialma.mov_almaorigen = al_origen.ch_almacen)
+JOIN inv_ta_almacenes al_destino ON (movialma.mov_almadestino = al_destino.ch_almacen)
+WHERE
+tipotransa.tran_naturaleza = '2'
+AND tipodocumento.tab_car_03 IN ('01','09') --MOSTRAMOS FACTURAS Y GUIAS DE REMISION
+AND movialma.tran_codigo IN ('21', '01')
+--AND movialma.art_codigo NOT IN('11620301','11620303','11620304','11620305','11620307')
+AND movialma.mov_fecha BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
+GROUP BY
+movialma.mov_numero, movialma.tran_codigo;";
+
+		$this->_error_log($param['tableName'].' - getHeadInvoicePurchase: '.$sql.' [LINE: '.__LINE__.']');
+		$c = 0;
+		if ($sqlca->query($sql) < 0) {
+			return array('error' => true);
+		}
+		while ($reg = $sqlca->fetchRow()) {
+			$c++;
+			$res[] = array(
+				'noperacion' => $reg['noperacion'],
+				'cardcode' => $this->preLetterBPartner('P', $reg['cardcode']),
+				'docdate' => $reg['docdate'],
+				'foliopref' => $reg['foliopref'],
+				'folionum' => $reg['folionum'],
+				'extempno' => $this->cleanStr($reg['extempno']),
+				'indicator' => $reg['indicator'],
+
+				'vatsum' => (float)$reg['vatsum'],//(Total Impuesto) actualmente vacíos
+				'doctotal' => (float)$reg['doctotal'],//(Total de Documento) actualmente vacíos
+
+				'estado' => 'P',
+				'errormsg' => '',
+				'transaccion' => '',
+				'docentry' => NULL,
+			);
+		}
+		return array(
+			'error' => false,
+			'tableName' => $param['tableName'],
+			'nodeData' => 'headInvoicePurchase',
+			'headInvoicePurchase' => $res,
+			'count' => $c,
+		);
+	}
+
+	/**
 	 * Factura de proveedores - Detalle
 	 */
 	public function getDetailInvoicePurchase($param) {
@@ -8523,7 +8593,83 @@ LEFT JOIN int_tabla_general AS tipodocumento ON (
 WHERE
 tipotransa.tran_naturaleza = '2'
 AND tipodocumento.tab_car_03 = '01'
-AND movialma.tran_codigo IN ('21', '01')
+AND movialma.tran_codigo IN ('21', '01') 
+--AND movialma.art_codigo NOT IN('11620301','11620303','11620304','11620305','11620307')
+AND movialma.mov_fecha BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
+ORDER BY 1;";
+
+		$this->_error_log($param['tableName'].' - getDetailInvoicePurchase: '.$sql.' [LINE: '.__LINE__.']');
+		$c = 0;
+		$ci = 1;
+		$tmpDoc = '';
+		if ($sqlca->query($sql) < 0) {
+			return array('error' => true);
+		}
+		while ($reg = $sqlca->fetchRow()) {
+			$c++;
+			if ($tmpDoc == $reg['noperacion']) {
+				$ci++;
+			} else {
+				$ci = 1;
+			}
+			$res[] = array(
+				'noperacion' => $reg['noperacion'],
+				'item' => $ci,
+				'itemcode' => $this->cleanStr($reg['itemcode']),
+				'whscode' => $reg['whscode'],
+				'quantity' => (float)$reg['quantity'],
+				'price' => (float)$reg['price'],
+				'taxcode' => $reg['taxcode'],
+				'discprcnt' => (float)$reg['discprcnt'],
+				'ocrcode2' => $reg['ocrcode2'],
+				'priceafvat' => (float)$reg['priceafvat'],
+				'desc_sinigv' => 0.00,
+				'desc_igv' => 0.00,
+			);
+			$tmpDoc = $reg['noperacion'];
+		}
+		return array(
+			'error' => false,
+			'tableName' => $param['tableName'],
+			'nodeData' => 'detailInvoicePurchase',
+			'detailInvoicePurchase' => $res,
+			'count' => $c,
+		);
+	}
+
+	/**
+	 * Factura de proveedores - Detalle
+	 */
+	public function getDetailInvoicePurchaseWithGuiasRemision($param) {
+		global $sqlca;
+
+		$res = array();
+		$sql = "
+SELECT
+ movialma.mov_numero || movialma.tran_codigo AS noperacion,
+ movialma.art_codigo AS itemcode,
+ SAPALMA.sap_codigo AS whscode,
+ movialma.mov_cantidad AS quantity,
+ movialma.mov_costounitario AS price,
+ '".$param['sap_tax_code']."' AS taxcode,
+ 0 AS discprcnt,
+ SAPCC.sap_codigo AS ocrcode2--centro de costo
+ , ROUND(movialma.mov_costounitario * ".$param['tax'].", 2) AS priceafvat
+ 
+FROM inv_movialma movialma
+JOIN inv_tipotransa tipotransa ON (movialma.tran_codigo = tipotransa.tran_codigo)
+LEFT JOIN sap_mapeo_tabla_detalle AS SAPALMA ON (SAPALMA.opencomb_codigo = movialma.mov_almacen AND SAPALMA.id_tipo_tabla = 2)
+JOIN int_ta_sucursales AS ORG ON (ORG.ch_sucursal = movialma.mov_almacen)
+LEFT JOIN sap_mapeo_tabla_detalle AS SAPCC ON (SAPCC.opencomb_codigo = ORG.ch_sucursal AND SAPCC.id_tipo_tabla = 1)--puede limitar
+LEFT JOIN int_tabla_general AS tipodocumento ON (
+ movialma.mov_tipdocuref = substring(TRIM(tipodocumento.tab_elemento) for 2 FROM length(TRIM(tipodocumento.tab_elemento))-1)
+ AND tipodocumento.tab_tabla = '08'
+ AND tipodocumento.tab_elemento <> '000000'
+)
+WHERE
+tipotransa.tran_naturaleza = '2'
+AND tipodocumento.tab_car_03 IN ('01','09') --MOSTRAMOS FACTURAS Y GUIAS DE REMISION
+AND movialma.tran_codigo IN ('21', '01') 
 --AND movialma.art_codigo NOT IN('11620301','11620303','11620304','11620305','11620307')
 AND movialma.mov_fecha BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
 ORDER BY 1;";
