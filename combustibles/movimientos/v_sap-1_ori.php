@@ -3749,4 +3749,177 @@ class v_sap_1 {
 	</div>
 	<div>Cantidad de registros: <?php echo $data['count'] ?></div>
 	<?php }
+
+	/**
+	 * Venta de combustibles por manguera/día
+	 */
+	public function tableDetailCombustiblePorManguera($data) { ?>
+
+	<br>
+	<div class="container-table-preview">
+		<h3>Combustible por manguera/día - Detalle <?php echo $data['isViewTableName'] ? '['.$data['tableName'].']' : '' ?></h3><hr>
+		<?php
+			if($_SESSION['debug'] == true){
+				/*** Debug ***/
+				$sql_delete = "DELETE FROM BDINT2.". $data['tableName'] ." WHERE noperacion IN (";
+				$sql_select = "SELECT * FROM BDINT2.". $data['tableName'] ." WHERE noperacion IN (";			
+				foreach($data['detailCombustiblePorManguera'] as $key=>$row){
+					$sql_data .= "'" . $row['noperacion'] . "',";
+				}
+				$sql_data = substr($sql_data,0,-1);
+				$sql_data .= ");";
+				$sql_delete = $sql_delete . $sql_data;
+				$sql_select = $sql_select . $sql_data;
+				echo "<pre>";
+				echo "<h3>$sql_delete</h3>";
+				echo "<h3>$sql_select</h3>";
+				echo "</pre>";				
+				/***/
+			}
+		?>
+		<table class="table-sap-1">
+			<thead class="head-table-preview-sap-1">
+				<tr>
+					<th>noperacion</th>
+					<th>docdate</th>
+					<th>itemcode</th>
+					<th>u_exc_lado</th>
+					<th>u_exc_manguera</th>					
+					<th>price</th>					
+					<th>u_exc_continigal</th>					
+					<th>u_exc_contfingal</th>					
+					<th>u_exc_continival</th>					
+					<th>u_exc_contfinval</th>					
+					<th>u_exc_afericiones</th>					
+					<th>u_exc_descuentos</th>					
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ($data['detailCombustiblePorManguera'] as $key => $row) { ?>
+				<tr>
+					<th><?php echo $row['noperacion'] ?></th>
+					<th><?php echo $row['docdate'] ?></th>					
+					<th><?php echo $row['itemcode'] ?></th>	
+					<th><?php echo $row['u_exc_lado'] ?></th>				
+					<th><?php echo $row['u_exc_manguera'] ?></th>
+					<th><?php echo $row['price'] ?></th>
+					<th><?php echo $row['u_exc_continigal'] ?></th>
+					<th><?php echo $row['u_exc_contfingal'] ?></th>
+					<th><?php echo $row['u_exc_continival'] ?></th>
+					<th><?php echo $row['u_exc_contfinval'] ?></th>
+					<th><?php echo $row['u_exc_afericiones'] ?></th>
+					<th><?php echo $row['u_exc_descuentos'] ?></th>
+				</tr>
+				<?php } ?>
+			</tbody>
+		</table>
+	</div>
+	<div>Cantidad de registros: <?php echo $data['count'] ?></div>
+	<?php }
+
+	/**
+	 * Stocks (sólo combustibles)
+	 */
+	public function tableDetailStock($data) { ?>
+
+	<br>
+	<div class="container-table-preview">
+		<h3>Stocks (sólo combustibles) - Detalle <?php echo $data['isViewTableName'] ? '['.$data['tableName'].']' : '' ?></h3><hr>
+		<?php
+			if($_SESSION['debug'] == true){
+				/*** Debug ***/
+				$sql_delete = "DELETE FROM BDINT2.". $data['tableName'] ." WHERE noperacion IN (";
+				$sql_select = "SELECT * FROM BDINT2.". $data['tableName'] ." WHERE noperacion IN (";			
+				foreach($data['detailStock'] as $key=>$row){
+					$sql_data .= "'" . $row['noperacion'] . "',";
+				}
+				$sql_data = substr($sql_data,0,-1);
+				$sql_data .= ");";
+				$sql_delete = $sql_delete . $sql_data;
+				$sql_select = $sql_select . $sql_data;
+				echo "<pre>";
+				echo "<h3>$sql_delete</h3>";
+				echo "<h3>$sql_select</h3>";
+				echo "</pre>";				
+				/***/
+			}
+		?>
+		<table class="table-sap-1">
+			<thead class="head-table-preview-sap-1">
+				<tr>
+					<th>noperacion</th>
+					<th>docdate</th>
+					<th>itemcode</th>
+					<th>u_exc_medicion</th>	
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ($data['detailStock'] as $key => $row) { ?>
+				<tr>
+					<th><?php echo $row['noperacion'] ?></th>
+					<th><?php echo $row['docdate'] ?></th>					
+					<th><?php echo $row['itemcode'] ?></th>	
+					<th><?php echo $row['u_exc_medicion'] ?></th>				
+				</tr>
+				<?php } ?>
+			</tbody>
+		</table>
+	</div>
+	<div>Cantidad de registros: <?php echo $data['count'] ?></div>
+	<?php }
+
+	/**
+	 * Totales por forma de pago con notas de despacho
+	 */
+	public function tableDetailTotales($data) { ?>
+
+	<br>
+	<div class="container-table-preview">
+		<h3>Totales por forma de pago con notas de despacho - Detalle <?php echo $data['isViewTableName'] ? '['.$data['tableName'].']' : '' ?></h3><hr>
+		<?php
+			if($_SESSION['debug'] == true){
+				/*** Debug ***/
+				$sql_delete = "DELETE FROM BDINT2.". $data['tableName'] ." WHERE noperacion IN (";
+				$sql_select = "SELECT * FROM BDINT2.". $data['tableName'] ." WHERE noperacion IN (";			
+				foreach($data['detailTotales'] as $key=>$row){
+					$sql_data .= "'" . $row['noperacion'] . "',";
+				}
+				$sql_data = substr($sql_data,0,-1);
+				$sql_data .= ");";
+				$sql_delete = $sql_delete . $sql_data;
+				$sql_select = $sql_select . $sql_data;
+				echo "<pre>";
+				echo "<h3>$sql_delete</h3>";
+				echo "<h3>$sql_select</h3>";
+				echo "</pre>";				
+				/***/
+			}
+		?>
+		<table class="table-sap-1">
+			<thead class="head-table-preview-sap-1">
+				<tr>
+					<th>noperacion</th>
+					<th>docdate</th>
+					<th>u_exc_turno</th>
+					<th>u_exc_fpago</th>	
+					<th>u_exc_nolinea</th>	
+					<th>u_exc_importe</th>	
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ($data['detailTotales'] as $key => $row) { ?>
+				<tr>
+					<th><?php echo $row['noperacion'] ?></th>
+					<th><?php echo $row['docdate'] ?></th>					
+					<th><?php echo $row['u_exc_turno'] ?></th>	
+					<th><?php echo $row['u_exc_fpago'] ?></th>				
+					<th><?php echo $row['u_exc_nolinea'] ?></th>				
+					<th><?php echo $row['u_exc_importe'] ?></th>
+				</tr>
+				<?php } ?>
+			</tbody>
+		</table>
+	</div>
+	<div>Cantidad de registros: <?php echo $data['count'] ?></div>
+	<?php }
 } ?>

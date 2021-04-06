@@ -4,12 +4,21 @@ require '../config.php';
 
 require 'movimientos/c_sap-1.php';
 
+$_SESSION['es_requerimiento_sap_energigas'] = false; 
+$_SESSION['es_requerimiento_sap_centauro'] = false; 
+
 $sqlca->query("SELECT par_valor FROM int_parametros WHERE par_nombre = 'version_sap';");
 $a = $sqlca->fetchRow(); 
-if($a[0] == "2"){ //Versión 1: Original, Versión 2: Requerimiento SAP Energigas
+
+/* Versiones SAP
+ * Versión 1: Original
+ * Versión 2: Requerimiento SAP Energigas 
+ * Versión 3: Requerimiento SAP Centauro 
+ */
+if($a[0] == "2"){ 
 	$_SESSION['es_requerimiento_sap_energigas'] = true; 
-}else{
-	$_SESSION['es_requerimiento_sap_energigas'] = false; 
+}else if($a[0] == "3"){
+	$_SESSION['es_requerimiento_sap_centauro'] = true;
 }
 $_SESSION['debug'] = true; 
 

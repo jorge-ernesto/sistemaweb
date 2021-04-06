@@ -1637,7 +1637,7 @@ WHERE
  AND pt.td IN ('F')
  AND pt.tm = 'V'
  --AND pt.es = '".$param['warehouse']."'
- --AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
+ AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
 GROUP BY
  PT.es,
  PT.caja,
@@ -4456,7 +4456,7 @@ GROUP BY 1, ftfc.ch_fac_tiporecargo3;";
 			'documentHeadTicket' => $res,
 			'count' => $c,
 		);
-	}
+	}	
 
 	/**
 	 * Boletas - Cabecera
@@ -4642,6 +4642,291 @@ GROUP BY 1, ftfc.ch_fac_tiporecargo3;";
 		}
 
 		error_log( json_encode( $this->ticketHead ) );
+		return array(
+			'error' => false,
+			'tableName' => $param['tableName'],
+			'nodeData' => 'documentHeadTicket',
+			'documentHeadTicket' => $res,
+			'count' => $c,
+		);
+	}
+
+	/**
+	 * Boletas - Cabecera
+	 */
+	public function getDocumentHeadTicketDesagregarDocumentosAnulados($param) {
+		//20 y 45 documentos manuales
+		global $sqlca;
+
+		$res = array();		
+		$originalHead = array();
+		$array_serie_turno = array();
+		$sql = "
+SELECT
+ (string_to_array(FIRST(pt.usr), '-'))[1] AS foliopref,
+ FIRST(pt.turno) AS _turn,
+ FIRST(pt.es) || FIRST(pt.caja) || FIRST(pt.trans) AS noperacion,
+ --CASE WHEN FIRST(pt.ruc) = '' THEN 'C00099999999' ELSE FIRST(pt.ruc) END AS cardcode,
+ 'C00099999999' AS cardcode, --JEL, cliente por defecto
+ FIRST(pt.dia) AS docdate,
+ MIN(((string_to_array(pt.usr, '-'))[2])::INTEGER) AS u_exx_nroini,
+ MAX(((string_to_array(pt.usr, '-'))[2])::INTEGER) AS u_exx_nrofin,
+ ROUND(SUM(pt.igv), 2) AS vatsum,
+ ROUND(SUM(pt.importe), 2) AS doctotal,
+ FIRST(pt.trans) AS transaccion--considerar otro valor para hacerlo unicno (caja?)
+ 
+ , FIRST(pt.trans) AS u_exc_ticket
+ , FIRST(pt.es) AS es
+ , FIRST(pt.caja) AS caja
+ , FIRST(pt.trans) AS trans
+ , FIRST(pt.cantidad) AS cantidad
+ , FIRST(pt.precio) AS precio
+ , FIRST(pt.igv) AS igv
+ , FIRST(pt.importe) AS importe
+FROM
+ ".$param['pos_trans']." pt
+ LEFT JOIN int_clientes AS client
+  ON(client.cli_codigo = pt.cuenta)
+ LEFT JOIN pos_historia_ladosxtrabajador AS employe
+  ON(employe.dt_dia = pt.dia AND employe.ch_posturno::CHAR = pt.turno AND employe.ch_lado = PT.pump)
+WHERE
+ pt.td = 'B'
+ AND pt.tm = 'V'
+ AND pt.dia BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
+ --AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
+GROUP BY
+ PT.es,
+ PT.caja,
+ PT.trans,
+ PT.codigo
+ORDER BY 
+ foliopref, u_exx_nroini, _turn;
+		";
+
+		$this->_error_log($param['tableName'].' - getDocumentTicket: '.$sql.' [LINE: '.__LINE__.']');
+		$c = 0;
+		if ($sqlca->query($sql) < 0) {
+			return array('error' => true);
+		}	
+		while ($reg = $sqlca->fetchRow()) {
+			$originalHead[] = array(
+				'noperacion' => $reg['noperacion'],
+				'cardcode' => $this->preLetterBPartner('C', $reg['cardcode']),
+				'docdate' => $reg['docdate'],
+				'foliopref' => $reg['foliopref'],
+				'u_exx_nroini' => (int)$reg['u_exx_nroini'],
+				'u_exx_nrofin' => (int)$reg['u_exx_nrofin'],
+				'vatsum' => (float)$reg['vatsum'],
+				'doctotal' => (float)$reg['doctotal'],
+				'estado' => 'P',
+				'errormsg' => '',
+				'transaccion' => $reg['transaccion'],
+				'docentry' => NULL,
+				'_turn' => $reg['_turn'],
+				'es' => $reg['es'],
+				'caja' => $reg['caja'],
+				'trans' => $reg['trans'],
+			);
+			$array_serie_turno[] = trim($reg['foliopref']) . "-" . trim($reg['_turn']);
+		}	
+		
+		//LOGICA PARA DESAGREGAR DOCUMENTOS ANULADOS MANTENIENDO CONTINUIDAD DE CORRELATIVO (1-19,20,21-69,70,71-100)
+		//OBTENEMOS UN ARRAY CON SERIE Y TURNO DEL DETALLE, YA QUE LOS DATOS SON AGRUPADOS POR SERIE Y TURNO
+		$array_serie_turno = array_unique($array_serie_turno);					
+		$i = 0;
+
+		//RECORREMOS ARRAY DE SERIE Y TURNO
+		foreach ($array_serie_turno as $key => $value) {
+			$serie_turno       = $value;
+			$inicio_agrupacion = true;					
+			$i++;	
+			
+			//DENTRO DE CADA VALOR DENTRO DEL ARRAY, RECORREMOS LOS DATOS DE LA QUERY DETALLADA
+			foreach ($originalHead as $key2 => $value2) {
+				
+				//SI ES EL PRIMER ELEMENTO DENTRO DEL ARRAY DE SERIES Y TURNO, OBTIENE EL DOCUMENTO INICIAL
+				if($inicio_agrupacion == true){
+					$noperacion   = $value2['es'] . $value2['caja'] . $value2['trans'];
+					$u_exx_nroini = $value2['u_exx_nroini'];
+					$transaccion  = $value2['transaccion'];
+				} 
+
+				//IGUALAMOS POR SERIE Y TURNO
+				if(trim($serie_turno) == trim($originalHead[$key2]['foliopref']) ."-". trim($originalHead[$key2]['_turn'])){
+					$inicio_agrupacion = false;										
+
+					if($value2['doctotal'] != 0){ //NO ES DOCUMENTO ANULADO
+						$res[$i]['noperacion']   = $noperacion;
+						$res[$i]['cardcode']     = $this->preLetterBPartner('C', $value2['cardcode']);
+						$res[$i]['docdate']      = $value2['docdate'];
+						$res[$i]['foliopref']    = $value2['foliopref'];
+						$res[$i]['u_exx_nroini'] = (int)$u_exx_nroini;
+						$res[$i]['u_exx_nrofin'] = (int)$value2['u_exx_nrofin'];
+						$res[$i]['vatsum']       += (float)$value2['vatsum'];
+						$res[$i]['doctotal']     += (float)$value2['doctotal'];					
+						$res[$i]['estado']       = 'P';
+						$res[$i]['errormsg']     = '';
+						$res[$i]['transaccion']  = $transaccion;
+						$res[$i]['docentry']     = NULL;
+						$res[$i]['_turn']        = $value2['_turn'];													
+					}else{ //DOCUMENTOS ANULADOS DIFERENCIADOS
+						$i++;
+						$res[$i]['noperacion']   = $value2['noperacion'];
+						$res[$i]['cardcode']     = $this->preLetterBPartner('C', $value2['cardcode']);
+						$res[$i]['docdate']      = $value2['docdate'];
+						$res[$i]['foliopref']    = $value2['foliopref'];
+						$res[$i]['u_exx_nroini'] = (int)$value2['u_exx_nroini'];
+						$res[$i]['u_exx_nrofin'] = (int)$value2['u_exx_nrofin'];
+						$res[$i]['vatsum']       += (float)$value2['vatsum'];
+						$res[$i]['doctotal']     += (float)$value2['doctotal'];					
+						$res[$i]['estado']       = 'P';
+						$res[$i]['errormsg']     = '';
+						$res[$i]['transaccion']  = $value2['transaccion'];
+						$res[$i]['docentry']     = NULL;
+						$res[$i]['_turn']        = $value2['_turn'];
+						$i++;
+						$inicio_agrupacion = true;
+					}								
+				}
+			}
+		}
+		//CERRAR LOGICA PARA DESAGREGAR DOCUMENTOS ANULADOS MANTENIENDO CONTINUIDAD DE CORRELATIVO (1-19,20,21-69,70,71-100)
+
+		$originalHead = array();
+		$array_serie_turno = array();
+		$sql = "
+SELECT
+ FIRST(ftfc.ch_fac_seriedocumento) AS foliopref,
+ FIRST(ftfc.ch_fac_tiporecargo3) AS _turn,
+ FIRST(ftfc.ch_fac_tipodocumento)||FIRST(ftfc.ch_fac_seriedocumento)||FIRST(ftfc.ch_fac_numerodocumento::INTEGER)||FIRST(ftfc.cli_codigo) AS noperacion,
+ FIRST(ftfc.cli_codigo) AS cardcode,
+ FIRST(ftfc.dt_fac_fecha) AS docdate,
+ MIN(ftfc.ch_fac_numerodocumento::INTEGER) AS u_exx_nroini,
+ MAX(ftfc.ch_fac_numerodocumento::INTEGER) AS u_exx_nrofin,
+ ROUND(SUM(ftfc.nu_fac_impuesto1), 2) AS vatsum,
+ ROUND(SUM(ftfc.nu_fac_valortotal), 2) AS doctotal,
+ '' AS transaccion
+
+ , FIRST(nu_fac_recargo3) AS nu_fac_recargo3
+ , FIRST(ch_fac_tiporecargo2) AS ch_fac_tiporecargo2
+ , FIRST(ftfc.ch_fac_tipodocumento) AS ch_fac_tipodocumento
+ , FIRST(ftfc.ch_fac_seriedocumento) AS ch_fac_seriedocumento
+ , FIRST(ftfc.ch_fac_numerodocumento::INTEGER) AS ch_fac_numerodocumento
+ , FIRST(ftfc.cli_codigo) AS cli_codigo
+FROM
+ fac_ta_factura_cabecera AS ftfc
+ JOIN int_clientes AS client
+  ON(ftfc.cli_codigo = client.cli_codigo)
+WHERE
+ ftfc.dt_fac_fecha BETWEEN '".$param['initial_date']."' AND '".$param['initial_date']."'
+ --AND ftfc.ch_almacen = '".$param['warehouse']."'
+ AND ftfc.ch_fac_tipodocumento = '35'
+ AND ftfc.ch_fac_anticipo != 'S'
+GROUP BY ftfc.ch_fac_seriedocumento, ftfc.ch_fac_numerodocumento, ftfc.ch_fac_tiporecargo3;";
+
+		$this->_error_log($param['tableName'].' - getDocumentTicket: '.$sql.' [LINE: '.__LINE__.']');
+		if ($sqlca->query($sql) < 0) {
+			return array('error' => true);
+		}
+		while ($reg = $sqlca->fetchRow()) {
+			$reg['transaccion'] = $reg['noperacion'];
+			$originalHead[] = array(
+				'noperacion' => $reg['noperacion'],
+				'cardcode' => $this->preLetterBPartner('C', $reg['cardcode']),
+				'docdate' => $reg['docdate'].' 00:00:00',
+				'foliopref' => $reg['foliopref'],
+				'u_exx_nroini' => (int)$reg['u_exx_nroini'],
+				'u_exx_nrofin' => (int)$reg['u_exx_nrofin'],
+				'vatsum' => (float)$reg['vatsum'],
+				'doctotal' => (float)$reg['doctotal'],
+				'estado' => 'P',
+				'errormsg' => '',
+				'transaccion' => $reg['transaccion'],
+				'docentry' => NULL,
+				'_turn' => $reg['_turn'],
+				'nu_fac_recargo3' => $reg['nu_fac_recargo3'],
+				'ch_fac_tiporecargo2' => $reg['ch_fac_tiporecargo2'],
+				'ch_fac_tipodocumento' => $reg['ch_fac_tipodocumento'],
+				'ch_fac_seriedocumento' => $reg['ch_fac_seriedocumento'],
+				'ch_fac_numerodocumento' => $reg['ch_fac_numerodocumento'],
+				'cli_codigo' => $reg['cli_codigo'],
+			);
+			$array_serie_turno[] = trim($reg['foliopref']) . "-" . trim($reg['_turn']);
+		}
+
+		//DESAGREGAR TRANSFERENCIAS GRATUITAS MANTENIENDO CONTINUIDAD DE CORRELATIVO
+		//OBTENEMOS UN ARRAY CON SERIE Y TURNO DEL DETALLE, YA QUE LOS DATOS SON AGRUPADOS POR SERIE Y TURNO
+		$array_serie_turno = array_unique($array_serie_turno);					
+		//$i = 0; //Ya no debe arrancar en 0
+
+		//RECORREMOS ARRAY DE SERIE Y TURNO
+		foreach ($array_serie_turno as $key => $value) {
+			$serie_turno       = $value;
+			$inicio_agrupacion = true;					
+			$i++;	
+			
+			//DENTRO DE CADA VALOR DENTRO DEL ARRAY, RECORREMOS LOS DATOS DE LA QUERY DETALLADA
+			foreach ($originalHead as $key2 => $value2) {
+				
+				//SI ES EL PRIMER ELEMENTO DENTRO DEL ARRAY DE SERIES Y TURNO, OBTIENE EL DOCUMENTO INICIAL
+				if($inicio_agrupacion == true){
+					$noperacion   = $value2['ch_fac_tipodocumento'] . $value2['ch_fac_seriedocumento'] . $value2['ch_fac_numerodocumento'] . $value2['cli_codigo'];
+					$u_exx_nroini = $value2['u_exx_nroini'];
+					$transaccion  = $value2['transaccion'];
+				} 
+
+				//IGUALAMOS POR SERIE Y TURNO
+				if(trim($serie_turno) == trim($originalHead[$key2]['foliopref']) ."-". trim($originalHead[$key2]['_turn'])){
+					$inicio_agrupacion = false;										
+
+					if($value2['nu_fac_recargo3'] == 2 || $value2['nu_fac_recargo3'] == 5 || $value2['nu_fac_recargo3'] == 6 || trim($value2['ch_fac_tiporecargo2']) == "T"){ //ES DOCUMENTO ANULADO O ES TRANSFERENCIA GRATUITA
+						$i++;
+						$res[$i]['noperacion']   = $value2['noperacion'];
+						$res[$i]['cardcode']     = $this->preLetterBPartner('C', $value2['cardcode']);
+						$res[$i]['docdate']      = $value2['docdate'];
+						$res[$i]['foliopref']    = $value2['foliopref'];
+						$res[$i]['u_exx_nroini'] = (int)$value2['u_exx_nroini'];
+						$res[$i]['u_exx_nrofin'] = (int)$value2['u_exx_nrofin'];
+						$res[$i]['vatsum']       += (float)$value2['vatsum'];
+						$res[$i]['doctotal']     += (float)$value2['doctotal'];					
+						$res[$i]['estado']       = 'P';
+						$res[$i]['errormsg']     = '';
+						$res[$i]['transaccion']  = $value2['transaccion'];
+						$res[$i]['docentry']     = NULL;
+						$res[$i]['_turn']        = $value2['_turn'];
+						$i++;
+						$inicio_agrupacion = true;
+					}else{
+						$res[$i]['noperacion']   = $noperacion;
+						$res[$i]['cardcode']     = $this->preLetterBPartner('C', $value2['cardcode']);
+						$res[$i]['docdate']      = $value2['docdate'];
+						$res[$i]['foliopref']    = $value2['foliopref'];
+						$res[$i]['u_exx_nroini'] = (int)$u_exx_nroini;
+						$res[$i]['u_exx_nrofin'] = (int)$value2['u_exx_nrofin'];
+						$res[$i]['vatsum']       += (float)$value2['vatsum'];
+						$res[$i]['doctotal']     += (float)$value2['doctotal'];					
+						$res[$i]['estado']       = 'P';
+						$res[$i]['errormsg']     = '';
+						$res[$i]['transaccion']  = $transaccion;
+						$res[$i]['docentry']     = NULL;
+						$res[$i]['_turn']        = $value2['_turn'];													
+					}								
+				}
+			}
+		}
+
+		foreach ($res as $key => $value) {
+			//ESTO SE CALCULARA EN EL ARRAY RESULTANTE
+			$c++;
+			$this->ticketHead[$value['foliopref']][$value['_turn']] = array(
+				'u_exx_nroini' => (int)$value['u_exx_nroini'],
+				'u_exx_nrofin' => (int)$value['u_exx_nrofin'],
+				'noperacion' => $value['noperacion'],
+			);
+			//CERRAR ESTO SE CALCULARA EN EL ARRAY RESULTANTE
+		}
+		//CERRAR DESAGREGAR TRANSFERENCIAS GRATUITAS MANTENIENDO CONTINUIDAD DE CORRELATIVO
+
 		return array(
 			'error' => false,
 			'tableName' => $param['tableName'],
@@ -5404,7 +5689,7 @@ WHERE
  AND pt.td IN ('B')
  AND pt.tm = 'V'
  --AND pt.es = '".$param['warehouse']."'
- --AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
+ AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
 GROUP BY
  PT.es,
  PT.caja,
@@ -8492,6 +8777,76 @@ movialma.mov_numero, movialma.tran_codigo;";
 	}
 
 	/**
+	 * Factura de proveedores - Cabecera
+	 */
+	public function getHeadInvoicePurchaseWithGuiasRemision($param) {
+		global $sqlca;
+
+		$res = array();
+		$sql = "SELECT
+ movialma.mov_numero || movialma.tran_codigo AS noperacion,
+ (CASE WHEN FIRST(proveedor.pro_ruc) IS NULL OR FIRST(proveedor.pro_ruc) = '' THEN 'C00099999999' ELSE FIRST(proveedor.pro_ruc) END)  AS cardcode,
+ FIRST(movialma.mov_fecha) AS docdate,
+ substring(FIRST(mov_docurefe) FROM 1 for 4) AS foliopref,
+ substring(FIRST(mov_docurefe) FROM 5 for 12) AS folionum,
+ '' AS extempno,
+ FIRST(tipodocumento.tab_car_03) AS indicator,
+ ROUND(((SUM(movialma.mov_costototal) * " . $param['tax'] . ") - SUM(movialma.mov_costototal)), 2) AS vatsum,
+ ROUND((SUM(movialma.mov_costototal) * " . $param['tax'] . "), 2) AS doctotal
+FROM inv_movialma movialma
+JOIN inv_tipotransa tipotransa ON (movialma.tran_codigo = tipotransa.tran_codigo)
+LEFT JOIN int_proveedores proveedor ON (movialma.mov_entidad = proveedor.pro_codigo)
+LEFT JOIN int_tabla_general AS tipodocumento ON (
+ movialma.mov_tipdocuref = substring(TRIM(tipodocumento.tab_elemento) for 2 FROM length(TRIM(tipodocumento.tab_elemento))-1)
+ AND tipodocumento.tab_tabla = '08'
+ AND tipodocumento.tab_elemento <> '000000'
+)
+JOIN inv_ta_almacenes al_origen ON (movialma.mov_almaorigen = al_origen.ch_almacen)
+JOIN inv_ta_almacenes al_destino ON (movialma.mov_almadestino = al_destino.ch_almacen)
+WHERE
+tipotransa.tran_naturaleza = '2'
+AND tipodocumento.tab_car_03 IN ('01','09') --MOSTRAMOS FACTURAS Y GUIAS DE REMISION
+AND movialma.tran_codigo IN ('21', '01')
+--AND movialma.art_codigo NOT IN('11620301','11620303','11620304','11620305','11620307')
+AND movialma.mov_fecha BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
+GROUP BY
+movialma.mov_numero, movialma.tran_codigo;";
+
+		$this->_error_log($param['tableName'].' - getHeadInvoicePurchase: '.$sql.' [LINE: '.__LINE__.']');
+		$c = 0;
+		if ($sqlca->query($sql) < 0) {
+			return array('error' => true);
+		}
+		while ($reg = $sqlca->fetchRow()) {
+			$c++;
+			$res[] = array(
+				'noperacion' => $reg['noperacion'],
+				'cardcode' => $this->preLetterBPartner('P', $reg['cardcode']),
+				'docdate' => $reg['docdate'],
+				'foliopref' => $reg['foliopref'],
+				'folionum' => $reg['folionum'],
+				'extempno' => $this->cleanStr($reg['extempno']),
+				'indicator' => $reg['indicator'],
+
+				'vatsum' => (float)$reg['vatsum'],//(Total Impuesto) actualmente vacíos
+				'doctotal' => (float)$reg['doctotal'],//(Total de Documento) actualmente vacíos
+
+				'estado' => 'P',
+				'errormsg' => '',
+				'transaccion' => '',
+				'docentry' => NULL,
+			);
+		}
+		return array(
+			'error' => false,
+			'tableName' => $param['tableName'],
+			'nodeData' => 'headInvoicePurchase',
+			'headInvoicePurchase' => $res,
+			'count' => $c,
+		);
+	}
+
+	/**
 	 * Factura de proveedores - Detalle
 	 */
 	public function getDetailInvoicePurchase($param) {
@@ -8523,7 +8878,83 @@ LEFT JOIN int_tabla_general AS tipodocumento ON (
 WHERE
 tipotransa.tran_naturaleza = '2'
 AND tipodocumento.tab_car_03 = '01'
-AND movialma.tran_codigo IN ('21', '01')
+AND movialma.tran_codigo IN ('21', '01') 
+--AND movialma.art_codigo NOT IN('11620301','11620303','11620304','11620305','11620307')
+AND movialma.mov_fecha BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
+ORDER BY 1;";
+
+		$this->_error_log($param['tableName'].' - getDetailInvoicePurchase: '.$sql.' [LINE: '.__LINE__.']');
+		$c = 0;
+		$ci = 1;
+		$tmpDoc = '';
+		if ($sqlca->query($sql) < 0) {
+			return array('error' => true);
+		}
+		while ($reg = $sqlca->fetchRow()) {
+			$c++;
+			if ($tmpDoc == $reg['noperacion']) {
+				$ci++;
+			} else {
+				$ci = 1;
+			}
+			$res[] = array(
+				'noperacion' => $reg['noperacion'],
+				'item' => $ci,
+				'itemcode' => $this->cleanStr($reg['itemcode']),
+				'whscode' => $reg['whscode'],
+				'quantity' => (float)$reg['quantity'],
+				'price' => (float)$reg['price'],
+				'taxcode' => $reg['taxcode'],
+				'discprcnt' => (float)$reg['discprcnt'],
+				'ocrcode2' => $reg['ocrcode2'],
+				'priceafvat' => (float)$reg['priceafvat'],
+				'desc_sinigv' => 0.00,
+				'desc_igv' => 0.00,
+			);
+			$tmpDoc = $reg['noperacion'];
+		}
+		return array(
+			'error' => false,
+			'tableName' => $param['tableName'],
+			'nodeData' => 'detailInvoicePurchase',
+			'detailInvoicePurchase' => $res,
+			'count' => $c,
+		);
+	}
+
+	/**
+	 * Factura de proveedores - Detalle
+	 */
+	public function getDetailInvoicePurchaseWithGuiasRemision($param) {
+		global $sqlca;
+
+		$res = array();
+		$sql = "
+SELECT
+ movialma.mov_numero || movialma.tran_codigo AS noperacion,
+ movialma.art_codigo AS itemcode,
+ SAPALMA.sap_codigo AS whscode,
+ movialma.mov_cantidad AS quantity,
+ movialma.mov_costounitario AS price,
+ '".$param['sap_tax_code']."' AS taxcode,
+ 0 AS discprcnt,
+ SAPCC.sap_codigo AS ocrcode2--centro de costo
+ , ROUND(movialma.mov_costounitario * ".$param['tax'].", 2) AS priceafvat
+ 
+FROM inv_movialma movialma
+JOIN inv_tipotransa tipotransa ON (movialma.tran_codigo = tipotransa.tran_codigo)
+LEFT JOIN sap_mapeo_tabla_detalle AS SAPALMA ON (SAPALMA.opencomb_codigo = movialma.mov_almacen AND SAPALMA.id_tipo_tabla = 2)
+JOIN int_ta_sucursales AS ORG ON (ORG.ch_sucursal = movialma.mov_almacen)
+LEFT JOIN sap_mapeo_tabla_detalle AS SAPCC ON (SAPCC.opencomb_codigo = ORG.ch_sucursal AND SAPCC.id_tipo_tabla = 1)--puede limitar
+LEFT JOIN int_tabla_general AS tipodocumento ON (
+ movialma.mov_tipdocuref = substring(TRIM(tipodocumento.tab_elemento) for 2 FROM length(TRIM(tipodocumento.tab_elemento))-1)
+ AND tipodocumento.tab_tabla = '08'
+ AND tipodocumento.tab_elemento <> '000000'
+)
+WHERE
+tipotransa.tran_naturaleza = '2'
+AND tipodocumento.tab_car_03 IN ('01','09') --MOSTRAMOS FACTURAS Y GUIAS DE REMISION
+AND movialma.tran_codigo IN ('21', '01') 
 --AND movialma.art_codigo NOT IN('11620301','11620303','11620304','11620305','11620307')
 AND movialma.mov_fecha BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
 ORDER BY 1;";
@@ -8575,8 +9006,8 @@ ORDER BY 1;";
 
 		$res = array();
 		$sql = "
-				SELECT
-					VARILLA.ch_sucursal || TO_CHAR(VARILLA.dt_fechamedicion, 'YYYYMMDD') || COMBU.ch_codigocombustible as noperacion,
+				SELECT	
+					VARILLA.ch_sucursal || TO_CHAR(VARILLA.dt_fechamedicion, 'YYYYMMDD') || COMBU.ch_codigocombustible as noperacion,				
 					VARILLA.dt_fechamedicion as docdate,
 					--VARILLA.ch_sucursal as whscode,
 					SAPCC.sap_codigo as whscode,
@@ -8632,6 +9063,188 @@ ORDER BY 1;";
 			'tableName' => $param['tableName'],
 			'nodeData' => 'detailVarillas',
 			'detailVarillas' => $res,
+			'count' => $c,
+		);
+	}
+
+	/**
+	 * Varillaje
+	 */
+	public function getDetailCombustiblePorManguera($param) {
+		global $sqlca;
+
+		$res = array();
+		$sql = "
+				SELECT 
+					cont.ch_sucursal || TO_CHAR(cont.dt_fechaparte, 'YYYYMMDD') || cont.ch_surtidor as noperacion,					
+					cont.dt_fechaparte, 
+					cont.ch_codigocombustible,
+					surt.ch_numerolado as lado,
+					cont.ch_surtidor as manguera, 
+					(
+					SELECT
+						ROUND((SUM(precio) / COUNT(*)),2)
+					FROM
+						pos_contometros
+					WHERE
+						dia = cont.dt_fechaparte
+						AND num_lado::text = surt.ch_numerolado
+						AND manguera = nu_manguera
+					) as precio,
+					cont.nu_contometroinicialgalon, 
+					cont.nu_contometrofinalgalon, 
+					cont.nu_contometroinicialvalor, 
+					cont.nu_contometrofinalvalor, 
+					cont.nu_afericionveces_x_5 as afericiones, 
+					-cont.nu_descuentos as descuentos	
+				FROM 
+					comb_ta_contometros cont
+					LEFT JOIN comb_ta_surtidores surt ON (cont.ch_sucursal= surt.ch_sucursal and cont.ch_surtidor=surt.ch_surtidor)
+					LEFT JOIN comb_ta_combustibles comb ON (cont.ch_codigocombustible=comb.ch_codigocombustible)
+				WHERE 				
+					DATE(cont.dt_fechaparte) BETWEEN '".$param['initial_date']."' AND '".$param['initial_date']."'
+				ORDER BY 	
+					dt_fechaparte, manguera;";
+		
+		$this->_error_log($param['tableName'].' - getDetailCombustiblePorManguera: '.$sql.' [LINE: '.__LINE__.']');
+		$c = 0;
+		if ($sqlca->query($sql) < 0) {
+			return array('error' => true);
+		}
+		while ($reg = $sqlca->fetchRow()) {
+			$c++;
+			$res[] = array(
+				'noperacion' => $reg['noperacion'],				
+				'docdate' => $reg['dt_fechaparte'],
+				'itemcode' => $reg['ch_codigocombustible'],				
+				'u_exc_lado' => $reg['lado'],				
+				'u_exc_manguera' => $reg['manguera'],				
+				'price' => $reg['precio'],				
+				'u_exc_continigal' => $reg['nu_contometroinicialgalon'],				
+				'u_exc_contfingal' => $reg['nu_contometrofinalgalon'],				
+				'u_exc_continival' => $reg['nu_contometroinicialvalor'],				
+				'u_exc_contfinval' => $reg['nu_contometrofinalvalor'],				
+				'u_exc_afericiones' => $reg['afericiones'],				
+				'u_exc_descuentos' => $reg['descuentos'],				
+				'estado' => 'P',
+				'errormsg' => '',							
+			);
+		}
+		return array(
+			'error' => false,
+			'tableName' => $param['tableName'],
+			'nodeData' => 'detailCombustiblePorManguera',
+			'detailCombustiblePorManguera' => $res,
+			'count' => $c,
+		);
+	}
+
+	/**
+	 * Tabla de stocks (sólo combustibles)
+	 */
+	public function getDetailStock($param) {
+		global $sqlca;
+
+		$res = array();
+		$sql = "
+				SELECT
+					VARILLA.ch_sucursal || TO_CHAR(VARILLA.dt_fechamedicion, 'YYYYMMDD') || COMBU.ch_codigocombustible as noperacion,
+					VARILLA.dt_fechamedicion as fechamedicion,
+					COMBU.ch_codigocombustible as codigocombustible,
+					COMBU.ch_nombrecombustible as nombrecombustible,
+					SUM(VARILLA.nu_medicion) as medicion
+				FROM
+					comb_ta_mediciondiaria    AS VARILLA
+					JOIN comb_ta_tanques      AS TANK    USING (ch_sucursal,ch_tanque)
+					JOIN comb_ta_combustibles AS COMBU   USING(ch_codigocombustible)
+				WHERE
+					--VARILLA.ch_sucursal = '003' AND
+					DATE(VARILLA.dt_fechamedicion) BETWEEN '".$param['initial_date']."' AND '".$param['initial_date']."'
+				GROUP BY
+					VARILLA.dt_fechamedicion,
+					COMBU.ch_codigocombustible,
+					VARILLA.ch_sucursal
+				ORDER BY
+					VARILLA.dt_fechamedicion,
+					COMBU.ch_codigocombustible;";
+		
+		$this->_error_log($param['tableName'].' - getDetailStock: '.$sql.' [LINE: '.__LINE__.']');
+		$c = 0;
+		if ($sqlca->query($sql) < 0) {
+			return array('error' => true);
+		}
+		while ($reg = $sqlca->fetchRow()) {
+			$c++;
+			$res[] = array(
+				'noperacion' => $reg['noperacion'],				
+				'docdate' => $reg['fechamedicion'],
+				'itemcode' => $reg['codigocombustible'],				
+				'u_exc_medicion' => $reg['medicion'],				
+				'estado' => 'P',
+				'errormsg' => '',							
+			);
+		}
+		return array(
+			'error' => false,
+			'tableName' => $param['tableName'],
+			'nodeData' => 'detailStock',
+			'detailStock' => $res,
+			'count' => $c,
+		);
+	}
+
+	/**
+	 * Tabla de totales por forma de pago con notas de despacho
+	 */
+	public function getDetailTotales($param) {
+		global $sqlca;
+
+		$res = array();
+		$sql = "
+				SELECT
+					t.es || TO_CHAR(DATE(t.dia), 'YYYYMMDD') || t.turno || TRIM(tl.tab_elemento) as noperacion,
+					DATE(t.dia) as docdate,
+					t.turno as turno,
+					'TARJETA' as fpago, 
+					TRIM(tl.tab_elemento)|| ' - ' ||TRIM(tl.tab_descripcion) nolinea,
+					SUM(t.importe) as importetarjeta
+				FROM
+					".$param['pos_trans']." t
+					JOIN int_articulos art ON(art.art_codigo = t.codigo)
+					LEFT JOIN int_tabla_general tl ON (tl.tab_elemento = art.art_linea AND tl.tab_tabla = '20' AND (tl.tab_elemento != '000000' AND tl.tab_elemento != ''))
+				WHERE
+					--t.es = '" . pg_escape_string($estaciones) . "' AND
+					t.fpago = '2' AND
+					t.td != 'N' AND
+					DATE(t.dia) BETWEEN '".$param['initial_date']."' AND '".$param['initial_date']."'
+				GROUP BY 
+					noperacion,docdate,turno,fpago,nolinea
+				ORDER BY 
+					docdate,turno,fpago,nolinea;";
+		
+		$this->_error_log($param['tableName'].' - getDetailTotales: '.$sql.' [LINE: '.__LINE__.']');
+		$c = 0;
+		if ($sqlca->query($sql) < 0) {
+			return array('error' => true);
+		}
+		while ($reg = $sqlca->fetchRow()) {
+			$c++;
+			$res[] = array(
+				'noperacion' => $reg['noperacion'],				
+				'docdate' => $reg['docdate'],
+				'u_exc_turno' => $reg['turno'],				
+				'u_exc_fpago' => $reg['fpago'],	
+				'u_exc_nolinea' => $reg['nolinea'],
+				'u_exc_importe' => $reg['importetarjeta'],
+				'estado' => 'P',
+				'errormsg' => '',							
+			);
+		}
+		return array(
+			'error' => false,
+			'tableName' => $param['tableName'],
+			'nodeData' => 'detailTotales',
+			'detailTotales' => $res,
 			'count' => $c,
 		);
 	}

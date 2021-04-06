@@ -160,7 +160,7 @@ class c_sap_1 {
 		$m_sap_1 = new m_sap_1();
 		$v_sap_1 = new v_sap_1();
 
-		$m_sap_1->setIsDebug(false);
+		$m_sap_1->setIsDebug(true);
 		$m_sap_1->setIsViewTableName(true);
 		$user = $m_sap_1->getUserIdByChLogin();
 		if ($user['error']) {
@@ -175,12 +175,12 @@ class c_sap_1 {
 		//validar que se reciba la fecha y no esté vacía
 		$arr_initial_date = explode('/', $req['initial_date']);
 
-		$connectionData = $m_sap_1->getConnectionData();
-		echo "<script>console.log('connectionData: " . json_encode($connectionData) . "')</script>"; //Agregado 2020-01-10			
+		// $connectionData = $m_sap_1->getConnectionData();
+		// echo "<script>console.log('connectionData: " . json_encode($connectionData) . "')</script>"; //Agregado 2020-01-10			
 
-		$hanaInstance = $m_sap_1->connectionHana($connectionData);
-		echo "<script>console.log('hanaInstance: " . json_encode($hanaInstance['message']) . "')</script>"; //Agregado 2020-01-10
-		$v_sap_1->statusRequest('Estado de conexión [', $hanaInstance);
+		// $hanaInstance = $m_sap_1->connectionHana($connectionData);
+		// echo "<script>console.log('hanaInstance: " . json_encode($hanaInstance['message']) . "')</script>"; //Agregado 2020-01-10
+		// $v_sap_1->statusRequest('Estado de conexión [', $hanaInstance);
 
 		$req['initial_date'] = $arr_initial_date[2].'-'.$arr_initial_date[1].'-'.$arr_initial_date[0];
 		$req['pos_trans'] = 'pos_trans'.$arr_initial_date[2].$arr_initial_date[1];
@@ -195,21 +195,21 @@ class c_sap_1 {
 		echo "<script>console.log('req: " . json_encode($req) . "')</script>"; //Agregado 2020-01-10
 
 
-		if($_SESSION['es_requerimiento_sap_energigas'] == false){
-			$req['tableName'] = 'INTOCRD';
-			$data['bpartner'] = $m_sap_1->getBPartner($hanaInstance, $req);
-			//$data['bpartner'] = $m_sap_1->getBPartner($req); cai				
-			$data['bpartner']['isViewTableName'] = $m_sap_1->isViewTableName;
-			//echo "<script>console.log('INTOCRD: " . json_encode($data['bpartner']) . "')</script>"; //Agregado 2020-01-10
-			$v_sap_1->tableBpartner($data['bpartner']);
-		}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
-			$req['tableName'] = 'INTOCRD';
-			$data['bpartner'] = $m_sap_1->getBPartnerRequerimientoEnergigas($hanaInstance, $req);
-			//$data['bpartner'] = $m_sap_1->getBPartner($req); cai				
-			$data['bpartner']['isViewTableName'] = $m_sap_1->isViewTableName;
-			//echo "<script>console.log('INTOCRD: " . json_encode($data['bpartner']) . "')</script>"; //Agregado 2020-01-10
-			$v_sap_1->tableBpartner($data['bpartner']);
-		}
+		// if($_SESSION['es_requerimiento_sap_energigas'] == false){
+		// 	$req['tableName'] = 'INTOCRD';
+		// 	$data['bpartner'] = $m_sap_1->getBPartner($hanaInstance, $req);
+		// 	//$data['bpartner'] = $m_sap_1->getBPartner($req); cai				
+		// 	$data['bpartner']['isViewTableName'] = $m_sap_1->isViewTableName;
+		// 	//echo "<script>console.log('INTOCRD: " . json_encode($data['bpartner']) . "')</script>"; //Agregado 2020-01-10
+		// 	$v_sap_1->tableBpartner($data['bpartner']);
+		// }else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+		// 	$req['tableName'] = 'INTOCRD';
+		// 	$data['bpartner'] = $m_sap_1->getBPartnerRequerimientoEnergigas($hanaInstance, $req);
+		// 	//$data['bpartner'] = $m_sap_1->getBPartner($req); cai				
+		// 	$data['bpartner']['isViewTableName'] = $m_sap_1->isViewTableName;
+		// 	//echo "<script>console.log('INTOCRD: " . json_encode($data['bpartner']) . "')</script>"; //Agregado 2020-01-10
+		// 	$v_sap_1->tableBpartner($data['bpartner']);
+		// }
 
 		$req['tableName'] = 'INTOHEM';
 		$data['employee'] = $m_sap_1->getEmployee($req);
@@ -219,46 +219,46 @@ class c_sap_1 {
 		/**
 		 * 1. Venta contado
 		 */
-		if($_SESSION['es_requerimiento_sap_energigas'] == false){			
-			$req['tableName'] = 'INTOINVFC'; //El numero de clientes RUC que están en la TABLA INTOINVFC no están en la tabla INTOCRD(SOCIOS DE NEGOCIO)
-			$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCash($req);
-			$data['invoiceHeaderSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;
-			$v_sap_1->tableInvoiceHeaderSaleCash($data['invoiceHeaderSaleCash']);			
-		}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+		if($_SESSION['es_requerimiento_sap_energigas'] == true){
 			/* Requerimiento Energigas fecha emision */
 			$req['tableName'] = 'INTOINVFC'; //El numero de clientes RUC que están en la TABLA INTOINVFC no están en la tabla INTOCRD(SOCIOS DE NEGOCIO)
 			$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCashWithFechaEmision($req);
 			$data['invoiceHeaderSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;			
 			$v_sap_1->tableInvoiceHeaderSaleCashWithFechaEmision($data['invoiceHeaderSaleCash']);
 			/* Fin */
+		}else{
+			$req['tableName'] = 'INTOINVFC'; //El numero de clientes RUC que están en la TABLA INTOINVFC no están en la tabla INTOCRD(SOCIOS DE NEGOCIO)
+			$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCash($req);
+			$data['invoiceHeaderSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableInvoiceHeaderSaleCash($data['invoiceHeaderSaleCash']);			
 		}
 
-		if($_SESSION['es_requerimiento_sap_energigas'] == false){			
-			$req['tableName'] = 'INTINVFC1';
-			$data['invoiceDetailSaleCash'] = $m_sap_1->getInvoiceDetailSaleCash($req);
-			$data['invoiceDetailSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;
-			$v_sap_1->tableInvoiceDetailSaleCash($data['invoiceDetailSaleCash']);
-		}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+		if($_SESSION['es_requerimiento_sap_energigas'] == true){
 			/* Requerimiento Energigas, excluimos notas de credito */
 			$req['tableName'] = 'INTINVFC1';
 			$data['invoiceDetailSaleCash'] = $m_sap_1->getInvoiceDetailSaleCashExcluimosNC($req);
 			$data['invoiceDetailSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;
 			$v_sap_1->tableInvoiceDetailSaleCash($data['invoiceDetailSaleCash']);
 			/* Fin */
+		}else{
+			$req['tableName'] = 'INTINVFC1';
+			$data['invoiceDetailSaleCash'] = $m_sap_1->getInvoiceDetailSaleCash($req);
+			$data['invoiceDetailSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableInvoiceDetailSaleCash($data['invoiceDetailSaleCash']);
 		}
 
-		if($_SESSION['es_requerimiento_sap_energigas'] == false){			
-			$req['tableName'] = 'INTORCTFC';
-			$data['paymentSaleCash'] = $m_sap_1->getPaymentSaleCash($req);
-			$data['paymentSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;
-			$v_sap_1->tablePaymentSaleCash($data['paymentSaleCash']);
-		}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+		if($_SESSION['es_requerimiento_sap_energigas'] == true){
 			/* Requerimiento Energigas, excluimos documentos originales */
 			$req['tableName'] = 'INTORCTFC';
 			$data['paymentSaleCash'] = $m_sap_1->getPaymentSaleCashExcluimosDocumentosOriginales($req);
 			$data['paymentSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;
 			$v_sap_1->tablePaymentSaleCash($data['paymentSaleCash']);
 			/* Fin */
+		}else{
+			$req['tableName'] = 'INTORCTFC';
+			$data['paymentSaleCash'] = $m_sap_1->getPaymentSaleCash($req);
+			$data['paymentSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tablePaymentSaleCash($data['paymentSaleCash']);
 		}
 
 		/**
@@ -292,14 +292,8 @@ class c_sap_1 {
 
 		/**
 		 * . Venta credito
-		 */
-		if($_SESSION['es_requerimiento_sap_energigas'] == false){			
-			$req['client'] = "AND client.cli_ndespacho_efectivo = '0' AND client.cli_anticipo = 'N'";//credito
-			$req['tableName'] = 'INTODLNPC';
-			$data['shipmentHeaderSaleCredit'] = $m_sap_1->getShipmentHeaderSaleCredit($req);
-			$data['shipmentHeaderSaleCredit']['isViewTableName'] = $m_sap_1->isViewTableName;
-			$v_sap_1->tableShipmentHeaderSaleCredit($data['shipmentHeaderSaleCredit']);			
-		}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+		 */		
+		if($_SESSION['es_requerimiento_sap_energigas'] == true){
 			/* Requerimiento Energigas fecha emision */
 			$req['client'] = "AND client.cli_ndespacho_efectivo = '0' AND client.cli_anticipo = 'N'";//credito
 			$req['tableName'] = 'INTODLNPC';
@@ -307,6 +301,12 @@ class c_sap_1 {
 			$data['shipmentHeaderSaleCredit']['isViewTableName'] = $m_sap_1->isViewTableName;			
 			$v_sap_1->tableShipmentHeaderSaleCreditWithFechaEmision($data['shipmentHeaderSaleCredit']);
 			/* Fin */
+		}else{
+			$req['client'] = "AND client.cli_ndespacho_efectivo = '0' AND client.cli_anticipo = 'N'";//credito
+			$req['tableName'] = 'INTODLNPC';
+			$data['shipmentHeaderSaleCredit'] = $m_sap_1->getShipmentHeaderSaleCredit($req);
+			$data['shipmentHeaderSaleCredit']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableShipmentHeaderSaleCredit($data['shipmentHeaderSaleCredit']);		
 		}
 
 		$req['tableName'] = 'INTDLNPC1';
@@ -378,46 +378,53 @@ class c_sap_1 {
 		/**
 		 * . Boletas
 		 */
-		if($_SESSION['es_requerimiento_sap_energigas'] == false){
-			$req['tableName'] = 'INTOBOL';
-			$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicket($req);
-			$data['documentHeadTicket']['isViewTableName'] = $m_sap_1->isViewTableName;
-			$v_sap_1->tableDocumentHeadTicket($data['documentHeadTicket']);
-		}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+		if($_SESSION['es_requerimiento_sap_energigas'] == true){
 			/* Requerimiento Energigas distinguir documentos mayores a 700 */
 			$req['tableName'] = 'INTOBOL';
 			$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicketDistinguirDocumentosMayores700($req);
 			$data['documentHeadTicket']['isViewTableName'] = $m_sap_1->isViewTableName;
 			$v_sap_1->tableDocumentHeadTicket($data['documentHeadTicket']);
 			/* Fin */
+		}else if($_SESSION['es_requerimiento_sap_centauro'] == true){
+			$req['tableName'] = 'INTOBOL';
+			$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicketDesagregarDocumentosAnulados($req);
+			$data['documentHeadTicket']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableDocumentHeadTicket($data['documentHeadTicket']);
+		}else{
+			$req['tableName'] = 'INTOBOL';
+			$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicket($req);
+			$data['documentHeadTicket']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableDocumentHeadTicket($data['documentHeadTicket']);
 		}
+		// die();
 
-		if($_SESSION['es_requerimiento_sap_energigas'] == false){
-			$req['tableName'] = 'INTBOL1';
-			$data['documentDetailTicket'] = $m_sap_1->getDocumentDetailTicket($req);
-			$data['documentDetailTicket']['isViewTableName'] = $m_sap_1->isViewTableName;
-			$v_sap_1->tableDocumentDetailTicket($data['documentDetailTicket']);
-		}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+		if($_SESSION['es_requerimiento_sap_energigas'] == true){
 			/* Requerimiento Energigas distinguir documentos mayores a 700 y fecha emision */
 			$req['tableName'] = 'INTBOL1';
 			$data['documentDetailTicket'] = $m_sap_1->getDocumentDetailTicketDistinguirDocumentosMayores700AndWithFechaEmision($req);
 			$data['documentDetailTicket']['isViewTableName'] = $m_sap_1->isViewTableName;
 			$v_sap_1->tableDocumentDetailTicketWithFechaEmision($data['documentDetailTicket']);
 			/* Fin */
+		}else{
+			$req['tableName'] = 'INTBOL1';
+			$data['documentDetailTicket'] = $m_sap_1->getDocumentDetailTicket($req);
+			$data['documentDetailTicket']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableDocumentDetailTicket($data['documentDetailTicket']);
 		}
+		die();
 
-		if($_SESSION['es_requerimiento_sap_energigas'] == false){
-			$req['tableName'] = 'INTORCTBOL';
-			$data['paymentDocumentTicket'] = $m_sap_1->getPaymentDocumentTicket($req);
-			$data['paymentDocumentTicket']['isViewTableName'] = $m_sap_1->isViewTableName;		
-			$v_sap_1->tablePaymentDocumentTicket($data['paymentDocumentTicket']);
-		}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+		if($_SESSION['es_requerimiento_sap_energigas'] == true){
 			/* Requerimiento Energigas distinguir documentos mayores a 700 y agrupacion por Turno y Efectivo */
 			$req['tableName'] = 'INTORCTBOL';
 			$data['paymentDocumentTicket'] = $m_sap_1->getPaymentDocumentTicketDistinguirDocumentosMayores700AndGroupByTurnoAndEfectivo($req);
 			$data['paymentDocumentTicket']['isViewTableName'] = $m_sap_1->isViewTableName;			
 			$v_sap_1->tablePaymentDocumentTicketGroupByTurnoAndEfectivo($data['paymentDocumentTicket']);
 			/* Fin */
+		}else{
+			$req['tableName'] = 'INTORCTBOL';
+			$data['paymentDocumentTicket'] = $m_sap_1->getPaymentDocumentTicket($req);
+			$data['paymentDocumentTicket']['isViewTableName'] = $m_sap_1->isViewTableName;		
+			$v_sap_1->tablePaymentDocumentTicket($data['paymentDocumentTicket']);
 		}
 
 		/**
@@ -447,18 +454,18 @@ class c_sap_1 {
 		/**
 		 * . Deposito
 		 */
-		if($_SESSION['es_requerimiento_sap_energigas'] == false){
-			$req['tableName'] = 'INTDEPOSITOS';
-			$data['deposit'] = $m_sap_1->getDeposit($req);
-			$data['deposit']['isViewTableName'] = $m_sap_1->isViewTableName;
-			$v_sap_1->tableDeposit($data['deposit']);
-		}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+		if($_SESSION['es_requerimiento_sap_energigas'] == true){
 			/* Requerimiento Energigas fecha sistema */
 			$req['tableName'] = 'INTDEPOSITOS';
 			$data['deposit'] = $m_sap_1->getDepositWithFechaSistema($req);
 			$data['deposit']['isViewTableName'] = $m_sap_1->isViewTableName;
 			$v_sap_1->tableDepositWithFechaSistema($data['deposit']);
 			/* Fin */
+		}else{
+			$req['tableName'] = 'INTDEPOSITOS';
+			$data['deposit'] = $m_sap_1->getDeposit($req);
+			$data['deposit']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableDeposit($data['deposit']);
 		}
 
 		/**
@@ -506,18 +513,18 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 		/**
 		 * . Notas de credito
 		 */
-		if($_SESSION['es_requerimiento_sap_energigas'] == false){
-			$req['tableName'] = 'INTORIN';
-			$data['headCreditNote'] = $m_sap_1->getHeadCreditNote($hanaInstance, $req);
-			$data['headCreditNote']['isViewTableName'] = $m_sap_1->isViewTableName;
-			$v_sap_1->tableHeadCreditNote($data['headCreditNote']);
-		}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+		if($_SESSION['es_requerimiento_sap_energigas'] == true){
 			/* Requerimiento Energigas fecha emision */
 			$req['tableName'] = 'INTORIN';
 			$data['headCreditNote'] = $m_sap_1->getHeadCreditNoteWithFechaEmision($hanaInstance, $req);
 			$data['headCreditNote']['isViewTableName'] = $m_sap_1->isViewTableName;
 			$v_sap_1->tableHeadCreditNoteWithFechaEmision($data['headCreditNote']);
 			/* Fin */
+		}else{
+			$req['tableName'] = 'INTORIN';
+			$data['headCreditNote'] = $m_sap_1->getHeadCreditNote($hanaInstance, $req);
+			$data['headCreditNote']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableHeadCreditNote($data['headCreditNote']);
 		}
 
 		$req['tableName'] = 'INTRIN1';
@@ -541,15 +548,29 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 		/**
 		 * . Factura de proveedores - compras
 		 */
-		$req['tableName'] = 'INTOPCH';
-		$data['headInvoicePurchase'] = $m_sap_1->getHeadInvoicePurchase($req);
-		$data['headInvoicePurchase']['isViewTableName'] = $m_sap_1->isViewTableName;
-		$v_sap_1->tableHeadInvoicePurchase($data['headInvoicePurchase']);
+		if($_SESSION['es_requerimiento_sap_centauro'] == true){
+			$req['tableName'] = 'INTOPCH';
+			$data['headInvoicePurchase'] = $m_sap_1->getHeadInvoicePurchaseWithGuiasRemision($req);
+			$data['headInvoicePurchase']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableHeadInvoicePurchase($data['headInvoicePurchase']);
+		}else{
+			$req['tableName'] = 'INTOPCH';
+			$data['headInvoicePurchase'] = $m_sap_1->getHeadInvoicePurchase($req);
+			$data['headInvoicePurchase']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableHeadInvoicePurchase($data['headInvoicePurchase']);
+		}
 
-		$req['tableName'] = 'INTPCH1';
-		$data['detailInvoicePurchase'] = $m_sap_1->getDetailInvoicePurchase($req);
-		$data['detailInvoicePurchase']['isViewTableName'] = $m_sap_1->isViewTableName;
-		$v_sap_1->tableDetailInvoicePurchase($data['detailInvoicePurchase']);
+		if($_SESSION['es_requerimiento_sap_centauro'] == true){
+			$req['tableName'] = 'INTPCH1';
+			$data['detailInvoicePurchase'] = $m_sap_1->getDetailInvoicePurchaseWithGuiasRemision($req);
+			$data['detailInvoicePurchase']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableDetailInvoicePurchase($data['detailInvoicePurchase']);
+		}else{
+			$req['tableName'] = 'INTPCH1';
+			$data['detailInvoicePurchase'] = $m_sap_1->getDetailInvoicePurchase($req);
+			$data['detailInvoicePurchase']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableDetailInvoicePurchase($data['detailInvoicePurchase']);
+		}
 
 		/**
 		 * . Varillaje
@@ -562,6 +583,38 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 			$v_sap_1->tableDetailVarillas($data['detailVarillas']);
 			/* Fin */
 		}
+
+		//REQUERIMIENTO CENTAURO OPENSOFT-XX
+		/**
+		 * . Venta de combustibles por manguera/día
+		 */
+		if($_SESSION['es_requerimiento_sap_centauro'] == true){
+			$req['tableName'] = 'INTCOMBUSTIBLECONT';
+			$data['detailCombustiblePorManguera'] = $m_sap_1->getDetailCombustiblePorManguera($req);
+			$data['detailCombustiblePorManguera']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableDetailCombustiblePorManguera($data['detailCombustiblePorManguera']);			
+		}
+
+		/**
+		 * . Tabla de stocks (sólo combustibles)
+		 */
+		if($_SESSION['es_requerimiento_sap_centauro'] == true){			
+			$req['tableName'] = 'INTSTOCK';
+			$data['detailStock'] = $m_sap_1->getDetailStock($req);
+			$data['detailStock']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableDetailStock($data['detailStock']);			
+		}
+
+		/**
+		 * . Tabla de totales por forma de pago con notas de despacho
+		 */
+		if($_SESSION['es_requerimiento_sap_centauro'] == true){			
+			$req['tableName'] = 'INTTOTALES';
+			$data['detailTotales'] = $m_sap_1->getDetailTotales($req);
+			$data['detailStock']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableDetailTotales($data['detailTotales']);			
+		}
+		//CERRAR REQUERIMIENTO CENTAURO OPENSOFT-XX
 
 		$m_sap_1->ticketHead = array();
 
@@ -633,16 +686,16 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 			var_dump($document);
 			exit;*/
 
-			if($_SESSION['es_requerimiento_sap_energigas'] == false){
+			if($_SESSION['es_requerimiento_sap_energigas'] == true){
 				$req['tableName'] = 'INTOCRD';
-				$data['bpartner'] = $m_sap_1->getBPartner($hanaInstance, $req);
+				$data['bpartner'] = $m_sap_1->getBPartnerRequerimientoEnergigas($hanaInstance, $req);
 				if ( $data['bpartner']['sStatus'] == 'success' ) { 
 					$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['bpartner'], array('isUnique' => false));
 					$this->checkResponseInsert($req, $res); 
 				}
-			}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+			}else{
 				$req['tableName'] = 'INTOCRD';
-				$data['bpartner'] = $m_sap_1->getBPartnerRequerimientoEnergigas($hanaInstance, $req);
+				$data['bpartner'] = $m_sap_1->getBPartner($hanaInstance, $req);
 				if ( $data['bpartner']['sStatus'] == 'success' ) { 
 					$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['bpartner'], array('isUnique' => false));
 					$this->checkResponseInsert($req, $res); 
@@ -654,46 +707,46 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 			$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['employee'], array('isUnique' => false));
 			$this->checkResponseInsert($req, $res); 
 
-			if($_SESSION['es_requerimiento_sap_energigas'] == false){
-				$req['tableName'] = 'INTOINVFC';
-				$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCash($req);
-				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['invoiceHeaderSaleCash'], array('isUnique' => true));
-				$this->checkResponseInsert($req, $res); 
-			}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+			if($_SESSION['es_requerimiento_sap_energigas'] == true){
 				/* Requerimiento Energigas fecha emision */
 				$req['tableName'] = 'INTOINVFC';
 				$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCashWithFechaEmision($req);
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['invoiceHeaderSaleCash'], array('isUnique' => true));
 				$this->checkResponseInsert($req, $res); 
 				/* Fin */
+			}else{
+				$req['tableName'] = 'INTOINVFC';
+				$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCash($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['invoiceHeaderSaleCash'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res); 
 			}
 
-			if($_SESSION['es_requerimiento_sap_energigas'] == false){	
-				$req['tableName'] = 'INTINVFC1';
-				$data['invoiceDetailSaleCash'] = $m_sap_1->getInvoiceDetailSaleCash($req);
-				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['invoiceDetailSaleCash'], array('isUnique' => true));
-				$this->checkResponseInsert($req, $res);
-			}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+			if($_SESSION['es_requerimiento_sap_energigas'] == true){
 				/* Requerimiento Energigas, excluimos notas de credito */
 				$req['tableName'] = 'INTINVFC1';
 				$data['invoiceDetailSaleCash'] = $m_sap_1->getInvoiceDetailSaleCashExcluimosNC($req);
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['invoiceDetailSaleCash'], array('isUnique' => true));
 				$this->checkResponseInsert($req, $res);
 				/* Fin */
+			}else{
+				$req['tableName'] = 'INTINVFC1';
+				$data['invoiceDetailSaleCash'] = $m_sap_1->getInvoiceDetailSaleCash($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['invoiceDetailSaleCash'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res);
 			}
 
-			if($_SESSION['es_requerimiento_sap_energigas'] == false){
-				$req['tableName'] = 'INTORCTFC';
-				$data['paymentSaleCash'] = $m_sap_1->getPaymentSaleCash($req);
-				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['paymentSaleCash'], array('isUnique' => true));
-				$this->checkResponseInsert($req, $res);
-			}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+			if($_SESSION['es_requerimiento_sap_energigas'] == true){
 				/* Requerimiento Energigas, excluimos documentos originales */
 				$req['tableName'] = 'INTORCTFC';
 				$data['paymentSaleCash'] = $m_sap_1->getPaymentSaleCashExcluimosDocumentosOriginales($req);
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['paymentSaleCash'], array('isUnique' => true));
 				$this->checkResponseInsert($req, $res);
 				/* Fin */
+			}else{
+				$req['tableName'] = 'INTORCTFC';
+				$data['paymentSaleCash'] = $m_sap_1->getPaymentSaleCash($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['paymentSaleCash'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res);
 			}
 
 
@@ -724,13 +777,7 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 			$this->checkResponseInsert($req, $res); 
 
 
-			if($_SESSION['es_requerimiento_sap_energigas'] == false){
-				$req['client'] = "AND client.cli_ndespacho_efectivo = '0' AND client.cli_anticipo = 'N'";//credito
-				$req['tableName'] = 'INTODLNPC';
-				$data['shipmentHeaderSaleCredit'] = $m_sap_1->getShipmentHeaderSaleCredit($req);
-				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['shipmentHeaderSaleCredit'], array('isUnique' => true));
-				$this->checkResponseInsert($req, $res); 
-			}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+			if($_SESSION['es_requerimiento_sap_energigas'] == true){
 				/* Requerimiento Energigas fecha emision */
 				$req['client'] = "AND client.cli_ndespacho_efectivo = '0' AND client.cli_anticipo = 'N'";//credito
 				$req['tableName'] = 'INTODLNPC';
@@ -738,6 +785,12 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['shipmentHeaderSaleCredit'], array('isUnique' => true));
 				$this->checkResponseInsert($req, $res); 
 				/* Fin */
+			}else{
+				$req['client'] = "AND client.cli_ndespacho_efectivo = '0' AND client.cli_anticipo = 'N'";//credito
+				$req['tableName'] = 'INTODLNPC';
+				$data['shipmentHeaderSaleCredit'] = $m_sap_1->getShipmentHeaderSaleCredit($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['shipmentHeaderSaleCredit'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res); 
 			}
 
 			$req['tableName'] = 'INTDLNPC1';
@@ -804,46 +857,51 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 
 
 
-			if($_SESSION['es_requerimiento_sap_energigas'] == false){
-				$req['tableName'] = 'INTOBOL';
-				$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicket($req);
-				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['documentHeadTicket'], array('isUnique' => true));
-				$this->checkResponseInsert($req, $res);
-			}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+			if($_SESSION['es_requerimiento_sap_energigas'] == true){
 				/* Requerimiento Energigas distinguir documentos mayores a 700 */
 				$req['tableName'] = 'INTOBOL';
 				$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicketDistinguirDocumentosMayores700($req);
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['documentHeadTicket'], array('isUnique' => true));
 				$this->checkResponseInsert($req, $res);
 				/* Fin */
+			}elseif($_SESSION['es_requerimiento_sap_centauro'] == true){
+				$req['tableName'] = 'INTOBOL';
+				$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicketDesagregarDocumentosAnulados($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['documentHeadTicket'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res);
+			}else{
+				$req['tableName'] = 'INTOBOL';
+				$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicket($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['documentHeadTicket'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res);
 			}
 
-			if($_SESSION['es_requerimiento_sap_energigas'] == false){
-				$req['tableName'] = 'INTBOL1';
-				$data['documentDetailTicket'] = $m_sap_1->getDocumentDetailTicket($req);
-				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['documentDetailTicket'], array('isUnique' => true));
-				$this->checkResponseInsert($req, $res); 
-			}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+			if($_SESSION['es_requerimiento_sap_energigas'] == true){
 				/* Requerimiento Energigas distinguir documentos mayores a 700 y fecha emision */
 				$req['tableName'] = 'INTBOL1';
 				$data['documentDetailTicket'] = $m_sap_1->getDocumentDetailTicketDistinguirDocumentosMayores700AndWithFechaEmision($req);
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['documentDetailTicket'], array('isUnique' => true));
 				$this->checkResponseInsert($req, $res); 
 				/* Fin */
+			}else{
+				$req['tableName'] = 'INTBOL1';
+				$data['documentDetailTicket'] = $m_sap_1->getDocumentDetailTicket($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['documentDetailTicket'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res); 
 			}
 
-			if($_SESSION['es_requerimiento_sap_energigas'] == false){				
-				$req['tableName'] = 'INTORCTBOL';
-				$data['paymentDocumentTicket'] = $m_sap_1->getPaymentDocumentTicket($req);
-				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['paymentDocumentTicket'], array('isUnique' => true));
-				$this->checkResponseInsert($req, $res); 
-			}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+			if($_SESSION['es_requerimiento_sap_energigas'] == true){
 				/* Requerimiento Energigas distinguir documentos mayores a 700 y agrupacion por Turno y Efectivo */
 				$req['tableName'] = 'INTORCTBOL';
 				$data['paymentDocumentTicket'] = $m_sap_1->getPaymentDocumentTicketDistinguirDocumentosMayores700AndGroupByTurnoAndEfectivo($req);
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['paymentDocumentTicket'], array('isUnique' => true));
 				$this->checkResponseInsert($req, $res); 
 				/* Fin */
+			}else{
+				$req['tableName'] = 'INTORCTBOL';
+				$data['paymentDocumentTicket'] = $m_sap_1->getPaymentDocumentTicket($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['paymentDocumentTicket'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res); 
 			}
 
 			
@@ -864,18 +922,18 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 			$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['bonus'], array('isUnique' => true));
 			$this->checkResponseInsert($req, $res); 
 
-			if($_SESSION['es_requerimiento_sap_energigas'] == false){
-				$req['tableName'] = 'INTDEPOSITOS';//Ok
-				$data['deposit'] = $m_sap_1->getDeposit($req);
-				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['deposit'], array('isUnique' => true));
-				$this->checkResponseInsert($req, $res); 
-			}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+			if($_SESSION['es_requerimiento_sap_energigas'] == true){
 				/* Requerimiento Energigas fecha sistema */
 				$req['tableName'] = 'INTDEPOSITOS';//Ok
 				$data['deposit'] = $m_sap_1->getDepositWithFechaSistema($req);
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['deposit'], array('isUnique' => true));
 				$this->checkResponseInsert($req, $res); 
 				/* Fin */
+			}else{
+				$req['tableName'] = 'INTDEPOSITOS';//Ok
+				$data['deposit'] = $m_sap_1->getDeposit($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['deposit'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res);
 			}
 
 			/*
@@ -912,18 +970,18 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 
 
 			//Para enviar Notas de credito, es necesiario también envíar INTOINVFC e INTOBOL
-			if($_SESSION['es_requerimiento_sap_energigas'] == false){
-				$req['tableName'] = 'INTORIN';
-				$data['headCreditNote'] = $m_sap_1->getHeadCreditNote($hanaInstance, $req);
-				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['headCreditNote'], array('isUnique' => true));
-				$this->checkResponseInsert($req, $res); 
-			}else if($_SESSION['es_requerimiento_sap_energigas'] == true){
+			if($_SESSION['es_requerimiento_sap_energigas'] == true){
 				/* Requerimiento Energigas fecha emision */
 				$req['tableName'] = 'INTORIN';
 				$data['headCreditNote'] = $m_sap_1->getHeadCreditNoteWithFechaEmision($hanaInstance, $req);
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['headCreditNote'], array('isUnique' => true));
 				$this->checkResponseInsert($req, $res); 
 				/* Fin */
+			}else{
+				$req['tableName'] = 'INTORIN';
+				$data['headCreditNote'] = $m_sap_1->getHeadCreditNote($hanaInstance, $req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['headCreditNote'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res); 
 			}
 
 			$req['tableName'] = 'INTRIN1';
@@ -941,15 +999,29 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 			$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['detailDebitNote'], array('isUnique' => true));
 			$this->checkResponseInsert($req, $res); 
 
-			$req['tableName'] = 'INTOPCH';
-			$data['headInvoicePurchase'] = $m_sap_1->getHeadInvoicePurchase($req);
-			$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['headInvoicePurchase'], array('isUnique' => true));
-			$this->checkResponseInsert($req, $res); 
+			if($_SESSION['es_requerimiento_sap_centauro'] == true){
+				$req['tableName'] = 'INTOPCH';
+				$data['headInvoicePurchase'] = $m_sap_1->getHeadInvoicePurchaseWithGuiasRemision($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['headInvoicePurchase'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res); 
+			}else{
+				$req['tableName'] = 'INTOPCH';
+				$data['headInvoicePurchase'] = $m_sap_1->getHeadInvoicePurchase($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['headInvoicePurchase'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res); 
+			}
 
-			$req['tableName'] = 'INTPCH1';
-			$data['detailInvoicePurchase'] = $m_sap_1->getDetailInvoicePurchase($req);
-			$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['detailInvoicePurchase'], array('isUnique' => true));
-			$this->checkResponseInsert($req, $res); 
+			if($_SESSION['es_requerimiento_sap_centauro'] == true){
+				$req['tableName'] = 'INTPCH1';
+				$data['detailInvoicePurchase'] = $m_sap_1->getDetailInvoicePurchaseWithGuiasRemision($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['detailInvoicePurchase'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res); 
+			}else{
+				$req['tableName'] = 'INTPCH1';
+				$data['detailInvoicePurchase'] = $m_sap_1->getDetailInvoicePurchase($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['detailInvoicePurchase'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res); 
+			}
 
 			if($_SESSION['es_requerimiento_sap_energigas'] == true){
 				/* Requerimiento Energigas agregar tabla varillas */
