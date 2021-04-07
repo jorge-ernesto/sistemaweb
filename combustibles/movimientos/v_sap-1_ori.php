@@ -555,6 +555,7 @@ class v_sap_1 {
 					<th>extempno</th>
 					<th>u_exc_maqreg</th>
 					<th>doccur</th>
+					<th>indicator</th>
 				</tr>
 			</thead>
 			<tbody>			
@@ -571,6 +572,7 @@ class v_sap_1 {
 					<th><?php echo $row['extempno'] ?></th>
 					<th><?php echo $row['u_exc_maqreg'] ?></th>
 					<th><?php echo $row['doccur'] ?></th>
+					<th><?php echo $row['indicator'] ?></th>
 				</tr>
 				<?php } ?>				
 			</tbody>

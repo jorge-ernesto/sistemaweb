@@ -1141,6 +1141,24 @@ GROUP BY
 				$reg['folionum'] = $arr_foliopref[1];
 			}
 
+			/**
+			 * Cuando es anulado cantidad, precio, igv, importe y soles_km se muestra en 0, y no hay documento de referencia
+			 */
+
+			/**
+			 * Campos:
+			   - indicator:
+					FA - Factura
+					BO - Boleta
+					AN - Factura Anulada
+					AB - Boleta Anulada
+					TG - Transferencia gratuita			 
+			 */
+			$indicator = "FA";
+			if ( $reg['doctotal'] == 0 ) {
+				$indicator = "AF";
+			}			
+
 			//No se almacena el detalle porque en el metodo de notas de credito consulta a postrans y estas deben aplicarse el mismo día
 			$res[] = array(
 				'noperacion' => $reg['noperacion'],
@@ -1159,6 +1177,8 @@ GROUP BY
 				'errormsg' => '',
 				'transaccion' => $reg['transaccion'],
 				'docentry' => NULL,
+
+				'indicator' => $indicator,
 			);
 		}
 
@@ -1219,6 +1239,54 @@ GROUP BY 1;";
 			$data['grand_total'] = $this->getFormatNumber(array('number' => $data['grand_total'], 'decimal' => 2));
 
 			$this->invoiceSaleHead[$reg['foliopref']][$reg['folionum']] = $param['tableName'];
+
+			/**
+			 * Transferencias gratuitas solo se realizan en oficina
+			 */ 
+			
+			/**
+			 * Tabla fac_ta_factura_cabecera
+			 * Campos:
+				- nu_fac_recargo3:
+					0 = Registrado
+					1 = Completado
+					2 = Anulado
+					3 = Completado Enviado
+					4 = Completado Error (No se envió el documento a EBI -> SUNAT)
+					5 = Anulado enviado
+					6 = Anulado Error
+			 */
+			
+			/** 
+			 * - Valores (OCS) de tipos de impuesto:
+							Impuesto                  | ch_fac_tiporecargo2    |    Valor de impuesto (S / N)
+					----------------------------------------------------------------------------------------
+					- Op. Gravadas                  =   vacío 				 =		S
+					- Op. Exoneradas      ,          =   S 				 	 =		N
+					- Op. Gratuitas                 =   T 				 	 =		S
+					- Op. Gratuitas + Exoneradas    =   U  				 	 =		N
+					- Op. Inafectas                 =   V  	 				 =		N
+					- Op. Gratuitas + Inafectas     =   W  	 				 =		N
+			 */
+			
+			/**
+			 * Campos:
+			   - indicator:
+					FA - Factura
+					BO - Boleta
+					AN - Factura Anulada
+					AB - Boleta Anulada
+					TG - Transferencia gratuita			 
+			 */
+			$indicator = "FA";
+			if($reg['nu_fac_recargo3'] == 2 || $reg['nu_fac_recargo3'] == 5 || $reg['nu_fac_recargo3'] == 6 || TRIM($reg['ch_fac_tiporecargo2']) == "T"){ //ES DOCUMENTO ANULADO O ES TRANSFERENCIA GRATUITA
+				if( $reg['nu_fac_recargo3'] == 2 || $reg['nu_fac_recargo3'] == 5 || $reg['nu_fac_recargo3'] == 6 ) { //ES DOCUMENTO ANULADO
+					$indicator = "AN";
+				}else{ //ES TRANSFERENCIA GRATUITA
+					$indicator = "TG";
+				}
+			}
+
 			$res[] = array(
 				'noperacion' => $reg['noperacion'],
 				'cardcode' => $this->preLetterBPartner('C', $reg['cardcode']),
@@ -1236,6 +1304,8 @@ GROUP BY 1;";
 				'errormsg' => '',
 				'transaccion' => '',
 				'docentry' => NULL,
+
+				'indicator' => $indicator,
 			);
 		}
 
@@ -4927,6 +4997,16 @@ ORDER BY
 					/**
 					 * Cuando es anulado cantidad, precio, igv, importe y soles_km se muestra en 0, y no hay documento de referencia
 					 */ 
+
+					/**
+					 * Campos:
+						- indicator:
+							FA - Factura
+							BO - Boleta
+							AN - Factura Anulada
+							AB - Boleta Anulada
+							TG - Transferencia gratuita			 
+					*/
 					if($value2['doctotal'] != 0){ //NO ES DOCUMENTO ANULADO
 						$res[$i]['noperacion']   = $noperacion;
 						$res[$i]['cardcode']     = $this->preLetterBPartner('C', $value2['cardcode']);
@@ -5081,7 +5161,17 @@ GROUP BY ftfc.ch_fac_seriedocumento, ftfc.ch_fac_numerodocumento, ftfc.ch_fac_ti
 							- Op. Inafectas                 =   V  	 				 =		N
 							- Op. Gratuitas + Inafectas     =   W  	 				 =		N
 					 */
-					if($value2['nu_fac_recargo3'] == 2 || $value2['nu_fac_recargo3'] == 5 || $value2['nu_fac_recargo3'] == 6 || trim($value2['ch_fac_tiporecargo2']) == "T"){ //ES DOCUMENTO ANULADO O ES TRANSFERENCIA GRATUITA
+
+					/**
+					 * Campos:
+						- indicator:
+							FA - Factura
+							BO - Boleta
+							AN - Factura Anulada
+							AB - Boleta Anulada
+							TG - Transferencia gratuita			 
+					*/
+					if($value2['nu_fac_recargo3'] == 2 || $value2['nu_fac_recargo3'] == 5 || $value2['nu_fac_recargo3'] == 6 || TRIM($value2['ch_fac_tiporecargo2']) == "T"){ //ES DOCUMENTO ANULADO O ES TRANSFERENCIA GRATUITA DIFERENCIADOS
 						$i++;
 						$res[$i]['noperacion']   = $value2['noperacion'];
 						$res[$i]['cardcode']     = $this->preLetterBPartner('C', $value2['cardcode']);
@@ -5096,7 +5186,7 @@ GROUP BY ftfc.ch_fac_seriedocumento, ftfc.ch_fac_numerodocumento, ftfc.ch_fac_ti
 						$res[$i]['transaccion']  = $value2['transaccion'];
 						$res[$i]['docentry']     = NULL;
 						$res[$i]['_turn']        = $value2['_turn'];
-						$res[$i]['indicator']    = ( $value2['nu_fac_recargo3'] == 2 || $value2['nu_fac_recargo3'] == 5 || $value2['nu_fac_recargo3'] == 6 ) ? "AB" : "TG"; //QUE PASA CUANDO UNA TRANSFERENCIA GRATUITA SE ANULA? PASA QUE SE MANTIENE LA "T" PERO CON EL STATUS "2", "5" O "6"
+						$res[$i]['indicator']    = ( $value2['nu_fac_recargo3'] == 2 || $value2['nu_fac_recargo3'] == 5 || $value2['nu_fac_recargo3'] == 6 ) ? "AB" : "TG"; //ES DOCUMENTO ANULADO - ES TRANSFERENCIA GRATUITA
 						$i++;
 						$inicio_agrupacion = true;
 					}else{
