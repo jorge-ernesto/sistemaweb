@@ -202,7 +202,7 @@ class c_sap_1 {
 		// 	$data['bpartner']['isViewTableName'] = $m_sap_1->isViewTableName;
 		// 	//echo "<script>console.log('INTOCRD: " . json_encode($data['bpartner']) . "')</script>"; //Agregado 2020-01-10
 		// 	$v_sap_1->tableBpartner($data['bpartner']);
-		// }else if($_SESSION['es_requerimiento_sap_energigas'] == false){		
+		// }else{		
 		// 	$req['tableName'] = 'INTOCRD';
 		// 	$data['bpartner'] = $m_sap_1->getBPartner($hanaInstance, $req);
 		// 	//$data['bpartner'] = $m_sap_1->getBPartner($req); cai				
@@ -876,7 +876,7 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['documentHeadTicket'], array('isUnique' => true));
 				$this->checkResponseInsert($req, $res);
 				/* Fin */
-			}elseif($_SESSION['es_requerimiento_sap_centauro'] == true){
+			}else if($_SESSION['es_requerimiento_sap_centauro'] == true){
 				$req['tableName'] = 'INTOBOL';
 				$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicketDesagregarDocumentosAnuladosTransferenciasGratuitas($req);
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['documentHeadTicket'], array('isUnique' => true));
