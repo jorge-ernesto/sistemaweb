@@ -274,7 +274,7 @@ class ConsumoValesTemplate extends Template {
 										if($sTipoCliente == "ANTICIPO"){
 											//OBTENEMOS QUIEBRE ENTRE EL TOTAL ITEM FACTURA VS LOS VALES
 											echo "<tr class='fila_registro_par'>";
-											echo "<td colspan='10' align='right' bgcolor='#DDFFE4'><p style='font-size:1.1em; color:green;'><b>Quiebre Item:</td>";
+											echo "<td colspan='10' align='right' bgcolor='#DDFFE4'><p style='font-size:1.1em; color:green;'><b>Saldo Item:</td>";
 											echo "<td align='right' bgcolor='#DDFFE4'><p style='font-size:1.1em; color:green;'><b>".number_format((float)$total_item_factura[0] - $item['total_item']['cantidad_item'], 4, '.', ',')."</td>";
 											echo "<td align='right' bgcolor='#DDFFE4'></td>";
 											echo "<td align='right' bgcolor='#DDFFE4'><p style='font-size:1.1em; color:green;'><b>".number_format((float)$total_item_factura[1] - $item['total_item']['importe_item'], 2, '.', ',')."</td>";
@@ -295,7 +295,7 @@ class ConsumoValesTemplate extends Template {
 									if($sTipoCliente == "ANTICIPO"){
 										//OBTENEMOS QUIEBRE ENTRE EL TOTAL FACTURA VS LOS VALES
 										echo "<tr class='fila_registro_par'>";
-										echo "<td colspan='10' align='right' bgcolor='#DDFFE4'><p style='font-size:1.1em; color:green;'><b>Quiebre Factura:</td>";
+										echo "<td colspan='10' align='right' bgcolor='#DDFFE4'><p style='font-size:1.1em; color:green;'><b>Saldo Factura:</td>";
 										echo "<td align='right' bgcolor='#DDFFE4'><p style='font-size:1.1em; color:green;'><b>".number_format((float)$total_factura[0] - $factura['total_factura']['cantidad_factura'], 4, '.', ',')."</td>";
 										echo "<td align='right' bgcolor='#DDFFE4'></td>";
 										echo "<td align='right' bgcolor='#DDFFE4'><p style='font-size:1.1em; color:green;'><b>".number_format((float)$total_factura[1] - $factura['total_factura']['importe_factura'], 2, '.', ',')."</td>";

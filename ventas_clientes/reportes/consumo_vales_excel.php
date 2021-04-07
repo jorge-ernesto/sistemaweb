@@ -306,7 +306,7 @@ if ($session_data_excel != null) {
 							//OBTENEMOS QUIEBRE ENTRE EL TOTAL ITEM FACTURA VS LOS VALES
 							$bucle 			= $bucle + 1;
 							$objRichText 	= new PHPExcel_RichText();
-							$objBold1 		= $objRichText->createTextRun('Quiebre Item', 4, '.', ',');
+							$objBold1 		= $objRichText->createTextRun('Saldo Item', 4, '.', ',');
 							$objBold1->getFont()->setBold(true);
 							$objPHPExcel->getActiveSheet()->getCell('L' . $bucle)->setValue($objRichText);
 							//
@@ -343,7 +343,7 @@ if ($session_data_excel != null) {
 						//OBTENEMOS QUIEBRE ENTRE EL TOTAL FACTURA VS LOS VALES
 						$bucle 			= $bucle + 1;
 						$objRichText 	= new PHPExcel_RichText();
-						$objBold1 		= $objRichText->createTextRun('Quiebre Factura', 4, '.', ',');
+						$objBold1 		= $objRichText->createTextRun('Saldo Factura', 4, '.', ',');
 						$objBold1->getFont()->setBold(true);
 						$objPHPExcel->getActiveSheet()->getCell('L' . $bucle)->setValue($objRichText);
 						//
