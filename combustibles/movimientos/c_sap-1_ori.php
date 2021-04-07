@@ -226,12 +226,18 @@ class c_sap_1 {
 			$data['invoiceHeaderSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;			
 			$v_sap_1->tableInvoiceHeaderSaleCashWithFechaEmision($data['invoiceHeaderSaleCash']);
 			/* Fin */
+		}else if($_SESSION['es_requerimiento_sap_centauro'] == true){
+			$req['tableName'] = 'INTOINVFC'; //El numero de clientes RUC que están en la TABLA INTOINVFC no están en la tabla INTOCRD(SOCIOS DE NEGOCIO)
+			$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCashDesagregarDocumentosAnuladosTransferenciasGratuitas($req);
+			$data['invoiceHeaderSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableInvoiceHeaderSaleCash($data['invoiceHeaderSaleCash']);			
 		}else{
 			$req['tableName'] = 'INTOINVFC'; //El numero de clientes RUC que están en la TABLA INTOINVFC no están en la tabla INTOCRD(SOCIOS DE NEGOCIO)
 			$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCash($req);
 			$data['invoiceHeaderSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;
 			$v_sap_1->tableInvoiceHeaderSaleCash($data['invoiceHeaderSaleCash']);			
 		}
+		// die();
 
 		if($_SESSION['es_requerimiento_sap_energigas'] == true){
 			/* Requerimiento Energigas, excluimos notas de credito */
@@ -246,6 +252,7 @@ class c_sap_1 {
 			$data['invoiceDetailSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;
 			$v_sap_1->tableInvoiceDetailSaleCash($data['invoiceDetailSaleCash']);
 		}
+		// die();
 
 		if($_SESSION['es_requerimiento_sap_energigas'] == true){
 			/* Requerimiento Energigas, excluimos documentos originales */
@@ -387,7 +394,7 @@ class c_sap_1 {
 			/* Fin */
 		}else if($_SESSION['es_requerimiento_sap_centauro'] == true){
 			$req['tableName'] = 'INTOBOL';
-			$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicketDesagregarDocumentosAnulados($req);
+			$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicketDesagregarDocumentosAnuladosTransferenciasGratuitas($req);
 			$data['documentHeadTicket']['isViewTableName'] = $m_sap_1->isViewTableName;
 			$v_sap_1->tableDocumentHeadTicket($data['documentHeadTicket']);
 		}else{
@@ -714,6 +721,11 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['invoiceHeaderSaleCash'], array('isUnique' => true));
 				$this->checkResponseInsert($req, $res); 
 				/* Fin */
+			}else if($_SESSION['es_requerimiento_sap_centauro'] == true){
+				$req['tableName'] = 'INTOINVFC';
+				$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCashDesagregarDocumentosAnuladosTransferenciasGratuitas($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['invoiceHeaderSaleCash'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res); 
 			}else{
 				$req['tableName'] = 'INTOINVFC';
 				$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCash($req);
@@ -866,7 +878,7 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 				/* Fin */
 			}elseif($_SESSION['es_requerimiento_sap_centauro'] == true){
 				$req['tableName'] = 'INTOBOL';
-				$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicketDesagregarDocumentosAnulados($req);
+				$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicketDesagregarDocumentosAnuladosTransferenciasGratuitas($req);
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['documentHeadTicket'], array('isUnique' => true));
 				$this->checkResponseInsert($req, $res);
 			}else{

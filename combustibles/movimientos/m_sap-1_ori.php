@@ -1080,6 +1080,175 @@ GROUP BY 1;";
 	}
 
 	/**
+	 * Venta al contado - Cabecera
+	 * Se está analizando la posibilidad de incluir:
+	 * Las facturas de crédito que no tengan referencia a guías, deben insertarse aqui,
+	 * tanto cabecera como detalle
+	 */
+	public function getInvoiceHeaderSaleCashDesagregarDocumentosAnuladosTransferenciasGratuitas($param) {
+		global $sqlca;
+
+		$res = array();
+		$sql = "
+SELECT
+ PT.es || PT.caja || PT.trans AS noperacion,
+ FIRST(pt.ruc) AS cardcode,
+ FIRST(pt.dia) AS docdate,
+ CASE WHEN FIRST(pt.usr) IS NULL OR FIRST(pt.usr) = '' THEN LPAD(FIRST(pt.caja),3,'000'::text)
+ ELSE FIRST(pt.usr) END AS foliopref,
+ CASE WHEN FIRST(pt.usr) IS NULL OR FIRST(pt.usr) = '' THEN TO_CHAR(FIRST(pt.trans),'FM9999999999')
+ ELSE '' END AS folionum,
+
+ ROUND(SUM(pt.igv), 2) AS vatsum,
+ ROUND(SUM(pt.importe), 2) AS doctotal,
+
+ CASE WHEN FIRST(employe.ch_codigo_trabajador) IS NULL OR FIRST(employe.ch_codigo_trabajador) = '' THEN
+  FIRST(pt.cajero)
+ ELSE
+  FIRST(employe.ch_codigo_trabajador)
+ END AS extempno,
+ FIRST(pt.caja) AS u_exc_maqreg,
+ '01' AS indicador,
+ CASE WHEN FIRST(pt.usr) IS NULL OR FIRST(pt.usr) = '' THEN '0'
+ ELSE 1 END AS _isfe,
+ FIRST(pt.trans) AS transaccion
+FROM
+ " . $param['pos_trans'] . " AS pt
+ LEFT JOIN int_clientes AS client ON(client.cli_codigo = pt.cuenta)
+ LEFT JOIN pos_historia_ladosxtrabajador AS employe ON(employe.dt_dia = pt.dia AND employe.ch_posturno::CHAR = pt.turno AND employe.ch_lado = PT.pump)
+WHERE
+ pt.dia BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
+ AND pt.td='F'
+ AND pt.tm='V'
+ --AND pt.es = '".$param['warehouse']."'
+ --AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
+GROUP BY
+ PT.es,
+ PT.caja,
+ PT.trans;
+ 		";
+
+		$this->_error_log($param['tableName'].' - getInvoiceHeaderSaleCash: '.$sql.' [LINE: '.__LINE__.']');
+		$c = 0;
+		if ($sqlca->query($sql) < 0) {
+			return array('error' => true);
+		}
+		while ($reg = $sqlca->fetchRow()) {
+			$c++;
+			if ($reg['_isfe'] == '1') {
+				$arr_foliopref = explode('-', $reg['foliopref']);
+				$reg['foliopref'] = $arr_foliopref[0];
+				$reg['folionum'] = $arr_foliopref[1];
+			}
+
+			//No se almacena el detalle porque en el metodo de notas de credito consulta a postrans y estas deben aplicarse el mismo día
+			$res[] = array(
+				'noperacion' => $reg['noperacion'],
+				'cardcode' => $this->preLetterBPartner('C', $reg['cardcode']),
+				'docdate' => $reg['docdate'],
+				'foliopref' => $reg['foliopref'],
+				'folionum' => (int)$reg['folionum'],
+				'indicador' => $reg['indicador'],
+				'vatsum' => (float)$reg['vatsum'],
+				'doctotal' => (float)$reg['doctotal'],
+				'extempno' => $this->cleanStr($reg['extempno']),
+				'u_exc_maqreg' => $reg['u_exc_maqreg'],
+				'doccur' => '',
+
+				'estado' => 'P',
+				'errormsg' => '',
+				'transaccion' => $reg['transaccion'],
+				'docentry' => NULL,
+			);
+		}
+
+		//$client = "AND client.cli_ndespacho_efectivo = '0' AND client.cli_anticipo = 'N'"; //credito, se comenta para mejorarlo
+
+		$sql = "
+SELECT
+ ftfc.ch_fac_tipodocumento||ftfc.ch_fac_seriedocumento||ftfc.ch_fac_numerodocumento AS noperacion,
+ FIRST(ftfc.cli_codigo) AS cardcode,
+ FIRST(ftfc.dt_fac_fecha) AS docdate,
+ FIRST(ftfc.ch_fac_seriedocumento) AS foliopref,
+ FIRST(ftfc.ch_fac_numerodocumento) AS folionum,
+ ROUND(FIRST(ftfc.nu_fac_impuesto1), 2) AS vatsum,
+ ROUND(FIRST(ftfc.nu_fac_valortotal), 2) AS doctotal,
+
+ FIRST(ftfc.nu_fac_impuesto1) AS tax_total,
+ FIRST((util_fn_igv()/100)) AS cnf_igv_ocs,
+ FIRST(ftfc.nu_fac_valorbruto) AS taxable_operations,
+ FIRST(ftfc.nu_fac_valortotal) AS grand_total,
+ CASE WHEN FIRST(ftfc.ch_fac_tiporecargo2) IS NULL OR FIRST(ftfc.ch_fac_tiporecargo2) = '' THEN 0 -- NORMAL
+ WHEN FIRST(ftfc.ch_fac_tiporecargo2) = 'S' AND FIRST(ftfc.nu_fac_impuesto1) = 0 THEN 1 -- EXO
+ WHEN FIRST(ftfc.ch_fac_tiporecargo2) = 'S' AND FIRST(ftfc.nu_fac_impuesto1) > 0 THEN 2 -- TG
+ END AS typetax,
+ COALESCE(FIRST(ftfc.nu_fac_descuento1), 0) AS disc,
+
+ '' AS extempno,
+ '' AS u_exc_maqreg,
+ FIRST(doctype_s.tab_car_03) AS indicador,
+ CASE WHEN FIRST(ch_fac_moneda) IN('1','01') THEN '' ELSE 'USD' END AS moneda
+FROM
+ fac_ta_factura_cabecera ftfc
+ JOIN int_tabla_general doctype_s ON(ftfc.ch_fac_tipodocumento = SUBSTRING(TRIM(doctype_s.tab_elemento) for 2 from length(TRIM(doctype_s.tab_elemento))-1) AND doctype_s.tab_tabla ='08' AND doctype_s.tab_elemento != '000000')
+ LEFT JOIN val_ta_complemento_documento vtcd ON(ftfc.ch_fac_tipodocumento = vtcd.ch_fac_tipodocumento AND ftfc.ch_fac_seriedocumento = vtcd.ch_fac_seriedocumento AND ftfc.ch_fac_numerodocumento = vtcd.ch_fac_numerodocumento)--client valta_complemente
+ LEFT JOIN val_ta_cabecera vtc ON (vtcd.ch_sucursal = vtc.ch_sucursal AND vtcd.dt_fecha = vtc.dt_fecha AND vtcd.ch_numeval = vtc.ch_documento)
+ JOIN int_clientes client ON (ftfc.cli_codigo = client.cli_codigo)
+WHERE
+ ftfc.dt_fac_fecha BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
+ AND ftfc.ch_fac_tipodocumento = '10'
+ AND vtcd.ch_fac_seriedocumento IS NULL
+ AND ftfc.nu_fac_recargo3 IN (3, 5)--enviado o anulado
+ AND ftfc.ch_liquidacion=''--cai
+ AND ftfc.ch_fac_anticipo!='S' --cai 21/01/20
+ --AND ftfc.ch_almacen = '".$param['warehouse']."'
+ --".$client." se comenta para mejorarlo, cai
+GROUP BY 1;";
+
+		$this->_error_log($param['tableName'].' - **getInvoiceHeaderSaleCredit: '.$sql.' [LINE: '.__LINE__.']');
+		//$c = 0;
+		if ($sqlca->query($sql) < 0) {
+			return array('error' => true);
+		}
+		while ($reg = $sqlca->fetchRow()) {
+			$c++;
+
+			$data = $this->calcAmounts($reg);
+
+			$data['tax_total'] = $this->getFormatNumber(array('number' => $data['tax_total'], 'decimal' => 2));
+			$data['grand_total'] = $this->getFormatNumber(array('number' => $data['grand_total'], 'decimal' => 2));
+
+			$this->invoiceSaleHead[$reg['foliopref']][$reg['folionum']] = $param['tableName'];
+			$res[] = array(
+				'noperacion' => $reg['noperacion'],
+				'cardcode' => $this->preLetterBPartner('C', $reg['cardcode']),
+				'docdate' => $reg['docdate'],
+				'foliopref' => $reg['foliopref'],
+				'folionum' => (int)$reg['folionum'],
+				'indicador' => $reg['indicador'],
+				'vatsum' => (float)$data['tax_total'],
+				'doctotal' => (float)$data['grand_total'],
+				'extempno' => $this->cleanStr($reg['extempno']),
+				'u_exc_maqreg' => 'CREDIT',
+				'doccur' => $reg['moneda'],
+
+				'estado' => 'P',
+				'errormsg' => '',
+				'transaccion' => '',
+				'docentry' => NULL,
+			);
+		}
+
+		return array(
+			'error' => false,
+			'tableName' => $param['tableName'],
+			'nodeData' => 'invoiceheadersalecash',
+			'invoiceheadersalecash' => $res,
+			'count' => $c,
+		);
+	}
+
+	/**
 	 * Venta al contado - Detalle
 	 */
 	public function getInvoiceDetailSaleCash($param) {
@@ -4654,7 +4823,7 @@ GROUP BY 1, ftfc.ch_fac_tiporecargo3;";
 	/**
 	 * Boletas - Cabecera
 	 */
-	public function getDocumentHeadTicketDesagregarDocumentosAnulados($param) {
+	public function getDocumentHeadTicketDesagregarDocumentosAnuladosTransferenciasGratuitas($param) {
 		//20 y 45 documentos manuales
 		global $sqlca;
 
