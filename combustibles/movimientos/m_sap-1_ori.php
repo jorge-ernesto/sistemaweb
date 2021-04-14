@@ -4961,6 +4961,7 @@ ORDER BY
 				'errormsg' => '',
 				'transaccion' => $reg['transaccion'],
 				'docentry' => NULL,
+				
 				'_turn' => $reg['_turn'],
 				'es' => $reg['es'],
 				'caja' => $reg['caja'],
@@ -5020,7 +5021,7 @@ ORDER BY
 						$res[$i]['errormsg']     = '';
 						$res[$i]['transaccion']  = $transaccion;
 						$res[$i]['docentry']     = NULL;
-						$res[$i]['_turn']        = $value2['_turn'];													
+						// $res[$i]['_turn']        = $value2['_turn'];													
 						$res[$i]['indicator']    = "BO";													
 					}else{ //DOCUMENTOS ANULADOS DIFERENCIADOS
 						$i++;
@@ -5036,7 +5037,7 @@ ORDER BY
 						$res[$i]['errormsg']     = '';
 						$res[$i]['transaccion']  = $value2['transaccion'];
 						$res[$i]['docentry']     = NULL;
-						$res[$i]['_turn']        = $value2['_turn'];
+						// $res[$i]['_turn']        = $value2['_turn'];
 						$res[$i]['indicator']    = "AB";
 						$i++;
 						$inicio_agrupacion = true;
@@ -5097,6 +5098,7 @@ GROUP BY ftfc.ch_fac_seriedocumento, ftfc.ch_fac_numerodocumento, ftfc.ch_fac_ti
 				'errormsg' => '',
 				'transaccion' => $reg['transaccion'],
 				'docentry' => NULL,
+
 				'_turn' => $reg['_turn'],
 				'nu_fac_recargo3' => $reg['nu_fac_recargo3'],
 				'ch_fac_tiporecargo2' => $reg['ch_fac_tiporecargo2'],
@@ -5185,7 +5187,7 @@ GROUP BY ftfc.ch_fac_seriedocumento, ftfc.ch_fac_numerodocumento, ftfc.ch_fac_ti
 						$res[$i]['errormsg']     = '';
 						$res[$i]['transaccion']  = $value2['transaccion'];
 						$res[$i]['docentry']     = NULL;
-						$res[$i]['_turn']        = $value2['_turn'];
+						// $res[$i]['_turn']        = $value2['_turn'];
 						$res[$i]['indicator']    = ( $value2['nu_fac_recargo3'] == 2 || $value2['nu_fac_recargo3'] == 5 || $value2['nu_fac_recargo3'] == 6 ) ? "AB" : "TG"; //ES DOCUMENTO ANULADO - ES TRANSFERENCIA GRATUITA
 						$i++;
 						$inicio_agrupacion = true;
@@ -5202,7 +5204,7 @@ GROUP BY ftfc.ch_fac_seriedocumento, ftfc.ch_fac_numerodocumento, ftfc.ch_fac_ti
 						$res[$i]['errormsg']     = '';
 						$res[$i]['transaccion']  = $transaccion;
 						$res[$i]['docentry']     = NULL;
-						$res[$i]['_turn']        = $value2['_turn'];													
+						// $res[$i]['_turn']        = $value2['_turn'];													
 						$res[$i]['indicator']    = "BO";
 					}								
 				}
