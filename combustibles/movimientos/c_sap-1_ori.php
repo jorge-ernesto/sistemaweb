@@ -230,7 +230,7 @@ class c_sap_1 {
 			$req['tableName'] = 'INTOINVFC'; //El numero de clientes RUC que están en la TABLA INTOINVFC no están en la tabla INTOCRD(SOCIOS DE NEGOCIO)
 			$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCashDesagregarDocumentosAnuladosTransferenciasGratuitas($req);
 			$data['invoiceHeaderSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;
-			$v_sap_1->tableInvoiceHeaderSaleCash($data['invoiceHeaderSaleCash']);			
+			$v_sap_1->tableInvoiceHeaderSaleCashDesagregarDocumentosAnuladosTransferenciasGratuitas($data['invoiceHeaderSaleCash']);			
 		}else{
 			$req['tableName'] = 'INTOINVFC'; //El numero de clientes RUC que están en la TABLA INTOINVFC no están en la tabla INTOCRD(SOCIOS DE NEGOCIO)
 			$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCash($req);
@@ -396,7 +396,7 @@ class c_sap_1 {
 			$req['tableName'] = 'INTOBOL';
 			$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicketDesagregarDocumentosAnuladosTransferenciasGratuitas($req);
 			$data['documentHeadTicket']['isViewTableName'] = $m_sap_1->isViewTableName;
-			$v_sap_1->tableDocumentHeadTicket($data['documentHeadTicket']);
+			$v_sap_1->tableDocumentHeadTicketDesagregarDocumentosAnuladosTransferenciasGratuitas($data['documentHeadTicket']);
 		}else{
 			$req['tableName'] = 'INTOBOL';
 			$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicket($req);
@@ -591,7 +591,7 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 			/* Fin */
 		}
 
-		//REQUERIMIENTO CENTAURO OPENSOFT-XX
+		//OPENSOFT-55: PUNTO 1, 2 y 3
 		/**
 		 * . Venta de combustibles por manguera/día
 		 */
@@ -621,7 +621,7 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 			$data['detailStock']['isViewTableName'] = $m_sap_1->isViewTableName;
 			$v_sap_1->tableDetailTotales($data['detailTotales']);			
 		}
-		//CERRAR REQUERIMIENTO CENTAURO OPENSOFT-XX
+		//CERRAR OPENSOFT-55: PUNTO 1, 2 y 3
 
 		$m_sap_1->ticketHead = array();
 
