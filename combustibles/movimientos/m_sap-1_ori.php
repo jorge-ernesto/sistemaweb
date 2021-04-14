@@ -987,6 +987,7 @@ GROUP BY
 				'errormsg' => '',
 				'transaccion' => $reg['transaccion'],
 				'docentry' => NULL,
+
 				'u_exc_fechaemi' => substr($reg['u_exc_fechaemi'],0,19)
 			);
 		}
@@ -1066,6 +1067,7 @@ GROUP BY 1;";
 				'errormsg' => '',
 				'transaccion' => '',
 				'docentry' => NULL,
+				
 				'u_exc_fechaemi' => substr($reg['u_exc_fechaemi'],0,19)
 			);
 		}
