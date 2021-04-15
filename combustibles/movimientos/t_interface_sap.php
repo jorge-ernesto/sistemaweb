@@ -302,28 +302,28 @@ class InterfaceSAPTemplate extends Template {
 		$worksheet1->write_string($fila, 0, "DocNum", $formato2);
 		$worksheet1->write_string($fila, 1, "DocType", $formato2);
 		// $worksheet1->write_string($fila, 2, "Series", $formato2); //CABECERA YA NO VA
-		$worksheet1->write_string($fila, 3, "CardCode", $formato2);
-		$worksheet1->write_string($fila, 4, "DocDate", $formato2);
-		$worksheet1->write_string($fila, 5, "DocDueDate", $formato2);
-		$worksheet1->write_string($fila, 6, "TaxDate", $formato2);
-		$worksheet1->write_string($fila, 7, "DocCurrency", $formato2);
-		$worksheet1->write_string($fila, 8, "NumAtCard", $formato2);
-		$worksheet1->write_string($fila, 9, "DocumentSubType", $formato2);
-		$worksheet1->write_string($fila, 10, "U_SYP_MDSD", $formato2); //CAMBIAMOS FolioPrefixString por U_SYP_MDSD
-		$worksheet1->write_string($fila, 11, "U_SYP_MDCD", $formato2); //CAMBIAMOS FolioNumber por U_SYP_MDCD
-		$worksheet1->write_string($fila, 12, "PaymentGroupCode", $formato2);
-		$worksheet1->write_string($fila, 13, "U_SYP_MDTD", $formato2); //CAMBIAMOS Indicator por U_SYP_MDTD
-		$worksheet1->write_string($fila, 14, "U_SYP_MDMT", $formato2); //CAMBIAMOS U_EXX_TIPOOPER por U_SYP_MDMT
+		$worksheet1->write_string($fila, 2, "CardCode", $formato2);
+		$worksheet1->write_string($fila, 3, "DocDate", $formato2);
+		$worksheet1->write_string($fila, 4, "DocDueDate", $formato2);
+		$worksheet1->write_string($fila, 5, "TaxDate", $formato2);
+		$worksheet1->write_string($fila, 6, "DocCurrency", $formato2);
+		$worksheet1->write_string($fila, 7, "NumAtCard", $formato2);
+		$worksheet1->write_string($fila, 8, "DocumentSubType", $formato2);
+		$worksheet1->write_string($fila, 9, "U_SYP_MDSD", $formato2); //CAMBIAMOS FolioPrefixString por U_SYP_MDSD
+		$worksheet1->write_string($fila, 10, "U_SYP_MDCD", $formato2); //CAMBIAMOS FolioNumber por U_SYP_MDCD
+		$worksheet1->write_string($fila, 11, "PaymentGroupCode", $formato2);
+		$worksheet1->write_string($fila, 12, "U_SYP_MDTD", $formato2); //CAMBIAMOS Indicator por U_SYP_MDTD
+		$worksheet1->write_string($fila, 13, "U_SYP_MDMT", $formato2); //CAMBIAMOS U_EXX_TIPOOPER por U_SYP_MDMT
 		// $worksheet1->write_string($fila, 15, "U_EXX_SUJPER", $formato2); //CABECERA YA NO VA
 		// $worksheet1->write_string($fila, 16, "U_EXX_INCPER", $formato2); //CABECERA YA NO VA
-		$worksheet1->write_string($fila, 17, "DocTotal", $formato2);
-		$worksheet1->write_string($fila, 18, "SalesPersonCode", $formato2);
+		$worksheet1->write_string($fila, 14, "DocTotal", $formato2);
+		$worksheet1->write_string($fila, 15, "SalesPersonCode", $formato2);
 		// $worksheet1->write_string($fila, 19, "U_EXC_TIPVEN", $formato2); //CABECERA YA NO VA
-		$worksheet1->write_string($fila, 20, "Comments", $formato2);
-		$worksheet1->write_string($fila, 21, "JournalMemo", $formato2);
-		$worksheet1->write_string($fila, 22, "U_CTG_FECRECEP", $formato2); //CAMBIAMOS U_EXC_FECRECEP por U_CTG_FECRECEP
+		$worksheet1->write_string($fila, 16, "Comments", $formato2);
+		$worksheet1->write_string($fila, 17, "JournalMemo", $formato2);
+		$worksheet1->write_string($fila, 18, "U_CTG_FECRECEP", $formato2); //CAMBIAMOS U_EXC_FECRECEP por U_CTG_FECRECEP
 		// $worksheet1->write_string($fila, 23, "U_EXX_COMPER", $formato2); //CABECERA YA NO VA
-		$worksheet1->write_string($fila, 24, "U_CTG_NUMLIQ", $formato2);
+		$worksheet1->write_string($fila, 19, "U_CTG_NUMLIQ", $formato2);
 		// $worksheet1->write_string($fila, 25, "U_EXX_SERIE", $formato2); //CABECERA YA NO VA
 		// $worksheet1->write_string($fila, 26, "U_EXX_NROINI", $formato2); //CABECERA YA NO VA
 		// $worksheet1->write_string($fila, 27, "U_EXX_NROFIN", $formato2); //CABECERA YA NO VA
@@ -332,28 +332,28 @@ class InterfaceSAPTemplate extends Template {
 		$worksheet1->write_string($fila, 0, "Num SAP", $formato2);
 		$worksheet1->write_string($fila, 1, "Tipo Documento", $formato2);
 		// $worksheet1->write_string($fila, 2, "Codigo Serie", $formato2); //CABECERA YA NO VA
-		$worksheet1->write_string($fila, 3, "Codigo SN", $formato2);
-		$worksheet1->write_string($fila, 4, "Fecha Contabilizacion", $formato2);
-		$worksheet1->write_string($fila, 5, "Fecha Vencimiento", $formato2);
-		$worksheet1->write_string($fila, 6, "Fecha Documento", $formato2);
-		$worksheet1->write_string($fila, 7, "Moneda", $formato2);
-		$worksheet1->write_string($fila, 8, "Numero Documento", $formato2);
-		$worksheet1->write_string($fila, 9, "DocumentSubType", $formato2);
-		$worksheet1->write_string($fila, 10, "Serie", $formato2); //CAMBIAMOS Folio Serie por Serie
-		$worksheet1->write_string($fila, 11, "Num. Correlativo", $formato2); //CAMBIAMOS Folio Correlativo por Num. Correlativo
-		$worksheet1->write_string($fila, 12, "Condicion Pago", $formato2);
-		$worksheet1->write_string($fila, 13, "Tipo Documento", $formato2); //CAMBIAMOS Tipo Documento por Tipo Documento
-		$worksheet1->write_string($fila, 14, "Motivo Traslado", $formato2); //CAMBIAMOS Tipo Operacion por Motivo Traslado
+		$worksheet1->write_string($fila, 2, "Codigo SN", $formato2);
+		$worksheet1->write_string($fila, 3, "Fecha Contabilizacion", $formato2);
+		$worksheet1->write_string($fila, 4, "Fecha Vencimiento", $formato2);
+		$worksheet1->write_string($fila, 5, "Fecha Documento", $formato2);
+		$worksheet1->write_string($fila, 6, "Moneda", $formato2);
+		$worksheet1->write_string($fila, 7, "Numero Documento", $formato2);
+		$worksheet1->write_string($fila, 8, "DocumentSubType", $formato2);
+		$worksheet1->write_string($fila, 9, "Serie", $formato2); //CAMBIAMOS Folio Serie por Serie
+		$worksheet1->write_string($fila, 10, "Num. Correlativo", $formato2); //CAMBIAMOS Folio Correlativo por Num. Correlativo
+		$worksheet1->write_string($fila, 11, "Condicion Pago", $formato2);
+		$worksheet1->write_string($fila, 12, "Tipo Documento", $formato2); //CAMBIAMOS Tipo Documento por Tipo Documento
+		$worksheet1->write_string($fila, 13, "Motivo Traslado", $formato2); //CAMBIAMOS Tipo Operacion por Motivo Traslado
 		// $worksheet1->write_string($fila, 15, "Sujeto a percepcion", $formato2); //CABECERA YA NO VA
 		// $worksheet1->write_string($fila, 16, "Incluye Percepcion", $formato2); //CABECERA YA NO VA
-		$worksheet1->write_string($fila, 17, "Importe Total", $formato2);
-		$worksheet1->write_string($fila, 18, "Empleado Ventas", $formato2);
+		$worksheet1->write_string($fila, 14, "Importe Total", $formato2);
+		$worksheet1->write_string($fila, 15, "Empleado Ventas", $formato2);
 		// $worksheet1->write_string($fila, 19, "Tipo de Venta", $formato2); //CABECERA YA NO VA
-		$worksheet1->write_string($fila, 20, "Comentario", $formato2);
-		$worksheet1->write_string($fila, 21, "Glosa Asiento Diario", $formato2);
-		$worksheet1->write_string($fila, 22, "Fecha de Recepcion", $formato2); //CAMBIAMOS Fecha de Recepcion por Fecha de Recepcion
+		$worksheet1->write_string($fila, 16, "Comentario", $formato2);
+		$worksheet1->write_string($fila, 17, "Glosa Asiento Diario", $formato2);
+		$worksheet1->write_string($fila, 18, "Fecha de Recepcion", $formato2); //CAMBIAMOS Fecha de Recepcion por Fecha de Recepcion
 		// $worksheet1->write_string($fila, 23, "Es Doc Percep", $formato2); //CABECERA YA NO VA
-		$worksheet1->write_string($fila, 24, "Turno", $formato2);
+		$worksheet1->write_string($fila, 19, "Turno", $formato2);
 		// $worksheet1->write_string($fila, 25, "Serie", $formato2); //CABECERA YA NO VA
 		// $worksheet1->write_string($fila, 26, "Numero Inicio", $formato2); //CABECERA YA NO VA
 		// $worksheet1->write_string($fila, 27, "Numero Final", $formato2); //CABECERA YA NO VA
@@ -365,28 +365,28 @@ class InterfaceSAPTemplate extends Template {
 				$worksheet1->write_string($fila, 0, $iCorrelativo, $formato_string);
 				$worksheet1->write_string($fila, 1, 'dDocument_Items', $formato_string);
 				// $worksheet1->write_string($fila, 2, $row['series'], $formato_string); //CABECERA YA NO VA
-				$worksheet1->write_string($fila, 3, $row['cardcode'], $formato_string);
-				$worksheet1->write_string($fila, 4, $row['docdate'], $formato_string);
-				$worksheet1->write_string($fila, 5, $row['docduedate'], $formato_string);
-				$worksheet1->write_string($fila, 6, $row['taxdate'], $formato_string);
-				$worksheet1->write_string($fila, 7, 'S/.', $formato_string); //CAMBIAMOS SOL POR S/.
-				$worksheet1->write_string($fila, 8, $row['indicator'] . "-" . $row['numatcard'], $formato_string); //AGREGAMOS INDICADOR CON UN GUION PARA QUE TENGA ESTE FORMATO: 03-B020-00502974
-				$worksheet1->write_string($fila, 9, 'bod_None', $formato_string);
-				$worksheet1->write_string($fila, 10, $row['folioprefixstring'], $formato_string);
-				$worksheet1->write_string($fila, 11, $row['folionumber'], $formato_string);
-				$worksheet1->write_string($fila, 12, $row['paymentgroupcode'], $formato_string);
-				$worksheet1->write_string($fila, 13, $row['indicator'], $formato_string);
-				$worksheet1->write_string($fila, 14, '01', $formato_string);
+				$worksheet1->write_string($fila, 2, $row['cardcode'], $formato_string);
+				$worksheet1->write_string($fila, 3, $row['docdate'], $formato_string);
+				$worksheet1->write_string($fila, 4, $row['docduedate'], $formato_string);
+				$worksheet1->write_string($fila, 5, $row['taxdate'], $formato_string);
+				$worksheet1->write_string($fila, 6, 'S/.', $formato_string); //CAMBIAMOS SOL POR S/.
+				$worksheet1->write_string($fila, 7, $row['indicator'] . "-" . $row['numatcard'], $formato_string); //AGREGAMOS INDICADOR CON UN GUION PARA QUE TENGA ESTE FORMATO: 03-B020-00502974
+				$worksheet1->write_string($fila, 8, 'bod_None', $formato_string);
+				$worksheet1->write_string($fila, 9, $row['folioprefixstring'], $formato_string);
+				$worksheet1->write_string($fila, 10, $row['folionumber'], $formato_string);
+				$worksheet1->write_string($fila, 11, $row['paymentgroupcode'], $formato_string);
+				$worksheet1->write_string($fila, 12, $row['indicator'], $formato_string);
+				$worksheet1->write_string($fila, 13, '01', $formato_string);
 				// $worksheet1->write_string($fila, 15, 'N', $formato_string); //CABECERA YA NO VA
 				// $worksheet1->write_string($fila, 16, 'N', $formato_string); //CABECERA YA NO VA
-				$worksheet1->write_string($fila, 17, $row['doctotal'], $formato_string);
-				$worksheet1->write_string($fila, 18, $row['salespersoncode'], $formato_string);
+				$worksheet1->write_string($fila, 14, $row['doctotal'], $formato_string);
+				$worksheet1->write_string($fila, 15, $row['salespersoncode'], $formato_string);
 				// $worksheet1->write_string($fila, 19, '06', $formato_string); //CABECERA YA NO VA
-				$worksheet1->write_string($fila, 20, $row['comments'], $formato_string);
-				$worksheet1->write_string($fila, 21, $row['journalmemo'], $formato_string);
-				$worksheet1->write_string($fila, 22, $row['u_exc_fecrecep'], $formato_string);
+				$worksheet1->write_string($fila, 16, $row['comments'], $formato_string);
+				$worksheet1->write_string($fila, 17, $row['journalmemo'], $formato_string);
+				$worksheet1->write_string($fila, 18, $row['u_exc_fecrecep'], $formato_string);
 				// $worksheet1->write_string($fila, 23, 'N', $formato_string); //CABECERA YA NO VA
-				$worksheet1->write_string($fila, 24, $row['u_ctg_numliq'], $formato_string);
+				$worksheet1->write_string($fila, 19, $row['u_ctg_numliq'], $formato_string);
 				// $worksheet1->write_string($fila, 25, $row['u_exx_serie'], $formato_string); //CABECERA YA NO VA
 				// $worksheet1->write_string($fila, 26, $row['u_exx_nroini'], $formato_string); //CABECERA YA NO VA 
 				// $worksheet1->write_string($fila, 27, $row['u_exx_nrofin'], $formato_string); //CABECERA YA NO VA
