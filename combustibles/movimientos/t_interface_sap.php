@@ -126,7 +126,7 @@ class InterfaceSAPTemplate extends Template {
 			$result .= '<tr bgcolor="#FFFFCD">';
 				$result .= '<th class="grid_cabecera">DocNum</th>';
 				$result .= '<th class="grid_cabecera">DocType</th>';
-				$result .= '<th class="grid_cabecera">Series</th>';
+				// $result .= '<th class="grid_cabecera">Series</th>'; //CABECERA YA NO VA
 				$result .= '<th class="grid_cabecera">CardCode</th>';
 				$result .= '<th class="grid_cabecera">DocDate</th>';
 				$result .= '<th class="grid_cabecera">DocDueDate</th>';
@@ -134,30 +134,30 @@ class InterfaceSAPTemplate extends Template {
 				$result .= '<th class="grid_cabecera">DocCurrency</th>';
 				$result .= '<th class="grid_cabecera">NumAtCard</th>';
 				$result .= '<th class="grid_cabecera">DocumentSubType</th>';
-				$result .= '<th class="grid_cabecera">FolioPrefixString</th>';
-				$result .= '<th class="grid_cabecera">FolioNumber</th>';
+				$result .= '<th class="grid_cabecera">U_SYP_MDSD</th>'; //CAMBIAMOS FolioPrefixString por U_SYP_MDSD
+				$result .= '<th class="grid_cabecera">U_SYP_MDCD</th>'; //CAMBIAMOS FolioNumber por U_SYP_MDCD
 				$result .= '<th class="grid_cabecera">PaymentGroupCode</th>';
-				$result .= '<th class="grid_cabecera">Indicator</th>';
-				$result .= '<th class="grid_cabecera">U_EXX_TIPOOPER</th>';
-				$result .= '<th class="grid_cabecera">U_EXX_SUJPER</th>';
-				$result .= '<th class="grid_cabecera">U_EXX_INCPER</th>';
+				$result .= '<th class="grid_cabecera">U_SYP_MDTD</th>'; //CAMBIAMOS Indicator por U_SYP_MDTD
+				$result .= '<th class="grid_cabecera">U_SYP_MDMT</th>'; //CAMBIAMOS U_EXX_TIPOOPER por U_SYP_MDMT
+				// $result .= '<th class="grid_cabecera">U_EXX_SUJPER</th>'; //CABECERA YA NO VA
+				// $result .= '<th class="grid_cabecera">U_EXX_INCPER</th>'; //CABECERA YA NO VA
 				$result .= '<th class="grid_cabecera">DocTotal</th>';
 				$result .= '<th class="grid_cabecera">SalesPersonCode</th>';
-				$result .= '<th class="grid_cabecera">U_EXC_TIPVEN</th>';
+				// $result .= '<th class="grid_cabecera">U_EXC_TIPVEN</th>'; //CABECERA YA NO VA
 				$result .= '<th class="grid_cabecera">Comments</th>';
 				$result .= '<th class="grid_cabecera">JournalMemo</th>';
-				$result .= '<th class="grid_cabecera">U_EXC_FECRECEP</th>';
-				$result .= '<th class="grid_cabecera">U_EXX_COMPER</th>';
+				$result .= '<th class="grid_cabecera">U_CTG_FECRECEP</th>'; //CAMBIAMOS U_EXC_FECRECEP por U_CTG_FECRECEP
+				// $result .= '<th class="grid_cabecera">U_EXX_COMPER</th>'; //CABECERA YA NO VA
 				$result .= '<th class="grid_cabecera">U_CTG_NUMLIQ</th>';
-				$result .= '<th class="grid_cabecera">U_EXX_SERIE</th>';
-				$result .= '<th class="grid_cabecera">U_EXX_NROINI</th>';
-				$result .= '<th class="grid_cabecera">U_EXX_NROFIN</th>';
+				// $result .= '<th class="grid_cabecera">U_EXX_SERIE</th>'; //CABECERA YA NO VA
+				// $result .= '<th class="grid_cabecera">U_EXX_NROINI</th>'; //CABECERA YA NO VA
+				// $result .= '<th class="grid_cabecera">U_EXX_NROFIN</th>'; //CABECERA YA NO VA
 			$result .= '</tr>';
 
 			$result .= '<tr bgcolor="#FFFFCD">';
 				$result .= '<th class="grid_cabecera">Num SAP</th>';
 				$result .= '<th class="grid_cabecera">Tipo Documento</th>';
-				$result .= '<th class="grid_cabecera">Codigo Serie</th>';
+				// $result .= '<th class="grid_cabecera">Codigo Serie</th>'; //CABECERA YA NO VA
 				$result .= '<th class="grid_cabecera">Codigo SN</th>';
 				$result .= '<th class="grid_cabecera">Fecha Contabilizacion</th>';
 				$result .= '<th class="grid_cabecera">Fecha Vencimiento</th>';
@@ -165,24 +165,24 @@ class InterfaceSAPTemplate extends Template {
 				$result .= '<th class="grid_cabecera">Moneda</th>';
 				$result .= '<th class="grid_cabecera">Numero Documento</th>';
 				$result .= '<th class="grid_cabecera">DocumentSubType</th>';
-				$result .= '<th class="grid_cabecera">Folio Serie</th>';
-				$result .= '<th class="grid_cabecera">Folio Correlativo</th>';
+				$result .= '<th class="grid_cabecera">Serie</th>'; //CAMBIAMOS Folio Serie por Serie
+				$result .= '<th class="grid_cabecera">Num. Correlativo</th>'; //CAMBIAMOS Folio Correlativo por Num. Correlativo
 				$result .= '<th class="grid_cabecera">Condicion Pago</th>';
-				$result .= '<th class="grid_cabecera">Tipo Documento</th>';
-				$result .= '<th class="grid_cabecera">Tipo Operacion</th>';
-				$result .= '<th class="grid_cabecera">Sujeto a percepcion</th>';
-				$result .= '<th class="grid_cabecera">Incluye Percepcion</th>';
+				$result .= '<th class="grid_cabecera">Tipo Documento</th>'; //CAMBIAMOS Tipo Documento por Tipo Documento
+				$result .= '<th class="grid_cabecera">Motivo Traslado</th>'; //CAMBIAMOS Tipo Operacion por Motivo Traslado
+				// $result .= '<th class="grid_cabecera">Sujeto a percepcion</th>'; //CABECERA YA NO VA
+				// $result .= '<th class="grid_cabecera">Incluye Percepcion</th>'; //CABECERA YA NO VA
 				$result .= '<th class="grid_cabecera">Importe Total</th>';
 				$result .= '<th class="grid_cabecera">Empleado Ventas</th>';
-				$result .= '<th class="grid_cabecera">Tipo de Venta</th>';
+				// $result .= '<th class="grid_cabecera">Tipo de Venta</th>'; //CABECERA YA NO VA
 				$result .= '<th class="grid_cabecera">Comentario</th>';
 				$result .= '<th class="grid_cabecera">Glosa Asiento Diario</th>';
-				$result .= '<th class="grid_cabecera">Fecha de Recepcion</th>';
-				$result .= '<th class="grid_cabecera">Es Doc Percep</th>';
+				$result .= '<th class="grid_cabecera">Fecha de Recepcion</th>'; //CAMBIAMOS Fecha de Recepcion por Fecha de Recepcion
+				// $result .= '<th class="grid_cabecera">Es Doc Percep</th>'; //CABECERA YA NO VA
 				$result .= '<th class="grid_cabecera">Turno</th>';
-				$result .= '<th class="grid_cabecera">Serie</th>';
-				$result .= '<th class="grid_cabecera">Numero Inicio</th>';
-				$result .= '<th class="grid_cabecera">Numero Final</th>';
+				// $result .= '<th class="grid_cabecera">Serie</th>'; //CABECERA YA NO VA
+				// $result .= '<th class="grid_cabecera">Numero Inicio</th>'; //CABECERA YA NO VA
+				// $result .= '<th class="grid_cabecera">Numero Final</th>'; //CABECERA YA NO VA
 			$result .= '</tr>';
 
 			$result .= '<tbody>';
@@ -194,32 +194,32 @@ class InterfaceSAPTemplate extends Template {
 			    	$result .= '<tr class="'. $color. '">';
 			    		$result .= '<td align="center">' . $iCorrelativo . '</td>';
 			    		$result .= '<td align="center">dDocument_Items</td>';
-			    		$result .= '<td align="center">' . $row['series'] . '</td>';
+			    		// $result .= '<td align="center">' . $row['series'] . '</td>'; //CABECERA YA NO VA
 			    		$result .= '<td align="center">' . $row['cardcode'] . '</td>';
 			    		$result .= '<td align="center">' . $row['docdate'] . '</td>';
 			    		$result .= '<td align="center">' . $row['docduedate'] . '</td>';
 			    		$result .= '<td align="center">' . $row['taxdate'] . '</td>';
-			    		$result .= '<td align="center">SOL</td>';
-			    		$result .= '<td align="center">' . $row['numatcard'] . '</td>';
+			    		$result .= '<td align="center">S/.</td>'; //CAMBIAMOS SOL POR S/.
+			    		$result .= '<td align="center">' . $row['indicator'] . "-" . $row['numatcard'] . '</td>'; //AGREGAMOS INDICADOR CON UN GUION PARA QUE TENGA ESTE FORMATO: 03-B020-00502974
 			    		$result .= '<td align="center">bod_None</td>';
 			    		$result .= '<td align="center">' . $row['folioprefixstring'] . '</td>';
 			    		$result .= '<td align="center">' . $row['folionumber'] . '</td>';
 			    		$result .= '<td align="center">' . $row['paymentgroupcode'] . '</td>';
 			    		$result .= '<td align="center">' . $row['indicator'] . '</td>';
 			    		$result .= '<td align="center">01</td>';
-			    		$result .= '<td align="center">N</td>';
-						$result .= '<td align="center">N</td>';
+			    		// $result .= '<td align="center">N</td>'; //CABECERA YA NO VA
+						// $result .= '<td align="center">N</td>'; //CABECERA YA NO VA
 			    		$result .= '<td align="center">' . $row['doctotal'] . '</td>';
 			    		$result .= '<td align="center">' . $row['salespersoncode'] . '</td>';
-			    		$result .= '<td align="center">06</td>';
+			    		// $result .= '<td align="center">06</td>'; //CABECERA YA NO VA
 			    		$result .= '<td align="center">' . $row['comments'] . '</td>';
 			    		$result .= '<td align="center">' . $row['journalmemo'] . '</td>';
 			    		$result .= '<td align="center">' . $row['u_exc_fecrecep'] . '</td>';
-			    		$result .= '<td align="center">N</td>';
+			    		// $result .= '<td align="center">N</td>'; //CABECERA YA NO VA
 			    		$result .= '<td align="center">' . $row['u_ctg_numliq'] . '</td>';
-			    		$result .= '<td align="center">' . $row['u_exx_serie'] . '</td>';
-			    		$result .= '<td align="center">' . $row['u_exx_nroini'] . '</td>';
-			    		$result .= '<td align="center">' . $row['u_exx_nrofin'] . '</td>';
+			    		// $result .= '<td align="center">' . $row['u_exx_serie'] . '</td>'; //CABECERA YA NO VA
+			    		// $result .= '<td align="center">' . $row['u_exx_nroini'] . '</td>'; //CABECERA YA NO VA
+			    		// $result .= '<td align="center">' . $row['u_exx_nrofin'] . '</td>'; //CABECERA YA NO VA
 				    $result .= '</tr>';
 				    ++$counter;
 				    ++$iCorrelativo;
@@ -301,7 +301,7 @@ class InterfaceSAPTemplate extends Template {
 		$fila = 2;
 		$worksheet1->write_string($fila, 0, "DocNum", $formato2);
 		$worksheet1->write_string($fila, 1, "DocType", $formato2);
-		$worksheet1->write_string($fila, 2, "Series", $formato2);
+		// $worksheet1->write_string($fila, 2, "Series", $formato2); //CABECERA YA NO VA
 		$worksheet1->write_string($fila, 3, "CardCode", $formato2);
 		$worksheet1->write_string($fila, 4, "DocDate", $formato2);
 		$worksheet1->write_string($fila, 5, "DocDueDate", $formato2);
@@ -309,29 +309,29 @@ class InterfaceSAPTemplate extends Template {
 		$worksheet1->write_string($fila, 7, "DocCurrency", $formato2);
 		$worksheet1->write_string($fila, 8, "NumAtCard", $formato2);
 		$worksheet1->write_string($fila, 9, "DocumentSubType", $formato2);
-		$worksheet1->write_string($fila, 10, "FolioPrefixString", $formato2);
-		$worksheet1->write_string($fila, 11, "FolioNumber", $formato2);
+		$worksheet1->write_string($fila, 10, "U_SYP_MDSD", $formato2); //CAMBIAMOS FolioPrefixString por U_SYP_MDSD
+		$worksheet1->write_string($fila, 11, "U_SYP_MDCD", $formato2); //CAMBIAMOS FolioNumber por U_SYP_MDCD
 		$worksheet1->write_string($fila, 12, "PaymentGroupCode", $formato2);
-		$worksheet1->write_string($fila, 13, "Indicator", $formato2);
-		$worksheet1->write_string($fila, 14, "U_EXX_TIPOOPER", $formato2);
-		$worksheet1->write_string($fila, 15, "U_EXX_SUJPER", $formato2);
-		$worksheet1->write_string($fila, 16, "U_EXX_INCPER", $formato2);
+		$worksheet1->write_string($fila, 13, "U_SYP_MDTD", $formato2); //CAMBIAMOS Indicator por U_SYP_MDTD
+		$worksheet1->write_string($fila, 14, "U_SYP_MDMT", $formato2); //CAMBIAMOS U_EXX_TIPOOPER por U_SYP_MDMT
+		// $worksheet1->write_string($fila, 15, "U_EXX_SUJPER", $formato2); //CABECERA YA NO VA
+		// $worksheet1->write_string($fila, 16, "U_EXX_INCPER", $formato2); //CABECERA YA NO VA
 		$worksheet1->write_string($fila, 17, "DocTotal", $formato2);
 		$worksheet1->write_string($fila, 18, "SalesPersonCode", $formato2);
-		$worksheet1->write_string($fila, 19, "U_EXC_TIPVEN", $formato2);
+		// $worksheet1->write_string($fila, 19, "U_EXC_TIPVEN", $formato2); //CABECERA YA NO VA
 		$worksheet1->write_string($fila, 20, "Comments", $formato2);
 		$worksheet1->write_string($fila, 21, "JournalMemo", $formato2);
-		$worksheet1->write_string($fila, 22, "U_EXC_FECRECEP", $formato2);
-		$worksheet1->write_string($fila, 23, "U_EXX_COMPER", $formato2);
+		$worksheet1->write_string($fila, 22, "U_CTG_FECRECEP", $formato2); //CAMBIAMOS U_EXC_FECRECEP por U_CTG_FECRECEP
+		// $worksheet1->write_string($fila, 23, "U_EXX_COMPER", $formato2); //CABECERA YA NO VA
 		$worksheet1->write_string($fila, 24, "U_CTG_NUMLIQ", $formato2);
-		$worksheet1->write_string($fila, 25, "U_EXX_SERIE", $formato2);
-		$worksheet1->write_string($fila, 26, "U_EXX_NROINI", $formato2);
-		$worksheet1->write_string($fila, 27, "U_EXX_NROFIN", $formato2);
+		// $worksheet1->write_string($fila, 25, "U_EXX_SERIE", $formato2); //CABECERA YA NO VA
+		// $worksheet1->write_string($fila, 26, "U_EXX_NROINI", $formato2); //CABECERA YA NO VA
+		// $worksheet1->write_string($fila, 27, "U_EXX_NROFIN", $formato2); //CABECERA YA NO VA
 
 		$fila++;
 		$worksheet1->write_string($fila, 0, "Num SAP", $formato2);
 		$worksheet1->write_string($fila, 1, "Tipo Documento", $formato2);
-		$worksheet1->write_string($fila, 2, "Codigo Serie", $formato2);
+		// $worksheet1->write_string($fila, 2, "Codigo Serie", $formato2); //CABECERA YA NO VA
 		$worksheet1->write_string($fila, 3, "Codigo SN", $formato2);
 		$worksheet1->write_string($fila, 4, "Fecha Contabilizacion", $formato2);
 		$worksheet1->write_string($fila, 5, "Fecha Vencimiento", $formato2);
@@ -339,24 +339,24 @@ class InterfaceSAPTemplate extends Template {
 		$worksheet1->write_string($fila, 7, "Moneda", $formato2);
 		$worksheet1->write_string($fila, 8, "Numero Documento", $formato2);
 		$worksheet1->write_string($fila, 9, "DocumentSubType", $formato2);
-		$worksheet1->write_string($fila, 10, "Folio Serie", $formato2);
-		$worksheet1->write_string($fila, 11, "Folio Correlativo", $formato2);
+		$worksheet1->write_string($fila, 10, "Serie", $formato2); //CAMBIAMOS Folio Serie por Serie
+		$worksheet1->write_string($fila, 11, "Num. Correlativo", $formato2); //CAMBIAMOS Folio Correlativo por Num. Correlativo
 		$worksheet1->write_string($fila, 12, "Condicion Pago", $formato2);
-		$worksheet1->write_string($fila, 13, "Tipo Documento", $formato2);
-		$worksheet1->write_string($fila, 14, "Tipo Operacion", $formato2);
-		$worksheet1->write_string($fila, 15, "Sujeto a percepcion", $formato2);
-		$worksheet1->write_string($fila, 16, "Incluye Percepcion", $formato2);
+		$worksheet1->write_string($fila, 13, "Tipo Documento", $formato2); //CAMBIAMOS Tipo Documento por Tipo Documento
+		$worksheet1->write_string($fila, 14, "Motivo Traslado", $formato2); //CAMBIAMOS Tipo Operacion por Motivo Traslado
+		// $worksheet1->write_string($fila, 15, "Sujeto a percepcion", $formato2); //CABECERA YA NO VA
+		// $worksheet1->write_string($fila, 16, "Incluye Percepcion", $formato2); //CABECERA YA NO VA
 		$worksheet1->write_string($fila, 17, "Importe Total", $formato2);
 		$worksheet1->write_string($fila, 18, "Empleado Ventas", $formato2);
-		$worksheet1->write_string($fila, 19, "Tipo de Venta", $formato2);
+		// $worksheet1->write_string($fila, 19, "Tipo de Venta", $formato2); //CABECERA YA NO VA
 		$worksheet1->write_string($fila, 20, "Comentario", $formato2);
 		$worksheet1->write_string($fila, 21, "Glosa Asiento Diario", $formato2);
-		$worksheet1->write_string($fila, 22, "Fecha de Recepcion", $formato2);
-		$worksheet1->write_string($fila, 23, "Es Doc Percep", $formato2);
+		$worksheet1->write_string($fila, 22, "Fecha de Recepcion", $formato2); //CAMBIAMOS Fecha de Recepcion por Fecha de Recepcion
+		// $worksheet1->write_string($fila, 23, "Es Doc Percep", $formato2); //CABECERA YA NO VA
 		$worksheet1->write_string($fila, 24, "Turno", $formato2);
-		$worksheet1->write_string($fila, 25, "Serie", $formato2);
-		$worksheet1->write_string($fila, 26, "Numero Inicio", $formato2);
-		$worksheet1->write_string($fila, 27, "Numero Final", $formato2);
+		// $worksheet1->write_string($fila, 25, "Serie", $formato2); //CABECERA YA NO VA
+		// $worksheet1->write_string($fila, 26, "Numero Inicio", $formato2); //CABECERA YA NO VA
+		// $worksheet1->write_string($fila, 27, "Numero Final", $formato2); //CABECERA YA NO VA
 
 		++$fila;
 		if($arrResult['bStatus']) {
@@ -364,32 +364,32 @@ class InterfaceSAPTemplate extends Template {
 			foreach ($arrResult['arrData'] as $row) {
 				$worksheet1->write_string($fila, 0, $iCorrelativo, $formato_string);
 				$worksheet1->write_string($fila, 1, 'dDocument_Items', $formato_string);
-				$worksheet1->write_string($fila, 2, $row['series'], $formato_string);
+				// $worksheet1->write_string($fila, 2, $row['series'], $formato_string); //CABECERA YA NO VA
 				$worksheet1->write_string($fila, 3, $row['cardcode'], $formato_string);
 				$worksheet1->write_string($fila, 4, $row['docdate'], $formato_string);
 				$worksheet1->write_string($fila, 5, $row['docduedate'], $formato_string);
 				$worksheet1->write_string($fila, 6, $row['taxdate'], $formato_string);
-				$worksheet1->write_string($fila, 7, 'SOL', $formato_string);
-				$worksheet1->write_string($fila, 8, $row['numatcard'], $formato_string);
+				$worksheet1->write_string($fila, 7, 'S/.', $formato_string); //CAMBIAMOS SOL POR S/.
+				$worksheet1->write_string($fila, 8, $row['indicator'] . "-" . $row['numatcard'], $formato_string); //AGREGAMOS INDICADOR CON UN GUION PARA QUE TENGA ESTE FORMATO: 03-B020-00502974
 				$worksheet1->write_string($fila, 9, 'bod_None', $formato_string);
 				$worksheet1->write_string($fila, 10, $row['folioprefixstring'], $formato_string);
 				$worksheet1->write_string($fila, 11, $row['folionumber'], $formato_string);
 				$worksheet1->write_string($fila, 12, $row['paymentgroupcode'], $formato_string);
 				$worksheet1->write_string($fila, 13, $row['indicator'], $formato_string);
 				$worksheet1->write_string($fila, 14, '01', $formato_string);
-				$worksheet1->write_string($fila, 15, 'N', $formato_string);
-				$worksheet1->write_string($fila, 16, 'N', $formato_string);
+				// $worksheet1->write_string($fila, 15, 'N', $formato_string); //CABECERA YA NO VA
+				// $worksheet1->write_string($fila, 16, 'N', $formato_string); //CABECERA YA NO VA
 				$worksheet1->write_string($fila, 17, $row['doctotal'], $formato_string);
 				$worksheet1->write_string($fila, 18, $row['salespersoncode'], $formato_string);
-				$worksheet1->write_string($fila, 19, '06', $formato_string);
+				// $worksheet1->write_string($fila, 19, '06', $formato_string); //CABECERA YA NO VA
 				$worksheet1->write_string($fila, 20, $row['comments'], $formato_string);
 				$worksheet1->write_string($fila, 21, $row['journalmemo'], $formato_string);
 				$worksheet1->write_string($fila, 22, $row['u_exc_fecrecep'], $formato_string);
-				$worksheet1->write_string($fila, 23, 'N', $formato_string);
+				// $worksheet1->write_string($fila, 23, 'N', $formato_string); //CABECERA YA NO VA
 				$worksheet1->write_string($fila, 24, $row['u_ctg_numliq'], $formato_string);
-				$worksheet1->write_string($fila, 25, $row['u_exx_serie'], $formato_string);
-				$worksheet1->write_string($fila, 26, $row['u_exx_nroini'], $formato_string);
-				$worksheet1->write_string($fila, 27, $row['u_exx_nrofin'], $formato_string);
+				// $worksheet1->write_string($fila, 25, $row['u_exx_serie'], $formato_string); //CABECERA YA NO VA
+				// $worksheet1->write_string($fila, 26, $row['u_exx_nroini'], $formato_string); //CABECERA YA NO VA 
+				// $worksheet1->write_string($fila, 27, $row['u_exx_nrofin'], $formato_string); //CABECERA YA NO VA
 				++$iCorrelativo;
 				++$fila;
 			}
