@@ -286,14 +286,25 @@ class InterfaceSAPTemplate extends Template {
 		$worksheet1 =& $workbook->add_worksheet($sGenerate);
 		$worksheet1->set_column(0, 0, 10);//Correlativo SAP
 		$worksheet1->set_column(1, 1, 15);//DocType
-		$worksheet1->set_column(2, 2, 20);//Series
-		$worksheet1->set_column(3, 3, 15);//CardCode
-		$worksheet1->set_column(4, 4, 23);//DocDate
-		$worksheet1->set_column(5, 5, 23);//DocDueDate
-		$worksheet1->set_column(6, 6, 23);//TaxDate
-		$worksheet1->set_column(7, 7, 13);//Moneda
-		$worksheet1->set_column(8, 8, 20);//NumAtCard
-		$worksheet1->set_column(9, 9, 20);//DocumentSubType
+		// $worksheet1->set_column(2, 2, 20);//Series
+		$worksheet1->set_column(2, 2, 15);//CardCode
+		$worksheet1->set_column(3, 3, 23);//DocDate
+		$worksheet1->set_column(4, 4, 23);//DocDueDate
+		$worksheet1->set_column(5, 5, 23);//TaxDate
+		$worksheet1->set_column(6, 6, 13);//Moneda
+		$worksheet1->set_column(7, 7, 20);//NumAtCard
+		$worksheet1->set_column(8, 8, 20);//DocumentSubType
+		$worksheet1->set_column(9, 9, 15);
+		$worksheet1->set_column(10, 10, 15);
+		$worksheet1->set_column(11, 11, 15);
+		$worksheet1->set_column(12, 12, 15);
+		$worksheet1->set_column(13, 13, 15);
+		$worksheet1->set_column(14, 14, 15);
+		$worksheet1->set_column(15, 15, 15);
+		$worksheet1->set_column(16, 16, 15);
+		$worksheet1->set_column(17, 17, 15);
+		$worksheet1->set_column(18, 18, 15);
+		$worksheet1->set_column(19, 19, 15);
 
 		$fila = 0;
 		$worksheet1->write_string($fila, 6, "Informacion de " . $sGenerate, $formato0);
