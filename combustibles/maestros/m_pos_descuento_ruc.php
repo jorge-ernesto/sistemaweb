@@ -191,6 +191,7 @@ class PosDescuentoRucModel extends Model {
 					WHEN ruc.tipo = 1 THEN cli.cli_razsocial
 					WHEN ruc.tipo = 2 THEN r.razsocial
 					WHEN ruc.tipo = 3 THEN 'Boleta'
+					WHEN ruc.tipo = 5 THEN cli.cli_razsocial
 				END AS cli_razsocial,
 				ruc.art_codigo || ' - ' || art.art_descbreve as art_codigo,
 				ruc.descuento,
@@ -199,6 +200,7 @@ class PosDescuentoRucModel extends Model {
 					WHEN ruc.tipo = 1 THEN 'Nota de Despacho'
 					WHEN ruc.tipo = 2 THEN 'Factura'
 					WHEN ruc.tipo = 3 THEN 'Tarjeta de Descuento'
+					WHEN ruc.tipo = '5' THEN 'Precio Pactado'
 				END AS tipo,
 			FROM
 				pos_descuento_ruc ruc
@@ -375,6 +377,7 @@ class PosDescuentoRucModel extends Model {
 					WHEN dr.tipo = 1 THEN cli.cli_razsocial
 					WHEN dr.tipo = 2 THEN r.razsocial
 					WHEN dr.tipo = 3 THEN 'Boleta'
+					WHEN dr.tipo = 5 THEN cli.cli_razsocial
 				END AS cli_razsocial,
 				dr.art_codigo || ' - ' || art.art_descbreve as art_codigo,
 				dr.descuento,
@@ -383,6 +386,7 @@ class PosDescuentoRucModel extends Model {
 					WHEN dr.tipo = 1 THEN 'Nota de Despacho'
 					WHEN dr.tipo = 2 THEN 'Factura'
 					WHEN dr.tipo = 3 THEN 'Tarjeta de Descuento'
+					WHEN dr.tipo = '5' THEN 'Precio Pactado'
 				END AS tipo
 			FROM
 				pos_descuento_ruc dr
@@ -496,6 +500,7 @@ class PosDescuentoRucModel extends Model {
 					WHEN ruc.tipo = 1 THEN cli.cli_razsocial
 					WHEN ruc.tipo = 2 THEN r.razsocial
 					WHEN ruc.tipo = 3 THEN 'Boleta'
+					WHEN ruc.tipo = 5 THEN cli.cli_razsocial
 				END AS cli_razsocial,
 				ruc.art_codigo || ' - ' || art.art_descbreve as art_codigo,
 				ruc.descuento,
@@ -504,6 +509,7 @@ class PosDescuentoRucModel extends Model {
 					WHEN ruc.tipo = '1' THEN 'Nota de Despacho'
 					WHEN ruc.tipo = '2' THEN 'Factura'
 					WHEN ruc.tipo = '3' THEN 'Tarjeta de Descuento'
+					WHEN ruc.tipo = '5' THEN 'Precio Pactado'
 				END AS tipo
 			FROM
 				pos_descuento_ruc ruc

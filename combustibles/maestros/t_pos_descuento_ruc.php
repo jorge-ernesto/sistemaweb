@@ -69,7 +69,7 @@ class PosDescuentoRucTemplate extends Template {
 	}
 
 	// Solo Formularios y otros
-	function formBuscar($paginacion, $tipo) {
+	function formBuscar($paginacion, $tipo = NULL) {
 		$tipos = Array("T"=>"Todos", "1"=>"Nota Despacho", "2"=>"Factura", "3"=>"Tarjeta de Descuento (Boleta)");
 		//echo "ENTRO BUSCAR\n";
 		$form = new form2('', 'Buscar', FORM_METHOD_GET, 'control.php', '', 'control');
@@ -325,6 +325,7 @@ class PosDescuentoRucTemplate extends Template {
 						<option value="1">Nota de Despacho</option>
 						<option value="2">Factura</option>
 						<option value="3">Tarjeta de Descuento (Boleta)</option>
+						<option value="5">Precio Pactado</option>
 					</select>
 				</div>
 				<div class="fila">
