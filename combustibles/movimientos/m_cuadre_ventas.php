@@ -406,7 +406,7 @@ class CuadreVentasModel extends Model {
 				$sql =	"
 						SELECT
 							sum(cantidad),
-							sum(importe)
+							sum(importe)-sum(COALESCE(km,0))
 						FROM
 							$postrans
 						WHERE
@@ -1164,7 +1164,7 @@ class CuadreVentasModel extends Model {
 				$sql =	"
 						SELECT
 							sum(cantidad),
-							sum(importe)
+							sum(importe)-sum(COALESCE(km,0))
 						FROM
 							$postrans
 						WHERE
@@ -1353,7 +1353,7 @@ class CuadreVentasModel extends Model {
 						t.trans,
 						max(t.text1),
 						max(g.tab_desc_breve),
-						sum(t.importe),
+						sum(t.importe)-first(COALESCE(t.km,0)),
 						to_char(first(t.fecha),'HH24:MI:SS')
 					FROM
 						$postrans t
