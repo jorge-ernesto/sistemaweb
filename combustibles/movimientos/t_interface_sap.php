@@ -199,7 +199,7 @@ class InterfaceSAPTemplate extends Template {
 			    		$result .= '<td align="center">' . $row['docdate'] . '</td>';
 			    		$result .= '<td align="center">' . $row['docduedate'] . '</td>';
 			    		$result .= '<td align="center">' . $row['taxdate'] . '</td>';
-			    		$result .= '<td align="center">S/.</td>'; //CAMBIAMOS SOL POR S/.
+			    		$result .= '<td align="center">S/</td>'; //CAMBIAMOS SOL POR S/
 			    		$result .= '<td align="center">' . $row['indicator'] . "-" . $row['numatcard'] . '</td>'; //AGREGAMOS INDICADOR CON UN GUION PARA QUE TENGA ESTE FORMATO: 03-B020-00502974
 			    		$result .= '<td align="center">bod_None</td>';
 			    		$result .= '<td align="center">' . $row['folioprefixstring'] . '</td>';
@@ -380,7 +380,7 @@ class InterfaceSAPTemplate extends Template {
 				$worksheet1->write_string($fila, 3, $row['docdate'], $formato_string);
 				$worksheet1->write_string($fila, 4, $row['docduedate'], $formato_string);
 				$worksheet1->write_string($fila, 5, $row['taxdate'], $formato_string);
-				$worksheet1->write_string($fila, 6, 'S/.', $formato_string); //CAMBIAMOS SOL POR S/.
+				$worksheet1->write_string($fila, 6, 'S/', $formato_string); //CAMBIAMOS SOL POR S/
 				$worksheet1->write_string($fila, 7, $row['indicator'] . "-" . $row['numatcard'], $formato_string); //AGREGAMOS INDICADOR CON UN GUION PARA QUE TENGA ESTE FORMATO: 03-B020-00502974
 				$worksheet1->write_string($fila, 8, 'bod_None', $formato_string);
 				$worksheet1->write_string($fila, 9, $row['folioprefixstring'], $formato_string);
