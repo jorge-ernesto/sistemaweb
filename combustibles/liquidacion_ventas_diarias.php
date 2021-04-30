@@ -11,6 +11,8 @@ list($dia_al, $mes_al, $ano_al)    = explode('/',$_REQUEST['dia_al']);
 
 $funcion     = new class_funciones;
 $conector_id = $funcion->conectar("","","","","");
+$debug       = false;
+$no_mostrar  = "style='display:none;'";
 
 if (strlen($dia_del) == 0) {
 	rangodefechas();
@@ -47,9 +49,9 @@ if ($_REQUEST['boton'] == "Consultar") {
 // fin fecha consolidada
 
 $almacen = $_POST['almacen'];
-$op_inv  = $_POST['inv_comb'];
 $sobfal  = $_POST['sobfal'];
 $sDocumentoManualVenta = $_POST['cbo-documento_venta_manual'];
+$op_inv  = $_POST['inv_comb'];
 
 $sql = "SELECT
 		SUM(CASE WHEN ch_codigocombustible!='11620307' THEN (CASE WHEN nu_ventagalon!=0 THEN nu_ventavalor ELSE 0 END) ELSE 0 END) as liquido,
@@ -63,6 +65,12 @@ $sql = "SELECT
 		dt_fechaparte BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "' ";
 
 $x_venta_combustible = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 1. Venta de Combustible</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
 
 $sql = "SELECT
 		SUM(d.nu_fac_valortotal) AS ventatienda,
@@ -79,6 +87,12 @@ $sql = "SELECT
 		AND c.cli_ndespacho_efectivo != 1 ";
 
 $x_venta_tienda = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 2. Venta de Productos y Promociones</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
 
 $sql = "SELECT
 		SUM(CASE WHEN v.ch_estado='1' THEN v.nu_importe ELSE 0 END) AS valescredito
@@ -115,6 +129,12 @@ $sql = "SELECT
 		VC.ch_cliente";
 
 $x_vales_credito_detalle = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 3. Credito Clientes - Detalle</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
 
 $sql = "SELECT 
 		g.tab_descripcion as descripciontarjeta,
@@ -133,6 +153,12 @@ $sql = "SELECT
 // echo "</pre>";
 
 $x_tarjetas_credito_detalle = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 4. Tarjetas de Credito</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
 
 $sql = "SELECT
 		SUM(t.importe)-SUM(COALESCE(t.km,0)) AS tarjetascredito
@@ -161,6 +187,12 @@ WHERE
 ";
 
 $x_descuentos = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 5. Descuentos</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
 
 $sql = "
 SELECT
@@ -177,6 +209,12 @@ WHERE
 ";
 
 $x_difprecio = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 6. Diferencias de Precio de Vales</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
 
 $sql = "SELECT 
 		SUM(importe) AS afericiones
@@ -187,6 +225,12 @@ $sql = "SELECT
 		dia BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "' ";
 
 $x_afericiones = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 7. Afericiones</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
 
 $sql ="SELECT 
 		SUM(
@@ -202,44 +246,51 @@ $sql ="SELECT
 		dt_dia BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "' ";
 
 $x_depositos_pos = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query Total Depositos POS</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
 
 // GASTOS
 
-$sql ="
-	SELECT
-		i.pay_number descripcion,
-		(CASE WHEN i.c_currency_id = '2' THEN ROUND(i.amount * c.rate,2) ELSE i.amount END) AS importe
-	FROM
-		c_cash_transaction c
-		INNER JOIN c_cash_transaction_payment i ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
-	WHERE
-		c.ware_house = '" . pg_escape_string($almacen) . "'
-		AND c.d_system BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
-		AND i.c_bank_id = '0'
-		AND c.type = '1'
-";
+// $sql ="
+// 	SELECT
+// 		i.pay_number descripcion,
+// 		(CASE WHEN i.c_currency_id = '2' THEN ROUND(i.amount * c.rate,2) ELSE i.amount END) AS importe
+// 	FROM
+// 		c_cash_transaction c
+// 		INNER JOIN c_cash_transaction_payment i ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
+// 	WHERE
+// 		c.ware_house = '" . pg_escape_string($almacen) . "'
+// 		AND c.d_system BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
+// 		AND i.c_bank_id = '0'
+// 		AND c.type = '1'
+// ";
 
 
-$x_liquidacion_gastos = pg_query($conector_id, $sql);
+// $x_liquidacion_gastos = pg_query($conector_id, $sql);
 
-$sql ="
-	SELECT
-		SUM((CASE WHEN i.c_currency_id = '2' THEN ROUND(i.amount * c.rate,2) ELSE i.amount END)) AS sumatotal
-	FROM
-		c_cash_transaction c
-		INNER JOIN c_cash_transaction_payment i ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
-	WHERE
-		c.ware_house = '" . pg_escape_string($almacen) . "'
-		AND c.d_system BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
-		AND i.c_bank_id = '0'
-		AND c.type = '1'
-";
+// $sql ="
+// 	SELECT
+// 		SUM((CASE WHEN i.c_currency_id = '2' THEN ROUND(i.amount * c.rate,2) ELSE i.amount END)) AS sumatotal
+// 	FROM
+// 		c_cash_transaction c
+// 		INNER JOIN c_cash_transaction_payment i ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
+// 	WHERE
+// 		c.ware_house = '" . pg_escape_string($almacen) . "'
+// 		AND c.d_system BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
+// 		AND i.c_bank_id = '0'
+// 		AND c.type = '1'
+// ";
 
-$x_liquidacion_gastos_total = pg_query($conector_id, $sql);
+// $x_liquidacion_gastos_total = pg_query($conector_id, $sql);
 
 $sql ="	SELECT
 		b.nombre||'	: '||a.descripcion as descripcion,
-		a.importe as importe
+		--a.importe as importe
+		0 as importe
 	FROM
 		comb_liquidacion_gastos a
 		LEFT JOIN comb_tipo_gasto b ON (a.id_tipo_gasto=b.id_tipo_gasto)
@@ -252,7 +303,8 @@ $sql ="	SELECT
 $x_liquidacion_gastos = pg_query($conector_id, $sql);
 
 $sql ="	SELECT
-		ROUND(SUM(importe),2) as sumatotal
+		--ROUND(SUM(importe),2) as sumatotal
+		0 as sumatotal
 	FROM
 		comb_liquidacion_gastos
 	WHERE
@@ -260,6 +312,12 @@ $sql ="	SELECT
 		fecha BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "' ";
 
 $x_liquidacion_gastos_total = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 9. Otros</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
 
 $sql ="	SELECT
 		ROUND(SUM(importe),2) AS sfttotal
@@ -284,6 +342,12 @@ $sql ="	SELECT
 		AND c.dia BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "' ";
 
 $diferencia_trabajadores = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 8. Sobrantes Faltantes por Trabajador</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
 
 // DETALLE Y TOTAL DE DOCUMENTOS MANUALES
 
@@ -297,6 +361,12 @@ $sql = "SELECT
 		dt_fac_fecha BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "' ";
 
 $x_totmanuales = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 13. Documentos de Venta Manual - Total</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
 
 $sql = "
 SELECT 
@@ -304,15 +374,15 @@ SELECT
  cab.nu_fac_valortotal AS importe
 FROM
  fac_ta_factura_cabecera AS cab
- JOIN int_clientes AS cli
+ LEFT JOIN int_clientes AS cli
   USING(cli_codigo)
- JOIN int_tabla_general AS TDOCU
+ LEFT JOIN int_tabla_general AS TDOCU
   ON(SUBSTRING(TDOCU.tab_elemento, 5) = cab.ch_fac_tipodocumento AND TDOCU.tab_tabla ='08' AND TDOCU.tab_elemento != '000000')
 WHERE 
  cab.ch_fac_tipodocumento IN ('10','35','20')
  AND cab.ch_almacen='" . pg_escape_string($almacen) . "'
  AND cab.dt_fac_fecha BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
- AND (cab.ch_liquidacion='' OR cab.ch_liquidacion IS NULL)
+ --AND (cab.ch_liquidacion='' OR cab.ch_liquidacion IS NULL)
 ORDER BY 
  cab.ch_fac_tipodocumento,
  cab.ch_fac_seriedocumento,
@@ -321,6 +391,12 @@ ORDER BY
 ";
 
 $x_manuales = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 13. Documentos de Venta Manual - Detalle</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
 
 // INGRESOS BANCOS
 
@@ -340,6 +416,69 @@ $sql ="
 		documento desc ";
 
 $x_caja_ingresos = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 10. Ingresos</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
+
+$sql ="
+	SELECT
+		c_op.name || ' - ' || c_mp.name || ' - ' ||  i.pay_number || ' - ' || CASE WHEN cli.cli_rsocialbreve IS NULL THEN c.reference ELSE cli.cli_rsocialbreve END AS documento,
+		(CASE WHEN i.c_currency_id = '2' THEN ROUND(i.amount * c.rate,2) ELSE i.amount END) AS ingresos,	
+		c_mp.c_cash_mpayment_id AS c_cash_mpayment_id,
+		c_mp.name AS metodo_pago,
+		c_ba.name AS banco
+	FROM
+		c_cash_transaction c
+		INNER JOIN c_cash_transaction_payment i ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
+		LEFT JOIN int_clientes cli ON (cli.cli_codigo = c.bpartner)
+		LEFT JOIN c_cash_operation c_op ON (c.c_cash_operation_id = c_op.c_cash_operation_id AND c_op.type = 0) 
+		LEFT JOIN c_cash_mpayment c_mp ON (i.c_cash_mpayment_id = c_mp.c_cash_mpayment_id)
+		LEFT JOIN c_bank c_ba ON (i.c_bank_id = c_ba.c_bank_id)
+	WHERE
+		c.ware_house = '" . pg_escape_string($almacen) . "'
+		AND c.d_system BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
+		AND c.type = '0'
+		AND c_op.c_cash_operation_id = '2' --VENTAS TICKETS
+	ORDER BY
+		documento desc ";
+
+$x_caja_ingresos_contado_dia = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 10.1 Ingresos al contado del dia</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
+
+$sql ="
+	SELECT
+		c_op.name || ' - ' || c_mp.name || ' - ' ||  i.pay_number || ' - ' || CASE WHEN cli.cli_rsocialbreve IS NULL THEN c.reference ELSE cli.cli_rsocialbreve END AS documento,
+		(CASE WHEN i.c_currency_id = '2' THEN ROUND(i.amount * c.rate,2) ELSE i.amount END) AS ingresos
+	FROM
+		c_cash_transaction c
+		INNER JOIN c_cash_transaction_payment i ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
+		LEFT JOIN int_clientes cli ON (cli.cli_codigo = c.bpartner)
+		LEFT JOIN c_cash_operation c_op ON (c.c_cash_operation_id = c_op.c_cash_operation_id AND c_op.type = 0) 
+		LEFT JOIN c_cash_mpayment c_mp ON (i.c_cash_mpayment_id = c_mp.c_cash_mpayment_id)
+		LEFT JOIN c_bank c_ba ON (i.c_bank_id = c_ba.c_bank_id)
+	WHERE
+		c.ware_house = '" . pg_escape_string($almacen) . "'
+		AND c.d_system BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
+		AND c.type = '0'
+		AND c_op.c_cash_operation_id != '2' --VENTAS TICKETS
+	ORDER BY
+		documento desc ";
+
+$x_caja_ingresos_cobranzas = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 10.2 Cobranzas y Amortizaciones por CC</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
 
 $sql =" SELECT
 		SUM(i.amount) AS total
@@ -352,6 +491,40 @@ $sql =" SELECT
 		AND c.type = '0' ";
 
 $x_caja_totingresos = pg_query($conector_id, $sql);
+
+$sql =" SELECT
+			SUM(i.amount) AS total
+		FROM
+			c_cash_transaction c
+			INNER JOIN c_cash_transaction_payment i ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
+			LEFT JOIN int_clientes cli ON (cli.cli_codigo = c.bpartner)
+			LEFT JOIN c_cash_operation c_op ON (c.c_cash_operation_id = c_op.c_cash_operation_id AND c_op.type = 0) 
+			LEFT JOIN c_cash_mpayment c_mp ON (i.c_cash_mpayment_id = c_mp.c_cash_mpayment_id)
+			LEFT JOIN c_bank c_ba ON (i.c_bank_id = c_ba.c_bank_id)
+		WHERE
+			c.ware_house = '" . pg_escape_string($almacen) . "'
+			AND c.d_system BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
+			AND c.type = '0'
+			AND c_op.c_cash_operation_id = '2' --VENTAS TICKETS"; 
+
+$x_caja_totingresos_contado_dia = pg_query($conector_id, $sql);
+
+$sql =" SELECT
+			SUM(i.amount) AS total
+		FROM
+			c_cash_transaction c
+			INNER JOIN c_cash_transaction_payment i ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
+			LEFT JOIN int_clientes cli ON (cli.cli_codigo = c.bpartner)
+			LEFT JOIN c_cash_operation c_op ON (c.c_cash_operation_id = c_op.c_cash_operation_id AND c_op.type = 0) 
+			LEFT JOIN c_cash_mpayment c_mp ON (i.c_cash_mpayment_id = c_mp.c_cash_mpayment_id)
+			LEFT JOIN c_bank c_ba ON (i.c_bank_id = c_ba.c_bank_id)
+		WHERE
+			c.ware_house = '" . pg_escape_string($almacen) . "'
+			AND c.d_system BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
+			AND c.type = '0'
+			AND c_op.c_cash_operation_id != '2' --VENTAS TICKETS";
+
+$x_caja_totingresos_cobranzas = pg_query($conector_id, $sql);
 
 // EGRESOS BANCOS
 
@@ -372,21 +545,26 @@ $sql ="
 		documento desc";
 
 $x_caja_egresos = pg_query($conector_id, $sql);
-
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 12. Egresos</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
 
 /*echo "<pre>";
 echo $sql;
 echo "</pre>";*/
 
-//*********************** inventario? ************************************************************
-$desde = $_REQUEST['dia_del'];
-$hasta = $_REQUEST['dia_al'];
-$estaciones = $almacen;
-/*
-if ($flag == 1) { 
-	$desde = "";
-	$hasta = "";
-}	*/
+//**************************************** Inventario de combustible ****************************************
+	$desde = $_REQUEST['dia_del'];
+	$hasta = $_REQUEST['dia_al'];
+	$estaciones = $almacen;
+	/*
+	if ($flag == 1) { 
+		$desde = "";
+		$hasta = "";
+	}	*/
 
 	function obtieneParte($desde, $hasta, $estaciones) {
 		global $sqlca;
@@ -525,6 +703,14 @@ if ($flag == 1) {
 				T.ch_codigocombustible) M on M.combustible = T.ch_codigocombustible";
 
 		$sqlA .= " ORDER BY Co.ch_nombrebreve ;";
+		$debug = false;
+		if($debug){
+			echo "<pre>";
+			echo "<b>Query Inventario de Combustible</b><br>";
+			echo $sqlA;
+			echo "</pre>";
+		}
+
 //		echo '- PARTE: '.$sqlA.' -';
 
 		if ($sqlca->query($sqlA) < 0) 
@@ -599,9 +785,9 @@ if ($flag == 1) {
 			$result[$a[0]] = $a[1];
 		}	
 		return $result;
-    	}   
+   }   
 
-    	function obtieneListaEstaciones() {
+   function obtieneListaEstaciones() {
 		global $sqlca;
 	
 		$sql = "SELECT ch_almacen, trim(ch_nombre_almacen)
@@ -617,9 +803,9 @@ if ($flag == 1) {
 		    	$result[$a[0]] = $a[0] . " - " . $a[1];
 		}	
 		return $result;
-    	}
+   }
     	
-    	function validaDia($dia, $almacen) {
+   function validaDia($dia, $almacen) {
 		global $sqlca;
 
 		/*$sql = "SELECT CASE WHEN ch_poscd='A' THEN ch_posturno ELSE ch_posturno-1 END FROM pos_aprosys WHERE da_fecha='$dia'";
@@ -647,11 +833,623 @@ if ($flag == 1) {
 		}else{
 			return 1;//Consolidado
 		}
+	}
+//**************************************** Cerrar Inventario de combustible ****************************************
 
+//**************************************** Reporte Caja y Banco ****************************************
+//echo "<script>console.log('POST: " . json_encode($_POST) . "')</script>";							
+
+$fecha_explode = explode("/", $_POST['dia_al']);
+
+$iAlmacen    = $_POST['almacen'];
+$dYear       = $fecha_explode['2'];
+$dMonth      = $fecha_explode['1'];
+$dDay        = $fecha_explode['0'];
+$pos_transYM = "pos_trans" . $dYear . $dMonth;
+
+function searchCajaBanco($estacion, $dYear, $dMonth, $pos_transYM){
+	global $sqlca;
+
+	$query = "
+SELECT
+	to_char(C.fecha,'DD/MM/YYYY') as fecha,
+	COMB.total_venta_comb as total_venta_comb,
+	GNV.total_venta_gnv as total_venta_gnv,
+	COMB.total_venta_glp as total_venta_glp,
+	L.lubricantes as lubrincates,
+	O.otros as otros,
+	CRE.clientescredito as clientescredito,
+	TC.tarjetascredito as tarjetascredito,
+	BCP.bcp as bcp,
+	BBVA.bbva as bbva,
+	SCOT.scotiabank as scotiabank,
+	INTER.interbank as interbank,
+	FA.faltante as faltante,
+	SO.sobrante as sobrante,
+	(COALESCE(FAC.facimporte, 0) - COALESCE(NCMANUAL.facimporte, 0)) AS facimporte,
+	AFC.af_comb,
+	AFG.af_glp,
+	DSCTO.descuentos as descuentos,
+	GNV.creditognv as creditognv,
+	GNV.faltagnv as faltagnv,
+	GNV.sobragnv as sobragnv,
+	(COALESCE(PRO.promociones, 0) - COALESCE(PRONCMANUAL.promociones, 0)) AS promociones,
+	EGRE.egresos,
+	OTHER.otherimp,
+	COMB.af_comb AS manual_af_comb,
+	COMB.af_glp AS manual_af_glp
+  FROM	
+	(SELECT
+		da_fecha AS fecha
+	FROM
+		pos_aprosys
+	WHERE
+		TO_CHAR(da_fecha, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
+	GROUP BY
+		da_fecha) C
+	LEFT JOIN
+	(SELECT
+		comb.dt_fechaparte AS fecha, 
+		SUM(CASE WHEN comb.ch_codigocombustible != '11620307' THEN (CASE WHEN comb.nu_ventagalon!=0 THEN comb.nu_ventavalor ELSE 0 END) ELSE 0 END) AS total_venta_comb,
+		SUM(CASE WHEN comb.ch_codigocombustible = '11620307' THEN (CASE WHEN comb.nu_ventagalon!=0 THEN comb.nu_ventavalor ELSE 0 END) ELSE 0 END) AS total_venta_glp,
+		CAST(SUM(CASE WHEN nu_ventagalon > 0 THEN (CASE WHEN ch_codigocombustible != '11620307' THEN ((nu_ventavalor / nu_ventagalon) * nu_afericionveces_x_5 * 5) ELSE 0 END) END) AS decimal(8,2)) AS af_comb,
+		CAST(SUM(CASE WHEN nu_ventagalon > 0 THEN (CASE WHEN ch_codigocombustible = '11620307' THEN ((nu_ventavalor / nu_ventagalon) * nu_afericionveces_x_5 * 5) ELSE 0 END) END) AS decimal(8,2)) AS af_glp,
+		ROUND(SUM(comb.nu_descuentos), 2) AS descuentos
+	 FROM 
+		comb_ta_contometros AS comb
+	 WHERE 	
+		comb.ch_sucursal = '" . $estacion . "'
+		AND TO_CHAR(comb.dt_fechaparte, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
+	GROUP BY 
+		comb.dt_fechaparte
+	) COMB ON (COMB.fecha = C.fecha)
+	LEFT JOIN
+	(SELECT
+		gnv.dt_fecha AS fecha,
+		SUM(gnv.tot_surtidor_soles) AS total_venta_gnv,
+		SUM(gnv.tot_cli_credito) AS creditognv,
+		SUM(gnv.tot_trab_faltantes) AS faltagnv,
+		SUM(gnv.tot_trab_sobrantes) AS sobragnv
+	 FROM 
+		comb_liquidaciongnv AS gnv
+	 WHERE 	
+		gnv.ch_almacen = '" . $estacion . "'
+		AND TO_CHAR(gnv.dt_fecha, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
+	 GROUP BY
+		gnv.dt_fecha
+	) GNV ON (GNV.fecha = C.fecha)
+	LEFT JOIN
+	(SELECT
+		v.dt_fecha AS fecha,
+		SUM(v.nu_importe) AS clientescredito
+	 FROM
+		val_ta_cabecera AS v
+		LEFT JOIN int_clientes AS c
+			ON (v.ch_cliente = c.cli_codigo)
+	 WHERE
+		v.ch_sucursal = '" . $estacion . "'
+		AND TO_CHAR(v.dt_fecha, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
+		AND c.cli_ndespacho_efectivo != 1
+		AND v.ch_estado = '1'
+	 GROUP BY
+		v.dt_fecha 
+	) CRE ON (CRE.fecha = C.fecha)
+	LEFT JOIN
+	(SELECT
+	 	t.dia, 
+		SUM(t.importe)-SUM(COALESCE(t.km,0)) AS tarjetascredito
+	FROM 
+		" . $pos_transYM . " AS t
+	WHERE 
+		t.es = '" . $estacion . "'
+		AND t.fpago = '2'
+		AND t.td in('B','F')
+	GROUP BY
+	 	t.dia
+	) TC ON (TC.dia = C.fecha)
+	LEFT JOIN
+	(SELECT
+	 	t.dia,
+		SUM(t.importe) AS descuentos
+	FROM 
+		" . $pos_transYM . " AS t
+	WHERE 
+		t.es = '" . $estacion . "'
+		AND t.grupo = 'D'
+		AND t.td in('N','B','F')
+	GROUP BY
+	 	t.dia
+	) DSCTO ON (DSCTO.dia = C.fecha)
+	LEFT JOIN
+	(SELECT
+	 	t.dia, 
+		SUM(t.importe) AS lubricantes
+	 FROM 
+		" . $pos_transYM . " AS t
+		LEFT JOIN int_articulos AS art
+			ON(t.codigo = art.art_codigo)
+	 WHERE 
+		t.es = '" . $estacion . "'
+		AND t.tipo = 'M'
+		AND art.art_tipo = '02'
+	GROUP BY
+		t.dia
+	) L ON (L.dia = C.fecha)
+	LEFT JOIN
+	(SELECT
+	 	t.dia,
+		SUM(t.importe) AS otros
+	 FROM 
+		" . $pos_transYM . " AS t
+		LEFT JOIN int_articulos AS art
+			ON(t.codigo = art.art_codigo)
+	 WHERE 
+		t.es = '" . $estacion . "'
+		AND t.tipo = 'M'
+		AND art.art_tipo != '02'
+	GROUP BY
+		t.dia
+	) O ON (O.dia = C.fecha)
+	LEFT JOIN
+	(SELECT
+		c.d_system,
+		SUM(CASE WHEN c.c_currency_id=1 THEN i.amount
+		ELSE i.amount*c.rate
+		END)  AS bcp
+	FROM
+		c_cash_transaction AS c
+		JOIN c_cash_transaction_payment AS i
+			ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
+		JOIN c_cash_transaction_detail AS CD
+			ON(c.c_cash_transaction_id = CD.c_cash_transaction_id)
+	WHERE
+		c.ware_house = '" . $estacion . "'
+		AND c.c_cash_id = 1--Solo se filtra caja principal
+		AND TO_CHAR(c.d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
+		AND i.c_bank_id = '1'
+		AND c.type = '0'
+		AND i.c_cash_transaction_id IN(SELECT c_cash_transaction_id FROM c_cash_transaction WHERE TO_CHAR(d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "' AND bpartner ='99999999')
+		AND CD.doc_type NOT IN ('10','35')
+	GROUP BY
+		c.d_system
+	) BCP ON (BCP.d_system = C.fecha)
+	LEFT JOIN
+	(SELECT
+		c.d_system,
+		SUM(CASE WHEN c.c_currency_id=1 THEN i.amount
+		ELSE i.amount*c.rate
+		END)  AS bbva
+	FROM
+		c_cash_transaction as c
+		JOIN c_cash_transaction_payment AS i
+			ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
+		JOIN c_cash_transaction_detail AS CD
+			ON(c.c_cash_transaction_id = CD.c_cash_transaction_id)
+	WHERE
+		c.ware_house = '" . $estacion . "'
+		AND c.c_cash_id = 1--Solo se filtra caja principal
+		AND TO_CHAR(c.d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
+		AND i.c_bank_id = '2'
+		AND c.type = '0'
+		AND i.c_cash_transaction_id IN(SELECT c_cash_transaction_id FROM c_cash_transaction WHERE TO_CHAR(d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "' AND bpartner ='99999999')
+		AND CD.doc_type NOT IN ('10','35')
+	GROUP BY
+		c.d_system
+	) BBVA ON (BBVA.d_system = C.fecha)
+	LEFT JOIN
+	(SELECT
+		c.d_system,
+		SUM(CASE WHEN c.c_currency_id=1 THEN i.amount
+		ELSE i.amount*c.rate
+		END)  AS scotiabank
+	FROM
+		c_cash_transaction AS c
+		JOIN c_cash_transaction_payment AS i
+			ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
+		JOIN c_cash_transaction_detail AS CD
+			ON(c.c_cash_transaction_id = CD.c_cash_transaction_id)
+	WHERE
+		c.ware_house = '" . $estacion . "'
+		AND c.c_cash_id = 1--Solo se filtra caja principal
+		AND TO_CHAR(c.d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
+		AND i.c_bank_id = '3'
+		AND c.type = '0'
+		AND CD.doc_type NOT IN ('10','35')
+	GROUP BY
+		c.d_system 
+	) SCOT ON (SCOT.d_system = C.fecha)
+	LEFT JOIN
+	(SELECT
+		c.d_system,
+		SUM(CASE WHEN c.c_currency_id=1 THEN i.amount
+		ELSE i.amount*c.rate
+		END)  AS interbank
+	FROM
+		c_cash_transaction AS c
+		JOIN c_cash_transaction_payment AS i
+			ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
+		JOIN c_cash_transaction_detail AS CD
+			ON(c.c_cash_transaction_id = CD.c_cash_transaction_id)
+	WHERE
+		c.ware_house = '" . $estacion . "'
+		AND c.c_cash_id = 1--Solo se filtra caja principal
+		AND TO_CHAR(c.d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
+		AND i.c_bank_id = '4'
+		AND c.type = '0'
+		AND i.c_cash_transaction_id IN(SELECT c_cash_transaction_id FROM c_cash_transaction WHERE TO_CHAR(d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "' AND bpartner ='99999999')
+		AND CD.doc_type NOT IN ('10','35')
+	GROUP BY
+		c.d_system
+	) INTER ON (INTER.d_system = C.fecha)
+	LEFT JOIN
+	(SELECT
+		dia,
+		SUM(importe) AS faltante
+	 FROM
+		comb_diferencia_trabajador
+	 WHERE
+		importe < 0
+		AND es = '" . $estacion . "'
+		AND TO_CHAR(dia, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
+	GROUP BY
+		dia
+	) FA ON (FA.dia = C.fecha)
+	LEFT JOIN
+	(SELECT
+		dia,
+		SUM(importe) AS sobrante
+	 FROM
+		comb_diferencia_trabajador
+	 WHERE
+		importe > 0
+		AND es = '" . $estacion . "'
+		AND TO_CHAR(dia, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
+	 GROUP BY
+		dia
+	) SO ON (SO.dia = C.fecha)
+	LEFT JOIN
+	(SELECT
+		cab.dt_fac_fecha,
+		SUM(det.nu_fac_valortotal) AS facimporte
+	FROM
+		fac_ta_factura_cabecera AS cab
+		JOIN fac_ta_factura_detalle AS det
+			USING(ch_fac_tipodocumento, ch_fac_seriedocumento, ch_fac_numerodocumento)
+		LEFT JOIN int_articulos AS art
+			ON(det.art_codigo = art.art_codigo)
+	WHERE
+		cab.ch_almacen 								= '" . $estacion . "'
+		AND art.art_tipo 							= '02'
+		AND TO_CHAR(cab.dt_fac_fecha, 'YYYY-MM') 	= '" . $dYear . '-' . $dMonth . "'
+		AND cab.ch_fac_tipodocumento NOT IN('45','20')
+	GROUP BY
+		cab.dt_fac_fecha
+	)FAC ON (FAC.dt_fac_fecha = C.fecha)
+	LEFT JOIN
+	(SELECT
+		cab.dt_fac_fecha,
+		SUM(det.nu_fac_valortotal) AS facimporte
+	FROM
+		fac_ta_factura_cabecera AS cab
+		JOIN fac_ta_factura_detalle AS det
+			USING(ch_fac_tipodocumento, ch_fac_seriedocumento, ch_fac_numerodocumento)
+		LEFT JOIN int_articulos AS art
+			ON(det.art_codigo = art.art_codigo)
+	WHERE
+		cab.ch_almacen 								= '" . $estacion . "'
+		AND art.art_tipo 							= '02'
+		AND TO_CHAR(cab.dt_fac_fecha, 'YYYY-MM') 	= '" . $dYear . '-' . $dMonth . "'
+		AND cab.ch_fac_tipodocumento IN('20')
+	GROUP BY
+		cab.dt_fac_fecha
+	) NCMANUAL ON (NCMANUAL.dt_fac_fecha = C.fecha)
+	LEFT JOIN
+	(SELECT 
+		af.dia AS dia,
+		SUM(af.importe) AS af_comb
+	FROM 
+		pos_ta_afericiones AS af
+	WHERE
+		af.es 							= '" . $estacion . "'
+		AND af.codigo 					!= '11620307'
+		AND TO_CHAR(af.dia, 'YYYY-MM') 	= '" . $dYear . '-' . $dMonth . "'
+	GROUP BY
+		af.dia
+	)AFC ON (AFC.dia = C.fecha)
+	LEFT JOIN
+	(SELECT
+		af.dia AS dia, 
+		SUM(af.importe) AS af_glp
+	FROM 
+		pos_ta_afericiones AS af
+	WHERE
+		af.es 							= '" . $estacion . "'
+		AND af.codigo 					= '11620307'
+		AND TO_CHAR(af.dia, 'YYYY-MM') 	= '" . $dYear . '-' . $dMonth . "'
+	GROUP BY
+		af.dia
+	)AFG ON (AFG.dia = C.fecha)
+	LEFT JOIN
+	(SELECT 
+		cab.dt_fac_fecha,
+		SUM(TOT.tot_promocion) AS promociones
+	FROM
+		fac_ta_factura_cabecera AS cab
+		JOIN fac_ta_factura_detalle AS det
+			USING(ch_fac_tipodocumento, ch_fac_seriedocumento, ch_fac_numerodocumento)
+		LEFT JOIN int_articulos AS art
+			ON(det.art_codigo = art.art_codigo)
+		LEFT JOIN (
+		SELECT
+			cab.ch_fac_tipodocumento, cab.ch_fac_seriedocumento, cab.ch_fac_numerodocumento,
+			(CASE WHEN ((cab.nu_fac_descuento1 = 0.00 OR cab.nu_fac_descuento1 IS NULL) AND cab.ch_fac_tiporecargo2 = 'S' AND cab.nu_fac_impuesto1 > 0.00 AND (cab.ch_fac_anulado IS NULL OR cab.ch_fac_anulado != 'S')) THEN
+				0
+			ELSE
+				cab.nu_fac_valortotal
+			END) AS tot_promocion
+		FROM
+			fac_ta_factura_cabecera AS cab
+			JOIN fac_ta_factura_detalle AS det
+				USING(ch_fac_tipodocumento, ch_fac_seriedocumento, ch_fac_numerodocumento)
+			LEFT JOIN int_articulos AS art
+				ON(det.art_codigo = art.art_codigo)
+		WHERE
+			cab.ch_almacen = '" . $estacion . "'
+			AND art.art_tipo = '08'
+			AND TO_CHAR(cab.dt_fac_fecha, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
+			AND cab.ch_fac_tipodocumento NOT IN('45','20')
+		) AS TOT USING(ch_fac_tipodocumento, ch_fac_seriedocumento, ch_fac_numerodocumento)
+	WHERE
+		cab.ch_almacen 								= '" . $estacion . "'
+		AND art.art_tipo 							= '08'
+		AND TO_CHAR(cab.dt_fac_fecha, 'YYYY-MM') 	= '" . $dYear . '-' . $dMonth . "'
+		AND cab.ch_fac_tipodocumento NOT IN('45','20')
+	GROUP BY
+		cab.dt_fac_fecha
+	)PRO ON (PRO.dt_fac_fecha = C.fecha)
+	LEFT JOIN
+	(SELECT 
+		cab.dt_fac_fecha,
+		SUM(TOT.tot_promocion) AS promociones
+	FROM
+		fac_ta_factura_cabecera AS cab
+		JOIN fac_ta_factura_detalle AS det
+			USING(ch_fac_tipodocumento, ch_fac_seriedocumento, ch_fac_numerodocumento)
+		LEFT JOIN int_articulos AS art
+			ON(det.art_codigo = art.art_codigo)
+		LEFT JOIN (
+		SELECT
+			cab.ch_fac_tipodocumento, cab.ch_fac_seriedocumento, cab.ch_fac_numerodocumento,
+			(CASE WHEN ((cab.nu_fac_descuento1 = 0.00 OR cab.nu_fac_descuento1 IS NULL) AND cab.ch_fac_tiporecargo2 = 'S' AND cab.nu_fac_impuesto1 > 0.00 AND (cab.ch_fac_anulado IS NULL OR cab.ch_fac_anulado != 'S')) THEN
+				0
+			ELSE
+				cab.nu_fac_valortotal
+			END) AS tot_promocion
+		FROM
+			fac_ta_factura_cabecera AS cab
+			JOIN fac_ta_factura_detalle AS det
+				USING(ch_fac_tipodocumento, ch_fac_seriedocumento, ch_fac_numerodocumento)
+			LEFT JOIN int_articulos AS art
+				ON(det.art_codigo = art.art_codigo)
+		WHERE
+			cab.ch_almacen = '" . $estacion . "'
+			AND art.art_tipo = '08'
+			AND TO_CHAR(cab.dt_fac_fecha, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
+			AND cab.ch_fac_tipodocumento = '20'
+		) AS TOT USING(ch_fac_tipodocumento, ch_fac_seriedocumento, ch_fac_numerodocumento)
+	WHERE
+		cab.ch_almacen 								= '" . $estacion . "'
+		AND art.art_tipo 							= '08'
+		AND TO_CHAR(cab.dt_fac_fecha, 'YYYY-MM') 	= '" . $dYear . '-' . $dMonth . "'
+		AND cab.ch_fac_tipodocumento = '20'
+	GROUP BY
+		cab.dt_fac_fecha
+	)PRONCMANUAL ON (PRONCMANUAL.dt_fac_fecha = C.fecha)
+	LEFT JOIN
+	(SELECT
+		c.d_system,
+		SUM(CASE WHEN c.c_currency_id=1 THEN i.amount
+		ELSE i.amount*c.rate
+		END)  AS egresos
+	FROM
+		c_cash_transaction AS c
+		JOIN c_cash_transaction_payment AS i
+			ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
+		JOIN c_cash_mpayment AS m
+			ON (m.c_cash_mpayment_id = i.c_cash_mpayment_id)
+	WHERE
+		c.ware_house 	= '" . $estacion . "'
+		AND c.c_cash_id = 1--Solo se filtra caja principal
+		AND c.type 		= '1'
+		AND m.banking 	= 0
+		AND TO_CHAR(c.d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
+	GROUP BY
+		c.d_system
+	) EGRE ON (EGRE.d_system = C.fecha)
+	LEFT JOIN
+	(SELECT
+		c.d_system,
+		SUM(CASE WHEN c.c_currency_id=1 THEN i.amount ELSE i.amount*c.rate END) AS otherimp
+	FROM
+		c_cash_transaction AS c
+		JOIN c_cash_transaction_payment AS i
+			ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
+		JOIN c_cash_transaction_detail AS CD
+			ON(c.c_cash_transaction_id = CD.c_cash_transaction_id)
+	WHERE
+		c.ware_house = '" . $estacion . "'
+		AND c.c_cash_id = 1--Solo se filtra caja principal
+		AND c.type = 0
+		AND TO_CHAR(c.d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
+		AND i.c_cash_mpayment_id != 1
+		AND i.c_cash_transaction_id IN(SELECT c_cash_transaction_id FROM c_cash_transaction WHERE TO_CHAR(d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "' AND c.c_cash_id = 1 AND bpartner = '99999999')
+	GROUP BY
+		c.d_system
+	) OTHER ON (OTHER.d_system = C.fecha)
+GROUP BY
+	C.fecha,
+	COMB.total_venta_comb,
+	AFC.af_comb,
+	GNV.total_venta_gnv,
+	COMB.total_venta_glp,
+	AFG.af_glp,
+	L.lubricantes,
+	O.otros,
+	CRE.clientescredito,
+	TC.tarjetascredito,
+	BCP.bcp,
+	BBVA.bbva,
+	SCOT.scotiabank,
+	INTER.interbank,
+	FA.faltante,
+	SO.sobrante,
+	FAC.facimporte,
+	DSCTO.descuentos,
+	GNV.creditognv,
+	GNV.faltagnv,
+	GNV.sobragnv,
+	PRO.promociones,
+	EGRE.egresos,
+	OTHER.otherimp,
+	COMB.af_comb,
+	COMB.af_glp,
+	NCMANUAL.facimporte,
+	PRONCMANUAL.promociones
+ORDER BY
+	C.fecha;
+";
+
+
+// echo "<pre>";
+// echo "QUERY:";
+// print_r($query);
+// echo "</pre>";
+
+
+	if ($sqlca->query($query) < 0)
+		return false;
+
+	$resultado = array();
+
+	for ($i = 0; $i < $sqlca->numrows(); $i++) {
+		$a = $sqlca->fetchRow();
+		$resultado[$i]['fecha']				= $a[0];
+		$resultado[$i]['total_venta_comb']	= $a[1];
+		$resultado[$i]['total_venta_gnv']	= $a[2];
+		$resultado[$i]['total_venta_glp']	= $a[3];
+		$resultado[$i]['lubricantes']		= $a[4];
+		$resultado[$i]['otros']				= $a[5];
+		$resultado[$i]['clientescredito']	= $a[6];
+		$resultado[$i]['tarjetascredito']	= $a[7];
+		$resultado[$i]['bcp']				= $a[8];
+		$resultado[$i]['bbva']				= $a[9];
+		$resultado[$i]['scotiabank']		= $a[10];		
+		$resultado[$i]['interbank']			= $a[11];
+		$resultado[$i]['faltante']			= $a[12];
+		$resultado[$i]['sobrante']			= $a[13];
+		$resultado[$i]['facimporte']		= $a[14];
+		$resultado[$i]['af_comb']			= $a[15];
+		$resultado[$i]['af_glp']			= $a[16];
+		$resultado[$i]['descuentos']		= $a[17];
+		$resultado[$i]['creditognv']		= $a[18];
+		$resultado[$i]['faltagnv']			= $a[19];
+		$resultado[$i]['sobragnv']			= $a[20];
+		$resultado[$i]['promociones']		= $a[21];
+		$resultado[$i]['egresos']			= $a[22];
+		$resultado[$i]['otherimp']			= $a[23];
+		$resultado[$i]['manual_af_comb']	= $a[24];
+		$resultado[$i]['manual_af_glp']		= $a[25];
+	}
+	return $resultado;
+}
+
+function listadoCajaBanco($resultados, $iAlmacen, $dYear, $dMonth, $dDay = "31") {			
+	//Get Class
+	//$objModelCajaBanco = new CajaBancoModel();
+
+	//Si el mes es Enero, debemos de mostrar Diciembre, ya que el sistema debe de verificar si existe saldo en el mes anterior
+	if ($dMonth == '01') {
+		$dYear = $dYear - 1;
+		$dMonth = '12';
+	} else
+		$dMonth = $dMonth - 1;
+
+	// Mostrar saldo inicial por mes
+	$arrData = array(
+		'Nu_Warehouse' => $iAlmacen,
+		'Fe_Validate_Previous_Year' => $dYear,
+		'Fe_Validate_Previous_Month' => $dMonth,
+	);
+	//$arrResponse = $objModelCajaBanco->getBalance($arrData);
+	$arrResponse = getBalance($arrData);			
+
+	$saldo_acu += (float)$arrResponse['fSaldoInicial'];
+	// ./ Saldo Inicial por Mes
+
+	for ($i = 0; $i < count($resultados); $i++) {
+
+		$a 	= $resultados[$i];
+
+		if(empty($a['af_comb']))
+			$data_af_comb = $a['manual_af_comb'];
+		else
+			$data_af_comb = $a['af_comb'];
+
+		if(empty($a['af_glp']))
+			$data_af_glp = $a['manual_af_glp'];
+		else
+			$data_af_glp = $a['af_glp'];
+
+		//Obtenemos dia de data "fecha" del array $resultados
+		$fecha_explode = explode('/', $a['fecha']);
+		$dia_explode = $fecha_explode['0'];
+
+		//Solo sumara si el dia de data "fecha" del array $resultados, es menor o igual a la "Fecha Final" indicada en el reporte al presionar "Consultar"
+		//if($dia_explode <= $dDay){
+			$saldo_acu += $a['total_venta_comb'] - $data_af_comb + $a['total_venta_gnv'] + $a['total_venta_glp'] - $data_af_glp + $a['lubricantes'] + $a['facimporte'] + $a['otros'] + $a['promociones'] - $a['clientescredito'] - $a['creditognv'] - $a['tarjetascredito'] - $a['egresos'] + ($a['faltante'] + $a['sobrante'] + $a['sobragnv'] - $a['faltagnv']) - $a['bcp'] - $a['bbva'] - $a['scotiabank'] - $a['interbank'] + $a['descuentos']  - $a['otherimp'];
+			$saldo_market += ($a['lubricantes'] + $a['facimporte'] + $a['otros'] + $a['promociones']);
+		//}		
 	}
 
-//************************************************************************************************
+	return $saldo_acu;
+}
 
+function getBalance($arrData){
+	global $sqlca;
+  //Verificar saldo final el último día del mes anterior
+	$dEndPreviousMonth = $arrData['Fe_Validate_Previous_Year'] . '-' . $arrData['Fe_Validate_Previous_Month'];
+	$dEndPreviousMonth = date("Y-m-t", strtotime($dEndPreviousMonth));
+	$sql = "SELECT COUNT(*) AS existe, amount FROM c_cashdeposit WHERE ch_almacen = '" . pg_escape_string($arrData['Nu_Warehouse']) . "' AND d_system = '" . pg_escape_string($dEndPreviousMonth) . "' GROUP BY amount";
+	$iStatus = $sqlca->query($sql);
+  $arrResponse = array(
+	  'status_query_execution' => $iStatus,
+	  'message_query_execution' => 'problemas para ejecutar sql',
+	  'status' => 'danger',
+	  'message' => 'Problemas al obtener saldo inicial',
+  );
+  if ( $iStatus == 0 ) {
+	  $arrResponse = array(
+		  'status_query_execution' => $iStatus,//BD
+		  'message_query_execution' => 'ejecutado',//BD
+		  'status' => 'warning',
+		  'message' => 'No existe saldo inicial para el Año: ' . $arrData['Fe_Validate_Previous_Year'] . ' - Mes: ' . $arrData['Fe_Validate_Previous_Month'],
+		  'fSaldoInicial' => 0,
+	  );
+  } else if ( $iStatus > 0 ) {
+	  $row = $sqlca->fetchRow();
+	  if($row['existe'] != '0') {//No existe saldo final el último día del mes anterior
+		  $arrResponse = array(
+			  'status_query_execution' => $iStatus,//BD
+			  'message_query_execution' => 'ejecutado',//BD
+			  'status' => 'success',
+			  'message' => 'Saldo inicial encontrado',
+			  'fSaldoInicial' => (float)$row['amount'],
+		  );
+	  }
+  }
+  return $arrResponse;
+}
+//**************************************** Cerrar Reporte Caja y Banco ****************************************
 
 ?>
 <!DOCTYPE html>
@@ -701,6 +1499,7 @@ if ($flag == 1) {
 		</script>
 	</head>
 <link href="styles/tabla.css" rel="stylesheet" type="text/css" >
+<link rel="stylesheet" href="/sistemaweb/assets/css/style.css">
 <tr>
 	<td><p align="center" style="font-size:2.0em"><b>LIQUIDACION DE VENTA TOTAL</b></p></td>
 </tr>
@@ -756,7 +1555,8 @@ if ($flag == 1) {
 			<option value="N"><?php echo "No" ?></option>
 		</select>
 	</tr>
-	<tr>	<th colspan="5">Inventario de Combustible :
+	<tr>	
+		<th colspan="5">Inventario de Combustible :
 		<select name="inv_comb">
 		<?php
 		$opcion = Array();
@@ -772,7 +1572,7 @@ if ($flag == 1) {
 		}
 		?>
 		</select>
-	</tr>
+	</tr>	
 </table>
 
 <div align="center"><br>
@@ -820,11 +1620,17 @@ if ($flag == 1) {
 
 	//DETALLE Y TOTAL DE CAJA INGRESOS
 	$totingresos	= pg_fetch_all($x_caja_totingresos);
+	$totingresos_contado_dia = pg_fetch_all($x_caja_totingresos_contado_dia);
+	$totingresos_cobranzas	 = pg_fetch_all($x_caja_totingresos_cobranzas);
 	$total_ingresos = number_format($totingresos[0]['total'],2);
 	$caja_ingresos 	= pg_fetch_all($x_caja_ingresos); // total ingresos
+	$caja_ingresos_contado_dia = pg_fetch_all($x_caja_ingresos_contado_dia); // total ingresos
+	$caja_ingresos_cobranzas   = pg_fetch_all($x_caja_ingresos_cobranzas); // total ingresos
 	$a3				= $totingresos[0]['total'];
+	$a3_1				= $totingresos_contado_dia[0]['total'];
+	$a3_2				= $totingresos_cobranzas[0]['total'];
 
-	//DETALLE Y TOTAL DE OTROS CAJA INGRESOS
+	//DETALLE Y TOTAL DE OTROS CAJA INGRESOS - ESTO NO HACE CONSULTA A NADA
 	$totingresoso 	= pg_fetch_all($x_otros_totingresos);
 	$total_other	= number_format($totingresoso[0]['total'],2);
 	$otros_ingresos	= pg_fetch_all($x_otros_ingresos); // total otros ingresos
@@ -871,10 +1677,16 @@ if ($flag == 1) {
 	$TDP = $depositos_pos[0]['depositospos']; //TDP: Total Depositos POS
 	$total_depositos_pos = number_format($TDP,2);
 
+	// if($sobfal == "S")
+	// 	$DD =  $TDP - $importe_sobfaltrab - $TVContado - $lgt;  //DD: Diferencia Diaria: TOTAL DEPOSITOS - DIFERENCIA TRABAJADOR - VENTA CONTADO - OTROS GASTOS
+	// else
+	// 	$DD =  $TDP - $TVContado - $lgt;  //DD: Diferencia Diaria: TOTAL DEPOSITOS - VENTA CONTADO - OTROS GASTOS
+
+	//CAMBIO REALIZADO PARA NO RESTAR "OTROS GASTOS"
 	if($sobfal == "S")
-		$DD =  $TDP - $importe_sobfaltrab - $TVContado - $lgt;  //DD: Diferencia Diaria: TOTAL DEPOSITOS - DIFERENCIA TRABAJADOR - VENTA CONTADO - OTROS GASTOS
+		$DD =  $TDP - $importe_sobfaltrab - $TVContado;  //DD: Diferencia Diaria: TOTAL DEPOSITOS - DIFERENCIA TRABAJADOR - VENTA CONTADO - OTROS GASTOS
 	else
-		$DD =  $TDP - $TVContado - $lgt;  //DD: Diferencia Diaria: TOTAL DEPOSITOS - VENTA CONTADO - OTROS GASTOS
+		$DD =  $TDP - $TVContado;  //DD: Diferencia Diaria: TOTAL DEPOSITOS - VENTA CONTADO - OTROS GASTOS
 
 	$diferencia_diaria = number_format($DD,2);
 
@@ -887,7 +1699,7 @@ if ($flag == 1) {
 	</tr>
 	
 	<tr>
-		<td width="85%" style="font-size:1.2em" colspan="3">1.&nbsp;Venta de Combustible</td>
+		<td width="85%" style="font-size:1.2em" colspan="3">1.&nbsp;Venta de Combustible</td> <!-- 1. Venta de Combustible -->
 	</tr>
 	<tr>
 		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;1.1.&nbsp;Liquido</td>
@@ -908,7 +1720,7 @@ if ($flag == 1) {
 		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
 	</tr>
 	<tr>
-		<td style="font-size:1.2em">2.&nbsp; Venta de Productos y Promociones</td>
+		<td style="font-size:1.2em">2.&nbsp; Venta de Productos y Promociones</td> <!-- 2. Venta de Productos y Promociones -->
 		<td><p align="right" style="font-size:1.5em"><?php echo htmlentities($canti_de_tienda); ?></p></td>
 		<td><p align="right" style="font-size:1.5em"><?php echo htmlentities($venta_de_tienda); ?></p></td>
 	</tr>
@@ -916,7 +1728,10 @@ if ($flag == 1) {
 		<td colspan="3">&nbsp;</td>
 	</tr>
 	<tr>
-		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>TOTAL VENTA</b></td>
+		<td style="font-size:1.2em">
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Venta</b>
+			&nbsp;<b style="font-size:0.6em; color:red;">(1+2)</b>
+		</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php echo htmlentities($total_canti); ?></b></p></td>
 		<td><p align="right" style="font-size:1.5em"><b><?php echo htmlentities($total_venta); ?></b></p></td>
 	</tr>
@@ -924,7 +1739,7 @@ if ($flag == 1) {
 		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
 	</tr>
 	<tr>
-		<td style="font-size:1.2em" colspan="3">3.&nbsp;Vales de Credito</td>
+		<td style="font-size:1.2em" colspan="3">3.&nbsp;Credito Clientes</td> <!-- 3. Credito Clientes -->
 	</tr>
 
 	<?php 	$val_can = 0; 
@@ -941,7 +1756,7 @@ if ($flag == 1) {
 	<?php 	}	?>
 
 	<tr>
-		<td style="font-size:1.1em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Vales de Credito</b></td>
+		<td style="font-size:1.1em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Credito Clientes</b></td>
 		<td><p align="right" style="font-size:1.5em"><b><?php echo number_format($val_can,2); ?></b></p></td>
 		<td><p align="right" style="font-size:1.5em"><b><?php echo number_format($val_imp,2); ?></b></p></td>
 	</tr>
@@ -950,7 +1765,7 @@ if ($flag == 1) {
 		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
 	</tr>
 	<tr>
-		<td width="85%" colspan="3" style="font-size:1.2em">4.&nbsp;Tarjetas de Credito</td>
+		<td width="85%" colspan="3" style="font-size:1.2em">4.&nbsp;Tarjetas de Credito</td> <!-- 4. Tarjetas de Credito -->
 	</tr>
 
 	<?php foreach($tarjetas_credito_detalle as $t){?>
@@ -970,7 +1785,7 @@ if ($flag == 1) {
 		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
 	</tr>
 	<tr>
-		<td style="font-size:1.2em">5.&nbsp;Descuentos</td>
+		<td style="font-size:1.2em">5.&nbsp;Descuentos</td> <!-- 5. Descuentos -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><?php echo htmlentities($descuentos_total); ?></p></td>
 	</tr>
@@ -978,7 +1793,7 @@ if ($flag == 1) {
 		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
 	</tr>
 	<tr>
-		<td style="font-size:1.2em">6.&nbsp;Diferencias de Precio de Vales</td>
+		<td style="font-size:1.2em">6.&nbsp;Diferencias de Precio de Vales</td> <!-- 6. Diferencias de Precio de Vales -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><?php echo htmlentities($difprecio_total); ?></p></td>
 	</tr>
@@ -986,7 +1801,7 @@ if ($flag == 1) {
 		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
 	</tr>
 	<tr>
-		<td style="font-size:1.2em">7.&nbsp;Afericiones</td>
+		<td style="font-size:1.2em">7.&nbsp;Afericiones</td> <!-- 7. Afericiones -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><?php echo htmlentities($afericiones_total); ?></p></td>
 	</tr>
@@ -994,7 +1809,11 @@ if ($flag == 1) {
 		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
 	</tr>
 	<tr>
-		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Venta Creditos y Otros No al Contado</b></td>
+		<td style="font-size:1.2em">
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Venta Creditos y Otros No al Contado</b>			
+			<br><br>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b style="font-size:0.6em; color:red">(3+4+5+6+7)<b>
+		</td> <!-- Total Venta Creditos y Otros No al Contado -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php echo htmlentities($total_venta_creditos_otros); ?></b></p></td>
 	</tr>
@@ -1002,7 +1821,9 @@ if ($flag == 1) {
 		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
 	</tr>
 	<tr>
-		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Depositos POS</b></td>
+		<td style="font-size:1.2em">
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Efectivo en Boveda (Total Depositos POS)</b>
+		</td> <!-- Total Efectivo en Boveda (Total Depositos POS) -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php echo htmlentities($total_depositos_pos); ?></b></p></td>
 	</tr>
@@ -1010,7 +1831,11 @@ if ($flag == 1) {
 		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
 	</tr>
 	<tr>
-		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Venta Contado</b></td>
+		<td style="font-size:1.2em">
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Venta Contado</b>
+			<br><br>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b style="font-size:0.6em; color:red">(Total Venta - Total Venta Creditos)<b>
+		</td> <!-- Total Venta Contado -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php echo htmlentities($total_venta_contado);?></b></p></td>
 	</tr>
@@ -1020,7 +1845,7 @@ if ($flag == 1) {
 
 	<?php if($sobfal == "S"){ ?>
 	<tr>
-		<td style="font-size:1.2em" colspan="3">8.&nbsp;Sobrantes Faltantes por Trabajador</td>
+		<td style="font-size:1.2em" colspan="3">8.&nbsp;Sobrantes Faltantes por Trabajador</td> <!-- 8. Sobrantes Faltantes por Trabajador -->
 	</tr>
 
 	<?php foreach($dif_trabajadores as $d){?>
@@ -1054,34 +1879,38 @@ if ($flag == 1) {
 	</tr>
 	
 	<?php } ?>
-	<tr>
-		<td width="85%" style="font-size:1.2em">9.&nbsp;Otros</td>
+	<tr <?= $no_mostrar ?>>
+		<td width="85%" style="font-size:1.2em">9.&nbsp;Otros</td> <!-- 9. Otros -->
 		<td width="*"><p align="right" style="font-size:1.5em">&nbsp;</p></td>
 		<td width="*"><p align="right" style="font-size:1.5em">&nbsp;</p></td>
 	</tr>
 
 	<?php foreach($liquidacion_gastos as $r){?>
-	<tr>
+	<tr <?= $no_mostrar ?>>
 		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;<?php echo htmlentities($r['descripcion']); ?></td>
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><?php echo htmlentities(number_format($r['importe'],2)); ?></p></td>
 	</tr>
 	<?php }?>
 
-	<tr>
+	<tr <?= $no_mostrar ?>>
 		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
 	</tr>
-	<tr>
-		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Otros</b></td>
+	<tr <?= $no_mostrar ?>>
+		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Otros</b></td> <!-- Total otros -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php echo htmlentities($lgt); ?></b></p></td>
 	</tr>
-	<tr>
+	<tr <?= $no_mostrar ?>>
 		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
 	</tr>
 
 	<tr>
-		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Diferencia Diaria</b></td>
+		<td style="font-size:1.2em">
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Diferencia Diaria</b>
+			<br><br>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b style="font-size:0.6em; color:red">(Total Efectivo en Boveda - Sobrantes y Faltantes - Total Venta Contado)<b>
+		</td> <!-- Diferencia Diaria -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php echo htmlentities($diferencia_diaria); ?></b></p></td>
 	</tr>
@@ -1089,11 +1918,16 @@ if ($flag == 1) {
 	<tr><td colspan="3" style="font-size:1.2em">&nbsp;</td></tr>
 
 	<tr>
-		<td style="font-size:1.2em">10. Ingresos</b></td>
+		<td style="font-size:1.2em" colspan="3">10.&nbsp;Ingresos</td> <!-- 10. Ingresos -->
+	</tr>
+
+	<tr>
+		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;10.1&nbsp;Ingresos al contado del dia</b></td> <!-- 10.1 Ingresos al contado del dia -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php
 
-			foreach($caja_ingresos as $igre) {
+			$val_igre = 0; 
+			foreach($caja_ingresos_contado_dia as $igre) {
 
 				$val_igre = $val_igre + $igre['ingresos'];
 
@@ -1103,10 +1937,43 @@ if ($flag == 1) {
 
 		<?php
 			$val_igre = 0; 
-			foreach($caja_ingresos as $igre) {?>
+			foreach($caja_ingresos_contado_dia as $igre) {?>
 		<tr>
 			
-			<td style="font-size:1em">&nbsp;&nbsp;&nbsp;&nbsp;<?php echo htmlentities($igre['documento']); ?></td>
+			<td style="font-size:1em">
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php echo htmlentities($igre['documento']); ?>
+				<?php echo ($igre['c_cash_mpayment_id'] == 1 || TRIM($igre['metodo_pago']) == "DEPOSITO BANCARIO") ? " - " . htmlentities($igre['banco']) : ""; ?>
+			</td>
+			<td>&nbsp;</td>
+			<td><p align="right" style="font-size:1.5em"><?php echo htmlentities(number_format($igre['ingresos'],2)); ?></p></td>
+			<?php
+				$val_igre = $val_igre + $igre['ingresos'];
+			?>
+		</tr>
+		<?php 	}	?>
+
+	<tr><td colspan="3" style="font-size:1.2em">&nbsp;</td></tr>	
+
+	<tr>
+		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;10.2&nbsp;Cobranzas y Amortizaciones por CC</b></td> <!-- 10.2 Cobranzas y Amortizaciones por CC -->
+		<td>&nbsp;</td>
+		<td><p align="right" style="font-size:1.5em"><b><?php
+
+			$val_igre = 0; 
+			foreach($caja_ingresos_cobranzas as $igre) {
+
+				$val_igre = $val_igre + $igre['ingresos'];
+
+			}
+
+			echo htmlentities(number_format($val_igre,2)); ?></b></p></td>
+
+		<?php
+			$val_igre = 0; 
+			foreach($caja_ingresos_cobranzas as $igre) {?>
+		<tr>
+			
+			<td style="font-size:1em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php echo htmlentities($igre['documento']); ?></td>
 			<td>&nbsp;</td>
 			<td><p align="right" style="font-size:1.5em"><?php echo htmlentities(number_format($igre['ingresos'],2)); ?></p></td>
 			<?php
@@ -1117,8 +1984,8 @@ if ($flag == 1) {
 
 	<tr><td colspan="3" style="font-size:1.2em">&nbsp;</td></tr>
 
-	<tr>
-		<td style="font-size:1.2em">11. Otros Ingresos</b></td>
+	<tr <?= $no_mostrar ?>>
+		<td style="font-size:1.2em">11. Otros Ingresos</b></td> <!-- 11. Otros Ingresos -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php
 
@@ -1144,10 +2011,10 @@ if ($flag == 1) {
 		</tr>
 		<?php 	}	?>
 
-	<tr><td colspan="3" style="font-size:1.2em">&nbsp;</td></tr>
+	<tr <?= $no_mostrar ?>><td colspan="3" style="font-size:1.2em">&nbsp;</td></tr>
 
 	<tr>
-		<td style="font-size:1.2em">12. Egresos</b></td>
+		<td style="font-size:1.2em">12. Egresos</b></td> <!-- 12. Egresos -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php
 
@@ -1178,7 +2045,7 @@ if ($flag == 1) {
 	<?php
 	if($sDocumentoManualVenta == "S"){ ?>
 	<tr>
-		<td style="font-size:1.2em">13. Documentos de Venta Manual</b></td>
+		<td style="font-size:1.2em">13. Documentos de Venta Manual</b></td> <!-- 13. Documentos de Venta Manual -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php echo htmlentities($total_manuales); ?></b></p></td>
 		<?php
@@ -1196,14 +2063,40 @@ if ($flag == 1) {
 	<tr><td colspan="3" style="font-size:1.2em">&nbsp;</td></tr>
 
 	<tr>
-		<td style="font-size:1.2em" title="((Venta contado + Faltantes)) + (Ingresos + Ingresos otros)) - Egresos">14. Saldo Neto a Depositar</b></td>
+		<td style="font-size:1.2em"> <!-- title="((Venta contado + Faltantes)) + (Ingresos + Ingresos otros)) - Egresos" -->
+			14. Saldo Neto a Depositar
+			<br><br>
+			<b style="font-size:0.6em; color:red">(Total Venta Contado + Sobrantes y Faltantes - Ingresos al contado del dia - Egresos)<b>
+		</td> <!-- 14. Saldo Neto a Depositar -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b>
 		
 		<?php
 		//$a1 venta contado $a2 faltantes $a3 ingresos $a4 ingresos otros $a6 documentos manuales $a5 egresos
-		$calculo=(($a1+abs($a2))+($a3+$a4))-$a5;
+		//$calculo=( ($a1+abs($a2)) + ($a3+$a4) ) - $a5;		
+
+		//$a1 venta contado $a2 faltantes $a3 ingresos $a3_1 ingresos_contado_dia $a3_2 ingreso_cobranzas $a4 ingresos otros $a6 documentos manuales $a5 egresos
+		$calculo=( ($a1+$a2) - ($a3_1) ) - $a5; //ESTO QUEDA
+		$calculo = htmlentities(number_format($calculo,2));
 		echo $calculo;
+		?>
+
+		</b></p></td>
+	
+	<tr><td colspan="3" style="font-size:1.2em">&nbsp;</td></tr>
+
+	<tr>
+		<td style="font-size:1.2em"> <!-- title="((Venta contado + Faltantes)) + (Ingresos + Ingresos otros)) - Egresos" -->
+			15. Saldo acumulado Caja y Banco			
+		</td> <!-- 14. Saldo Neto a Depositar -->
+		<td>&nbsp;</td>
+		<td><p align="right" style="font-size:1.5em"><b>
+		
+		<?php		
+			$resultado_ = searchCajaBanco($iAlmacen, $dYear, $dMonth, $pos_transYM);
+			$result_ = listadoCajaBanco($resultado_, $iAlmacen, $dYear, $dMonth, $dDay);
+			$saldo_acumulado_caja_banco = htmlentities(number_format($result_,2));
+			echo $saldo_acumulado_caja_banco;
 		?>
 
 		</b></p></td>
@@ -1211,8 +2104,9 @@ if ($flag == 1) {
 	<tr><td colspan="3" style="font-size:1.2em">&nbsp;</td></tr>
 </table><br>
 
-<?php //-----------------------------------------------------------------------------------
-	if($inv_comb == 'S') {
+<?php 
+	//**************************************** Inventario de combustible ****************************************
+	if($op_inv == 'S') {
 
 		$results1 = obtieneParte($desde, $hasta, $estaciones);
 
@@ -1303,5 +2197,6 @@ if ($flag == 1) {
 
 	}
 ?>
+
 </body>
 </html>
