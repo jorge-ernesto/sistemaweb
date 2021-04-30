@@ -64,16 +64,24 @@ class CajaBancoTemplate extends Template {
     function listado($resultados, $iAlmacen, $dYear, $dMonth) {
 		$result = '';
 		$result .= '<table align="center" border = "0.5px" style="background:#FFFFFF"> ';
+			
+			$result .= '<tr>';
+				$result .= '<th colspan="1"></th>';				
+				$result .= '<th colspan="6" bgcolor="30767F" span style="color:#FFFFFF"><b>VENTAS</b></th>';								
+				$result .= '<th colspan="5"></th>';				
+				$result .= '<th colspan="5" bgcolor="30767F" span style="color:#FFFFFF"><b>INGRESOS / DEPOSITOS BANCARIOS</b></th>';								
+			$result .= '</tr>';
+
 			$result .= '<tr>';
 				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>FECHA</b></th>';
-				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>VENTAS GASOLINA</b></th>';
+				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>LIQUIDOS</b></th>';
 				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>DESC. / INCRE.</b></th>';
-				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>VENTAS GNV</b></th>';
-				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>VENTAS GLP</b></th>';
+				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>GNV</b></th>';
+				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>GLP</b></th>';
 				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>LUBRICANTES</b></th>';
 				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>PROMOCIONES</b></th>';
 				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>VENTA TOTAL</b></th>';
-				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>CREDITOS (GLP + GASOLINA + GNV)</b></th>';
+				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>CREDITO <br>CLIENTES</b></th>';
 				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>TARJETAS</b></th>';
 				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>EGRESOS</b></th>';
 				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>SOB. / FAL.</b></th>';
@@ -81,8 +89,8 @@ class CajaBancoTemplate extends Template {
 				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>BBVA</b></th>';
 				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>SCOTIABANK</b></th>';
 				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>INTERBANK</b></th>';
-				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>OTROS INGRESOS</b></th>';
-				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>SALDO</b></th>';
+				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>OTROS</b></th>';
+				$result .= '<th bgcolor="30767F" span style="color:#FFFFFF"><b>SALDO PENDIENTE <br>POR DEPOSITAR</b></th>';
 			$result .= '</tr>';
 
 		$saldo = 0;
@@ -155,7 +163,7 @@ class CajaBancoTemplate extends Template {
 			'Fe_Validate_Previous_Year' => $dYear,
 			'Fe_Validate_Previous_Month' => $dMonth,
 		);
-        $arrResponse = $objModelCajaBanco->getBalance($arrData);
+		$arrResponse = $objModelCajaBanco->getBalance($arrData);
 		$result .= '<tr>';
 		$result .= '<td class="grid_detalle_especial" colspan="16"></td>';
 		$result .= '<td class="grid_detalle_especial" align = "right">Saldo Inicial</td>';
@@ -226,7 +234,7 @@ class CajaBancoTemplate extends Template {
 			$result .= '<td class="'.$color.'" align = "right">' . htmlentities(number_format($a['interbank'], 2, '.', ',')) . '</td>';
 			$result .= '<td class="'.$color.'" align = "right">' . htmlentities(number_format($a['otherimp'], 2, '.', ',')) . '</td>';
 
-			$saldo_acu += $a['total_venta_comb'] - $data_af_comb + $a['total_venta_gnv'] + $a['total_venta_glp'] - $data_af_glp + $a['lubricantes'] + $a['facimporte'] + $a['otros'] + $a['promociones'] - $a['clientescredito'] - $a['creditognv'] - $a['tarjetascredito'] - $a['egresos'] + ($a['faltante'] + $a['sobrante'] + $a['sobragnv'] - $a['faltagnv']) - $a['bcp'] - $a['bbva'] - $a['scotiabank'] - $a['interbank'] + $a['descuentos']  + $a['otherimp'];
+			$saldo_acu += $a['total_venta_comb'] - $data_af_comb + $a['total_venta_gnv'] + $a['total_venta_glp'] - $data_af_glp + $a['lubricantes'] + $a['facimporte'] + $a['otros'] + $a['promociones'] - $a['clientescredito'] - $a['creditognv'] - $a['tarjetascredito'] - $a['egresos'] + ($a['faltante'] + $a['sobrante'] + $a['sobragnv'] - $a['faltagnv']) - $a['bcp'] - $a['bbva'] - $a['scotiabank'] - $a['interbank'] + $a['descuentos']  - $a['otherimp'];
 			$saldo_market += ($a['lubricantes'] + $a['facimporte'] + $a['otros'] + $a['promociones']);
 
 			$result .= '<td class="'.$color.'" align = "right">' . htmlentities(number_format($saldo_acu, 2, '.', ',')) . '</td>';
@@ -255,7 +263,8 @@ class CajaBancoTemplate extends Template {
 				);
 				$arrResponse = $objModelCajaBanco->saveFinalBalance($arrData);
 				unset($arrData);
-				echo "<script>alert('" . $arrResponse['message'] . "');</script>";
+				//MENSAJE DE ALERTA
+				//echo "<script>alert('" . $arrResponse['message'] . "');</script>";
 			}
 		}
 
@@ -300,6 +309,11 @@ class CajaBancoTemplate extends Template {
 		$result .= '</tr>';
 
 		$result .= '</table>';
+		
+		$result .= '<br>';		
+		$result .= '<span align="left">';		
+		$result .= '<h5 style="color:red;">* SALDO PENDIENTE A DEPOSITAR: VENTA TOTAL - CREDITO CLIENTES - TARJETAS - EGRESOS + SOB. / FAL. - BCP - BBVA - SCOTIABANK - INTERBANK - OTROS INGRESOS</h5>';
+		$result .= '</span>';
 
 		return $result;
     }
@@ -332,23 +346,23 @@ class CajaBancoTemplate extends Template {
 
     	$cab = array(
 			"fecha"		=>	"FECHA",
-			"gasolina"	=>	"VENTA GASOLINA",
+			"gasolina"	=>	"VENTA LIQUIDOS",
 			"descuentos" =>	"DESC. / INCRE.",
 			"gnv"		=>	"VENTA GNV",
 			"glp"		=>	"VENTA GLP",
 			"lubricantes" => "LUBRICANTES",
 			"otros"		=>	"PROMOCIONES",
 			"total"		=>	"VENTA TOTAL",
-			"creditos"	=>	"CREDITOS",
+			"creditos"	=>	"CREDITO CLIENTES",
 			"tarjetas"	=>	"TARJETAS",
 			"egresos"	=>	"EGRESOS",
-			"sobfal"	=>	"SOB. / FALT.",
+			"sobfal"	=>	"SOB. / FAL.",
 			"bcp"		=>	"BCP",
 			"bbva"		=>	"BBVA",
 			"scot"		=>	"SCOT.B",
 			"inter"		=>	"INTER.B",
 			"oingresos"	=>	"OTROS INGRESOS",
-			"saldo"		=>	"SALDO"
+			"saldo"		=>	"SALDO PENDIENTE POR DEPOSITAR"
 		);
 
 		$reporte = new CReportes2("P","pt","A3");
@@ -464,7 +478,7 @@ class CajaBancoTemplate extends Template {
 			$sum_egre = $sum_egre + $a['egresos'];
 			$sum_other = $sum_other + $a['otherimp'];
 
-			$saldo_acu += $a['total_venta_comb'] - $data_af_comb + $a['total_venta_gnv'] + $a['total_venta_glp'] - $data_af_glp + $a['lubricantes'] + $a['facimporte'] + $a['otros'] + $a['promociones'] - $a['clientescredito'] - $a['creditognv'] - $a['tarjetascredito'] - $a['egresos'] + ($a['faltante'] + $a['sobrante'] - $a['faltagnv'] + $a['sobragnv']) - $a['bcp'] - $a['bbva'] - $a['scotiabank'] - $a['interbank'] + $a['descuentos']  + $a['otherimp'];
+			$saldo_acu += $a['total_venta_comb'] - $a['af_comb'] + $a['total_venta_gnv'] + $a['total_venta_glp'] - $a['af_glp'] + $a['lubricantes'] + $a['facimporte'] + $a['otros'] + $a['promociones'] - $a['clientescredito'] - $a['creditognv'] - $a['tarjetascredito'] - $a['egresos'] + ($a['faltante'] + $a['sobrante'] - $a['faltagnv'] + $a['sobragnv']) - $a['bcp'] - $a['bbva'] - $a['scotiabank'] - $a['interbank'] + $a['descuentos']  - $a['otherimp'];
 			$saldo_market += ($a['lubricantes'] + $a['facimporte'] + $a['otros'] + $a['promociones']);
 
 			$arr = array(
@@ -485,7 +499,7 @@ class CajaBancoTemplate extends Template {
 				"scot"		=>$a['scotiabank'],
 				"inter"		=>$a['interbank'],
 				"oingresos"	=>$a['otherimp'],
-				"saldo"		=>$saldo_acu, 
+				"saldo"		=>htmlentities(number_format($saldo_acu,2)),
 			);
 
 			$suma = array(
@@ -614,23 +628,23 @@ class CajaBancoTemplate extends Template {
 		$e = 3;
 
 		$worksheet1->write_string($e, 0, "FECHA",$formato2);
-		$worksheet1->write_string($e, 1, "VENTA GASOLINA",$formato2);
+		$worksheet1->write_string($e, 1, "VENTA LIQUIDOS",$formato2);
 		$worksheet1->write_string($e, 2, "DESC. / INCRE.",$formato2);
 		$worksheet1->write_string($e, 3, "VENTA GNV",$formato2);
 		$worksheet1->write_string($e, 4, "VENTA GLP",$formato2);
 		$worksheet1->write_string($e, 5, "LUBRICANTES",$formato2);
 		$worksheet1->write_string($e, 6, "PROMOCIONES",$formato2);
 		$worksheet1->write_string($e, 7, "VENTA TOTAL",$formato2);	
-		$worksheet1->write_string($e, 8, "CREDITOS",$formato2);
+		$worksheet1->write_string($e, 8, "CREDITO CLIENTES",$formato2);
 		$worksheet1->write_string($e, 9, "TARJETAS",$formato2);
 		$worksheet1->write_string($e, 10, "EGRESOS",$formato2);
-		$worksheet1->write_string($e, 11, "SOB. / FALT.",$formato2);
+		$worksheet1->write_string($e, 11, "SOB. / FAL.",$formato2);
 		$worksheet1->write_string($e, 12, "BCP",$formato2);
 		$worksheet1->write_string($e, 13, "BBVA",$formato2);
 		$worksheet1->write_string($e, 14, "SCOTIABANK",$formato2);
 		$worksheet1->write_string($e, 15, "INTERBANK",$formato2);
 		$worksheet1->write_string($e, 16, "OTROS INGRESOS",$formato2);
-		$worksheet1->write_string($e, 17, "SALDO",$formato2);
+		$worksheet1->write_string($e, 17, "SALDO PENDIENTE POR DEPOSITAR",$formato2);
 
 		// Saldo
 		$saldo_acu = 0;
@@ -708,7 +722,7 @@ class CajaBancoTemplate extends Template {
 			$sum_egre = $sum_egre + $a['egresos'];
 			$sum_other = $sum_other + $a['otherimp'];
 
-			$saldo_acu += $a['total_venta_comb'] - $a['af_comb'] + $a['total_venta_gnv'] + $a['total_venta_glp'] - $a['af_glp'] + $a['lubricantes'] + $a['facimporte'] + $a['otros'] + $a['promociones'] - $a['clientescredito'] - $a['creditognv'] - $a['tarjetascredito'] - $a['egresos'] + ($a['faltante'] + $a['sobrante'] - $a['faltagnv'] + $a['sobragnv']) - $a['bcp'] - $a['bbva'] - $a['scotiabank'] - $a['interbank'] + $a['descuentos']  + $a['otherimp'];
+			$saldo_acu += $a['total_venta_comb'] - $a['af_comb'] + $a['total_venta_gnv'] + $a['total_venta_glp'] - $a['af_glp'] + $a['lubricantes'] + $a['facimporte'] + $a['otros'] + $a['promociones'] - $a['clientescredito'] - $a['creditognv'] - $a['tarjetascredito'] - $a['egresos'] + ($a['faltante'] + $a['sobrante'] - $a['faltagnv'] + $a['sobragnv']) - $a['bcp'] - $a['bbva'] - $a['scotiabank'] - $a['interbank'] + $a['descuentos']  - $a['otherimp'];
 
 			$saldo_combu	= ($sum_comb+$sum_descuentos+$sum_gnv+$sum_glp - ($sum_cli + $sum_creditognv) - $sum_tar + ($sum_sobra + $sum_falta + $sum_sobragnv - $sum_faltagnv) - $sum_bcp - $sum_bbva - $sum_inter - $sum_scot - $sum_egre);
 			$saldo_market	= $saldo_market + $a['lubricantes'] + $a['facimporte'] + $a['otros'] + $a['promociones'];
