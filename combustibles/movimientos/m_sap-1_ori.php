@@ -1209,7 +1209,9 @@ SELECT
  '' AS extempno,
  '' AS u_exc_maqreg,
  FIRST(doctype_s.tab_car_03) AS indicador,
- CASE WHEN FIRST(ch_fac_moneda) IN('1','01') THEN '' ELSE 'USD' END AS moneda
+ CASE WHEN FIRST(ch_fac_moneda) IN('1','01') THEN '' ELSE 'USD' END AS moneda,
+ FIRST(ftfc.nu_fac_recargo3) as nu_fac_recargo3,
+ FIRST(ftfc.ch_fac_tiporecargo2) as ch_fac_tiporecargo2
 FROM
  fac_ta_factura_cabecera ftfc
  JOIN int_tabla_general doctype_s ON(ftfc.ch_fac_tipodocumento = SUBSTRING(TRIM(doctype_s.tab_elemento) for 2 from length(TRIM(doctype_s.tab_elemento))-1) AND doctype_s.tab_tabla ='08' AND doctype_s.tab_elemento != '000000')
@@ -1221,7 +1223,7 @@ WHERE
  AND ftfc.ch_fac_tipodocumento = '10'
  AND vtcd.ch_fac_seriedocumento IS NULL
  AND ftfc.nu_fac_recargo3 IN (3, 5)--enviado o anulado
- AND ftfc.ch_liquidacion=''--cai
+ --AND ftfc.ch_liquidacion=''--cai
  AND ftfc.ch_fac_anticipo!='S' --cai 21/01/20
  --AND ftfc.ch_almacen = '".$param['warehouse']."'
  --".$client." se comenta para mejorarlo, cai
@@ -1511,6 +1513,7 @@ AND ftfc.nu_fac_recargo3 IN (3, 5)--enviado o anulado
 AND ftfc.ch_fac_tipodocumento = '10'
 AND vtcd.ch_fac_seriedocumento IS NULL
 AND ftfc.ch_liquidacion=''
+AND ftfc.ch_fac_anticipo!='S'
 --".$client." cai, se comenta para mejorarlo
 ORDER BY _serie, _number, _turn;";
 
@@ -1764,6 +1767,7 @@ AND ftfc.nu_fac_recargo3 IN (3, 5)--enviado o anulado
 AND ftfc.ch_fac_tipodocumento = '10'
 AND vtcd.ch_fac_seriedocumento IS NULL
 AND ftfc.ch_liquidacion=''
+AND ftfc.ch_fac_anticipo!='S'
 --".$client." cai, se comenta para mejorarlo
 ORDER BY _serie, _number, _turn;";
 
@@ -4975,7 +4979,7 @@ ORDER BY
 		//LOGICA PARA DESAGREGAR DOCUMENTOS ANULADOS MANTENIENDO CONTINUIDAD DE CORRELATIVO (1-19,20,21-69,70,71-100)
 		//OBTENEMOS UN ARRAY CON SERIE Y TURNO DEL DETALLE, YA QUE LOS DATOS SON AGRUPADOS POR SERIE Y TURNO
 		$array_serie_turno = array_unique($array_serie_turno);					
-		$i = 0;
+		$i = -1;
 
 		//RECORREMOS ARRAY DE SERIE Y TURNO
 		foreach ($array_serie_turno as $key => $value) {
@@ -5010,7 +5014,7 @@ ORDER BY
 							AB - Boleta Anulada
 							TG - Transferencia gratuita			 
 					*/
-					if($value2['doctotal'] != 0){ //NO ES DOCUMENTO ANULADO
+					if($value2['doctotal'] != 0){ //NO ES DOCUMENTO ANULADO						
 						$res[$i]['noperacion']   = $noperacion;
 						$res[$i]['cardcode']     = $this->preLetterBPartner('C', $value2['cardcode']);
 						$res[$i]['docdate']      = $value2['docdate'];
@@ -5023,7 +5027,7 @@ ORDER BY
 						$res[$i]['errormsg']     = '';
 						$res[$i]['transaccion']  = $transaccion;
 						$res[$i]['docentry']     = NULL;
-						// $res[$i]['_turn']        = $value2['_turn'];													
+						$res[$i]['_turn']        = $value2['_turn'];													
 						$res[$i]['indicator']    = "BO";													
 					}else{ //DOCUMENTOS ANULADOS DIFERENCIADOS
 						$i++;
@@ -5039,7 +5043,7 @@ ORDER BY
 						$res[$i]['errormsg']     = '';
 						$res[$i]['transaccion']  = $value2['transaccion'];
 						$res[$i]['docentry']     = NULL;
-						// $res[$i]['_turn']        = $value2['_turn'];
+						$res[$i]['_turn']        = $value2['_turn'];
 						$res[$i]['indicator']    = "AB";
 						$i++;
 						$inicio_agrupacion = true;
@@ -5189,7 +5193,7 @@ GROUP BY ftfc.ch_fac_seriedocumento, ftfc.ch_fac_numerodocumento, ftfc.ch_fac_ti
 						$res[$i]['errormsg']     = '';
 						$res[$i]['transaccion']  = $value2['transaccion'];
 						$res[$i]['docentry']     = NULL;
-						// $res[$i]['_turn']        = $value2['_turn'];
+						$res[$i]['_turn']        = $value2['_turn'];
 						$res[$i]['indicator']    = ( $value2['nu_fac_recargo3'] == 2 || $value2['nu_fac_recargo3'] == 5 || $value2['nu_fac_recargo3'] == 6 ) ? "AB" : "TG"; //ES DOCUMENTO ANULADO - ES TRANSFERENCIA GRATUITA
 						$i++;
 						$inicio_agrupacion = true;
@@ -5206,23 +5210,52 @@ GROUP BY ftfc.ch_fac_seriedocumento, ftfc.ch_fac_numerodocumento, ftfc.ch_fac_ti
 						$res[$i]['errormsg']     = '';
 						$res[$i]['transaccion']  = $transaccion;
 						$res[$i]['docentry']     = NULL;
-						// $res[$i]['_turn']        = $value2['_turn'];													
+						$res[$i]['_turn']        = $value2['_turn'];													
 						$res[$i]['indicator']    = "BO";
 					}								
 				}
 			}
 		}
 
+		//GUARDAMOS DATA EN ARRAY CON INDICES CORRELATIVOS
+		$res_ = array();
+		foreach ($res as $key => $value) {
+			$res_[] = array(
+				'noperacion'   => $value['noperacion'],
+				'cardcode'     => $value['cardcode'],
+				'docdate'      => $value['docdate'],
+				'foliopref'    => $value['foliopref'],
+				'u_exx_nroini' => $value['u_exx_nroini'],
+				'u_exx_nrofin' => $value['u_exx_nrofin'],
+				'vatsum'       => $value['vatsum'],
+				'doctotal'     => $value['doctotal'],
+				'estado'       => $value['estado'],
+				'errormsg'     => $value['errormsg'],
+				'transaccion'  => $value['transaccion'],
+				'docentry'     => $value['docentry'],
+				'_turn'        => $value['_turn'],
+				'indicator'    => $value['indicator']
+			);
+		}
+		//CERRAR GUARDAMOS DATA EN ARRAY CON INDICES CORRELATIVOS
+
+		$res = $res_;
 		foreach ($res as $key => $value) {
 			//ESTO SE CALCULARA EN EL ARRAY RESULTANTE
-			$c++;
-			$this->ticketHead[$value['foliopref']][$value['_turn']] = array(
+			$c++;			
+			$this->ticketHead[$value['foliopref']][$value['_turn']][] = array(
 				'u_exx_nroini' => (int)$value['u_exx_nroini'],
 				'u_exx_nrofin' => (int)$value['u_exx_nrofin'],
 				'noperacion' => $value['noperacion'],
 			);
 			//CERRAR ESTO SE CALCULARA EN EL ARRAY RESULTANTE
 		}
+
+		//ELIMINAMOS CAMPO QUE NO SE INSERTARA
+		foreach ($res as $key => $value) {
+			unset($res[$key]['_turn']);
+		}
+		//CERRAR ELIMINAMOS CAMPO QUE NO SE INSERTARA
 		//CERRAR DESAGREGAR TRANSFERENCIAS GRATUITAS MANTENIENDO CONTINUIDAD DE CORRELATIVO
 
 		return array(
@@ -5344,8 +5377,11 @@ ORDER BY _serie, _number, _turn;";
 		}
 		$ci = 1;
 		$tmpDoc = '';
+		// echo "<pre>";
+		// print_r($this->ticketHead);
+		// echo "</pre>";
 		while ($reg = $sqlca->fetchRow()) {
-			$c++;
+			$c++;			
 			$noperacion = $this->getNOperacionTicket($reg);
 			if ($tmpDoc == $noperacion) {
 				$ci++;
@@ -9601,7 +9637,9 @@ ORDER BY 1;";
 				$insert .= ($c != $countValues ? ',' : '');
 			}
 			$insert .= ");\n";
-			//echo '<br>'.$insert;
+			// echo '<br>'.$insert;
+			// error_log($i);
+			// error_log($insert);
 			$stmt = odbc_exec($hanaInstance['instance'], $insert);
 			if (!$stmt) {
 				$this->_error_log('$insert: '.$insert.' [LINE: '.__LINE__.']');
@@ -9792,13 +9830,34 @@ WHERE se.systemdate = '".$req['initial_systemdate']."' ORDER BY se.systemdate;";
 
 	public function getNOperacionTicket($res) {
 		if (isset($this->ticketHead[$res['_serie']][$res['_turn']])) {
-			$val = $this->ticketHead[$res['_serie']][$res['_turn']];
-			if ($res['_number'] >= $val['u_exx_nroini'] && $res['_number'] <= $val['u_exx_nrofin']) {
-				return $val['noperacion'];
-			} else {
-				error_log('No valido, u_exx_nroini: '.$val['u_exx_nroini'].' u_exx_nrofin: '.$val['u_exx_nrofin'].' - _number: '.$res['_number']);
-				return '';
+			$tickets = $this->ticketHead[$res['_serie']][$res['_turn']];		
+								
+			$es_array = false;
+			if( isset( $tickets[0]) ){ //SI EXISTE
+				if( is_array( $tickets[0] ) ){ //SI ES ARRAY
+					$es_array = true;
+				}
 			}
+
+			if( $es_array == true ){ //FUNCIONALIDAD PARA OBTENER DE ARRAY "ticketHead" DESGLOSE DE DOCUMENTOS TRANSFERENCIA GRATUITA O DOCUMENTOS ANULADOS				
+				foreach ($tickets as $key => $val) {
+					if ($res['_number'] >= $val['u_exx_nroini'] && $res['_number'] <= $val['u_exx_nrofin']) {
+						return $val['noperacion'];
+					}
+				}
+			} else { //LO MISMO DE SIEMPRE	
+				$val = $tickets;			
+				if ($res['_number'] >= $val['u_exx_nroini'] && $res['_number'] <= $val['u_exx_nrofin']) {
+					return $val['noperacion'];
+				} else {
+					error_log('No valido, u_exx_nroini: '.$val['u_exx_nroini'].' u_exx_nrofin: '.$val['u_exx_nrofin'].' - _number: '.$res['_number']);
+					return '';
+				}
+			}
+
+			error_log('No valido, u_exx_nroini: '.$val['u_exx_nroini'].' u_exx_nrofin: '.$val['u_exx_nrofin'].' - _number: '.$res['_number']);
+			return '';
+
 		} else {
 			error_log('No existe en ticketHead');
 			return '';
