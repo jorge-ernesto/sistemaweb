@@ -131,7 +131,7 @@ $sql = "SELECT
 $x_vales_credito_detalle = pg_query($conector_id, $sql);
 if($debug){
 	echo "<pre>";
-	echo "<b>Query 3. Credito Clientes - Detalle</b><br>";
+	echo "<b>Query 3. Credito Clientes</b><br>";
 	echo $sql;
 	echo "</pre>";
 }
@@ -155,7 +155,7 @@ $sql = "SELECT
 $x_tarjetas_credito_detalle = pg_query($conector_id, $sql);
 if($debug){
 	echo "<pre>";
-	echo "<b>Query 4. Tarjetas de Credito</b><br>";
+	echo "<b>Query 4. Tarjetas de Credito - Detalle</b><br>";
 	echo $sql;
 	echo "</pre>";
 }
@@ -173,6 +173,12 @@ $sql = "SELECT
 // echo "</pre>";
 
 $x_tarjetas_credito_total = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 4. Tarjetas de Credito - Total</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
 
 $sql = "
 SELECT
@@ -312,12 +318,12 @@ $sql ="	SELECT
 		fecha BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "' ";
 
 $x_liquidacion_gastos_total = pg_query($conector_id, $sql);
-if($debug){
-	echo "<pre>";
-	echo "<b>Query 9. Otros</b><br>";
-	echo $sql;
-	echo "</pre>";
-}
+// if($debug){
+// 	echo "<pre>";
+// 	echo "<b>Query 9. Otros</b><br>";
+// 	echo $sql;
+// 	echo "</pre>";
+// }
 
 $sql ="	SELECT
 		ROUND(SUM(importe),2) AS sfttotal
