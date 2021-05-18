@@ -20,8 +20,10 @@ try {
     ?>
     <link rel="stylesheet" href="/sistemaweb/css/sistemaweb.css" type="text/css">
     <link rel="stylesheet" href="/sistemaweb/css/vales_liquidacion.css" type="text/css">
-    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+    <!-- <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script> -->
+    <script src="/sistemaweb/js/jquery-1.9.1.js"></script>
+    <script src="/sistemaweb/js/jquery-ui.js"></script>
     <script type="text/javascript">
         $(function(){
             $('#activar_edicion_id').click(function(){

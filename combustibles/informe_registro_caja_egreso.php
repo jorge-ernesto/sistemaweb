@@ -12,7 +12,7 @@ include('movimientos/t_egreso_caja.php');
 
 $objmodel = new RegistroCajasModel();
 $objtem = new RegistroCajasTemplate();
-$objcomn = new RegistroCajaController();
+$objcomn = new RegistroCajaController("");
 
 
 $accion = $_REQUEST['accion'];
