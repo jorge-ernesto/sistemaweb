@@ -1943,11 +1943,11 @@ FROM
 				JOIN val_ta_detalle detalle ON (
 					cabecera.ch_documento = detalle.ch_documento AND cabecera.ch_sucursal = detalle.ch_sucursal AND cabecera.dt_fecha = detalle.dt_fecha
 				)
-				JOIN int_ta_sucursales sucursales ON (
+				/*JOIN int_ta_sucursales sucursales ON ( //ESTE JOIN NO TIENE SENTIDO, NUNCA OBTENDRA NADA
 					clientes.cli_ruc = sucursales.ruc
-				)
+				)*/
 				WHERE
-				sucursales.ch_sucursal = TRIM('$warehouse_id')
+				TRIM(detalle.ch_sucursal) = TRIM('$warehouse_id')
 				AND detalle.dt_fecha BETWEEN '$BeginDate' AND '$EndDate'
 				--AND detalle.ch_articulo = TRIM('11620304')
 				GROUP BY detalle.ch_articulo
