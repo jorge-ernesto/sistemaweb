@@ -287,7 +287,7 @@ function operacion_fac_ta_factura_cabecera($verificar, $registros){
                 values
                 ('45' ,'$sucursal'
                 ,'$numdoc' ,'CLIENTEPOS'
-                ,$igv,$importe-$igv
+                ,$igv,$importe - $igv
                 ,$importe
                 ,'$sucursal','$sucursal'
                 ,'$dia' --Esto hay que revisar
@@ -296,7 +296,7 @@ function operacion_fac_ta_factura_cabecera($verificar, $registros){
     }elseif($verificar == 'actualizar'){
         $sql = "update fac_ta_factura_cabecera
                 set nu_fac_impuesto1 = nu_fac_impuesto1 + $igv
-                ,nu_fac_valorbruto   = nu_fac_valorbruto + ($importe-$igv)
+                ,nu_fac_valorbruto   = nu_fac_valorbruto + ($importe - $igv)
                 ,nu_fac_valortotal   = nu_fac_valortotal + $importe
                 where
                 ch_fac_tipodocumento    = '45' and
@@ -343,13 +343,13 @@ function operacion_fac_ta_factura_detalle($verificar, $registros){
                 ,'$numdoc' ,'CLIENTEPOS'
                 ,'$codigo'
                 ,$cantidad,$precio
-                ,$importe-$igv , $igv
+                ,$importe - $igv , $igv
                 ,$importe);";
     }elseif($verificar == 'actualizar'){
         $sql = "update fac_ta_factura_detalle
                 set nu_fac_cantidad     = nu_fac_cantidad + $cantidad
-                , nu_fac_precio         = ($importe-$igv) / $cantidad
-                , nu_fac_importeneto    = nu_fac_importeneto + ($importe-$igv)
+                , nu_fac_precio         = ($importe - $igv) / $cantidad
+                , nu_fac_importeneto    = nu_fac_importeneto + ($importe - $igv)
                 , nu_fac_impuesto1      = nu_fac_impuesto1 + $igv
                 , nu_fac_valortotal     = nu_fac_valortotal + $importe
                 where ch_fac_tipodocumento      = '45'   and
@@ -385,7 +385,7 @@ CREATE OR REPLACE FUNCTION public.post_fn_inserta_ventas()
 AS ".'$BODY$DECLARE'."
         tipodoc char(2);
         seriedoc char(4);
-        numdoc  char(20);
+        numdoc  char(10);
         numeval char(10);
         cli_cod char(12);
         fila record;
@@ -442,7 +442,7 @@ pos=NEW.caja;
 
         IF NEW.tm IN ('V','A') AND NEW.trans IS NOT NULL AND NEW.td='N' THEN --if1
 
-                select into numdoc trim(NEW.caja) || '-' || trim(to_char(NEW.trans,'9999999999'));
+                select into numdoc trim(to_char(NEW.trans,'9999999999'));
                 SELECT INTO numeval trim(to_char(COALESCE(NEW.inicial,NEW.trans),'9999999999'));
                 RAISE NOTICE 'INSERTA_VENTAS NUMDOC %',numdoc;
 
