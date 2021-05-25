@@ -2204,14 +2204,13 @@ FROM
 					SUM(d.nu_fac_cantidad) AS cantienda
 				FROM
 					fac_ta_factura_cabecera f 
-					LEFT JOIN int_clientes c on f.cli_codigo=c.cli_codigo 
+					LEFT JOIN int_clientes c on (f.cli_codigo=c.cli_codigo AND c.cli_ndespacho_efectivo != 1)
 					LEFT JOIN fac_ta_factura_detalle d ON (f.ch_fac_tipodocumento=d.ch_fac_tipodocumento and f.ch_fac_seriedocumento=d.ch_fac_seriedocumento
 										and f.ch_fac_numerodocumento=d.ch_fac_numerodocumento and f.cli_codigo=d.cli_codigo)
 				WHERE
 					f.ch_fac_seriedocumento='" . pg_escape_string($warehouse_id) . "' AND 
 					f.ch_fac_tipodocumento='45' AND
 					f.dt_fac_fecha BETWEEN '" . pg_escape_string($desde_) . "' AND '" . pg_escape_string($hasta_) . "'	
-					AND c.cli_ndespacho_efectivo != 1 
 			";
 			$contenido['2_venta_productos_promociones'] = SQLImplodeArray($sql2_venta_productos_promociones);
 
