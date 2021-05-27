@@ -338,7 +338,7 @@ WHERE
 	function tmListado($pp, $pagina, $tipo_consulta, $tm, $td,  $bonus,$almacen, $lado, $caja, $turno, $periodo, $mes, $dia_desde, $dia_hasta, $art_codigo, $ruc, $cuenta, $tarjeta, $tipo, $fpago, $feserie, $fenumero) {
 		global $sqlca;
 
-    		$tur = $turno;
+    	$tur = $turno;
 
 		if ($tipo_consulta == "historico")
 			$tabla = pg_escape_string("pos_trans" . $periodo . $mes);
@@ -376,10 +376,18 @@ SELECT
  round(trans.igv,4),
  (trans.importe / 7.5),
  SUBSTR(TRIM(trans.usr), 6) fenumero,
- trans.rendi_gln
+ trans.rendi_gln, --Documento origen
+ trans.rendi_acu, --Documento resultante
+ CASE 
+      WHEN trans.tipo = 'C' THEN ( SELECT t.ch_nombre1 || ' ' || t.ch_nombre2 || ' ' || t.ch_apellido_paterno || ' ' || t.ch_apellido_materno FROM pos_historia_ladosxtrabajador hl LEFT JOIN pla_ta_trabajadores t ON hl.ch_codigo_trabajador = t.ch_codigo_trabajador WHERE hl.dt_dia = DATE(trans.dia) AND hl.ch_sucursal = '" . pg_escape_string($almacen) . "' AND CAST(hl.ch_posturno AS CHARACTER) = trans.turno AND hl.ch_lado = trans.pump AND hl.ch_tipo = 'C' LIMIT 1 )
+		WHEN trans.tipo = 'M' THEN ( SELECT t.ch_nombre1 || ' ' || t.ch_nombre2 || ' ' || t.ch_apellido_paterno || ' ' || t.ch_apellido_materno FROM pos_historia_ladosxtrabajador hl LEFT JOIN pla_ta_trabajadores t ON hl.ch_codigo_trabajador = t.ch_codigo_trabajador WHERE hl.dt_dia = DATE(trans.dia) AND hl.ch_sucursal = '" . pg_escape_string($almacen) . "' AND CAST(hl.ch_posturno AS CHARACTER) = trans.turno AND hl.ch_lado = trans.caja AND hl.ch_tipo = 'M' LIMIT 1 ) 
+		ELSE ''
+ END AS trabajador, --Trabajador
+ pf.nomusu as chofer
 FROM
  ".$tabla." trans
- LEFT JOIN ruc truc ON (trans.ruc=truc.ruc),
+ LEFT JOIN ruc truc ON (trans.ruc=truc.ruc)
+ LEFT JOIN pos_fptshe1 AS pf ON(pf.numtar = trans.tarjeta),
  int_articulos art
 WHERE
  art.art_codigo = trans.codigo
@@ -501,6 +509,10 @@ ORDER BY
  trans.trans ASC
 		";
 		//echo($sql);
+		// echo "<pre>Query detalle";
+		// echo $sql;
+		// echo "</pre>";
+		error_log($sql);
 
 		$resultado_1 = $sqlca->query($sql);
 		$sumPuntos = 0;
@@ -566,7 +578,10 @@ ORDER BY
 			$igv		 = $a[19];
 			$puntos		 = $a[20];
 			$fenumero	 = $a[21];// FE NUMERO
-			$rendi_gln = $a[22];
+			$rendi_gln   = $a[22];
+			$rendi_acu   = $a[23];
+			$trabajador  = $a[24];
+			$chofer      = $a[25];
 
 			$resultado[$i]['tm'] 		  = $tm;
 			$resultado[$i]['td'] 		  = $td;
@@ -591,7 +606,10 @@ ORDER BY
 			$resultado[$i]['puntos'] 	  = $puntos;
 			$resultado[$i]['fenumero'] 	  = $fenumero;
 			$resultado[$i]['rendi_gln']   = $rendi_gln;
-			$resultado[$i]['almacen']   = $almacen;
+			$resultado[$i]['rendi_acu']   = $rendi_acu;
+			$resultado[$i]['trabajador']  = $trabajador;
+			$resultado[$i]['chofer']      = $chofer;
+			$resultado[$i]['almacen']     = $almacen;
 
 			$sumPuntos += floor($puntos);
 		}
@@ -606,9 +624,10 @@ ORDER BY
 		return $listado;
 	}
 
-	function tmListado_Excel($pp, $pagina, $tipo_consulta, $tm, $td,  $bonus,$almacen, $lado, $caja, $turno, $periodo, $mes, $dia_desde, $dia_hasta, $art_codigo, $ruc, $cuenta, $tarjeta, $tipo, $fpago) {
+	function tmListado_Excel($pp, $pagina, $tipo_consulta, $tm, $td,  $bonus,$almacen, $lado, $caja, $turno, $periodo, $mes, $dia_desde, $dia_hasta, $art_codigo, $ruc, $cuenta, $tarjeta, $tipo, $fpago, $feserie, $fenumero) {
 		global $sqlca;
-    		$tur = $turno;
+    		
+		$tur = $turno;
 
 		if ($tipo_consulta == "historico")
 			$tabla = pg_escape_string("pos_trans" . $periodo . $mes);
@@ -619,43 +638,7 @@ ORDER BY
 		$sqlca->query($sql);
 
 		$desde = $dia_desde . "/" . $mes . "/" . $periodo;
-		$hasta = $dia_hasta . "/" . $mes . "/" . $periodo;		
-
-		// $sql = "
-		// SELECT
-		//  trans.tm,
-		//  trans.td,
-		//  trans.trans,
-		//  to_char(trans.fecha, 'DD/MM/YYYY HH24:MI:SS') as fecha,
-		//  trans.codigo || ' - ' || art.art_descripcion,
-		//  CASE WHEN trans.importe>=0 THEN trans.cantidad WHEN (trans.importe<0 and tm IN('A','D')) THEN trans.cantidad ELSE 0 END,
-		//  trans.precio,
-		//  trans.importe,
-		//  trans.tarjeta,
-		//  trans.odometro,
-		//  trans.placa,
-		//  trans.proveedor,
-		//  trans.usr,
-		//  trans.caja,
-		//  trans.pump,
-		//  trans.indexa,
-		//  trans.ruc,
-		//  truc.razsocial,
-		//  trans.turno,
-		//  round(trans.igv,4),
-		//  (trans.importe / 7.5),
-		//  cfp.nu_posz_z_serie as serie,
-		//  --'' as serie,
-		//  trans.rendi_gln		 
-		// FROM
-		//  ".$tabla." AS trans
-		//  LEFT JOIN pos_z_cierres AS cfp
-		//   ON(trans.caja = cfp.ch_posz_pos AND trans.dia = cfp.dt_posz_fecha_sistema::date AND trans.turno::integer = cfp.nu_posturno AND trans.es = cfp.ch_sucursal)
-		//  LEFT JOIN ruc AS truc ON (trans.ruc=truc.ruc),
-		//  int_articulos AS art
-		// WHERE
-		//  art.art_codigo = trans.codigo
-		// 		";
+		$hasta = $dia_hasta . "/" . $mes . "/" . $periodo;	
 
 		$sql = "
 SELECT
@@ -663,16 +646,17 @@ SELECT
  trans.td,
  trans.trans,
  to_char(trans.fecha, 'DD/MM/YYYY HH24:MI:SS') as fecha,
- to_char(trans.dia, 'DD/MM/YYYY') as dia, --cai 2020-03-02
+ to_char(trans.dia, 'DD/MM/YYYY') as dia, --cai 2020-03-02 ??????
  trans.codigo || ' - ' || art.art_descripcion,
- CASE WHEN trans.importe>=0 THEN trans.cantidad WHEN (trans.importe<0 and tm IN('A','D')) THEN trans.cantidad ELSE 0 END,
+ trans.cantidad,
+ --CASE WHEN trans.importe>=0 THEN trans.cantidad WHEN (trans.importe<0 and tm IN ('D','A') THEN trans.cantidad ELSE 0 END,
  trans.precio,
  trans.importe,
  trans.tarjeta,
  trans.odometro,
  trans.placa,
  trans.proveedor,
- trans.usr,
+ SUBSTR(TRIM(trans.usr), 0, 5) feserie,
  trans.caja,
  trans.pump,
  trans.indexa,
@@ -681,21 +665,20 @@ SELECT
  trans.turno,
  round(trans.igv,4),
  (trans.importe / 7.5),
- cfp.nu_posz_z_serie as serie,
- --'' as serie,
- trans.rendi_gln,
- trans.dia,   -- Agregado 2020-02-12
- trans.turno, -- Agregado 2020-02-12
- trans.pump,  -- Agregado 2020-02-12
- trans.caja,  -- Agregado 2020-02-12
- ( SELECT t.ch_nombre1 || ' ' || t.ch_nombre2 || ' ' || t.ch_apellido_paterno || ' ' || t.ch_apellido_materno FROM pos_historia_ladosxtrabajador hl LEFT JOIN pla_ta_trabajadores t ON hl.ch_codigo_trabajador = t.ch_codigo_trabajador WHERE hl.dt_dia = DATE(trans.dia) AND hl.ch_sucursal = '" . pg_escape_string($almacen) . "' AND CAST(hl.ch_posturno AS CHARACTER) = trans.turno AND hl.ch_lado = trans.pump LIMIT 1 ) as nombre_trabajador_lado, -- Agregado 2020-02-12
- ( SELECT t.ch_nombre1 || ' ' || t.ch_nombre2 || ' ' || t.ch_apellido_paterno || ' ' || t.ch_apellido_materno FROM pos_historia_ladosxtrabajador hl LEFT JOIN pla_ta_trabajadores t ON hl.ch_codigo_trabajador = t.ch_codigo_trabajador WHERE hl.dt_dia = DATE(trans.dia) AND hl.ch_sucursal = '" . pg_escape_string($almacen) . "' AND CAST(hl.ch_posturno AS CHARACTER) = trans.turno AND hl.ch_lado = trans.caja LIMIT 1 ) as nombre_trabajador_caja -- Agregado 2020-02-12
+ SUBSTR(TRIM(trans.usr), 6) fenumero,
+ trans.rendi_gln, --Documento origen
+ trans.rendi_acu, --Documento resultante
+ CASE 
+      WHEN trans.tipo = 'C' THEN ( SELECT t.ch_nombre1 || ' ' || t.ch_nombre2 || ' ' || t.ch_apellido_paterno || ' ' || t.ch_apellido_materno FROM pos_historia_ladosxtrabajador hl LEFT JOIN pla_ta_trabajadores t ON hl.ch_codigo_trabajador = t.ch_codigo_trabajador WHERE hl.dt_dia = DATE(trans.dia) AND hl.ch_sucursal = '" . pg_escape_string($almacen) . "' AND CAST(hl.ch_posturno AS CHARACTER) = trans.turno AND hl.ch_lado = trans.pump AND hl.ch_tipo = 'C' LIMIT 1 )
+		WHEN trans.tipo = 'M' THEN ( SELECT t.ch_nombre1 || ' ' || t.ch_nombre2 || ' ' || t.ch_apellido_paterno || ' ' || t.ch_apellido_materno FROM pos_historia_ladosxtrabajador hl LEFT JOIN pla_ta_trabajadores t ON hl.ch_codigo_trabajador = t.ch_codigo_trabajador WHERE hl.dt_dia = DATE(trans.dia) AND hl.ch_sucursal = '" . pg_escape_string($almacen) . "' AND CAST(hl.ch_posturno AS CHARACTER) = trans.turno AND hl.ch_lado = trans.caja AND hl.ch_tipo = 'M' LIMIT 1 ) 
+		ELSE ''
+ END AS trabajador, --Trabajador
+ pf.nomusu as chofer
 FROM
  ".$tabla." AS trans
- LEFT JOIN pos_z_cierres AS cfp
-  ON(trans.caja = cfp.ch_posz_pos AND trans.dia = cfp.dt_posz_fecha_sistema::date AND trans.turno::integer = cfp.nu_posturno AND trans.es = cfp.ch_sucursal)
- LEFT JOIN ruc AS truc ON (trans.ruc=truc.ruc),
- int_articulos AS art
+ LEFT JOIN ruc truc ON (trans.ruc=truc.ruc)
+ LEFT JOIN pos_fptshe1 AS pf ON(pf.numtar = trans.tarjeta),
+ int_articulos art
 WHERE
  art.art_codigo = trans.codigo
 		";
@@ -709,8 +692,8 @@ WHERE
 			AND trans.dia >= '" . pg_escape_string($periodo.'-'.$mes.'-'.$dia_desde) . "'
 			AND trans.dia <= '" . pg_escape_string($periodo.'-'.$mes.'-'.$dia_hasta) . "'
 			";
-        }
-	
+		}
+
 		if($tm != ''){
 			if (count($tm) > 0) {
 				$where .= " AND trans.tm IN (";
@@ -788,58 +771,76 @@ WHERE
 			$where .= "AND trans.indexa LIKE '%" . pg_escape_string($tarjeta) . "%' ";
 		}
 
+		if ($feserie != "")
+			$where .= "AND SUBSTR(TRIM(trans.usr), 0, 5) LIKE '%" . pg_escape_string($feserie) . "%' ";
+
+		if ($fenumero != "")
+			$where .= "AND SUBSTR(TRIM(trans.usr), 6) LIKE '%" . pg_escape_string($fenumero) . "%' ";
                 
-                //
-		$sqlt = "SELECT count(*) as total, sum(importe) as importe FROM {$tabla} trans WHERE true $where;";
+		$sqlt = "SELECT count(*) AS total, sum(importe) AS importe FROM {$tabla} trans WHERE true $where;";
 		$resultado_t = $sqlca->query($sqlt);
 		$totales1 = $sqlca->fetchRow();
-		
-
-		$sqlt = "SELECT sum(cantidad) as cantidad FROM {$tabla} trans WHERE true $where AND (trans.importe>=0 OR (trans.importe<0 AND trans.tm='D'));";
+		//echo $sqlt."<br/>";
+	
+		//$sqlt = "SELECT sum(cantidad) as cantidad FROM {$tabla} trans WHERE true $where AND (trans.importe>=0 OR (trans.importe<0 AND trans.tm='D'));";
+		$sqlt = "SELECT sum(cantidad) AS cantidad FROM {$tabla} trans WHERE true $where;";
 		$resultado_t = $sqlca->query($sqlt);
 		$totales2 = $sqlca->fetchRow();
-		
+		//echo $sqlt."<br/>";
 		$totales['total']    = $totales1['total'];
 		$totales['importe']  = $totales1['importe'];
 		$totales['cantidad'] = $totales2['cantidad'];
-
+	
 		$sql .= $where;	
-		$sql .= " ORDER BY trans.fecha, trans.trans ASC ";
-
-		/*** Agregado 2020-02-12 ***/
-		// echo "<pre>";
+		$sql .= "
+	ORDER BY
+	trans.fecha,
+	trans.trans ASC
+		";
+		//echo($sql);
+		// echo "<pre>Query detalle";
 		// echo $sql;
 		// echo "</pre>";
-		/***/
+		error_log($sql);
 
 		$resultado_1 = $sqlca->query($sql);
+		// $sumPuntos = 0;
+		// for ($i = 0; $i < $sqlca->numrows(); $i++) {
+		// 	$a = $sqlca->fetchRow();
+		// 	$puntos	= $a[20];
+		// 	$sumPuntos += floor($puntos);
+		// }
+		// $totales['puntos']  = $sumPuntos;
 		$numrows = $sqlca->numrows();
 
 		if($pp && $pagina){
-			
+			//echo "ENTRO 2\n REGPP : $pp \n PAG : $pagina\n";
 			$paginador = new paginador($numrows,$pp, $pagina);
 		} else {
-			
+			//echo "ENTRO 2 ELSE\n REGPP : $pp \n PAG : $pagina\n";
 			$paginador = new paginador($numrows,100,0);
 		}
 	
 		$listado2['partir'] 		= $paginador->partir();
-		$listado2['fin'] 		= $paginador->fin();
-		$listado2['numero_paginas'] 	= $paginador->numero_paginas();
+		$listado2['fin'] 			= $paginador->fin();
+		$listado2['numero_paginas'] = $paginador->numero_paginas();
 		$listado2['pagina_previa'] 	= $paginador->pagina_previa();
-		$listado2['pagina_siguiente'] 	= $paginador->pagina_siguiente();
-		$listado2['pp'] 		= $paginador->pp;
+		$listado2['pagina_siguiente'] = $paginador->pagina_siguiente();
+		$listado2['pp'] 			= $paginador->pp;
 		$listado2['paginas'] 		= $paginador->paginas();
-		$listado2['primera_pagina'] 	= $paginador->primera_pagina();
+		$listado2['primera_pagina'] = $paginador->primera_pagina();
 		$listado2['ultima_pagina'] 	= $paginador->ultima_pagina();
 
-		/*if ($pp > 0)
+		/*
+		if ($pp > 0)
 			$sql .= "LIMIT ".pg_escape_string($pp) . " ";
 		if ($pagina > 0)
 			$sql .= "OFFSET ".pg_escape_string((($paginador->partir()<0)?0:$paginador->partir()));
+
 		if ($sqlca->query($sql)<=0)
 			return $sqlca->get_error();
 		*/
+
 		$listado = array();
 		$resultado = array();
 
@@ -859,7 +860,7 @@ WHERE
 			$odometro 	 = $a[10];
 			$placa 		 = $a[11];
 			$codcli 	 = $a[12];
-			$usr 		 = $a[13];
+			$feserie	 = $a[13];// FE SERIE
 			$caja 		 = $a[14];
 			$pump 		 = $a[15];
 			$indexa 	 = $a[16];
@@ -868,10 +869,11 @@ WHERE
 			$turno 		 = $a[19];
 			$igv		 = $a[20];
 			$puntos		 = $a[21];
-			$serie		 = $a[22];
+			$fenumero	 = $a[22];// FE NUMERO
 			$rendi_gln   = $a[23];
-			$nombre_trabajador_lado = $a[28]; //Agregado 2020-02-13
-			$nombre_trabajador_caja = $a[29]; //Agregado 2020-02-13
+			$rendi_acu   = $a[24];
+      	$trabajador  = $a[25];
+			$chofer      = $a[26];
 
 			$resultado[$i]['tm'] 		  = $tm;
 			$resultado[$i]['td'] 		  = $td;
@@ -886,26 +888,22 @@ WHERE
 			$resultado[$i]['odometro'] 	  = $odometro;
 			$resultado[$i]['placa'] 	  = $placa;
 			$resultado[$i]['codcli'] 	  = $codcli;
-			$resultado[$i]['usr'] 	  	  = $usr;
+			$resultado[$i]['feserie'] 	  	  = $feserie;
 			$resultado[$i]['caja'] 		  = $caja;
 			$resultado[$i]['pump'] 		  = $pump;
 			$resultado[$i]['bonus'] 	  = $indexa;
-			$resultado[$i]['ruc'] 		  = $ruc;
-			$razsocial = str_replace("'","",$razsocial);
-			$resultado[$i]['razsocial']   = $razsocial;
+			$resultado[$i]['ruc'] 		  = $ruc;		
+			$razsocial = str_replace("'","",$razsocial);				
+			$resultado[$i]['razsocial'] 	  = $razsocial;			
 			$resultado[$i]['turno'] 	  = $turno;
 			$resultado[$i]['igv'] 	  	  = $igv;
 			$resultado[$i]['puntos'] 	  = $puntos;
-			$resultado[$i]['serie'] 	  = $serie;
-
-			$resultado[$i]['rendi_gln'] = $rendi_gln;
-			$resultado[$i]['almacen']   = $almacen;
-
-			$resultado[$i]['dFechaReferencia'] = "";
-			$resultado[$i]['sSerieNumeroReferencia'] = "";
-
-			$resultado[$i]['nombre_trabajador_lado'] = $nombre_trabajador_lado; //Agregado 2020-02-13
-			$resultado[$i]['nombre_trabajador_caja'] = $nombre_trabajador_caja; //Agregado 2020-02-13
+			$resultado[$i]['fenumero'] 	  = $fenumero;			
+			$resultado[$i]['rendi_gln']   = $rendi_gln;
+			$resultado[$i]['rendi_acu']   = $rendi_acu;
+			$resultado[$i]['trabajador']  = $trabajador;
+			$resultado[$i]['chofer']      = $chofer;
+			$resultado[$i]['almacen']     = $almacen;		
 		}
 
 		$resultado[-1] = $totales;
@@ -1237,6 +1235,9 @@ WHERE
 	    return TicketsPosModel::llamadaRemota("obtenerArticulo", $params);
 	}
 
+	/**
+	 * Buscar documento origen de extorno
+	 */
 	function verify_reference_sales_invoice_document($arrCond){
 		global $sqlca;
 
@@ -1251,7 +1252,7 @@ WHERE
 		$sql = "
 SELECT
  usr,
- fecha
+ to_char(fecha, 'DD/MM/YYYY HH24:MI:SS') as fecha
 FROM
  " . $nombre_tabla . "
 WHERE
@@ -1263,6 +1264,50 @@ WHERE
  AND grupo != 'D'
 LIMIT 1;
 		";
+		// echo "<pre>";
+		// echo $sql;
+		// echo "</pre>";
+
+		$iStatus = $sqlca->query($sql);
+		if ((int)$iStatus >= 1){//Existe registro en la tabla pos_transYM
+			$row = $sqlca->fetchRow();
+			$arrResponse = array('sStatus' => 'success', 'sMessage' => 'Documento de playa encontrado', 'arrDataModel' => $row);
+		}
+    	return $arrResponse;
+	}
+
+	/**
+	 * Buscar documento resultante de extorno
+	 */
+	function verify_reference_sales_invoice_document_result($arrCond){
+		global $sqlca;
+
+		$nombre_tabla = $arrCond['sNombreTabla'];
+		$cond_codigo_almacen = $arrCond['sCodigoAlmacen'];
+		$cond_caja = $arrCond['sCaja'];
+		$cond_tipo_documento = $arrCond['sTipoDocumento'];
+		$cond_trans = $arrCond['fIDTrans'];
+
+  		$arrResponse = array('sStatus' => 'warning', 'sMessage' => 'No existe documento de referencia');
+
+		$sql = "
+SELECT
+ usr,
+ to_char(fecha, 'DD/MM/YYYY HH24:MI:SS') as fecha
+FROM
+ " . $nombre_tabla . "
+WHERE
+ es = '" . $cond_codigo_almacen . "'
+ AND caja = '" . $cond_caja . "'
+ --AND td = '" . $cond_tipo_documento . "' --Para buscar documento resultante no es necesario
+ AND trans = " . $cond_trans . "
+ AND tm = 'V'
+ AND grupo != 'D'
+LIMIT 1;
+		";
+		// echo "<pre>";
+		// echo $sql;
+		// echo "</pre>";
 
 		$iStatus = $sqlca->query($sql);
 		if ((int)$iStatus >= 1){//Existe registro en la tabla pos_transYM

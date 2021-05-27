@@ -95,12 +95,14 @@ class TicketsPosController extends Controller {
                 $fpago = array();
                 $fpago = $tfpago;
 
-                $listado_excel = $modelTicketPos->tmListado_Excel($_REQUEST['rxp'], $_REQUEST['pagina'], $_REQUEST['ch_tipo_consulta'], $_REQUEST['tm'], $_REQUEST['td'], $_REQUEST['Bonus'], $_REQUEST['ch_almacen'], $_REQUEST['ch_lado'], $_REQUEST['ch_caja'], $_REQUEST['ch_turno'], $_REQUEST['ch_periodo'], $_REQUEST['ch_mes'], $_REQUEST['ch_dia_desde'], $_REQUEST['ch_dia_hasta'], $_REQUEST['art_codigo'], $_REQUEST['ruc'], $_REQUEST['cuenta'], $_REQUEST['tarjeta'], $_REQUEST['ch_tipo'], $fpago);                
-                $_SESSION['info']=$listado_excel['datos'];
+                $bonus = "";
+                if (isset($_REQUEST['Bonus']))
+                    $bonus = $_REQUEST['Bonus'];
                 
-                /*** Agregado 2020-02-10 ***/
-                // echo "<script>console.log('" . json_encode($listado_excel) . "')</script>";
-                /***/
+                $listado_excel = $modelTicketPos->tmListado_Excel($_REQUEST['rxp'], $_REQUEST['pagina'], $_REQUEST['ch_tipo_consulta'], $_REQUEST['tm'], $_REQUEST['td'], $bonus, $_REQUEST['ch_almacen'], $_REQUEST['ch_lado'], $_REQUEST['ch_caja'], $_REQUEST['ch_turno'], $_REQUEST['ch_periodo'], $_REQUEST['ch_mes'], $_REQUEST['ch_dia_desde'], $_REQUEST['ch_dia_hasta'], $_REQUEST['art_codigo'], $_REQUEST['ruc'], $_REQUEST['cuenta'], $_REQUEST['tarjeta'], $_REQUEST['ch_tipo'], $fpago,  $_REQUEST['txtfeserie'], $_REQUEST['txtfenumero']);
+                // echo "<script>console.log('" . json_encode($listado_excel) . "')</script>";                
+                $_SESSION['info']  = $listado_excel['datos'];
+                $_SESSION['info_'] = array('modo' => $_REQUEST['ch_tipo_consulta'], 'iYear' => $_REQUEST['ch_periodo'], 'iMonth' => $_REQUEST['ch_mes']);
 
                 $listado = false;
                 header("Location: /sistemaweb/ventas_clientes/reporte_tickes_ventas.php");
@@ -115,7 +117,7 @@ class TicketsPosController extends Controller {
             $result = $templateTicketPos->formSearch();
         }
 
-        if ($listado) {
+        if ($listado) {            
             $tfpago = null;
 
             if (isset($_REQUEST['tfpago']) && is_array($_REQUEST['tfpago']))
@@ -130,8 +132,9 @@ class TicketsPosController extends Controller {
             $bonus = "";
             if (isset($_REQUEST['Bonus']))
                 $bonus = $_REQUEST['Bonus'];
-
+            
             $listado = $modelTicketPos->tmListado($_REQUEST['rxp'], $_REQUEST['pagina'], $_REQUEST['ch_tipo_consulta'], $_REQUEST['tm'], $_REQUEST['td'], $bonus, $_REQUEST['ch_almacen'], $_REQUEST['ch_lado'], $_REQUEST['ch_caja'], $_REQUEST['ch_turno'], $_REQUEST['ch_periodo'], $_REQUEST['ch_mes'], $_REQUEST['ch_dia_desde'], $_REQUEST['ch_dia_hasta'], $_REQUEST['art_codigo'], $_REQUEST['ruc'], $_REQUEST['cuenta'], $_REQUEST['tarjeta'], $_REQUEST['ch_tipo'], $fpago,  $_REQUEST['txtfeserie'], $_REQUEST['txtfenumero']);
+            // echo "<script>console.log('" . json_encode($listado) . "')</script>";
             $vec = array($_REQUEST['ch_tipo_consulta'], $_REQUEST['tm'][0], $_REQUEST['tm'][1], $_REQUEST['tm'][2], $_REQUEST['td'][0], $_REQUEST['td'][1], $_REQUEST['td'][2], $bonus, $_REQUEST['ch_almacen'], $_REQUEST['ch_lado'], $_REQUEST['ch_caja'], $_REQUEST['ch_turno'], $_REQUEST['ch_periodo'], $_REQUEST['ch_mes'], $_REQUEST['ch_dia_desde'], $_REQUEST['ch_dia_hasta'], $_REQUEST['art_codigo'], $_REQUEST['ruc'], $_REQUEST['cuenta'], $_REQUEST['tarjeta'], $_REQUEST['ch_tipo'], $tfpago[0], $tfpago[1]);
 
             $result_f2 = $templateTicketPos->formPag($listado['paginacion'], $vec);

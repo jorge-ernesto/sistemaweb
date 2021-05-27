@@ -143,33 +143,36 @@ class TicketsPosTemplate extends Template {
         $totales['cantidad'] = 0;
         $totales['importe'] = 0;
 
-        $result = '<center><table border="1" cellspacing="0">';
+        $result = '<center><table id="tabprincipal" align="center">';
         $result .= '<tr>';
-        $result .= '<th>&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;TM&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;TD&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;# Ticket&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Numero&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Fecha&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Turno&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Descripcion&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Cantidad&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Precio&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;IGV&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Importe&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Tarjeta&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Odometro&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;Placa&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Cod. Cli.&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Usuario&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;Caja&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;Lado&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Bonus&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;RUC&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Razon Social&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Puntos Bonus&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Fecha Ref.&nbsp;&nbsp;</th>';
-        $result .= '<th style="color:blue;">&nbsp;&nbsp;Ticket / Documento Ref.&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;TM&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;TD&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;# Ticket&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Numero&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Fecha&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Turno&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Descripcion&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Cantidad&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Precio&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;IGV&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Importe&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Tarjeta&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Odometro&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;Placa&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Cod. Cli.&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Usuario&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;Caja&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;Lado&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Bonus&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;RUC&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Razon Social&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Puntos Bonus&nbsp;&nbsp;</th>';        
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Fecha Extorno&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Documento Extorno&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Fecha Nuevo&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Documento Nuevo&nbsp;&nbsp;</th>';
+        $result .= '<th class="grid_cabecera" style="font-size:0.8em; color:white;">&nbsp;&nbsp;Trabajador&nbsp;&nbsp;</th>';
         $result .= '</tr>';
 
         $modelTicketPos = new TicketsPosModel();
@@ -187,7 +190,7 @@ class TicketsPosTemplate extends Template {
 //            $url = "/sistemaweb/ventas_clientes/reimpresiones.php?nro_caja=" . $a['caja'] . "&nro_trans=" . $a['trans'] . "&dia_trans=" . substr($a['fecha'], 0, 10) . "&tipo_consulta=" . urlencode($modo);
 //            $result .= '<tr bgcolor="" onMouseOver=this.style.backgroundColor="#FFFFCC"; this.style.cursor="hand"; onMouseOut=this.style.backgroundColor=""; onClick="window.open(\'' . $url . '\',\'reimpresion\',\'width=600,height=400,scrollbars=yes,menubar=no,left=60,top=20\')";>';
             $url = "/sistemaweb/ventas_clientes/reimpresiones.php?nro_caja=" . $a['caja'] . "&nro_trans=" . $a['trans'] . "&dia_trans=" . substr($a['fecha'], 0, 10) . "&tipo_consulta=" . urlencode($modo);
-            $result .= '<tr bgcolor="" onMouseOver=this.style.backgroundColor="#FFFFCC"; this.style.cursor="hand"; onMouseOut=this.style.backgroundColor=""; onClick="return true;";>';
+            $result .= '<tr bgcolor="" onClick="return true;";>';
 
 // By Alvaro - Eliminar la funciond e reimpresio - ya no se necesita
 //            $result .= '<td><input type="radio" name="xxx" onClick="window.open(\'' . $url . '\',\'reimpresion\',\'width=600,height=400,scrollbars=yes,menubar=no,left=60,top=20\')"></td>';
@@ -195,6 +198,7 @@ class TicketsPosTemplate extends Template {
             if(isset($a['usr']))
                 $usr=$a['usr'];
 
+            //DOCUMENTO ORIGINAL
             $dFechaReferencia = "";
             $sSerieNumeroReferencia = "";
             if ( $a['rendi_gln'] != "" ) {
@@ -215,72 +219,98 @@ class TicketsPosTemplate extends Template {
                 }
             }
 
-            $result .= '<td><input type="radio" name="xxx" onClick="return false;"></td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($a['tm']) . '&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($a['td']) . '&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($a['trans']) . '&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($a['feserie']) . ' -  ' . htmlentities($a['fenumero']) . '</td>';
-            $result .= '<td>&nbsp;&nbsp;' . htmlentities($a['fecha']) . '&nbsp;&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($a['turno']) . '&nbsp;</td>';
-            $result .= '<td>&nbsp;&nbsp;' . htmlentities($a['art_descripcion']) . '&nbsp;&nbsp;</td>';
-            $result .= '<td align="right">&nbsp;' . htmlentities($a['cantidad']) . '&nbsp;</td>';
-            $result .= '<td align="right">&nbsp;' . htmlentities($a['precio']) . '&nbsp;</td>';
-            $result .= '<td align="right">&nbsp;' . htmlentities($a['igv']) . '&nbsp;</td>';
-            $result .= '<td align="right">&nbsp;' . htmlentities($a['importe']) . '&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($a['tarjeta']) . '&nbsp;</td>';
-            $result .= '<td align="right">&nbsp;' . htmlentities($a['odometro']) . '&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($a['placa']) . '&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($a['codcli']) . '&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($usr) . '&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($a['caja']) . '&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($a['pump']) . '&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($a['bonus']) . '&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($a['ruc']) . '&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($a['razsocial']) . '&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities(floor($a['puntos'])) . '&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($dFechaReferencia) . '&nbsp;</td>';
-            $result .= '<td align="center">&nbsp;' . htmlentities($sSerieNumeroReferencia) . '&nbsp;</td>';
+            //DOCUMENTO RESULTANTE
+            $dFechaReferencia_resultante = "";
+            $sSerieNumeroReferencia_resultante = "";
+            if ( $a['rendi_acu'] != "" ) {
+                $arrData = array(
+                    "sNombreTabla" => $tabla,
+                    "sCodigoAlmacen" => $a['almacen'],
+                    "sCaja" => $a['caja'],
+                    "sTipoDocumento" => $a['td'],
+                    "fIDTrans" => $a['rendi_acu'],
+                    "iNumeroDocumentoIdentidad" => $a['ruc'],
+                );
+                $arrResponseModel = $modelTicketPos->verify_reference_sales_invoice_document_result($arrData);
+                $dFechaReferencia_resultante = "";
+                $sSerieNumeroReferencia_resultante = "";
+                if ($arrResponseModel["sStatus"] == "success") {
+                    $dFechaReferencia_resultante = $arrResponseModel["arrDataModel"]["fecha"];
+                    $sSerieNumeroReferencia_resultante = $arrResponseModel["arrDataModel"]["usr"];
+                }
+            }
+
+            $color = ($x%2==0?"grid_detalle_par":"grid_detalle_impar");
+
+            $result .= '<td class="'.$color.'"><input type="radio" name="xxx" onClick="return false;"></td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['tm']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['td']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['trans']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['feserie']) . ' -  ' . htmlentities($a['fenumero']) . '</td>';
+            $result .= '<td class="'.$color.'">&nbsp;&nbsp;' . htmlentities($a['fecha']) . '&nbsp;&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['turno']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'">&nbsp;&nbsp;' . htmlentities($a['art_descripcion']) . '&nbsp;&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="right">&nbsp;' . htmlentities($a['cantidad']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="right">&nbsp;' . htmlentities($a['precio']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="right">&nbsp;' . htmlentities($a['igv']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="right">&nbsp;' . htmlentities($a['importe']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['tarjeta']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="right">&nbsp;' . htmlentities($a['odometro']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['placa']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['codcli']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['chofer']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['caja']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['pump']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['bonus']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['ruc']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['razsocial']) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities(floor($a['puntos'])) . '&nbsp;</td>';            
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($dFechaReferencia) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($sSerieNumeroReferencia) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($dFechaReferencia_resultante) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($sSerieNumeroReferencia_resultante) . '&nbsp;</td>';
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['trabajador']) . '&nbsp;</td>';
             $result .= '</tr>';
             $cantidad_de_ticke['T-'.$a['trans']]=1;
         }
-        $result .= '<tr>';
-        $result .= '<td bgcolor=#F4FA58 colspan="6">TOTAL: ' . number_format($totales['total'], 0, '.', ',') . ' transacciones</td>';
-        $result .= '<td bgcolor=#F4FA58>&nbsp;</td><td bgcolor=#F4FA58></td>';
-        $result .= '<td bgcolor=#F4FA58 align="right" style="font-weight:bold">' . number_format($totales['cantidad'], 4, '.', ',') . '</td>';
-        $result .= '<td bgcolor=#F4FA58>&nbsp;</td>';
-        $result .= '<td bgcolor=#F4FA58>&nbsp;</td>';
-        $result .= '<td bgcolor=#F4FA58 align="right" style="font-weight:bold">' . number_format($totales['importe'], 4, '.', ',') . '</td>';
-        $result .= '<td bgcolor=#F4FA58 colspan="10">&nbsp;</td>';
-        $result .= '<td bgcolor=#F4FA58 align="center" style="font-weight:bold">' . $totales['puntos'] . '</td></tr>';
-         $result .= '<tr>';
+        $result .= '<tr bgcolor="">';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 colspan="6" style="font-weight:bold">TOTAL: ' . number_format($totales['total'], 0, '.', ',') . ' transacciones</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58>&nbsp;</td><td class="grid_detalle_impar" bgcolor=#F4FA58></td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 align="right" style="font-weight:bold">' . number_format($totales['cantidad'], 4, '.', ',') . '</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58>&nbsp;</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58>&nbsp;</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 align="right" style="font-weight:bold">' . number_format($totales['importe'], 4, '.', ',') . '</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 colspan="10">&nbsp;</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 align="center" style="font-weight:bold">' . $totales['puntos'] . '</td></tr>';
+         $result .= '<tr bgcolor="">';
          
-          $result .= '<td bgcolor=#F4FA58 colspan="6">CANTIDAD TICKES : </td><td bgcolor=#F4FA58></td>';
-        $result .= '<td bgcolor=#F4FA58>&nbsp;</td>';
-        $result .= '<td bgcolor=#F4FA58 align="right" style="font-weight:bold">' . count($cantidad_de_ticke) . '</td>';
-        $result .= '<td bgcolor=#F4FA58>&nbsp;</td>';
-        $result .= '<td bgcolor=#F4FA58>&nbsp;</td>';
-        $result .= '<td bgcolor=#F4FA58>&nbsp;</td>';
-        $result .= '<td bgcolor=#F4FA58 colspan="10">&nbsp;</td>';
-        $result .= '<td bgcolor=#F4FA58 >&nbsp;</td></tr>';
+          $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 colspan="6" style="font-weight:bold">CANTIDAD TICKES : </td><td class="grid_detalle_impar" bgcolor=#F4FA58></td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58>&nbsp;</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 align="right" style="font-weight:bold">' . count($cantidad_de_ticke) . '</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58>&nbsp;</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58>&nbsp;</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58>&nbsp;</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 colspan="10">&nbsp;</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 >&nbsp;</td></tr>';
          
-        $result .= '<td bgcolor=#F4FA58 colspan="6">UNIDADES X TRANSACCIÓN : </td>';
-        $result .= '<td bgcolor=#F4FA58>&nbsp;</td><td bgcolor=#F4FA58></td>';
-        $result .= '<td bgcolor=#F4FA58 align="right" style="font-weight:bold">' . number_format(($totales['cantidad']/count($cantidad_de_ticke)), 4, '.', ',') . '</td>';
-        $result .= '<td bgcolor=#F4FA58>&nbsp;</td>';
-        $result .= '<td bgcolor=#F4FA58>&nbsp;</td>';
-        $result .= '<td bgcolor=#F4FA58>&nbsp;</td>';
-        $result .= '<td bgcolor=#F4FA58 colspan="10">&nbsp;</td>';
-        $result .= '<td bgcolor=#F4FA58 >&nbsp;</td></tr>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 colspan="6" style="font-weight:bold">UNIDADES X TRANSACCIÓN : </td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58>&nbsp;</td><td class="grid_detalle_impar" bgcolor=#F4FA58></td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 align="right" style="font-weight:bold">' . number_format(($totales['cantidad']/count($cantidad_de_ticke)), 4, '.', ',') . '</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58>&nbsp;</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58>&nbsp;</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58>&nbsp;</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 colspan="10">&nbsp;</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 >&nbsp;</td></tr>';
         
-         $result .= '<tr>';
-        $result .= '<td bgcolor=#F4FA58 colspan="6">TICKET PROMEDIO (TRANS S/.) : </td>';
-        $result .= '<td bgcolor=#F4FA58>&nbsp;</td><td bgcolor=#F4FA58></td>';
-        $result .= '<td bgcolor=#F4FA58 align="right" style="font-weight:bold">' . number_format(($totales['importe']/count($cantidad_de_ticke)), 4, '.', ',') . '</td>';
-        $result .= '<td bgcolor=#F4FA58>&nbsp;</td>';
-        $result .= '<td bgcolor=#F4FA58>&nbsp;</td>';
-        $result .= '<td bgcolor=#F4FA58>&nbsp;</td>';
-        $result .= '<td bgcolor=#F4FA58 colspan="10"></td>';
-        $result .= '<td bgcolor=#F4FA58 >&nbsp;</td></tr>';
+         $result .= '<tr bgcolor="">';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 colspan="6" style="font-weight:bold">TICKET PROMEDIO (TRANS S/.) : </td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58>&nbsp;</td><td class="grid_detalle_impar" bgcolor=#F4FA58></td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 align="right" style="font-weight:bold">' . number_format(($totales['importe']/count($cantidad_de_ticke)), 4, '.', ',') . '</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58>&nbsp;</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58>&nbsp;</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58>&nbsp;</td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 colspan="10"></td>';
+        $result .= '<td class="grid_detalle_impar" bgcolor=#F4FA58 >&nbsp;</td></tr>';
         
         $result .= '</table></center>';
 
