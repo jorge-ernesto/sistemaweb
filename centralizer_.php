@@ -942,7 +942,12 @@ function obtieneParte($desde, $hasta, $estaciones) {
 	for ($i = 0; $i < $sqlca->numrows(); $i++) {
 		$a = $sqlca->fetchRow();		    
 		$ch_sucursal = pg_escape_string($estaciones);
-		$producto = $a[0];
+		/**
+		 * La query ordena por nombre de combustible, pero el indice era solo $a[0], que es el codigo
+		 * Al recibir esta informacion en JS, cambia el orden al del indice, no respetando el orden de la query
+		 * Se realizo el cambio a $a[1] . "|" . $a[0] para que ordene por el nombre al enviar la data a JS en OCS Manager
+		 */ 
+		$producto = $a[1] . "|" . $a[0];
 		$propio = ($propiedad[$ch_sucursal]=='S'?"ESTACION":"OTROS");
 		$ch_sucursal = $almacenes[$ch_sucursal];
 
