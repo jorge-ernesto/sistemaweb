@@ -1082,7 +1082,7 @@ WHERE
 		);
 
 		$printerip = $row[0];
-		$fp = fsockopen("127.0.0.1", 9100, $errno, $errstr, 2); //"127.0.0.1", 9100
+		$fp = fsockopen($printerip, 9100, $errno, $errstr, 2); //"127.0.0.1", 9100
 		if ($fp === false) {
 			echo "$errstr ($errno)<br />\n";
 			
