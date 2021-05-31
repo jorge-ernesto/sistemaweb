@@ -286,7 +286,7 @@ class InterfaceConcarActModel extends Model {
 						$id_cencos_comb      = $row['id_cencos_comb'];
 						$id_centro_costo_glp = $row['id_centro_costo_glp'];
 						$id_centrocosto      = $row['id_centrocosto'];
-						$id_centro_cos_dMa   = $row['id_centro_cos_dMa'];
+						$id_centro_cos_dMa   = $row['id_centro_cos_dma']; //En SQL todos los campos estan en minusculas
 						$codane              = $row['codane'];
 						$codane_lubri        = $row['codane_lubri'];
 						$codane_glp2         = $row['codane_glp2'];
@@ -481,90 +481,7 @@ class InterfaceConcarActModel extends Model {
 				}
 			}
 		}
-	}
-
-	/*
-	concar_confignew Values
-		module Values
-		6 Ventas Documentos Manuales
-			category
-			0 Cuentas Configuracion
-						0 Subdiario de Ventas Documentos Manuales
-			1 Cuentas Documentos Manuales Combustible
-						0 Cuenta Documentos Manuales Combustible Cliente
-						1 Cuenta Documentos Manuales Impuesto
-						2 Cuenta Documentos Manuales Combustible Ventas
-			2 Cuentas Documentos Manuales GLP
-						0 Cuenta Documentos Manuales GLP Cliente
-						1 Cuenta Documentos Manuales GLP Ventas
-	*/
-	function insert_module6_ventas_documentos_manuales() {
-		global $sqlca;
-			
-		//VERIFICAMOS QUE NO HAYA DATA INSERTADA
-		$iStatus = $sqlca->query("SELECT count(*) as resultado_cantidad FROM concar_confignew WHERE module = '6'");
-
-		//SE EJECUTO LA QUERY
-		if ((int)$iStatus > 0) {
-			$row = $sqlca->fetchRow();
-			$resultado_cantidad = $row['resultado_cantidad'];
-
-			//SI LA CANTIDAD ES 0, INSERTAMOS
-			if($resultado_cantidad == 0){
-
-				//OBTENEMOS SUCURSALES
-				$iStatus = $sqlca->query("SELECT ch_sucursal FROM int_ta_sucursales LIMIT 1");				
-
-				//SE EJECUTO LA QUERY
-				if ((int)$iStatus > 0) {					
-					$row = $sqlca->fetchRow();
-					$ch_sucursal = $row['ch_sucursal'];										
-
-					//OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO VENTAS DOCUMENTOS MANUALES
-					$iStatus = $sqlca->query("SELECT
-													venta_subdiario_docManual
-													,venta_cuenta_cliente_dMa
-													,venta_cuenta_impuesto
-													,venta_cuenta_ventas_dMa
-													,venta_cuenta_cliente_glp2
-													,venta_cuenta_ventas_glp2
-												FROM
-													concar_config;");	
-						
-					//SE EJECUTO LA QUERY
-					if ((int)$iStatus > 0) {
-						$row = $sqlca->fetchRow();
-						error_log( json_encode( $row ) ); //Usamos el indice numerico, ya que Postgres retorna el nombre del dato en minusculas
-						$venta_subdiario_docManual = $row[0];
-						$venta_cuenta_cliente_dMa  = $row[1];	
-						$venta_cuenta_impuesto     = $row[2];											
-						$venta_cuenta_ventas_dMa   = $row[3];
-						$venta_cuenta_cliente_glp2 = $row[4];
-						$venta_cuenta_ventas_glp2  = $row[5];
-
-						//INICIAMOS TRANSACCION
-						$sqlca->query("BEGIN;");
-
-						//INSERTAMOS DATA
-						$iStatus = $sqlca->query("
-							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 0, 0, '$venta_subdiario_docManual');
-							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 1, 0, '$venta_cuenta_cliente_dMa');
-							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 1, 1, '$venta_cuenta_impuesto');
-							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 1, 2, '$venta_cuenta_ventas_dMa');
-							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 2, 0, '$venta_cuenta_cliente_glp2');
-							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 2, 1, '$venta_cuenta_ventas_glp2');
-						");
-
-						if ((int)$iStatus < 0) {
-							$sqlca->query("ROLLBACK;");							
-						}else{
-							$sqlca->query("COMMIT;");			
-						}
-					}
-				}
-			}
-		}
-	}
+	}	
 
 	/*
 	concar_confignew Values
@@ -723,15 +640,15 @@ class InterfaceConcarActModel extends Model {
 						1 Subdiario de Compra GLP
 						2 Subdiario de Compra Market
 			1 Cuentas Combustible
-						0 Cuenta Combustible Compra Proveedor
-						1 Cuenta Combustible Compra BI
+						0 Cuenta Compra Proveedor Combustible
+						1 Cuenta Compra BI Combustible
 			2 Cuentas GLP
-						0 Cuenta GLP Compra Proveedor
-						1 Cuenta GLP Compra BI
+						0 Cuenta Compra Proveedor GLP
+						1 Cuenta Compra BI GLP
 			3 Cuentas Market
-						0 Cuenta Market Compra Proveedor
+						0 Cuenta Compra Proveedor Market
 						1 Cuenta Compra Impuesto
-						2 Cuenta Market Compra Mercaderia
+						2 Cuenta Compra BI Market
 	*/
 	function insert_module5_compras() {
 		global $sqlca;
@@ -779,13 +696,96 @@ class InterfaceConcarActModel extends Model {
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 0, 0, '$compra_subdiario');
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 0, 1, '$compra_subdiario');
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 0, 2, '$compra_subdiario');
-							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 1, 0, '421201');
-							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 1, 1, '201111');
-							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 2, 0, '421202');
-							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 2, 1, '201112');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 1, 0, '$compra_cuenta_proveedor');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 1, 1, '$compra_cuenta_mercaderia');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 2, 0, '$compra_cuenta_proveedor');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 2, 1, '$compra_cuenta_mercaderia');
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 3, 0, '$compra_cuenta_proveedor');
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 3, 1, '$compra_cuenta_impuesto');
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 3, 2, '$compra_cuenta_mercaderia');
+						");
+
+						if ((int)$iStatus < 0) {
+							$sqlca->query("ROLLBACK;");							
+						}else{
+							$sqlca->query("COMMIT;");			
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/*
+	concar_confignew Values
+		module Values
+		6 Ventas Manuales
+			category
+			0 Cuentas Configuracion
+						0 Subdiario de Ventas Documentos Manuales
+			1 Cuentas Documentos Manuales Combustible
+						0 Cuenta Documentos Manuales Combustible Cliente
+						1 Cuenta Documentos Manuales Impuesto
+						2 Cuenta Documentos Manuales Combustible Ventas
+			2 Cuentas Documentos Manuales GLP
+						0 Cuenta Documentos Manuales GLP Cliente
+						1 Cuenta Documentos Manuales GLP Ventas
+	*/
+	function insert_module6_ventas_manuales() {
+		global $sqlca;
+			
+		//VERIFICAMOS QUE NO HAYA DATA INSERTADA
+		$iStatus = $sqlca->query("SELECT count(*) as resultado_cantidad FROM concar_confignew WHERE module = '6'");
+
+		//SE EJECUTO LA QUERY
+		if ((int)$iStatus > 0) {
+			$row = $sqlca->fetchRow();
+			$resultado_cantidad = $row['resultado_cantidad'];
+
+			//SI LA CANTIDAD ES 0, INSERTAMOS
+			if($resultado_cantidad == 0){
+
+				//OBTENEMOS SUCURSALES
+				$iStatus = $sqlca->query("SELECT ch_sucursal FROM int_ta_sucursales LIMIT 1");				
+
+				//SE EJECUTO LA QUERY
+				if ((int)$iStatus > 0) {					
+					$row = $sqlca->fetchRow();
+					$ch_sucursal = $row['ch_sucursal'];										
+
+					//OBTENEMOS INFORMACION DE CONCAR_CONFIG PARA EL MODULO VENTAS DOCUMENTOS MANUALES
+					$iStatus = $sqlca->query("SELECT
+													venta_subdiario_docManual
+													,venta_cuenta_cliente_dMa
+													,venta_cuenta_impuesto
+													,venta_cuenta_ventas_dMa
+													,venta_cuenta_cliente_glp2
+													,venta_cuenta_ventas_glp2
+												FROM
+													concar_config;");	
+						
+					//SE EJECUTO LA QUERY
+					if ((int)$iStatus > 0) {
+						$row = $sqlca->fetchRow();
+						error_log( json_encode( $row ) ); //Usamos el indice numerico, ya que Postgres retorna el nombre del dato en minusculas
+						$venta_subdiario_docManual = $row[0];
+						$venta_cuenta_cliente_dMa  = $row[1];	
+						$venta_cuenta_impuesto     = $row[2];											
+						$venta_cuenta_ventas_dMa   = $row[3];
+						$venta_cuenta_cliente_glp2 = $row[4];
+						$venta_cuenta_ventas_glp2  = $row[5];
+
+						//INICIAMOS TRANSACCION
+						$sqlca->query("BEGIN;");
+
+						//INSERTAMOS DATA
+						$iStatus = $sqlca->query("
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 0, 0, '$venta_subdiario_docManual');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 1, 0, '$venta_cuenta_cliente_dMa');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 1, 1, '$venta_cuenta_impuesto');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 1, 2, '$venta_cuenta_ventas_dMa');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 2, 0, '$venta_cuenta_cliente_glp2');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 6, 2, 1, '$venta_cuenta_ventas_glp2');
 						");
 
 						if ((int)$iStatus < 0) {
@@ -11467,8 +11467,8 @@ WHERE
 				,c9.account AS compra_glp_cuenta_proveedor 
 				,c10.account AS compra_glp_cuenta_bi
 
-				,c11.account AS compra_market_cuenta_proveedor 
-				,c12.account AS compra_cuenta_impuesto 
+				,c11.account AS compra_market_cuenta_proveedor 		
+				,c12.account AS compra_cuenta_impuesto 		
 				,c13.account AS compra_market_cuenta_bi 
 
 				,c14.account AS compra_subdiario_glp
@@ -11481,15 +11481,15 @@ WHERE
 				LEFT JOIN concar_confignew c5 ON   c5.module = 0   AND c5.category = 1   AND c5.subcategory = 1   --Codigo de Cliente
 				LEFT JOIN concar_confignew c6 ON   c6.module = 0   AND c6.category = 1   AND c6.subcategory = 2   --Codigo de Caja
 			
-				LEFT JOIN concar_confignew c7 ON   c7.module = 5   AND c7.category = 1   AND c7.subcategory = 0   --Cuenta Combustible Compra Proveedor  
-				LEFT JOIN concar_confignew c8 ON   c8.module = 5   AND c8.category = 1   AND c8.subcategory = 1   --Cuenta Combustible Compra BI
+				LEFT JOIN concar_confignew c7 ON   c7.module = 5   AND c7.category = 1   AND c7.subcategory = 0   --Cuenta Compra Proveedor Combustible
+				LEFT JOIN concar_confignew c8 ON   c8.module = 5   AND c8.category = 1   AND c8.subcategory = 1   --Cuenta Compra BI Combustible
 				
-				LEFT JOIN concar_confignew c9 ON   c9.module = 5   AND c9.category = 2   AND c9.subcategory = 0   --Cuenta GLP Compra Proveedor
-				LEFT JOIN concar_confignew c10 ON   c10.module = 5   AND c10.category = 2   AND c10.subcategory = 1   --Cuenta GLP Compra BI
+				LEFT JOIN concar_confignew c9 ON   c9.module = 5   AND c9.category = 2   AND c9.subcategory = 0       --Cuenta Compra Proveedor GLP
+				LEFT JOIN concar_confignew c10 ON   c10.module = 5   AND c10.category = 2   AND c10.subcategory = 1   --Cuenta Compra BI GLP
 
-				LEFT JOIN concar_confignew c11 ON   c11.module = 5   AND c11.category = 3   AND c11.subcategory = 0   --Cuenta Market Compra Proveedor
+				LEFT JOIN concar_confignew c11 ON   c11.module = 5   AND c11.category = 3   AND c11.subcategory = 0   --Cuenta Compra Proveedor Market
 				LEFT JOIN concar_confignew c12 ON   c12.module = 5   AND c12.category = 3   AND c12.subcategory = 1   --Cuenta Compra Impuesto
-				LEFT JOIN concar_confignew c13 ON   c13.module = 5   AND c13.category = 3   AND c13.subcategory = 2   --Cuenta Market Compra Mercaderia
+				LEFT JOIN concar_confignew c13 ON   c13.module = 5   AND c13.category = 3   AND c13.subcategory = 2   --Cuenta Compra BI Market
 
 				LEFT JOIN concar_confignew c14 ON   c14.module = 5   AND c14.category = 0   AND c14.subcategory = 1   --Subdiario de Compra GLP
 				LEFT JOIN concar_confignew c15 ON   c15.module = 5   AND c15.category = 0   AND c15.subcategory = 2   --Subdiario de Compra Market

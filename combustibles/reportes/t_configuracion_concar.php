@@ -109,7 +109,7 @@ class ConfigurarConcarTemplate extends Template {
 			</article>
 
 			<article>
-			<h2>II. Ventas de Tiendas y Productos</h2>
+			<h2>II. Ventas Market</h2>
 			<table>
 			<tr>
 				<td>
@@ -223,7 +223,7 @@ class ConfigurarConcarTemplate extends Template {
 			</article>
 
 			<article>
-				<h2>V. Documentos Manuales Ventas</h2>
+				<h2>V. Ventas Documentos Manuales</h2>
 				<table>
 					<tr>
 						<td>
@@ -277,7 +277,7 @@ class ConfigurarConcarTemplate extends Template {
 			</article>
 
 			<article>
-				<h2>VI. Documentos Manuales Compras</h2>
+				<h2>VI. Compras Documentos Manuales</h2>
 				<table>
 					<tr>
 						<td>

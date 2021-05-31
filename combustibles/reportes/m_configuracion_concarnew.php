@@ -75,82 +75,166 @@ class ConfigurarConcarModel extends Model {
 		return $resultado;
   	}
 
+	function BuscarEquivalenciaProducto(){
+		global $sqlca;
+
+		$query="
+			SELECT 	
+				*									
+			FROM 
+				interface_equivalencia_producto
+			ORDER BY
+				art_codigo;
+			";
+
+//		echo $query;
+
+		if ($sqlca->query($query) < 0)
+			return false;		
+
+		$resultado = Array();
+
+		for ($i = 0; $i < $sqlca->numrows(); $i++) {
+			$a = $sqlca->fetchRow();
+			$resultado[$i]['art_codigo']			 = $a[0];
+			$resultado[$i]['codigo_iridium']		 = $a[1];
+			$resultado[$i]['dt_fecha_actualiza'] = $a[2];
+			$resultado[$i]['codigo_concar'] 		 = $a[3];		
+		}
+
+		return $resultado;
+  	}
+
 	function Actualizar(
+		//I. Ventas Combustibles y GLP
 		$venta_subdiario,		
 		$venta_cuenta_cliente,	
 		$venta_cuenta_cliente_glp,	
-		$venta_cuenta_impuesto, 	
+		$venta_cuenta_impuesto_account_111, 	
 		$venta_cuenta_ventas,	
 		$venta_cuenta_ventas_glp,	
+
+		//II. Ventas de Tiendas y Productos
 		$venta_subdiario_market,	
 		$venta_cuenta_cliente_mkt,
+		$venta_cuenta_impuesto_account_211,
 		$venta_cuenta_ventas_mkt,	
+
+		//III. Cuentas por Cobrar Combustibles y GLP
 		$ccobrar_subdiario,
 		$ccobrar_cuenta_cliente,
 		$ccobrar_cuenta_caja,	
 		$ccobrar_cuenta_cliente_new,
 		$ccobrar_cuenta_caja_new,
+
+		//IV. Cuentas por Cobrar Market
 		$ccobrar_subdiario_mkt,	
 		$ccobrar_cuenta_cliente_mkt,	
 		$ccobrar_cuenta_caja_mkt,	
+
+		//V. Ventas Documentos Manuales
 		$venta_subdiario_docManual,	
 		$venta_cuenta_cliente_dMa,	
 		$venta_cuenta_cliente_glp2,
+		$venta_cuenta_impuesto_account_611,
 		$venta_cuenta_ventas_dMa,	
 		$venta_cuenta_ventas_glp2,	
+
+		//Sucursal
 		$id_cencos_comb,		
 		$id_centro_costo_glp,	
 		$id_centrocosto,	
 		$id_centro_cos_dma,
 		$cod_cliente,
-		$compra_subdiario,
-		$compra_cuenta_proveedor,
+
+		//VI. Compras Documentos Manuales
+		$compra_subdiario_comb,
+		$compra_subdiario_glp,
+		$compra_subdiario_mkt,
+		$compra_cuenta_proveedor_comb,
+		$compra_cuenta_proveedor_glp,
+		$compra_cuenta_proveedor_mkt,
 		$compra_cuenta_impuesto,
-		$compra_cuenta_mercaderia
+		$compra_cuenta_mercaderia_comb,
+		$compra_cuenta_mercaderia_glp,
+		$compra_cuenta_mercaderia_mkt
 	){
 
 		global $sqlca;
 
-		$sql = "
-			UPDATE 
-				concar_config
-			SET
-				venta_subdiario = '".$venta_subdiario."',	
-				venta_cuenta_cliente = '".$venta_cuenta_cliente."',	
-				venta_cuenta_cliente_glp = '".$venta_cuenta_cliente_glp."',	
-				venta_cuenta_impuesto = '".$venta_cuenta_impuesto."', 	
-				venta_cuenta_ventas = '".$venta_cuenta_ventas."',	
-				venta_cuenta_ventas_glp = '".$venta_cuenta_ventas_glp."',	
-				venta_subdiario_market = '".$venta_subdiario_market."',	
-				venta_cuenta_cliente_mkt = '".$venta_cuenta_cliente_mkt."',
-				venta_cuenta_ventas_mkt = '".$venta_cuenta_ventas_mkt."',	
-				ccobrar_subdiario = '".$ccobrar_subdiario."',
-				ccobrar_cuenta_cliente = '".$ccobrar_cuenta_cliente."',
-				ccobrar_cuenta_caja = '".$ccobrar_cuenta_caja."',
-				ccobrar_cuenta_cliente_new = '".$ccobrar_cuenta_cliente_new."',
-				ccobrar_cuenta_caja_new = '".$ccobrar_cuenta_caja_new."',
-				ccobrar_subdiario_mkt = '".$ccobrar_subdiario_mkt."',	
-				ccobrar_cuenta_cliente_mkt = '".$ccobrar_cuenta_cliente_mkt."',	
-				ccobrar_cuenta_caja_mkt = '".$ccobrar_cuenta_caja_mkt."',	
-				venta_subdiario_docManual = '".$venta_subdiario_docManual."',	
-				venta_cuenta_cliente_dMa = '".$venta_cuenta_cliente_dMa ."',	
-				venta_cuenta_cliente_glp2 = '".$venta_cuenta_cliente_glp2."',	
-				venta_cuenta_ventas_dMa = '".$venta_cuenta_ventas_dMa."',	
-				venta_cuenta_ventas_glp2 = '".$venta_cuenta_ventas_glp2."',	
-				id_cencos_comb = '".$id_cencos_comb."',		
-				id_centro_costo_glp = '".$id_centro_costo_glp."',	
-				id_centrocosto = '".$id_centrocosto."',	
-				id_centro_cos_dma = '".$id_centro_cos_dma."',
-				cod_cliente = '".$cod_cliente."',
-				compra_subdiario = '".$compra_subdiario."',
-				compra_cuenta_proveedor = '".$compra_cuenta_proveedor."',
-				compra_cuenta_impuesto = '".$compra_cuenta_impuesto."',
-				compra_cuenta_mercaderia = '".$compra_cuenta_mercaderia."';
-			";
+		//I. Ventas Combustibles y GLP
+		$upd = "
+					UPDATE concar_confignew SET account ='$venta_subdiario'                   WHERE module = '1' AND category = '0' AND subcategory = '0';
+					UPDATE concar_confignew SET account ='$venta_cuenta_cliente'              WHERE module = '1' AND category = '1' AND subcategory = '0';
+					UPDATE concar_confignew SET account ='$venta_cuenta_cliente_glp'          WHERE module = '1' AND category = '2' AND subcategory = '0';
+					UPDATE concar_confignew SET account ='$venta_cuenta_impuesto_account_111' WHERE module = '1' AND category = '1' AND subcategory = '1';
+					UPDATE concar_confignew SET account ='$venta_cuenta_ventas'               WHERE module = '1' AND category = '1' AND subcategory = '2';					
+					UPDATE concar_confignew SET account ='$venta_cuenta_ventas_glp'           WHERE module = '1' AND category = '2' AND subcategory = '1';					
+				";		
+		$sqlca->query($upd);
 
-		//echo "Update Concar: " . $sql;
+		//II. Ventas de Tiendas y Productos
+		$upd = "
+					UPDATE concar_confignew SET account ='$venta_subdiario_market'            WHERE module = '2' AND category = '0' AND subcategory = '0';
+					UPDATE concar_confignew SET account ='$venta_cuenta_cliente_mkt'          WHERE module = '2' AND category = '1' AND subcategory = '0';
+					UPDATE concar_confignew SET account ='$venta_cuenta_impuesto_account_211' WHERE module = '2' AND category = '1' AND subcategory = '1';
+					UPDATE concar_confignew SET account ='$venta_cuenta_ventas_mkt'           WHERE module = '2' AND category = '1' AND subcategory = '2';					
+				";
+		$sqlca->query($upd);
+				
+		//III. Cuentas por Cobrar Combustibles y GLP
+		$upd = "
+					UPDATE concar_confignew SET account ='$ccobrar_subdiario'          WHERE module = '3' AND category = '0' AND subcategory = '0';
+					UPDATE concar_confignew SET account ='$ccobrar_cuenta_cliente'     WHERE module = '3' AND category = '1' AND subcategory = '0';
+					UPDATE concar_confignew SET account ='$ccobrar_cuenta_caja'        WHERE module = '3' AND category = '1' AND subcategory = '1';
+					UPDATE concar_confignew SET account ='$ccobrar_cuenta_cliente_new' WHERE module = '3' AND category = '2' AND subcategory = '0';					
+					UPDATE concar_confignew SET account ='$ccobrar_cuenta_caja_new'    WHERE module = '3' AND category = '2' AND subcategory = '1';										
+				";
+		$sqlca->query($upd);
 
-		$sqlca->query($sql);
+		//IV. Cuentas por Cobrar Market
+		$upd = "
+					UPDATE concar_confignew SET account ='$ccobrar_subdiario_mkt'      WHERE module = '4' AND category = '0' AND subcategory = '0';
+					UPDATE concar_confignew SET account ='$ccobrar_cuenta_cliente_mkt' WHERE module = '4' AND category = '1' AND subcategory = '0';
+					UPDATE concar_confignew SET account ='$ccobrar_cuenta_caja_mkt'    WHERE module = '4' AND category = '1' AND subcategory = '1';										
+				";
+		$sqlca->query($upd);
+
+		//V. Ventas Documentos Manuales		
+		$upd = "
+					UPDATE concar_confignew SET account ='$venta_subdiario_docManual'         WHERE module = '6' AND category = '0' AND subcategory = '0';
+					UPDATE concar_confignew SET account ='$venta_cuenta_cliente_dMa'          WHERE module = '6' AND category = '1' AND subcategory = '0';
+					UPDATE concar_confignew SET account ='$venta_cuenta_cliente_glp2'         WHERE module = '6' AND category = '2' AND subcategory = '0';										
+					UPDATE concar_confignew SET account ='$venta_cuenta_impuesto_account_611' WHERE module = '6' AND category = '1' AND subcategory = '1';										
+					UPDATE concar_confignew SET account ='$venta_cuenta_ventas_dMa'           WHERE module = '6' AND category = '1' AND subcategory = '2';										
+					UPDATE concar_confignew SET account ='$venta_cuenta_ventas_glp2'          WHERE module = '6' AND category = '2' AND subcategory = '1';										
+				";
+		$sqlca->query($upd);
+		
+		//Sucursal
+		$upd = "
+					UPDATE concar_confignew SET account ='$id_cencos_comb'      WHERE module = '0' AND category = '2' AND subcategory = '0';
+					UPDATE concar_confignew SET account ='$id_centro_costo_glp' WHERE module = '0' AND category = '2' AND subcategory = '1';
+					UPDATE concar_confignew SET account ='$id_centrocosto'      WHERE module = '0' AND category = '2' AND subcategory = '2';										
+					UPDATE concar_confignew SET account ='$id_centro_cos_dma'   WHERE module = '0' AND category = '2' AND subcategory = '3';										
+					UPDATE concar_confignew SET account ='$cod_cliente'         WHERE module = '0' AND category = '1' AND subcategory = '1';															
+				";
+		$sqlca->query($upd);
+
+		//VI. Compras Documentos Manuales
+		$upd = "
+					UPDATE concar_confignew SET account ='$compra_subdiario_comb'         WHERE module = '5' AND category = '0' AND subcategory = '0';
+					UPDATE concar_confignew SET account ='$compra_subdiario_glp'          WHERE module = '5' AND category = '0' AND subcategory = '1';
+					UPDATE concar_confignew SET account ='$compra_subdiario_mkt'          WHERE module = '5' AND category = '0' AND subcategory = '2';										
+					UPDATE concar_confignew SET account ='$compra_cuenta_proveedor_comb'  WHERE module = '5' AND category = '1' AND subcategory = '0';										
+					UPDATE concar_confignew SET account ='$compra_cuenta_proveedor_glp'   WHERE module = '5' AND category = '2' AND subcategory = '0';															
+					UPDATE concar_confignew SET account ='$compra_cuenta_proveedor_mkt'   WHERE module = '5' AND category = '3' AND subcategory = '0';															
+					UPDATE concar_confignew SET account ='$compra_cuenta_impuesto'        WHERE module = '5' AND category = '3' AND subcategory = '1';															
+					UPDATE concar_confignew SET account ='$compra_cuenta_mercaderia_comb' WHERE module = '5' AND category = '1' AND subcategory = '1';															
+					UPDATE concar_confignew SET account ='$compra_cuenta_mercaderia_glp'  WHERE module = '5' AND category = '2' AND subcategory = '1';															
+					UPDATE concar_confignew SET account ='$compra_cuenta_mercaderia_mkt'  WHERE module = '5' AND category = '3' AND subcategory = '2';															
+				";
+		$sqlca->query($upd);
 		
  	}
 
@@ -173,6 +257,5 @@ class ConfigurarConcarModel extends Model {
 		$sqlca->query($up7);
 
 	}
-	
 	
 }

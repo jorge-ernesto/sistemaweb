@@ -5,11 +5,11 @@ class ConfigurarConcarTemplate extends Template {
 		return '<h2 align="center"><b>Configuracion Contable - Asientos Concar New SQL</b></h2>';
 	}
 
-	function formSearch($datos, $arrResponseTarjetasCredito){
+	function formSearch($datos, $datosEquivalenciaProducto, $arrResponseTarjetasCredito){
 		$form = new Form('', "Form", FORM_METHOD_POST, "control.php", '', "control");
-		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("rqst", "REPORTES.CONFIGURARCONCAR"));
+		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("rqst", "REPORTES.CONFIGURARCONCARNEW"));
 		
-		error_log(json_encode($datos['account_030']));
+		//error_log(json_encode($datos['account_030']));
 
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('
 		<!DOCTYPE html>
@@ -35,12 +35,11 @@ class ConfigurarConcarTemplate extends Template {
 					}		
 					
 					article h2 {
-						font-size: 2em;
 						margin-top: 9px;
 					}
 
 					article td {
-						font-size: 0.8em; 
+						font-size: 0.6em; 
 					}	
 					
 					input {												
@@ -55,8 +54,8 @@ class ConfigurarConcarTemplate extends Template {
 						box-sizing: border-box;
 						padding-left: 20px;
 						padding-right: 20px;
-						padding-top: 8px;
-						padding-bottom: 8px;
+						padding-top: 5px;
+						padding-bottom: 5px;
 						font-size: 1em;																												
 					}
 
@@ -123,24 +122,24 @@ class ConfigurarConcarTemplate extends Template {
 			<table>
 			<tr>
 				<td>
-					Cuenta Cliente Combustible:
+					Subdiario:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="venta_subdiario" value="'.$datos[0]['venta_subdiario'].'" >
+				<input type="text" maxlength="6" size="6" name="venta_subdiario" value="'.$datos['account_100']['account'].'" >
 				</td>
 			<tr>
 				<td>
 					Cuenta Cliente Combustible:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="venta_cuenta_cliente" value="'.$datos[0]['venta_cuenta_cliente'].'" >
+				<input type="text" maxlength="6" size="6" name="venta_cuenta_cliente" value="'.$datos['account_110']['account'].'" >
 				</td>
 			<tr>
 				<td>
 					Cuenta Cliente GLP:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="venta_cuenta_cliente_glp" value="'.$datos[0]['venta_cuenta_cliente_glp'].'" >
+				<input type="text" maxlength="6" size="6" name="venta_cuenta_cliente_glp" value="'.$datos['account_120']['account'].'" >
 				</td>
 				<td>
 			<tr>
@@ -148,35 +147,35 @@ class ConfigurarConcarTemplate extends Template {
 					Cuenta Impuesto:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="venta_cuenta_impuesto" value="'.$datos[0]['venta_cuenta_impuesto'].'" >
+				<input type="text" maxlength="6" size="6" name="venta_cuenta_impuesto_account_111" value="'.$datos['account_111']['account'].'" >
 				</td>
 			<tr>
 				<td>
 					Cuenta Ventas Combustible:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="venta_cuenta_ventas" value="'.$datos[0]['venta_cuenta_ventas'].'" >
+				<input type="text" maxlength="6" size="6" name="venta_cuenta_ventas" value="'.$datos['account_112']['account'].'" >
 				</td>
 			<tr>
 				<td>
 					Cuenta Ventas GLP:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="venta_cuenta_ventas_glp" value="'.$datos[0]['venta_cuenta_ventas_glp'].'" >
+				<input type="text" maxlength="6" size="6" name="venta_cuenta_ventas_glp" value="'.$datos['account_121']['account'].'" >
 				</td>
 			</tr>
 			</table>
 			</article>
 
 			<article>
-			<h2>II. Ventas de Tiendas y Productos</h2>
+			<h2>II. Ventas Market</h2>
 			<table>
 			<tr>
 				<td>
 					Subdiario:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="venta_subdiario_market" value="'.$datos[0]['venta_subdiario_market'].'" >
+				<input type="text" maxlength="6" size="6" name="venta_subdiario_market" value="'.$datos['account_200']['account'].'" >
 				</td>
 			<tr>
 			<tr>
@@ -184,7 +183,7 @@ class ConfigurarConcarTemplate extends Template {
 					Cuenta Cliente:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="venta_cuenta_cliente_mkt" value="'.$datos[0]['venta_cuenta_cliente_mkt'].'" >
+				<input type="text" maxlength="6" size="6" name="venta_cuenta_cliente_mkt" value="'.$datos['account_210']['account'].'" >
 				</td>
 			<tr>
 			<tr>
@@ -192,7 +191,7 @@ class ConfigurarConcarTemplate extends Template {
 					Cuenta Impuesto:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="venta_cuenta_impuesto" value="'.$datos[0]['venta_cuenta_impuesto'].'" >
+				<input type="text" maxlength="6" size="6" name="venta_cuenta_impuesto_account_211" value="'.$datos['account_211']['account'].'" >
 				</td>
 			<tr>
 			<tr>
@@ -200,7 +199,7 @@ class ConfigurarConcarTemplate extends Template {
 					Cuenta Ventas:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="venta_cuenta_ventas_mkt" value="'.$datos[0]['venta_cuenta_ventas_mkt'].'" >
+				<input type="text" maxlength="6" size="6" name="venta_cuenta_ventas_mkt" value="'.$datos['account_212']['account'].'" >
 				</td>
 			</tr>
 			</table>
@@ -214,7 +213,7 @@ class ConfigurarConcarTemplate extends Template {
 					Subdiario:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="ccobrar_subdiario" value="'.$datos[0]['ccobrar_subdiario'].'" >
+				<input type="text" maxlength="6" size="6" name="ccobrar_subdiario" value="'.$datos['account_300']['account'].'" >
 				</td>
 			</tr>
 			<tr>
@@ -222,7 +221,7 @@ class ConfigurarConcarTemplate extends Template {
 					Cuenta Cliente Combustible:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="ccobrar_cuenta_cliente" value="'.$datos[0]['ccobrar_cuenta_cliente'].'" >
+				<input type="text" maxlength="6" size="6" name="ccobrar_cuenta_cliente" value="'.$datos['account_310']['account'].'" >
 				</td>
 			</tr>
 			<tr>
@@ -230,7 +229,7 @@ class ConfigurarConcarTemplate extends Template {
 					Cuenta Caja Combustible:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="ccobrar_cuenta_caja" value="'.$datos[0]['ccobrar_cuenta_caja'].'" >
+				<input type="text" maxlength="6" size="6" name="ccobrar_cuenta_caja" value="'.$datos['account_311']['account'].'" >
 				</td>
 			</tr>
 			<tr>
@@ -238,7 +237,7 @@ class ConfigurarConcarTemplate extends Template {
 					Cuenta Cliente GLP:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="ccobrar_cuenta_cliente_new" value="'.$datos[0]['ccobrar_cuenta_cliente_new'].'" >
+				<input type="text" maxlength="6" size="6" name="ccobrar_cuenta_cliente_new" value="'.$datos['account_320']['account'].'" >
 				</td>
 			</tr>
 			<tr>
@@ -246,7 +245,7 @@ class ConfigurarConcarTemplate extends Template {
 					Cuenta Caja GLP:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="ccobrar_cuenta_caja_new" value="'.$datos[0]['ccobrar_cuenta_caja_new'].'" >
+				<input type="text" maxlength="6" size="6" name="ccobrar_cuenta_caja_new" value="'.$datos['account_321']['account'].'" >
 				</td>
 			</tr>
 			</table>
@@ -260,7 +259,7 @@ class ConfigurarConcarTemplate extends Template {
 					Subdiario:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="ccobrar_subdiario_mkt" value="'.$datos[0]['ccobrar_subdiario_mkt'].'" >
+				<input type="text" maxlength="6" size="6" name="ccobrar_subdiario_mkt" value="'.$datos['account_400']['account'].'" >
 				</td>
 			</tr>
 			<tr>
@@ -268,7 +267,7 @@ class ConfigurarConcarTemplate extends Template {
 					Cuenta Cliente:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="ccobrar_cuenta_cliente_mkt" value="'.$datos[0]['ccobrar_cuenta_cliente_mkt'].'" >
+				<input type="text" maxlength="6" size="6" name="ccobrar_cuenta_cliente_mkt" value="'.$datos['account_410']['account'].'" >
 				</td>
 			</tr>
 			<tr>
@@ -276,21 +275,21 @@ class ConfigurarConcarTemplate extends Template {
 					Cuenta Caja:
 				</td>
 				<td>
-				<input type="text" maxlength="6" size="6" name="ccobrar_cuenta_caja_mkt" value="'.$datos[0]['ccobrar_cuenta_caja_mkt'].'" >
+				<input type="text" maxlength="6" size="6" name="ccobrar_cuenta_caja_mkt" value="'.$datos['account_411']['account'].'" >
 				</td>
 			</tr>
 			</table>
 			</article>
 
 			<article>
-				<h2>V. Documentos Manuales Ventas</h2>
+				<h2>V. Ventas Documentos Manuales</h2>
 				<table>
 					<tr>
 						<td>
 							Subdiario:
 						</td>
 						<td>
-						<input type="text" maxlength="6" size="6" name="venta_subdiario_docManual" value="'.$datos[0]['venta_subdiario_docManual'].'" >
+						<input type="text" maxlength="6" size="6" name="venta_subdiario_docManual" value="'.$datos['account_600']['account'].'" >
 						</td>
 					</tr>
 					<tr>
@@ -298,7 +297,7 @@ class ConfigurarConcarTemplate extends Template {
 							Cuenta Cliente Combustible:
 						</td>
 						<td>
-						<input type="text" maxlength="6" size="6" name="venta_cuenta_cliente_dMa" value="'.$datos[0]['venta_cuenta_cliente_dMa'].'" >
+						<input type="text" maxlength="6" size="6" name="venta_cuenta_cliente_dMa" value="'.$datos['account_610']['account'].'" >
 						</td>
 					</tr>
 					<tr>
@@ -306,7 +305,7 @@ class ConfigurarConcarTemplate extends Template {
 							Cuenta Cliente GLP:
 						</td>
 						<td>
-						<input type="text" maxlength="6" size="6" name="venta_cuenta_cliente_glp2" value="'.$datos[0]['venta_cuenta_cliente_glp2'].'" >
+						<input type="text" maxlength="6" size="6" name="venta_cuenta_cliente_glp2" value="'.$datos['account_620']['account'].'" >
 						</td>
 					</tr>
 					<tr>
@@ -314,7 +313,7 @@ class ConfigurarConcarTemplate extends Template {
 							Cuenta Impuesto:
 						</td>
 						<td>
-						<input type="text" maxlength="6" size="6" name="venta_cuenta_impuesto" value="'.$datos[0]['venta_cuenta_impuesto'].'" >
+						<input type="text" maxlength="6" size="6" name="venta_cuenta_impuesto_account_611" value="'.$datos['account_611']['account'].'" >
 						</td>
 					</tr>
 					<tr>
@@ -322,7 +321,7 @@ class ConfigurarConcarTemplate extends Template {
 							Cuenta Ventas Combustible:
 						</td>
 						<td>
-						<input type="text" maxlength="6" size="6" name="venta_cuenta_ventas_dMa" value="'.$datos[0]['venta_cuenta_ventas_dMa'].'" >
+						<input type="text" maxlength="6" size="6" name="venta_cuenta_ventas_dMa" value="'.$datos['account_612']['account'].'" >
 						</td>
 					</tr>
 					<tr>
@@ -330,29 +329,61 @@ class ConfigurarConcarTemplate extends Template {
 							Cuenta Ventas GLP:
 						</td>
 						<td>
-						<input type="text" maxlength="6" size="6" name="venta_cuenta_ventas_glp2" value="'.$datos[0]['venta_cuenta_ventas_glp2'].'" >
+						<input type="text" maxlength="6" size="6" name="venta_cuenta_ventas_glp2" value="'.$datos['account_621']['account'].'" >
 						</td>
 					</tr>
 				</table>
 			</article>
 
 			<article>
-				<h2>VI. Documentos Manuales Compras</h2>
+				<h2>VI. Compras Documentos Manuales</h2>
 				<table>
 					<tr>
 						<td>
-							Subdiario:
+							Subdiario Combustible:
 						</td>
 						<td>
-						<input type="text" maxlength="6" size="6" name="compra_subdiario" value="'.$datos[0]['compra_subdiario'].'" >
+						<input type="text" maxlength="6" size="6" name="compra_subdiario_comb" value="'.$datos['account_500']['account'].'" >
 						</td>
 					</tr>
 					<tr>
 						<td>
-							Cuenta Compra Proveedor:
+							Subdiario GLP:
 						</td>
 						<td>
-						<input type="text" maxlength="6" size="6" name="compra_cuenta_proveedor" value="'.$datos[0]['compra_cuenta_proveedor'].'" >
+						<input type="text" maxlength="6" size="6" name="compra_subdiario_glp" value="'.$datos['account_501']['account'].'" >
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Subdiario Market:
+						</td>
+						<td>
+						<input type="text" maxlength="6" size="6" name="compra_subdiario_mkt" value="'.$datos['account_502']['account'].'" >
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Cuenta Compra Proveedor Combustible:
+						</td>
+						<td>
+						<input type="text" maxlength="6" size="6" name="compra_cuenta_proveedor_comb" value="'.$datos['account_510']['account'].'" >
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Cuenta Compra Proveedor GLP:
+						</td>
+						<td>
+						<input type="text" maxlength="6" size="6" name="compra_cuenta_proveedor_glp" value="'.$datos['account_520']['account'].'" >
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Cuenta Compra Proveedor Market:
+						</td>
+						<td>
+						<input type="text" maxlength="6" size="6" name="compra_cuenta_proveedor_mkt" value="'.$datos['account_530']['account'].'" >
 						</td>
 					</tr>
 					<tr>
@@ -360,15 +391,31 @@ class ConfigurarConcarTemplate extends Template {
 							Cuenta Compra Impuesto:
 						</td>
 						<td>
-						<input type="text" maxlength="6" size="6" name="compra_cuenta_impuesto" value="'.$datos[0]['compra_cuenta_impuesto'].'" >
+						<input type="text" maxlength="6" size="6" name="compra_cuenta_impuesto" value="'.$datos['account_531']['account'].'" >
 						</td>
 					</tr>
 					<tr>
 						<td>
-							Cuenta Compra B.I:
+							Cuenta Compra B.I Combustible:
 						</td>
 						<td>
-						<input type="text" maxlength="6" size="6" name="compra_cuenta_mercaderia" value="'.$datos[0]['compra_cuenta_mercaderia'].'" >
+						<input type="text" maxlength="6" size="6" name="compra_cuenta_mercaderia_comb" value="'.$datos['account_511']['account'].'" >
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Cuenta Compra B.I GLP:
+						</td>
+						<td>
+						<input type="text" maxlength="6" size="6" name="compra_cuenta_mercaderia_glp" value="'.$datos['account_521']['account'].'" >
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Cuenta Compra B.I Market:
+						</td>
+						<td>
+						<input type="text" maxlength="6" size="6" name="compra_cuenta_mercaderia_mkt" value="'.$datos['account_532']['account'].'" >
 						</td>
 					</tr>
 				</table>
@@ -379,58 +426,58 @@ class ConfigurarConcarTemplate extends Template {
 				<table>
 					<tr>
 						<td>
-							Combustible '.$datos[0]['codigo_iridium'].':
+							Combustible '.$datosEquivalenciaProducto[0]['codigo_iridium'].':
 						</td>
 						<td>
-						<input type="text" maxlength="13" size="13" name="codigo_concar_84" value="'.$datos[0]['codigo_concar'].'" >
-						</td>
-					</tr>
-					<tr>
-						<td>
-							Combustible '.$datos[1]['codigo_iridium'].':
-						</td>
-						<td>
-						<input type="text" maxlength="13" size="13" name="codigo_concar_90" value="'.$datos[1]['codigo_concar'].'" >
+						<input type="text" maxlength="13" size="13" name="codigo_concar_84" value="'.$datosEquivalenciaProducto[0]['codigo_concar'].'" >
 						</td>
 					</tr>
 					<tr>
 						<td>
-							Combustible '.$datos[2]['codigo_iridium'].':
+							Combustible '.$datosEquivalenciaProducto[1]['codigo_iridium'].':
 						</td>
 						<td>
-						<input type="text" maxlength="13" size="13" name="codigo_concar_97" value="'.$datos[2]['codigo_concar'].'" >
-						</td>
-					</tr>
-					<tr>
-						<td>
-							Combustible '.$datos[3]['codigo_iridium'].':
-						</td>
-						<td>
-						<input type="text" maxlength="13" size="13" name="codigo_concar_d2" value="'.$datos[3]['codigo_concar'].'" >
+						<input type="text" maxlength="13" size="13" name="codigo_concar_90" value="'.$datosEquivalenciaProducto[1]['codigo_concar'].'" >
 						</td>
 					</tr>
 					<tr>
 						<td>
-							Combustible '.$datos[4]['codigo_iridium'].':
+							Combustible '.$datosEquivalenciaProducto[2]['codigo_iridium'].':
 						</td>
 						<td>
-						<input type="text" maxlength="13" size="13" name="codigo_concar_95" value="'.$datos[4]['codigo_concar'].'" >
-						</td>
-					</tr>
-					<tr>
-						<td>
-							Combustible '.$datos[5]['codigo_iridium'].':
-						</td>
-						<td>
-						<input type="text" maxlength="13" size="13" name="codigo_concar_glp" value="'.$datos[5]['codigo_concar'].'" >
+						<input type="text" maxlength="13" size="13" name="codigo_concar_97" value="'.$datosEquivalenciaProducto[2]['codigo_concar'].'" >
 						</td>
 					</tr>
 					<tr>
 						<td>
-							'.$datos[6]['codigo_iridium'].':
+							Combustible '.$datosEquivalenciaProducto[3]['codigo_iridium'].':
 						</td>
 						<td>
-						<input type="text" maxlength="13" size="13" name="codigo_concar_m" value="'.$datos[6]['codigo_concar'].'" >
+						<input type="text" maxlength="13" size="13" name="codigo_concar_d2" value="'.$datosEquivalenciaProducto[3]['codigo_concar'].'" >
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Combustible '.$datosEquivalenciaProducto[4]['codigo_iridium'].':
+						</td>
+						<td>
+						<input type="text" maxlength="13" size="13" name="codigo_concar_95" value="'.$datosEquivalenciaProducto[4]['codigo_concar'].'" >
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Combustible '.$datosEquivalenciaProducto[5]['codigo_iridium'].':
+						</td>
+						<td>
+						<input type="text" maxlength="13" size="13" name="codigo_concar_glp" value="'.$datosEquivalenciaProducto[5]['codigo_concar'].'" >
+						</td>
+					</tr>
+					<tr>
+						<td>
+							'.$datosEquivalenciaProducto[6]['codigo_iridium'].':
+						</td>
+						<td>
+						<input type="text" maxlength="13" size="13" name="codigo_concar_m" value="'.$datosEquivalenciaProducto[6]['codigo_concar'].'" >
 						</td>
 					</tr>
 				</table>

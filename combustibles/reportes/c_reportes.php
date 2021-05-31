@@ -160,6 +160,11 @@ class ReportesController extends Controller {
 				$Controlador = new ConfigurarConcarController("");
 			break;
 
+			case "CONFIGURARCONCARNEW" :
+				include "reportes/c_configuracion_concarnew.php";
+				$Controlador = new ConfigurarConcarNewController("");
+			break;
+
 			case "REGISTROVENTAS" :
 				include "reportes/c_registro_ventas.php";
 				$Controlador = new RegistroVentasController("");
