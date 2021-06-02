@@ -216,8 +216,10 @@ class ActDepositosPosModel extends Model{
 	function actualizarFila($ch_almacen,$dt_dia,$ch_posturno,$ch_codigo_trabajador,$ch_numero_documento,$nvalida,$ndia,$nturno,$ncodtrab,$usuario,$ip, $ch_numero_correl) {
 		global $sqlca;
 
+		/*
 		list($dia,$mes,$ano)	= explode("/", $ndia);
 		list($dia2,$mes2,$ano2)	= explode("/", $dt_dia);
+		*/
 
 		//ch_numero_documento 	= '0'||'$ch_numero_documento' Le colocan porque si no su primary key se repetirá, esta mal compuesta la llave primaria :/
 
@@ -226,7 +228,7 @@ class ActDepositosPosModel extends Model{
 			pos_depositos_diarios
 		SET
 			ch_valida 				= '" . pg_escape_string($nvalida) . "',
-			dt_dia 					= '" . pg_escape_string($ano."-".$mes."-".$dia) . "',
+			dt_dia 					= '" . pg_escape_string($ndia) . "',
 			ch_posturno 			= '" . pg_escape_string($nturno) . "',
 			ch_codigo_trabajador 	= '" . pg_escape_string($ncodtrab) . "',
 			ch_usuario 				= '" . pg_escape_string($usuario) . "',
@@ -235,7 +237,7 @@ class ActDepositosPosModel extends Model{
 			ch_numero_documento 	= '0" . pg_escape_string($ch_numero_documento) . "'
 		WHERE
 			ch_almacen 					= '" . pg_escape_string($ch_almacen) . "'
-			AND dt_dia 					= '" . pg_escape_string($ano2."-".$mes2."-".$dia2) . "'
+			AND dt_dia 					= '" . pg_escape_string($dt_dia) . "'
 			AND ch_posturno 			= '" . pg_escape_string($ch_posturno) . "'
 			AND ch_codigo_trabajador 	= '" . pg_escape_string($ch_codigo_trabajador) . "'
 			AND ch_numero_documento 	= '" . pg_escape_string($ch_numero_documento) . "'

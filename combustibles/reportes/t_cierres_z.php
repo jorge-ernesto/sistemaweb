@@ -6,14 +6,15 @@ class CierresZTemplate extends Template {
 	}
 
 	function formSearch($almacenes) {    	
+		$fecha_actual = date("Y-m-d");
+
 		$form = new Form('', "Agregar", FORM_METHOD_GET, "control.php", '', "control");
 		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("rqst", "REPORTES.CIERRES_Z"));
 
 		$form->addElement(FORM_GROUP_MAIN, new form_element_anytext("<table><tr><td align='right'>Almacen : </td><td>"));
-		$form->addElement(FORM_GROUP_MAIN, new form_element_combo("","ch_almacen","--","<br/>","","",$almacenes,false));
-		$form->addElement(FORM_GROUP_MAIN, new form_element_anytext("</td></tr><tr><td align='right'>Del : </td><td>"));
-		// $form->addElement(FORM_GROUP_MAIN, new form_element_text("", "ch_fecha_del", date("d/m/Y"), '<a href="javascript:show_calendar(\'Agregar.ch_fecha_del\');"><img src="/sistemaweb/images/showcalendar.gif" border=0></a><div style="position:relative"><div id="overDiv" style="position:absolute;float:right; visibility:hidden; z-index:0;"></div></div>', '', 10, 10, true));
-		$fecha_actual = date("Y-m-d");
+		$form->addElement(FORM_GROUP_MAIN, new form_element_combo("","ch_almacen","--","<br/>","","",$almacenes,false));		
+		$form->addElement(FORM_GROUP_MAIN, new form_element_anytext("</td></tr><tr><td align='right'>Del : </td><td>"));		
+		// $form->addElement(FORM_GROUP_MAIN, new form_element_text("", "ch_fecha_del", date("d/m/Y"), '<a href="javascript:show_calendar(\'Agregar.ch_fecha_del\');"><img src="/sistemaweb/images/showcalendar.gif" border=0></a><div style="position:relative"><div id="overDiv" style="position:absolute;float:right; visibility:hidden; z-index:0;"></div></div>', '', 10, 10, true));		
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<input type="date" name="ch_fecha_del" value="'.$fecha_actual.'">'));
 		$form->addElement(FORM_GROUP_MAIN, new form_element_anytext("</td></tr><tr><td align='right'>Al : </td><td>"));		
 		// $form->addElement(FORM_GROUP_MAIN, new form_element_text("", "ch_fecha_al", date("d/m/Y"), '<a href="javascript:show_calendar(\'Agregar.ch_fecha_al\');"><img src="/sistemaweb/images/showcalendar.gif" border=0></a><div style="position:relative"><div id="overDiv" style="position:absolute;float:right; visibility:hidden; z-index:0;"></div></div>', '', 10, 10, true));

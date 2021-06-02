@@ -36,11 +36,13 @@ class ActDepositosPosTemplate extends Template {
     	}
 
 	function formEdit($fila,$trabajadores,$usuario,$ip) {
+		list($dia,$mes,$ano)	= explode("/", $fila['dia']);		
+
 		$form = new Form('','editar', FORM_METHOD_POST, "control.php", '', '');
 		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("rqst", "MOVIMIENTOS.ACTDEPOSITOSPOS"));
 		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("action", "update"));
 		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("ch_almacen", $fila['almacen']));
-		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("dt_dia", $fila['dia']));
+		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("dt_dia", date("Y-m-d", strtotime($ano."-".$mes."-".$dia))));
 		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("ch_posturno", $fila['turno']));
 		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("ch_codigo_trabajador", $fila['codtrab']));
 		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("ch_numero_documento", $fila['num']));
@@ -71,7 +73,8 @@ class ActDepositosPosTemplate extends Template {
 			$fila['valida'] = 'N';
 
 		$form->addElement("GRUPO_EDITABLES", new form_element_combo('Valida','nvalida',trim($fila['valida']),'<br/>','', '', Array('S'=>'Si','N'=>'No'), false, ''));
-		$form->addElement("GRUPO_EDITABLES", new form_element_text('Dia', 'ndia', $fila['dia'], '<a href="javascript:show_calendar(\'editar.ndia\');"><img src="/sistemaweb/images/showcalendar.gif" border=0></a><div style="position:relative"><div id="overDiv" style="position:absolute;float:right; visibility:hidden; z-index:0;"></div></div><br/>', '', 10, 10, true));
+		// $form->addElement("GRUPO_EDITABLES", new form_element_text('Dia', 'ndia', $fila['dia'], '<a href="javascript:show_calendar(\'editar.ndia\');"><img src="/sistemaweb/images/showcalendar.gif" border=0></a><div style="position:relative"><div id="overDiv" style="position:absolute;float:right; visibility:hidden; z-index:0;"></div></div><br/>', '', 10, 10, true));
+		$form->addElement("GRUPO_EDITABLES", new f2element_freeTags('<input type="date" name="ndia" value="'.date("Y-m-d", strtotime($ano."-".$mes."-".$dia)).'"><br/>'));
 		$form->addElement("GRUPO_EDITABLES", new form_element_text('Turno','nturno',$fila['turno'],'<br/>', '', 5, 1, false));
 		$form->addElement("GRUPO_EDITABLES", new form_element_combo('Trabajador','ncodtrab',trim($fila['codtrab']),'<br/>','', '', $trabajadores, false, ''));
 
