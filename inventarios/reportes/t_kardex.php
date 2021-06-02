@@ -49,103 +49,106 @@ class KardexTemplate extends Template
 		$result = '<button name="fm" value="" onClick="javascript:parent.location.href=\'/sistemaweb/inventarios/control.php?rqst=REPORTES.KARDEX&desde=' . htmlentities($desde) . '&hasta=' . htmlentities($hasta) . '&art_desde=' . htmlentities($art_desde) . '&art_hasta=' . htmlentities($art_hasta) . '&estacion=' . htmlentities($estacion) . '&tipo_reporte=' . htmlentities($tipo) . '&action=pdf\';return false"><img src="/sistemaweb/images/icono_pdf.gif" alt="left"/> PDF</button>';
 
 		foreach($resultado['almacenes'] as $mov_almacen => $almacen) {
-		    	$result .= '<table border="0" width="1536px">';
+				$result .= '<table border="0" width="100%" id="tabprincipal" align="center">';
 		    	$result .= '<tr>';
 		    
 		    	if ($tipo == "CONTABLE")
-				$result .= '<td colspan="16"><center>' . htmlentities($mov_almacen . " " . FormProcesModel::obtenerDescripcionAlmacen($mov_almacen)) . '</center></td>';
+				$result .= '<td class="grid_cabecera" style="color:white;" colspan="16"><center>' . htmlentities($mov_almacen . " " . FormProcesModel::obtenerDescripcionAlmacen($mov_almacen)) . '</center></td>';
 		    	else
-				$result .= '<td colspan="10"><center>' . htmlentities($mov_almacen . " " . FormProcesModel::obtenerDescripcionAlmacen($mov_almacen)) . '</center></td>';
+				$result .= '<td class="grid_cabecera" style="color:white;" colspan="10"><center>' . htmlentities($mov_almacen . " " . FormProcesModel::obtenerDescripcionAlmacen($mov_almacen)) . '</center></td>';
 
 		    	$result .= '</tr>';
 		    	$result .= '<tr>';
-		   	$result .= '<td>Codigo</td>';
-		    	$result .= '<td colspan="5">DESCRIPCION</td>';
+		   	$result .= '<td class="grid_cabecera" style="color:white;">Codigo</td>';
+		    	$result .= '<td class="grid_cabecera" style="color:white;" colspan="5">DESCRIPCION</td>';
 		    
 		    	if ($tipo == "CONTABLE")
-				$result .= '<td colspan="10">&nbsp;</td>';
+				$result .= '<td class="grid_cabecera" style="color:white;" colspan="10">&nbsp;</td>';
 		    	else
-				$result .= '<td colspan="4">&nbsp;</td>';
+				$result .= '<td class="grid_cabecera" style="color:white;" colspan="4">&nbsp;</td>';
 		    	$result .= '</tr>';
 		    	$result .= '<tr>';
-		    	$result .= '<td>Fecha</td>';
-		    	$result .= '<td>Formulario</td>';
-		    	$result .= '<td>Numero</td>';
-		    	$result .= '<td>Origen/Destino</td>';
-		    	$result .= '<td>Cliente/Proveedor</td>';
-		    	$result .= '<td>No.REF.</td>';
-		    	$result .= '<td>CANT-ANT</td>';
+		    	$result .= '<td class="grid_cabecera" style="color:white;">Fecha</td>';
+		    	$result .= '<td class="grid_cabecera" style="color:white;">Formulario</td>';
+		    	$result .= '<td class="grid_cabecera" style="color:white;">Numero</td>';
+		    	$result .= '<td class="grid_cabecera" style="color:white;">Origen/Destino</td>';
+		    	$result .= '<td class="grid_cabecera" style="color:white;">Cliente/Proveedor</td>';
+		    	$result .= '<td class="grid_cabecera" style="color:white;">No.REF.</td>';
+		    	$result .= '<td class="grid_cabecera" style="color:white;">CANT-ANT</td>';
 		    
 		    	if ($tipo == "CONTABLE")
-				$result .= '<td>VAL-UNIT-ANT</td>';
-		    	$result .= '<td>CANT-ENTRADA</td>';
+				$result .= '<td class="grid_cabecera" style="color:white;">VAL-UNIT-ANT</td>';
+		    	$result .= '<td class="grid_cabecera" style="color:white;">CANT-ENTRADA</td>';
 		    
 		    	if ($tipo == "CONTABLE")
-				$result .= '<td>COST-ENTRADA</td>';
-		    	$result .= '<td>CANT-SALIDA</td>';
+				$result .= '<td class="grid_cabecera" style="color:white;">COST-ENTRADA</td>';
+		    	$result .= '<td class="grid_cabecera" style="color:white;">CANT-SALIDA</td>';
 		    
 		    	if ($tipo == "CONTABLE") {
-				$result .= '<td>COST-SALIDA</td>';
-				$result .= '<td>COST-MVMTO</td>';
+				$result .= '<td class="grid_cabecera" style="color:white;">COST-SALIDA</td>';
+				$result .= '<td class="grid_cabecera" style="color:white;">COST-MVMTO</td>';
 		    	}
 		    
-		    	$result .= '<td>CANT-ACTUAL</td>';
+		    	$result .= '<td class="grid_cabecera" style="color:white;">CANT-ACTUAL</td>';
 
 		    	if ($tipo == "CONTABLE") {
-				$result .= '<td>VAL-UNI-ACT</td>';
-				$result .= '<td>VAL-TOT-ACT</td>';
+				$result .= '<td class="grid_cabecera" style="color:white;">VAL-UNI-ACT</td>';
+				$result .= '<td class="grid_cabecera" style="color:white;">VAL-TOT-ACT</td>';
 		    	}
 
 		    	$result .= '</tr>';
 
 		    	foreach($almacen['articulos'] as $art_codigo => $articulo) {
 				$result .= '<tr>';
-				$result .= '<td>' . htmlentities($art_codigo) . '</td>';
-				$result .= '<td colspan="5">' . htmlentities(FormProcesModel::obtenerDescripcion($art_codigo)) . '</td>';
-				$result .= '<td>' . htmlentities($articulo['saldoinicial']['cant_anterior']) . '</td>';
+				$result .= '<td class="grid_detalle_impar" bgcolor="#F4FA58" style="font-weight:bold">' . htmlentities($art_codigo) . '</td>';
+				$result .= '<td class="grid_detalle_impar" bgcolor="#F4FA58" style="font-weight:bold" colspan="5">' . htmlentities(FormProcesModel::obtenerDescripcion($art_codigo)) . '</td>';
+				$result .= '<td class="grid_detalle_impar" bgcolor="#F4FA58" style="font-weight:bold">' . htmlentities($articulo['saldoinicial']['cant_anterior']) . '</td>';
 		
 				if ($tipo == "CONTABLE") {
-				    	$result .= '<td>' . htmlentities($articulo['saldoinicial']['unit_anterior']) . '</td>';
-				    	$result .= '<td colspan="7">&nbsp;</td>';
+				    	$result .= '<td class="grid_detalle_impar" bgcolor="#F4FA58" style="font-weight:bold">' . htmlentities($articulo['saldoinicial']['unit_anterior']) . '</td>';
+				    	$result .= '<td class="grid_detalle_impar" bgcolor="#F4FA58" style="font-weight:bold" colspan="7">&nbsp;</td>';
 				} else
-				    	$result .= '<td colspan="3">&nbsp;</td>';
+				    	$result .= '<td class="grid_detalle_impar" bgcolor="#F4FA58" style="font-weight:bold" colspan="3">&nbsp;</td>';
 
 				if ($tipo == "CONTABLE")
-				    	$result .= '<td>' . htmlentities($articulo['saldoinicial']['costo_total']) . '</td>';
+				    	$result .= '<td class="grid_detalle_impar" bgcolor="#F4FA58" style="font-weight:bold">' . htmlentities($articulo['saldoinicial']['costo_total']) . '</td>';
 
 				$result .= '</tr>';
 				
+				$x_color = -1;
 				foreach($articulo['movimientos'] as $i => $movimiento) {
+						$x_color++;
+						$color = ($x_color%2==0?"grid_detalle_par":"grid_detalle_impar");
 			    		$result .= '<tr>';
-			    		$result .= '<td>' . htmlentities($movimiento['mov_fecha']) . '</td>';
-			    		$result .= '<td>' . htmlentities($movimiento['tran_codigo']) . '</td>';
-			    		$result .= '<td>' . htmlentities($movimiento['mov_numero']) . '</td>';
-			    		$result .= '<td>' . htmlentities($movimiento['mov_almacen']) . '</td>';
-			    		$result .= '<td>' . htmlentities($movimiento['mov_entidad']) . '</td>';
-			    		$result .= '<td>' . htmlentities($movimiento['mov_docurefe']) . '</td>';
-			    		$result .= '<td>' . htmlentities($movimiento['mov_cant_anterior']) . '</td>';
+			    		$result .= '<td class="'.$color.'">' . htmlentities($movimiento['mov_fecha']) . '</td>';
+			    		$result .= '<td class="'.$color.'">' . htmlentities($movimiento['tran_codigo']) . '</td>';
+			    		$result .= '<td class="'.$color.'">' . htmlentities($movimiento['mov_numero']) . '</td>';
+			    		$result .= '<td class="'.$color.'">' . htmlentities($movimiento['mov_almacen']) . '</td>';
+			    		$result .= '<td class="'.$color.'">' . htmlentities($movimiento['mov_entidad']) . '</td>';
+			    		$result .= '<td class="'.$color.'">' . htmlentities($movimiento['mov_docurefe']) . '</td>';
+			    		$result .= '<td class="'.$color.'">' . htmlentities($movimiento['mov_cant_anterior']) . '</td>';
 			    
 			    	if ($tipo == "CONTABLE")
-					$result .= '<td>' . htmlentities($movimiento['mov_val_ant']) . '</td>';
+					$result .= '<td class="'.$color.'">' . htmlentities($movimiento['mov_val_ant']) . '</td>';
 
-			    	$result .= '<td>' . htmlentities($movimiento['mov_cant_entrada']) . '</td>';
+			    	$result .= '<td class="'.$color.'">' . htmlentities($movimiento['mov_cant_entrada']) . '</td>';
 			    
 			    	if ($tipo == "CONTABLE")
-					$result .= '<td>' . htmlentities($movimiento['mov_cost_entrada']) . '</td>';
+					$result .= '<td class="'.$color.'">' . htmlentities($movimiento['mov_cost_entrada']) . '</td>';
 
-			    	$result .= '<td>' . htmlentities($movimiento['mov_cant_salida']) . '</td>';
+			    	$result .= '<td class="'.$color.'">' . htmlentities($movimiento['mov_cant_salida']) . '</td>';
 			    
 			    	if ($tipo == "CONTABLE") {
-					$result .= '<td>' . htmlentities($movimiento['mov_cost_salida']) . '</td>';
-					$result .= '<td>' . htmlentities($movimiento['mov_costounitario']) . '</td>';
+					$result .= '<td class="'.$color.'">' . htmlentities($movimiento['mov_cost_salida']) . '</td>';
+					$result .= '<td class="'.$color.'">' . htmlentities($movimiento['mov_costounitario']) . '</td>';
 			    	}	    
 
-			    	$result .= '<td>' . htmlentities($movimiento['mov_cant_actual']) . '</td>';
+			    	$result .= '<td class="'.$color.'">' . htmlentities($movimiento['mov_cant_actual']) . '</td>';
 			    
 			    	if ($tipo == "CONTABLE") {
-					$result .= '<td>' . htmlentities($movimiento['mov_val_unit_act']) . '</td>';
+					$result .= '<td class="'.$color.'">' . htmlentities($movimiento['mov_val_unit_act']) . '</td>';
 					//$result .= '<h1>' . $movimiento['mov_total_act'] . '</h1>';
-					$result .= '<td>' . htmlentities($movimiento['mov_total_act']) . '</td>';
+					$result .= '<td class="'.$color.'">' . htmlentities($movimiento['mov_total_act']) . '</td>';
 			    	}
 			}
 			$result .= '<tr>';
@@ -156,21 +159,21 @@ class KardexTemplate extends Template
 			    	$result .= '<td colspan="7">&nbsp;</td>';
 
 			$result .= '<td>' . htmlentities($articulo['totales']['cant_entrada']) . '</td>';
-		
+
 			if ($tipo == "CONTABLE")
-			    	$result .= '<td>' . htmlentities($articulo['totales']['cost_entrada']) . '</td>';
+					$result .= '<td>' . htmlentities($articulo['totales']['cost_entrada']) . '</td>';
 
 			$result .= '<td>' . htmlentities($articulo['totales']['cant_salida']) . '</td>';
 		
 			if ($tipo == "CONTABLE") {
-			    	$result .= '<td>' . htmlentities($articulo['totales']['cost_salida']) . '</td>';
-			    	$result .= '<td colspan="3">&nbsp;</td>';
+					$result .= '<td>' . htmlentities($articulo['totales']['cost_salida']) . '</td>';
+					$result .= '<td colspan="3">&nbsp;</td>';
 			
-			    	$result .= '<td>' . htmlentities($articulo['totales']['valor_total']) . '</td>';
+					$result .= '<td>' . htmlentities($articulo['totales']['valor_total']) . '</td>';
 			}
 			$result .= '</tr>';
-		    }
-		    $result .= '</table>';
+			}
+			$result .= '</table>';
 		}
 		return $result;
     	}
