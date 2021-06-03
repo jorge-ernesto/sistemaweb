@@ -4004,7 +4004,12 @@ WHERE
 				FROM 
 					$postrans t 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'B' 
 					AND t.tipo = 'M' AND art.art_tipo!='01' 
@@ -4041,7 +4046,12 @@ WHERE
 			FROM 
 				$postrans  t 
 				LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
-				LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+				LEFT JOIN (
+					SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+					FROM     pos_z_cierres 
+					WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+					GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+				) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 			WHERE
 				t.td = 'B' 
 				AND t.tipo='M'  AND art.art_tipo!='01' 
@@ -4079,7 +4089,12 @@ WHERE
 					$postrans  t 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo)
 					LEFT JOIN interface_equivalencia_producto q ON (art.art_codigo = q.art_codigo)
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'B' 
 					AND t.tipo='M'  AND art.art_tipo!='01' 
@@ -4117,7 +4132,12 @@ WHERE
 				FROM 
 					$postrans t 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'B' 
 					AND t.tipo = 'M' AND art.art_tipo='01' 
@@ -4154,7 +4174,12 @@ WHERE
 				FROM 
 					$postrans  t 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'B' 
 					AND t.tipo='M'  AND art.art_tipo='01' 
@@ -4192,7 +4217,12 @@ WHERE
 					$postrans  t 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
 					LEFT JOIN interface_equivalencia_producto q ON (art.art_codigo = q.art_codigo)
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'B' 
 					AND t.tipo='M'  AND art.art_tipo='01' 
@@ -4230,7 +4260,12 @@ WHERE
 				FROM 
 					$postrans AS t 
 					LEFT JOIN int_articulos AS art ON (t.codigo=art.art_codigo) 
-					LEFT JOIN pos_z_cierres AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'B' 
 					AND t.tipo = 'M'
@@ -4270,7 +4305,12 @@ WHERE
 				FROM 
 					$postrans AS t 
 					LEFT JOIN int_articulos AS art ON (t.codigo=art.art_codigo) 
-					LEFT JOIN pos_z_cierres AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'B' 
 					AND t.tipo='M'
@@ -4311,7 +4351,12 @@ WHERE
 					$postrans  t 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo)
 					LEFT JOIN interface_equivalencia_producto q ON (art.art_codigo = q.art_codigo)
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'B' 
 					AND t.tipo='M'
@@ -4352,7 +4397,12 @@ WHERE
 				FROM 
 					$postrans t 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'B' 
 					AND t.tipo = 'M'
@@ -4392,7 +4442,12 @@ WHERE
 				FROM 
 					$postrans  t 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'B' 
 					AND t.tipo='M'
@@ -4433,7 +4488,12 @@ WHERE
 					$postrans AS t 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
 					LEFT JOIN interface_equivalencia_producto q ON (art.art_codigo = q.art_codigo)
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'B' 
 					AND t.tipo='M'
@@ -4474,7 +4534,12 @@ WHERE
 				FROM 
 					$postrans  t 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'F' 
 					AND t.tipo='M'  AND art.art_tipo!='01' 
@@ -4514,7 +4579,12 @@ WHERE
 				FROM 
 					$postrans  t 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'F' 
 					AND t.tipo='M'  AND art.art_tipo!='01' 
@@ -4555,7 +4625,12 @@ WHERE
 					$postrans t 					 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
 					LEFT JOIN interface_equivalencia_producto q ON (art.art_codigo = q.art_codigo)
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'F' 
 					AND t.tipo='M'
@@ -4597,7 +4672,12 @@ WHERE
 				FROM 
 					$postrans t 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'F' 
 					AND t.tipo='M'
@@ -4638,7 +4718,12 @@ WHERE
 				FROM 
 					$postrans  t 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'F' 
 					AND t.tipo='M'
@@ -4680,7 +4765,12 @@ WHERE
 					$postrans t 					 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo)
 					LEFT JOIN interface_equivalencia_producto q ON (art.art_codigo = q.art_codigo)
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'F' 
 					AND t.tipo='M'
@@ -4722,7 +4812,12 @@ WHERE
 				FROM 
 					$postrans  t 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'F' 
 					AND t.tipo='M'
@@ -4765,7 +4860,12 @@ WHERE
 				FROM 
 					$postrans  t 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'F' 
 					AND t.tipo='M'
@@ -4809,7 +4909,12 @@ WHERE
 					$postrans t 					 
 					LEFT JOIN int_articulos art ON (t.codigo=art.art_codigo) 
 					LEFT JOIN interface_equivalencia_producto q ON (art.art_codigo = q.art_codigo)
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'F' 
 					AND t.tipo='M'
@@ -4853,7 +4958,12 @@ WHERE
 				FROM 
 					$postrans AS t 
 					LEFT JOIN int_articulos AS art ON (t.codigo=art.art_codigo) 
-					LEFT JOIN pos_z_cierres AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'F' 
 					AND t.tipo='M'
@@ -4896,7 +5006,12 @@ WHERE
 				FROM 
 					$postrans AS t 
 					LEFT JOIN int_articulos AS art ON (t.codigo=art.art_codigo) 
-					LEFT JOIN pos_z_cierres AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'F' 
 					AND t.tipo='M'
@@ -4940,7 +5055,12 @@ WHERE
 					$postrans AS t
 					LEFT JOIN int_articulos AS art ON (t.codigo=art.art_codigo)
 					LEFT JOIN interface_equivalencia_producto AS q ON (art.art_codigo = q.art_codigo)
-					LEFT JOIN pos_z_cierres AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					t.td = 'F' 
 					AND t.tipo='M'
@@ -4984,7 +5104,12 @@ WHERE
 				FROM 
 					$postrans AS t
 					LEFT JOIN int_articulos AS art ON (t.codigo=art.art_codigo)
-					LEFT JOIN pos_z_cierres AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 					LEFT JOIN
 						(SELECT
 							venta_tickes.feoriginal AS fe1,
@@ -5079,7 +5204,12 @@ WHERE
 				FROM 
 					$postrans AS t
 					LEFT JOIN int_articulos AS art ON (t.codigo=art.art_codigo)
-					LEFT JOIN pos_z_cierres AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 					LEFT JOIN
 						(SELECT
 							venta_tickes.feoriginal AS fe1,
@@ -5226,7 +5356,12 @@ WHERE
 							venta_tickes.feoriginal,
 							venta_tickes.feextorno
 					) AS ext ON(ext.fe2 = t.trans AND ext.fe3 = t.usr)
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					td = 'F' 
 					AND tm = 'D'
@@ -5268,7 +5403,12 @@ WHERE
 				FROM 
 					$postrans AS t
 					LEFT JOIN int_articulos AS art ON (t.codigo=art.art_codigo)
-					LEFT JOIN pos_z_cierres AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 					LEFT JOIN
 						(SELECT
 							venta_tickes.feoriginal AS fe1,
@@ -5363,7 +5503,12 @@ WHERE
 				FROM 
 					$postrans AS t
 					LEFT JOIN int_articulos AS art ON (t.codigo=art.art_codigo)
-					LEFT JOIN pos_z_cierres AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 					LEFT JOIN
 						(SELECT
 							venta_tickes.feoriginal AS fe1,
@@ -5510,7 +5655,12 @@ WHERE
 							venta_tickes.feoriginal,
 							venta_tickes.feextorno
 					) AS ext ON(ext.fe2 = t.trans AND ext.fe3 = t.usr)
-					LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+					LEFT JOIN (
+						SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+						FROM     pos_z_cierres 
+						WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+						GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+					) cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 				WHERE 
 					td 			= 'F' 
 					AND tm 		= 'D'
@@ -5604,7 +5754,12 @@ FROM
 		venta_tickes.feoriginal,
 		venta_tickes.feextorno
  ) AS ext ON(ext.fe2 = t.trans AND ext.fe3 = t.usr)
- LEFT JOIN pos_z_cierres AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+ LEFT JOIN (
+	SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+	FROM     pos_z_cierres 
+	WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+	GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+ ) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 WHERE 
  td = 'B'
  AND tm = 'D'
@@ -5698,7 +5853,12 @@ FROM
 		venta_tickes.feoriginal,
 		venta_tickes.feextorno
  ) AS ext ON(ext.fe2 = t.trans AND ext.fe3 = t.usr)
- LEFT JOIN pos_z_cierres AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+ LEFT JOIN (
+	SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+	FROM     pos_z_cierres 
+	WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+	GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+ ) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 WHERE 
  td = 'B'
  AND tm = 'D'
@@ -5791,7 +5951,12 @@ FROM
 		venta_tickes.feoriginal,
 		venta_tickes.feextorno
  ) AS ext ON(ext.fe2 = t.trans AND ext.fe3 = t.usr)
- LEFT JOIN pos_z_cierres AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+ LEFT JOIN (
+	SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+	FROM     pos_z_cierres 
+	WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+	GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+ ) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 WHERE 
  td = 'B'
  AND tm = 'D'
@@ -5885,7 +6050,12 @@ FROM
 		venta_tickes.feoriginal,
 		venta_tickes.feextorno
  ) AS ext ON(ext.fe2 = t.trans AND ext.fe3 = t.usr)
- LEFT JOIN pos_z_cierres AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+ LEFT JOIN (
+	SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+	FROM     pos_z_cierres 
+	WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+	GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+ ) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 WHERE 
  td = 'B'
  AND tm = 'D'
@@ -5979,7 +6149,12 @@ FROM
 		venta_tickes.feoriginal,
 		venta_tickes.feextorno
  ) AS ext ON(ext.fe2 = t.trans AND ext.fe3 = t.usr)
- LEFT JOIN pos_z_cierres AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+ LEFT JOIN (
+	SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+	FROM     pos_z_cierres 
+	WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+	GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+ ) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 WHERE 
  td = 'B'
  AND tm = 'D'
@@ -6072,7 +6247,12 @@ FROM
 		venta_tickes.feoriginal,
 		venta_tickes.feextorno
  ) AS ext ON(ext.fe2 = t.trans AND ext.fe3 = t.usr)
- LEFT JOIN pos_z_cierres AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+ LEFT JOIN (
+	SELECT   ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal, FIRST(nu_posz_z_serie) AS nu_posz_z_serie
+	FROM     pos_z_cierres 
+	WHERE    dt_posz_fecha_sistema::date BETWEEN '$FechaIni' AND '$FechaFin' AND ch_sucursal = '$almacen'
+	GROUP BY ch_posz_pos, dt_posz_fecha_sistema, nu_posturno, ch_sucursal
+ ) AS cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
 WHERE 
  td = 'B'
  AND tm = 'D'
@@ -6092,7 +6272,9 @@ GROUP BY
 )
 			ORDER BY dia, venta, tip2, tip, trans, DCUENTA;";
 
+		echo "<pre>";
 		echo "\n\nVENTAS MARKET: ".$sql."\n\n";	
+		echo "</pre>";
 
 		$centimo = "CREATE TABLE tmp_concar_centimo (dsubdia character varying(7), dcompro character varying(6), dsecue character varying(7), dfeccom character varying(6), dcuenta character varying(12), dcodane character varying(18),
 			dcencos character varying(6), dcodmon character varying(2), ddh character varying(1), dimport numeric(14,2), dtipdoc character varying(2), dnumdoc character varying(30), 
@@ -10419,14 +10601,15 @@ WHERE
 				SELECT 
 					to_char(t.dt_fac_fecha,'YYMMDD') as dia, 
 					'$vmcliente'::text as DCUENTA,  
-					(CASE WHEN SUBSTRING(t.ch_fac_seriedocumento FROM '[A-Z]+') = 'B' THEN '$codcliente'::text ELSE c.cli_ruc::text END) as codigo, 
+					(CASE WHEN SUBSTRING(t.ch_fac_seriedocumento FROM '[A-Z]+') = 'B' THEN '$codcliente'::text ELSE FIRST(c.cli_ruc)::text END) as codigo, 
 					t.ch_fac_numerodocumento::text as trans, 
 					'3'::text as tip, 
 					CASE
 						WHEN t.ch_fac_tipodocumento = '20' THEN 'H'::text 
 						ELSE 'D'
 					END AS ddh,
-					round(t.nu_fac_valortotal,2) as importe, --Agregado para que redondee correctamente
+					-- round(t.nu_fac_valortotal,2) as importe, --Agregado para que redondee correctamente
+					round(sum(d.nu_fac_valortotal),2) as importe,
 					'VENTA MANUALES ' || substring(t.dt_fac_fecha::text from 9 for 2) || '-' || substring(t.dt_fac_fecha::text from 6 for 2) || '-' || substring(t.dt_fac_fecha::text from 3 for 2) ||' '::text as venta , 
 					t.ch_almacen as sucursal, 
 					t.ch_fac_seriedocumento || '-' ||  substr(t.ch_fac_numerodocumento,2)::text as dnumdoc,
@@ -10434,19 +10617,25 @@ WHERE
 					''::text as DCENCOS ,
 					'D'::text as tip2,
 					t.ch_fac_tipodocumento as tipodoc,
-					(string_to_array(r.ch_fac_observacion2, '*'))[3]::text as tiporef,
-					(string_to_array(r.ch_fac_observacion2, '*'))[2]::text as serieref,
-					(string_to_array(r.ch_fac_observacion2, '*'))[1]::text as docuref
+					(string_to_array(FIRST(r.ch_fac_observacion2), '*'))[3]::text as tiporef,
+					(string_to_array(FIRST(r.ch_fac_observacion2), '*'))[2]::text as serieref,
+					(string_to_array(FIRST(r.ch_fac_observacion2), '*'))[1]::text as docuref
 				FROM 
 					fac_ta_factura_cabecera t
 					LEFT JOIN fac_ta_factura_detalle d ON (d.ch_fac_numerodocumento = t.ch_fac_numerodocumento AND d.ch_fac_seriedocumento = t.ch_fac_seriedocumento AND d.ch_fac_tipodocumento = t.ch_fac_tipodocumento)
 					LEFT JOIN fac_ta_factura_complemento r ON (r.ch_fac_numerodocumento = t.ch_fac_numerodocumento AND r.ch_fac_seriedocumento = t.ch_fac_seriedocumento AND r.ch_fac_tipodocumento = t.ch_fac_tipodocumento)
 					INNER JOIN int_clientes c ON (c.cli_codigo = t.cli_codigo)
+					LEFT JOIN int_articulos art ON (d.art_codigo = art.art_codigo) 
+   				LEFT JOIN interface_equivalencia_producto q ON (art.art_codigo = q.art_codigo)
 				WHERE 
 					t.ch_fac_tipodocumento IN ('10','11','20') 
 					AND t.dt_fac_fecha BETWEEN '$FechaIni' AND '$FechaFin' 
 					AND t.nu_fac_valortotal > 0.00 
 					AND t.ch_almacen = '$almacen'
+				GROUP BY 
+					t.dt_fac_fecha, t.ch_almacen,t.ch_fac_seriedocumento, t.ch_fac_numerodocumento,t.nu_fac_valortotal, t.ch_fac_tipodocumento
+				ORDER BY 
+					t.dt_fac_fecha
 			)UNION(
 				SELECT 
 					to_char(t.dt_fac_fecha,'YYMMDD') as dia, 
@@ -10458,7 +10647,8 @@ WHERE
 						WHEN t.ch_fac_tipodocumento = '20' THEN 'D'::text 
 						ELSE 'H'
 					END AS ddh,
-					round(t.nu_fac_impuesto1,2) as importe, --Agregado para que redondee correctamente
+					-- round(t.nu_fac_impuesto1,2) as importe, --Agregado para que redondee correctamente
+					round(sum(d.nu_fac_impuesto1),2) as importe,
 					'VENTA MANUALES ' || substring(t.dt_fac_fecha::text from 9 for 2) || '-' || substring(t.dt_fac_fecha::text from 6 for 2) || '-' || substring(t.dt_fac_fecha::text from 3 for 2) ||' '::text as venta , 
 					t.ch_almacen as sucursal , 
 					t.ch_fac_seriedocumento || '-' ||  substr(t.ch_fac_numerodocumento,2)::text as dnumdoc,
@@ -10795,7 +10985,7 @@ WHERE
 			fecha::date AS fe_emision_ref,
 			SUBSTR(TRIM(usr), 6) AS orden
 		FROM
-			pos_trans201612
+			$postrans
 		WHERE
 		";
 		if (count($refserie) > 0) { 
