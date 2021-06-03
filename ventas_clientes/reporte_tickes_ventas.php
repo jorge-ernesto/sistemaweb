@@ -70,19 +70,16 @@ function reporteExcelPersonalizado($resultado_postrans, $modo, $iYear, $iMonth) 
     $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(8);
     $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(19);
     $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(11);
-    $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(3);
-    $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(20);
-    $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setWidth(12);
-    $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setWidth(3);
-    $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setWidth(8);
-    $objPHPExcel->getActiveSheet()->getColumnDimension('O')->setWidth(12);
-    $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setWidth(14);
-    $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setWidth(3);
+    $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(11);
+    $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(3);
+    $objPHPExcel->getActiveSheet()->getColumnDimension('N')->setWidth(3);
+    $objPHPExcel->getActiveSheet()->getColumnDimension('P')->setWidth(12);
+    $objPHPExcel->getActiveSheet()->getColumnDimension('Q')->setWidth(14);
     $objPHPExcel->getActiveSheet()->getColumnDimension('R')->setWidth(3);
-    $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setWidth(12);
-    $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setWidth(5);
-    $objPHPExcel->getActiveSheet()->getColumnDimension('U')->setWidth(12);
-    $objPHPExcel->getActiveSheet()->getColumnDimension('V')->setWidth(20);
+    $objPHPExcel->getActiveSheet()->getColumnDimension('S')->setWidth(3);
+    $objPHPExcel->getActiveSheet()->getColumnDimension('T')->setWidth(12);
+    $objPHPExcel->getActiveSheet()->getColumnDimension('U')->setWidth(5);
+    $objPHPExcel->getActiveSheet()->getColumnDimension('V')->setWidth(12);
 
     $objPHPExcel->setActiveSheetIndex(0);
     $hoja = 0;
@@ -95,6 +92,7 @@ function reporteExcelPersonalizado($resultado_postrans, $modo, $iYear, $iMonth) 
     $objPHPExcel->getActiveSheet()->getColumnDimension('Y')->setWidth(20);
     $objPHPExcel->getActiveSheet()->getColumnDimension('Z')->setWidth(20);
     $objPHPExcel->getActiveSheet()->getColumnDimension('AA')->setWidth(20);
+    $objPHPExcel->getActiveSheet()->getColumnDimension('AB')->setWidth(20);
 
     $objPHPExcel->setActiveSheetIndex($hoja)
     ->setCellValue('A4', 'TM')
@@ -102,28 +100,29 @@ function reporteExcelPersonalizado($resultado_postrans, $modo, $iYear, $iMonth) 
     ->setCellValue('C4', "#Ticket")
     ->setCellValue('D4', "Numero ")
     ->setCellValue('E4', "Fecha")
-    ->setCellValue('F4', 'Turno')
-    ->setCellValue('G4', 'Descripcion')
-    ->setCellValue('H4', 'Cantidad')
-    ->setCellValue('I4', 'Precio')
-    ->setCellValue('J4', 'IGV  ')
-    ->setCellValue('K4', 'Importe')
-    ->setCellValue('L4', 'Tarjeta')
-    ->setCellValue('M4', 'Odometro')
-    ->setCellValue('N4', 'Placa')
-    ->setCellValue('O4', 'Cod. Cli.')
-    ->setCellValue('P4', 'Usuario')
-    ->setCellValue('Q4', 'Caja')
-    ->setCellValue('R4', 'Lado')
-    ->setCellValue('S4', 'Bonus')    
-    ->setCellValue('T4', 'RUC')
-    ->setCellValue('U4', 'Razon Social')
-    ->setCellValue('V4', 'Puntos Bonus')
-    ->setCellValue('W4', 'Fecha Extorno')
-    ->setCellValue('X4', 'Documento Extorno')
-    ->setCellValue('Y4', 'Fecha Nuevo')
-    ->setCellValue('Z4', 'Documento Nuevo')
-    ->setCellValue('AA4', 'Trabajador')
+    ->setCellValue('F4', "Dia")
+    ->setCellValue('G4', 'Turno')
+    ->setCellValue('H4', 'Descripcion')
+    ->setCellValue('I4', 'Cantidad')
+    ->setCellValue('J4', 'Precio')
+    ->setCellValue('K4', 'IGV  ')
+    ->setCellValue('L4', 'Importe')
+    ->setCellValue('M4', 'Tarjeta')
+    ->setCellValue('N4', 'Odometro')
+    ->setCellValue('O4', 'Placa')
+    ->setCellValue('P4', 'Cod. Cli.')
+    ->setCellValue('Q4', 'Usuario')
+    ->setCellValue('R4', 'Caja')
+    ->setCellValue('S4', 'Lado')
+    ->setCellValue('T4', 'Bonus')    
+    ->setCellValue('U4', 'RUC')
+    ->setCellValue('V4', 'Razon Social')
+    ->setCellValue('W4', 'Puntos Bonus')
+    ->setCellValue('X4', 'Fecha Extorno')
+    ->setCellValue('Y4', 'Documento Extorno')
+    ->setCellValue('Z4', 'Fecha Nuevo')
+    ->setCellValue('AA4', 'Documento Nuevo')
+    ->setCellValue('AB4', 'Trabajador')
     ;
 
     $iCountPostrans = count($resultado_postrans);
@@ -146,23 +145,24 @@ function reporteExcelPersonalizado($resultado_postrans, $modo, $iYear, $iMonth) 
                 ->setCellValue('C' . $bucle, $fila['trans'])
                 ->setCellValue('D' . $bucle, $fila['feserie'] . ' -  ' . $fila['fenumero'])
                 ->setCellValue('E' . $bucle, $fila['fecha'])
-                ->setCellValue('F' . $bucle, $fila['turno'])
-                ->setCellValue('G' . $bucle, $fila['art_descripcion'])
-                ->setCellValue('H' . $bucle, $fila['cantidad'])
-                ->setCellValue('I' . $bucle, $fila['precio'])
-                ->setCellValue('J' . $bucle, $fila['igv'])
-                ->setCellValue('K' . $bucle, $fila['importe'])
-                ->setCellValue('L' . $bucle, $fila['tarjeta'])
-                ->setCellValue('M' . $bucle, $fila['odometro'])
-                ->setCellValue('N' . $bucle, $fila['placa'])
-                ->setCellValue('O' . $bucle, $fila['codcli'])
-                ->setCellValue('P' . $bucle, $fila['chofer'])
-                ->setCellValue('Q' . $bucle, $fila['caja'])
-                ->setCellValue('R' . $bucle, $fila['pump'])
-                ->setCellValue('S' . $bucle, $fila['bonus'])
-                ->setCellValue('T' . $bucle, $fila['ruc'])
-                ->setCellValue('U' . $bucle, $fila['razsocial'])
-                ->setCellValue('V' . $bucle, floor($fila['puntos']))
+                ->setCellValue('F' . $bucle, $fila['dia'])
+                ->setCellValue('G' . $bucle, $fila['turno'])
+                ->setCellValue('H' . $bucle, $fila['art_descripcion'])
+                ->setCellValue('I' . $bucle, $fila['cantidad'])
+                ->setCellValue('J' . $bucle, $fila['precio'])
+                ->setCellValue('K' . $bucle, $fila['igv'])
+                ->setCellValue('L' . $bucle, $fila['importe'])
+                ->setCellValue('M' . $bucle, $fila['tarjeta'])
+                ->setCellValue('N' . $bucle, $fila['odometro'])
+                ->setCellValue('O' . $bucle, $fila['placa'])
+                ->setCellValue('P' . $bucle, $fila['codcli'])
+                ->setCellValue('Q' . $bucle, $fila['chofer'])
+                ->setCellValue('R' . $bucle, $fila['caja'])
+                ->setCellValue('S' . $bucle, $fila['pump'])
+                ->setCellValue('T' . $bucle, $fila['bonus'])
+                ->setCellValue('U' . $bucle, $fila['ruc'])
+                ->setCellValue('V' . $bucle, $fila['razsocial'])
+                ->setCellValue('W' . $bucle, floor($fila['puntos']))
                 ;
                 
                 //DOCUMENTO ORIGINAL
@@ -208,11 +208,11 @@ function reporteExcelPersonalizado($resultado_postrans, $modo, $iYear, $iMonth) 
                 }
 
                 $objPHPExcel->setActiveSheetIndex($hoja)
-                ->setCellValue('W' . $bucle, $dFechaReferencia)
-                ->setCellValue('X' . $bucle, $sSerieNumeroReferencia)
-                ->setCellValue('Y' . $bucle, $dFechaReferencia_resultante)
-                ->setCellValue('Z' . $bucle, $sSerieNumeroReferencia_resultante)
-                ->setCellValue('AA' . $bucle, $fila['trabajador'])
+                ->setCellValue('X' . $bucle, $dFechaReferencia)
+                ->setCellValue('Y' . $bucle, $sSerieNumeroReferencia)
+                ->setCellValue('Z' . $bucle, $dFechaReferencia_resultante)
+                ->setCellValue('AA' . $bucle, $sSerieNumeroReferencia_resultante)
+                ->setCellValue('AB' . $bucle, $fila['trabajador'])
                 ;
                 $bucle++;
             }

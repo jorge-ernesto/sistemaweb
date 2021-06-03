@@ -126,6 +126,8 @@ $( '.input-number_guion' ).on('input', function () {this.value = this.value.repl
 })();
 
 function calcAmounts(fNum1, sTipoOperador, fNum2, fResult, fImpuesto) {
+	// console.log( fNum1, sTipoOperador, fNum2, fResult, fImpuesto );
+
 	var fNum1 = parseFloat($('#' + fNum1).val());
 	var fNum2 = parseFloat($('#' + fNum2).val());
 	var fDecimal = 4;
@@ -135,13 +137,23 @@ function calcAmounts(fNum1, sTipoOperador, fNum2, fResult, fImpuesto) {
 	if ( sTipoOperador=='*' ) {//input cantidad y precio
 		fNum1 = isNaN(fNum1) ? 0 : fNum1;
 		fNum2 = isNaN(fNum2) ? 0 : fNum2;
-		
+  
 		$('#' + fResult).val( Math.round10((fNum1 * fNum2), -fDecimal) );
+		console.log("PRIMER PASO: CALCULAR EL TOTAL");
+		console.log(`$('#${fResult}').val( Math.round10((${fNum1} * ${fNum2}), -${fDecimal}) );`);
 		if ( $('#txt-subtotal' ).val() !== undefined ) {
 			var ss_subtotal = ($('#' + fResult).val() / parseFloat($('#' + fImpuesto).val()) );
+			console.log("SEGUNDO PASO: CALCULAMOS SUBTOTAL");
+			console.log(`($('#${fResult}').val() / parseFloat($('#${fImpuesto}').val()) );`);
+
 			$('#hidden-subtotal' ).val( Math.round10( ss_subtotal, -fDecimal) );
 			$('#txt-subtotal' ).val( Math.round10( ss_subtotal, -fDecimal) );
 			$('#txt-igv' ).val( Math.round10( $('#' + fResult).val() - ss_subtotal, -fDecimal) );
+
+			console.log("TERCER PASO: CALCULAMOS IGV");
+			// console.log(`$('#hidden-subtotal' ).val( Math.round10( ${ss_subtotal}, -${fDecimal}) );`);
+			// console.log(`$('#txt-subtotal' ).val( Math.round10( ${ss_subtotal}, -${fDecimal}) );`);
+			console.log(`$('#txt-igv' ).val( Math.round10( $('#${fResult}').val() - ${ss_subtotal}, -${fDecimal}) );`);
 		}
 	} else if (sTipoOperador === '/') {//input total
 		fNum1 = isNaN(fNum1) ? 0 : fNum1;

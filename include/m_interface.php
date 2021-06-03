@@ -93,7 +93,7 @@ ORDER BY
 
 		$TipoAlmacen 	= $reg[0];
 
-		$ExportDir 		= "/home/data/";
+		$ExportDir 		= "/home/jlachira/";
 
 		if ($TipoAlmacen == "M" || $TipoAlmacen == "m") {
 			$prefijo_tipo 	= "m-";
@@ -146,7 +146,10 @@ FROM
   ) AS VREF ON (VREF.id_trans = c.ch_documento)
  WHERE
   c.dt_fecha BETWEEN '" . $FechaIni . "' AND '" . $FechaFin . "'
-  AND c.ch_sucursal LIKE '%{$CodAlmacen}%';
+  AND c.ch_sucursal LIKE '%{$CodAlmacen}%'
+ORDER BY
+	RUC,
+	FECHA DESC;
 			";
 
 			$headers = Array (	0	=>	"FECHA",
@@ -172,6 +175,8 @@ FROM
 			);
 
 			CSVFromQuery($sql,$ExportDir."vales.txt",$headers);
+			error_log("vales.txt");
+			error_log($sql);
 		}
 
 		if ($modulo == "TODOS" || $modulo=="VENTAS" || $modulo=="VENTASC") {
@@ -227,7 +232,9 @@ SELECT * FROM
   DATE(t.dia) BETWEEN '" . $FechaIni . "' AND '" . $FechaFin . "'
   AND t.ruc != ''
   AND '${CodAlmacen}' LIKE '%'||t.es||'%'
-);
+)
+ORDER BY 
+ 1; --RUC
 			";
 			
 			$headers = Array (
@@ -241,6 +248,8 @@ SELECT * FROM
 			);
 
 			CSVFromQuery($sql,$ExportDir."maestro.txt",$headers);
+			error_log("maestro.txt");
+			error_log($sql);
 
 			$sql = "	SELECT
 						a.ch_sucursal AS ALMACEN,
@@ -257,7 +266,11 @@ SELECT * FROM
 						AND a.ch_sucursal=b.ch_sucursal
 						AND a.dt_fechamedicion BETWEEN '$FechaIni' AND '$FechaFin'
 						AND '${CodAlmacen}' LIKE '%'||a.ch_sucursal||'%'  
-						AND b.ch_codigocombustible=i.art_codigo;";
+						AND b.ch_codigocombustible=i.art_codigo
+					ORDER BY 
+						a.ch_sucursal DESC,
+						a.dt_fechamedicion DESC,
+						a.ch_tanque DESC;";
 
 			$headers = Array (	0	=>	"ALMACEN",
 						1	=>	"FECHA",
@@ -267,6 +280,8 @@ SELECT * FROM
 			);
 
 			CSVFromQuery($sql,$ExportDir."varillaje.txt",$headers);
+			error_log("varillaje.txt");
+			error_log($sql);
 
 			$sql = "	SELECT
 						to_char(c.dt_fechaparte,'dd/mm/yyyy') as FECHA,
@@ -299,7 +314,12 @@ SELECT * FROM
 					WHERE
 						dt_fechaparte BETWEEN '$FechaIni' AND '$FechaFin'
 						AND '${CodAlmacen}' LIKE '%'||c.ch_sucursal||'%'
-						AND c.ch_codigocombustible=i.art_codigo;";
+						AND c.ch_codigocombustible=i.art_codigo
+					ORDER BY
+						FECHA,
+						TURNO,
+						LADO,
+						MANGUERA;"; 
 
 			$headers = Array(
 						0	=>	"FECHA",
@@ -322,6 +342,8 @@ SELECT * FROM
 			);
 
 			CSVFromQuery($sql,$ExportDir."parte-diario.txt",$headers);
+			error_log("parte-diario.txt");
+			error_log($sql);
 		}   
 
 		if ($modulo=="TODOS" || $modulo=="VENTAS" || $modulo=="VENTASM") {
@@ -364,6 +386,8 @@ SELECT * FROM
 				ca.dt_fac_fecha BETWEEN '" . $FechaIni . "' AND '" . $FechaFin . "'
 				AND '${CodAlmacen}' LIKE '%'||ca.ch_almacen||'%'
 				AND ca.ch_fac_tipodocumento <> '45'
+			ORDER BY
+				ca.ch_almacen DESC, ca.dt_fac_fecha DESC, ca.ch_fac_tipodocumento DESC, ca.ch_fac_seriedocumento DESC, ca.ch_fac_numerodocumento DESC;
 			";
 
 			$headers = Array(
@@ -396,6 +420,8 @@ SELECT * FROM
 			);
 
 			CSVFromQuery($sql,$ExportDir."venta.txt",$headers);
+			error_log("venta.txt");
+			error_log($sql);
 
 			// Facturas de oficina y liquidadas - 05/07/2019
 // 			$sql = "
@@ -484,7 +510,9 @@ SELECT * FROM
 						AND c.dt_fac_fecha BETWEEN '$FechaIni' AND '$FechaFin'
 						AND '${CodAlmacen}' LIKE '%'||c.ch_almacen||'%'
 						AND d.ch_fac_tipodocumento<>'45'
-						AND l.tab_tabla = '20';";
+						AND l.tab_tabla = '20'
+					ORDER BY
+ 						c.ch_almacen DESC, c.dt_fac_fecha DESC, c.ch_fac_tipodocumento DESC, c.ch_fac_seriedocumento DESC, c.ch_fac_numerodocumento DESC;";
 
 			$headers = Array(
 						0	=>	"VENTA",
@@ -499,6 +527,8 @@ SELECT * FROM
 			);
 
 			CSVFromQuery($sql,$ExportDir."ventalinea.txt",$headers);
+			error_log("ventalinea.txt");
+			error_log($sql);
 
 		// Facturas de oficina y liquidadas DETALLE - 05/07/2019
 // 			$sql = "
@@ -651,6 +681,8 @@ SELECT * FROM
 			);
 
 			CSVFromQuery($sql,$ExportDir."zzventatickets.txt",$headers);
+			error_log("zzventatickets.txt");
+			error_log($sql);
 
 			$sql = "
 			SELECT
@@ -786,6 +818,8 @@ SELECT * FROM
 			);
 
 			CSVFromQuery($sql,$ExportDir."zzventaplaya.txt",$headers);
+			error_log("zzventaplaya.txt");
+			error_log($sql);
 
 			$sql = "	SELECT
 						ch_posz_pos AS CAJAREGISTRADORA,
@@ -814,7 +848,10 @@ SELECT * FROM
 						pos_z_cierres
 					WHERE
 						dt_posz_fecha_sistema BETWEEN '$FechaIni' AND '$FechaFin 23:59:59'
-						AND '${CodAlmacen}' LIKE '%'||ch_sucursal||'%';";
+						AND '${CodAlmacen}' LIKE '%'||ch_sucursal||'%'
+					ORDER BY
+						CAJAREGISTRADORA,
+						ZZ";
 
 			//var_dump($sql);
 			//exit;
@@ -845,6 +882,8 @@ SELECT * FROM
 			);
 
 			CSVFromQuery($sql,$ExportDir."zz.txt",$headers);
+			error_log("zz.txt");
+			error_log($sql);
 
 			$sql = "	SELECT
 						max(t.caja) AS CAJAREGISTRADORA,
@@ -884,6 +923,7 @@ SELECT * FROM
 						t.caja,
 						z.nu_posz_z_numero
 					ORDER BY
+						CAJAREGISTRADORA,
 						ZZ;";
 
 			$headers = Array(
@@ -902,6 +942,8 @@ SELECT * FROM
 			);
 
 			CSVFromQuery($sql,$ExportDir."producto.txt",$headers);
+			error_log("producto.txt");
+			error_log($sql);
 
 			$sql = "	SELECT 	
 						pdd.ch_valida as valida,
@@ -956,6 +998,8 @@ SELECT * FROM
 			);
 
 			CSVFromQuery($sql,$ExportDir."depositos.txt",$headers);
+			error_log("depositos.txt");
+			error_log($sql);
 
 			$sql = "	SELECT  
 						hl.ch_sucursal AS ESTACION,
@@ -986,6 +1030,8 @@ SELECT * FROM
 			);
 
 			CSVFromQuery($sql,$ExportDir."trabajadores.txt",$headers);
+			error_log("trabajadores.txt");
+			error_log($sql);
 
 			$sql = "	SELECT
 						dia AS DIA,
@@ -1009,6 +1055,8 @@ SELECT * FROM
 			);
 
 			CSVFromQuery($sql,$ExportDir."cierres.txt",$headers);
+			error_log("cierres.txt");
+			error_log($sql);
 
 			$sql = "
 SELECT
@@ -1051,7 +1099,10 @@ WHERE
  com.dt_fac_fecha BETWEEN '$FechaIni' AND '$FechaFin'
  AND com.ch_almacen LIKE '%{$CodAlmacen}%'
  AND com.ch_liquidacion != ''
- AND (com.ch_fac_anulado IS NULL OR com.ch_fac_anulado ='' OR com.ch_fac_anulado='N');
+ AND (com.ch_fac_anulado IS NULL OR com.ch_fac_anulado ='' OR com.ch_fac_anulado='N')
+ORDER BY
+ RUC,
+ FECHA DESC;
 			";
 
 			$headers = Array(
@@ -1081,6 +1132,8 @@ WHERE
 			);
 
 			CSVFromQuery($sql,$ExportDir."vales-liquidados.txt",$headers);
+			error_log("vales-liquidados.txt");
+			error_log($sql);
 
 			$sql = "
 					SELECT DISTINCT
@@ -1178,6 +1231,8 @@ WHERE
 			);
 
 			CSVFromQuery($sql,$ExportDir."contometros-turno.txt",$headers);
+			error_log("contometros-turno.txt");
+			error_log($sql);
 
 			$sql = "
 					SELECT
@@ -1200,7 +1255,7 @@ WHERE
 						es LIKE '%{$CodAlmacen}%'
 						AND dia BETWEEN '$FechaIni' AND '$FechaFin'
 					ORDER BY
-						dia desc,
+						dia,
 						turno,
 						caja,
 						trans;
@@ -1223,6 +1278,8 @@ WHERE
 			);
 
 			CSVFromQuery($sql,$ExportDir."afericiones.txt",$headers);
+			error_log("afericiones.txt");
+			error_log($sql);
 
 			$sql = "
 					SELECT 
@@ -1261,7 +1318,8 @@ WHERE
 						AND m.mov_almacen LIKE '%{$CodAlmacen}%'
 						AND m.tran_codigo IN('01','21')
 					ORDER BY 
-						m.mov_fecha DESC
+						m.mov_fecha DESC,
+						m.mov_numero DESC
 				";
 
 			$headers = Array(
@@ -1287,6 +1345,8 @@ WHERE
 			);
 
 			CSVFromQuery($sql,$ExportDir."compras.txt",$headers);
+			error_log("compras.txt");
+			error_log($sql);
 		
 			/*$flag = InterfaceModel::validaDia($FechaFin,$CodAlmacen);
 
@@ -1333,7 +1393,9 @@ WHERE
 						dt.dia BETWEEN '$FechaIni' AND '$FechaFin'
 						AND dt.es LIKE '%{$CodAlmacen}%'
 					ORDER BY 
-						dt.dia desc
+						dt.es DESC,
+						dt.dia DESC,
+						dt.turno DESC;
 				";
 
 				$headers = Array(
@@ -1349,6 +1411,8 @@ WHERE
 				);
 
 				CSVFromQuery($sql,$ExportDir."sobrantes-faltantes.txt",$headers);
+				error_log("sobrantes-faltantes.txt");
+				error_log($sql);
 
 
 				$sql =	"
@@ -1375,6 +1439,8 @@ WHERE
 				);
 
 				CSVFromQuery($sql,$ExportDir."consolidaciones.txt",$headers);
+				error_log("consolidaciones.txt");
+				error_log($sql);
 
 				/* FACTURAS DE COMPRAS */
 
@@ -1386,9 +1452,12 @@ WHERE
 						gen.tab_desc_breve||' '||c.pro_cab_seriedocumento||' - '||c.pro_cab_numdocumento documento, 
 						p.pro_codigo||' '||p.pro_razsocial proveedor,
 						CASE WHEN d.pro_det_moneda IN('2','02') THEN '$' ELSE 'S/.' END moneda,
+						c.pro_cab_impafecto imponible,
 						c.pro_cab_impto1 impuesto,
+						c.pro_cab_impinafecto inafecto,
 						c.pro_cab_imptotal total,
 						c.pro_cab_impsaldo saldo,
+						c.regc_sunat_percepcion perce,
 						rubro.ch_descripcion rubro,
 						to_char(c.pro_cab_fechavencimiento, 'DD/MM/YYYY') fvencimiento,
 						c.pro_cab_tipdocumento||' '||c.pro_cab_seriedocumento||' - '||c.pro_cab_numdocumento|| ' - ' ||c.pro_codigo eliminar,
@@ -1429,6 +1498,8 @@ WHERE
 				);
 
 				CSVFromQuery($sql,$ExportDir."registro_compras.txt",$headers);
+				error_log("registro_compras.txt");
+				error_log($sql);
 
 		}
 

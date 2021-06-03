@@ -136,36 +136,65 @@ class PosDescuentoRucTemplate extends Template {
 		return $form->getForm();
    }
 
-	function MostrarDataExcel($data, $filename) {
-		$result = '';
-		$cliente = '';
-		$nuproducto = '';
+	/**
+	 * Validaciones:
+	 * -Verificamos existencia de articulo (Codigo de Articulo, Tipo de Documento, NULL)		
+	 * -Verificamos si la primera fila a recorrer tiene informacion - Fila 4 de Excel
+	 * -Verificamos existencia del articulo Y cliente (Codigo de Articulo, Tipo de Documento, Codigo de Cliente)		
+	 */
+	function MostrarDataExcel($data, $filename) {		
+		echo "<script>console.log('" . json_encode( 
+			array( 
+				"data"     => $data, 
+				"filename" => $filename 
+			) 
+		) . "')</script>";
+
+		$result      = '';
+		$cliente     = '';
+		$nuproducto  = '';
 		$norazsocial = '';
 
+		//OBTENEMOS DATOS DE EXCEL (TIPO STRING Y NUMERIC) <!--PORQUE LO TRABAJARON ASI?????
 		$arrCeldasNombres = $data->sheets[0]['cells'];
-		$arrCeldas = $data->sheets[0]['cellsInfo'];
-
-		$nuproducto	= $arrCeldas[1][2]['raw'];
-		$notd = $arrCeldasNombres[2][2];
+		$arrCeldas        = $data->sheets[0]['cellsInfo'];		
+		
+		echo "<script>console.log('" . json_encode( 
+			array( 
+				"arrCeldasNombres" => $arrCeldasNombres, 
+				"arrCeldas"        => $arrCeldas 
+			) 
+		) . "')</script>";
+		
+		//OBTENEMOS CODIGO DE ARTICULO Y TIPO DE DOCUMNETO
+		$notd       = $arrCeldasNombres[2][2]; //Tipo de Documento 
+		$nuproducto	= $arrCeldas[1][2]['raw']; //Codigo de Articulo
 
 		$notd = strtoupper($notd);
 
 		$color = 'black';
-
-		$producto = PosDescuentoRucModel::ValidarExcel(trim($nuproducto), $notd, NULL);
-		$exiteproducto = $producto[0][0];
-		$noproducto = $producto[0][1];
+		
+		//VERIFICAMOS EXISTENCIA DEL ARTICULO (Codigo de Articulo, Tipo de Documento, NULL)
+		$producto      = PosDescuentoRucModel::ValidarExcel(trim($nuproducto), $notd, NULL);
+		$exiteproducto = $producto[0][0]; //Cantidad de articulo
+		$noproducto    = $producto[0][1]; //Descripcion de articulo		
+		echo "<script>console.log('Cantidad de producto, Descripcion de producto: " . json_encode( array( $exiteproducto, $noproducto ) ) . "')</script>";
 
 		if($exiteproducto == '1')
 			$color = 'black';
 		else
 			$color = 'red';
 
+		/**
+		 * Nota de despacho (1)
+		 * Factura (2)
+		 * Boleta (3)
+		 */
 		if($notd == 'FACTURA')
 			$nutd = 2;
 		elseif ($notd == 'BOLETA')
 			$nutd = 3;
-		else//NOTA DESPACHO
+		else //NOTA DESPACHO
 			$nutd = 1;
 
 		$result .= '<table align="center" cellspacing="2" cellpadding="2"> ';
@@ -187,7 +216,7 @@ class PosDescuentoRucTemplate extends Template {
 		$result .= '<tr>';
 		$result .= '<th align="right" style="font-size:0.9em; color:black; background-color: #D9F9B2">Tipo Documento: </th>';
 		$result .= '<th colspan="2" align="left" style="font-size:0.9em; color:'.$color.';background-color: #D9F9B2">';
-		$result .= $data->val(2, 2);//NOMBRE Tipo Documento
+		$result .= $data->val(2, 2); //Tipo de Documento
 
 		$result .= '<tr>';
 		$result .= '<th colspan="3" style="font-size:0.9em; color:black;background-color: #D9F9B2">&nbsp;</td>';
@@ -203,36 +232,40 @@ class PosDescuentoRucTemplate extends Template {
 		$codigoexcel = '';
 		$codigoexcel1 = '';
 
-		if(strlen($arrCeldas[4][1]['raw']) > 0 && strlen($arrCeldas[4][2]['raw']) > 0) {
-			for ($i = 4; $i <= $resultados; $i++) {
+		//VERIFICA SI LA PRIMERA FILA RECORRER TIENE INFORMACION - FILA 4
+		if(strlen($arrCeldas[4][1]['raw']) > 0 && strlen($arrCeldas[4][2]['raw']) > 0) { //Codigo de Cliente e Importe Descuento
+			//RECORREMOS INFORMACION
+			for ($i = 4; $i <= $resultados; $i++) { 
 				$codcliente	= stripslashes($arrCeldas[$i][1]['raw']);
-				$codcliente = trim($codcliente,"'");
-				$nuimporte	= $arrCeldas[$i][2]['raw'];
+				$codcliente = trim($codcliente,"'");    //Codigo de Cliente
+				$nuimporte	= $arrCeldas[$i][2]['raw']; //Importe Descuento
 
-				$color = ($i%2==0?"grid_detalle_par":"grid_detalle_impar");
-				$datos = PosDescuentoRucModel::ValidarExcel(trim($nuproducto), $notd, trim($codcliente));
-				if($codigoexcel == $codcliente && $codigoexcel1 == $nuimporte){
+				$color = ($i%2==0?"grid_detalle_par":"grid_detalle_impar");		
+				//VERIFICAMOS EXISTENCIA DEL ARTICULO Y CLIENTE (Codigo de Articulo, Tipo de Documento, Codigo de Cliente)						
+				$datos = PosDescuentoRucModel::ValidarExcel(trim($nuproducto), $notd, trim($codcliente));				
+				
+				if($codigoexcel == $codcliente && $codigoexcel1 == $nuimporte){ //Esto solo valida si hay 2 registros iguales seguidos <!--PORQUE LO TRABAJARON ASI?????
 					$colorletra = "red";
 					$nocliente = $datos[0]['nocliente'];
 					$status = "DUPLICADO";
-				} elseif ($datos[0]['existe_cliente'] == '0' && $datos[0]['existe_descuento'] == '0') {
+				} elseif ($datos[0]['existe_cliente'] == '0' && $datos[0]['existe_descuento'] == '0') { //Sino encuentra cliente en tablas int_clientes, ruc y sino encuentra registro en tabla pos_descuento_ruc
 					$colorletra = "red";
-					$nocliente = "NO EXISTE PRODUCTO";
+					$nocliente = "NO EXISTE CLIENTE";
 					$status = "-";
-				} elseif ($datos[0]['existe_cliente'] == '1' && $datos[0]['existe_descuento'] == '0') {
+				} elseif ($datos[0]['existe_cliente'] == '1' && $datos[0]['existe_descuento'] == '0') { //Si encuentra cliente en tablas int_clientes, ruc y sino encuentra registro en tabla pos_descuento_ruc
 					$colorletra = "blue";
 					$nocliente = $datos[0]['nocliente'];
 					$status = "NUEVO";
 					$procesar = true;
-				} elseif ($datos[0]['existe_cliente'] == '1' && $datos[0]['existe_descuento'] == '1') {
+				} elseif ($datos[0]['existe_cliente'] == '1' && $datos[0]['existe_descuento'] == '1') { //Si encuentra cliente en tablas int_clientes, ruc y si encuentra registro en tabla pos_descuento_ruc
 					$colorletra = "red";
 					$nocliente = $datos[0]['nocliente'];
-					$status = "EXISTE";
+					$status = "YA EXISTE DESCUENTO";
 				}
 
 				$result .= '<tr bgcolor="">';
 				$result .= '<td class="'.$color.'" align = "center"><p style="color:'.$colorletra.';">' . htmlentities($nocliente) . '</td>';
-				$result .= '<td class="'.$color.'" align = "right"><p style="color:'.$colorletra.';">S/ ' . number_format($nuimporte, 2, '.', ',') . '</td>';
+				$result .= '<td class="'.$color.'" align = "right"><p style="color:'.$colorletra.';">S/ ' . number_format($nuimporte, 3, '.', ',') . '</td>';
 				$result .= '<td class="'.$color.'" align = "center"><p style="color:'.$colorletra.';">' . htmlentities($status) . '</td>';
 				$result .= '</tr>';
 				$codigoexcel = $codcliente;
@@ -243,13 +276,173 @@ class PosDescuentoRucTemplate extends Template {
 			$result .= '<td colspan="3" align="center" class="'.$color.'" ><p style="font-size:12px; color:red;">No hay informacion</td>';
 			$result .= '</tr>';
 			$procesar = false;
-		} if($procesar) {
+		} 
+		
+		if($procesar) { //OPCIONES PROCESAR LISTA Y REGRESAR
 			$result .= '<tr bgcolor="C9F4D4">';
 			$result .= '<td colspan="3" align="center">';
 			$result .= '<A href="control.php?rqst=MAESTROS.POS_DESCUENTO_RUC&task=POS_DESCUENTO_RUC&action=EnviarData&filename='.$filename.'&nuproducto='.$nuproducto.'&notd='.$notd.'&nutd='.$nutd.'" target="control"><button><img src="/sistemaweb/icons/importar_excel.png" align="right" />Procesar Lista</button></A>';
 			$result .= '&nbsp;&nbsp;&nbsp;<button name="action" type="button" value="Regresar" onclick="regresar()"><img src="/sistemaweb/icons/atra.gif" align="right" />Regresar</button>';
 			$result .= '</tr>';
+		} else { //OPCION REGRESAR
+			$result .= '<tr bgcolor="C9F4D4">';
+			$result .= '<td colspan="3" align="right">';
+			$result .= '<button name="action" type="button" value="Regresar" onclick="regresar()"><img src="/sistemaweb/icons/atra.gif" align="right" />Regresar</button>';
+			$result .= '</tr>';
+		}
+		$result .= '</table>';
+		return $result;
+   }
+
+	/**
+	 * Validaciones:
+	 * -Verificamos existencia de articulo (Codigo de Articulo, Tipo de Documento, NULL)		
+	 * -Verificamos si la primera fila a recorrer tiene informacion - Fila 4 de Excel
+	 * -Verificamos existencia del articulo Y cliente (Codigo de Articulo, Tipo de Documento, Codigo de Cliente)		
+	 */
+	function MostrarDataExcelOptimizado($data, $filename) {		
+		echo "<script>console.log('" . json_encode( 
+			array( 
+				"data"     => $data, 
+				"filename" => $filename 
+			) 
+		) . "')</script>";
+
+		$result      = '';
+		$cliente     = '';
+		$nuproducto  = '';
+		$norazsocial = '';
+
+		//OBTENEMOS DATOS DE EXCEL (TIPO STRING Y NUMERIC) <!--PORQUE LO TRABAJARON ASI?????
+		$arrCeldasNombres = $data->sheets[0]['cells'];
+		$arrCeldas        = $data->sheets[0]['cellsInfo'];		
+		
+		echo "<script>console.log('" . json_encode( 
+			array( 
+				"arrCeldasNombres" => $arrCeldasNombres, 
+				"arrCeldas"        => $arrCeldas 
+			) 
+		) . "')</script>";
+		
+		//OBTENEMOS CODIGO DE ARTICULO Y TIPO DE DOCUMNETO
+		$notd       = $arrCeldasNombres[2][2]; //Tipo de Documento 
+		$nuproducto	= $arrCeldas[1][2]['raw']; //Codigo de Articulo
+
+		$notd = strtoupper($notd);
+
+		$color = 'black';
+		
+		//VERIFICAMOS EXISTENCIA DEL ARTICULO (Codigo de Articulo, Tipo de Documento, NULL)
+		$producto      = PosDescuentoRucModel::ValidarExcel(trim($nuproducto), $notd, NULL);
+		$exiteproducto = $producto[0][0]; //Cantidad de articulo
+		$noproducto    = $producto[0][1]; //Descripcion de articulo		
+		echo "<script>console.log('Cantidad de producto, Descripcion de producto: " . json_encode( array( $exiteproducto, $noproducto ) ) . "')</script>";
+
+		if($exiteproducto == '1')
+			$color = 'black';
+		else
+			$color = 'red';
+
+		/**
+		 * Nota de despacho (1)
+		 * Factura (2)
+		 * Boleta (3)
+		 */
+		if($notd == 'FACTURA')
+			$nutd = 2;
+		elseif ($notd == 'BOLETA')
+			$nutd = 3;
+		else //NOTA DESPACHO
+			$nutd = 1;
+
+		$result .= '<table align="center" cellspacing="2" cellpadding="2"> ';
+		$result .= '<tr>';
+		$result .= '<th align="right" style="font-size:0.9em; color:black;background-color: #D9F9B2">Codigo Producto: </th>';
+		$result .= '<th colspan="2" align="left" style="font-size:0.9em; color:'.$color.';background-color: #D9F9B2">';
+		$result .= $nuproducto;
+
+		$result .= '<tr>';
+		$result .= '<th align="right" style="font-size:0.9em; color:black;background-color: #D9F9B2">Nombre Producto: </th>';
+		if($noproducto) {
+			$result .= '<th colspan="2" align="left" style="font-size:0.9em; color:'.$color.';background-color: #D9F9B2">';
+			$result .= $noproducto;
 		} else {
+			$result .= '<th colspan="2" align="left" style="font-size:0.9em; color:'.$color.';background-color: #D9F9B2">';
+			$result .= 'ERROR: NO EXISTE PRODUCTO';
+		}
+
+		$result .= '<tr>';
+		$result .= '<th align="right" style="font-size:0.9em; color:black; background-color: #D9F9B2">Tipo Documento: </th>';
+		$result .= '<th colspan="2" align="left" style="font-size:0.9em; color:'.$color.';background-color: #D9F9B2">';
+		$result .= $data->val(2, 2); //Tipo de Documento
+
+		$result .= '<tr>';
+		$result .= '<th colspan="3" style="font-size:0.9em; color:black;background-color: #D9F9B2">&nbsp;</td>';
+		$result .= '</tr>';
+
+		$result .= '<tr>';
+		$result .= '<th style="font-size:0.9em; color:black;background-color: #D9F9B2">CLIENTE</td>';
+		$result .= '<th style="font-size:0.9em; color:black;background-color: #D9F9B2">IMPORTE</td>';
+		$result .= '<th style="font-size:0.9em; color:black;background-color: #D9F9B2">ESTADO</td>';
+		$result .= '</tr>';
+
+		$resultados = count($arrCeldas);
+		$codigoexcel = '';
+		$codigoexcel1 = '';
+
+		//VERIFICA SI LA PRIMERA FILA RECORRER TIENE INFORMACION - FILA 4
+		if(strlen($arrCeldas[4][1]['raw']) > 0 && strlen($arrCeldas[4][2]['raw']) > 0) { //Codigo de Cliente e Importe Descuento
+			//RECORREMOS INFORMACION
+			for ($i = 4; $i <= $resultados; $i++) { 
+				$codcliente	= stripslashes($arrCeldas[$i][1]['raw']);
+				$codcliente = trim($codcliente,"'");    //Codigo de Cliente
+				$nuimporte	= $arrCeldas[$i][2]['raw']; //Importe Descuento
+
+				$color = ($i%2==0?"grid_detalle_par":"grid_detalle_impar");		
+				//VERIFICAMOS EXISTENCIA DEL ARTICULO Y CLIENTE (Codigo de Articulo, Tipo de Documento, Codigo de Cliente)						
+				$datos = PosDescuentoRucModel::ValidarExcel(trim($nuproducto), $notd, trim($codcliente));				
+				
+				if($codigoexcel == $codcliente && $codigoexcel1 == $nuimporte){ //Esto solo valida si hay 2 registros iguales seguidos <!--PORQUE LO TRABAJARON ASI?????
+					$colorletra = "red";
+					$nocliente = $datos[0]['nocliente'];
+					$status = "DUPLICADO";
+				} elseif ($datos[0]['existe_cliente'] == '0' && $datos[0]['existe_descuento'] == '0') { //Sino encuentra cliente en tablas int_clientes, ruc y sino encuentra registro en tabla pos_descuento_ruc
+					$colorletra = "red";
+					$nocliente = "NO EXISTE CLIENTE";
+					$status = "-";
+				} elseif ($datos[0]['existe_cliente'] == '1' && $datos[0]['existe_descuento'] == '0') { //Si encuentra cliente en tablas int_clientes, ruc y sino encuentra registro en tabla pos_descuento_ruc
+					$colorletra = "blue";
+					$nocliente = $datos[0]['nocliente'];
+					$status = "NUEVO";
+					$procesar = true;
+				} elseif ($datos[0]['existe_cliente'] == '1' && $datos[0]['existe_descuento'] == '1') { //Si encuentra cliente en tablas int_clientes, ruc y si encuentra registro en tabla pos_descuento_ruc
+					$colorletra = "red";
+					$nocliente = $datos[0]['nocliente'];
+					$status = "YA EXISTE DESCUENTO";
+				}
+
+				$result .= '<tr bgcolor="">';
+				$result .= '<td class="'.$color.'" align = "center"><p style="color:'.$colorletra.';">' . htmlentities($nocliente) . '</td>';
+				$result .= '<td class="'.$color.'" align = "right"><p style="color:'.$colorletra.';">S/ ' . number_format($nuimporte, 3, '.', ',') . '</td>';
+				$result .= '<td class="'.$color.'" align = "center"><p style="color:'.$colorletra.';">' . htmlentities($status) . '</td>';
+				$result .= '</tr>';
+				$codigoexcel = $codcliente;
+				$codigoexcel1 = $nuimporte;
+			}
+		} else {
+			$result .= '<tr bgcolor="">';
+			$result .= '<td colspan="3" align="center" class="'.$color.'" ><p style="font-size:12px; color:red;">No hay informacion</td>';
+			$result .= '</tr>';
+			$procesar = false;
+		} 
+		
+		if($procesar) { //OPCIONES PROCESAR LISTA Y REGRESAR
+			$result .= '<tr bgcolor="C9F4D4">';
+			$result .= '<td colspan="3" align="center">';
+			$result .= '<A href="control.php?rqst=MAESTROS.POS_DESCUENTO_RUC&task=POS_DESCUENTO_RUC&action=EnviarData&filename='.$filename.'&nuproducto='.$nuproducto.'&notd='.$notd.'&nutd='.$nutd.'" target="control"><button><img src="/sistemaweb/icons/importar_excel.png" align="right" />Procesar Lista</button></A>';
+			$result .= '&nbsp;&nbsp;&nbsp;<button name="action" type="button" value="Regresar" onclick="regresar()"><img src="/sistemaweb/icons/atra.gif" align="right" />Regresar</button>';
+			$result .= '</tr>';
+		} else { //OPCION REGRESAR
 			$result .= '<tr bgcolor="C9F4D4">';
 			$result .= '<td colspan="3" align="right">';
 			$result .= '<button name="action" type="button" value="Regresar" onclick="regresar()"><img src="/sistemaweb/icons/atra.gif" align="right" />Regresar</button>';

@@ -62,7 +62,15 @@ class ConsultaCuentaxCobrarModel extends Model {
 					cli.cli_razsocial AS razsocial,
 					--sum(cab.nu_importesaldo) AS total,
 					(CASE WHEN cab.ch_moneda = '01' THEN 'S/' ELSE '$' END) as moneda,
-					(CASE WHEN cab.ch_tipdocumento = '20' THEN SUM(cab.nu_importesaldo * -1) ELSE SUM(cab.nu_importesaldo) END) AS total,
+					--(CASE WHEN cab.ch_tipdocumento = '20' THEN SUM(cab.nu_importesaldo * -1) ELSE SUM(cab.nu_importesaldo) END) AS total,
+					(CASE --SI EL VALE ESTA LIGADO A UNA FACTURA ANTICIPO, NO SE SUMARA A LOS TOTALES
+						WHEN ( SELECT ch_fac_anticipo FROM fac_ta_factura_cabecera WHERE
+									ch_fac_seriedocumento||'-'||ch_fac_numerodocumento = (select TRIM(cod_hermandad) from val_ta_complemento_documento where ch_liquidacion = cab.ch_numdocreferencia GROUP BY cod_hermandad)               
+									AND ch_fac_anticipo = 'S' ) = 'S' THEN 
+									0
+								ELSE
+									CASE WHEN cab.ch_tipdocumento = '20' THEN SUM(cab.nu_importesaldo * -1) ELSE SUM(cab.nu_importesaldo) END
+					END) AS total,
 					0::integer AS total2,
 					0::integer AS total3,
 					CASE WHEN sum(cli.cli_creditosol) is null THEN 0 ELSE sum(cli.cli_creditosol) END as credito,
@@ -83,7 +91,8 @@ class ConsultaCuentaxCobrarModel extends Model {
 					cab.ch_sucursal,
 					cli.cli_ndespacho_efectivo,
 					cli_anticipo,
-					cab.ch_moneda
+					cab.ch_moneda,
+					cab.ch_numdocreferencia
 				) AS K
 
 				UNION
@@ -151,7 +160,9 @@ class ConsultaCuentaxCobrarModel extends Model {
 			ORDER BY
 				razsocial;";
 
-		//echo $sql;
+		echo "<pre>";
+		echo $sql;
+		echo "</pre>";
 	
 		if ($sqlca->query($sql) < 0)
 			return false;

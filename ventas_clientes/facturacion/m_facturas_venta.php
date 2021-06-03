@@ -115,15 +115,15 @@ class modelSalesInvoice {
 
     	$sql = "
 SELECT
- VC.ch_almacen AS nu_codigo_almacen,
- VC.ch_fac_tipodocumento AS nu_tipo_documento,
+ VC.ch_almacen AS nu_codigo_almacen, --1 DESC
+ VC.ch_fac_tipodocumento AS nu_tipo_documento, --2 DESC
  TDOCU.tab_desc_breve AS no_tipo_documento,
- VC.ch_fac_seriedocumento AS no_serie_documento,
- VC.ch_fac_numerodocumento AS nu_numero_documento,
+ VC.ch_fac_seriedocumento AS no_serie_documento, --4 DESC
+ VC.ch_fac_numerodocumento AS nu_numero_documento, --5 DESC 
  CLI.cli_codigo AS nu_codigo_cliente,
  CLI.cli_ruc AS nu_documento_identidad_cliente,
  CLI.cli_razsocial AS no_razsocial_breve_cliente,
- VC.dt_fac_fecha AS fe_emision,
+ VC.dt_fac_fecha AS fe_emision, --9 DESC
  TMONE.tab_desc_breve AS no_signo_moneda,
  TC.tca_venta_oficial AS ss_tipo_cambio,
  VC.nu_fac_valorbruto AS ss_valor_venta,
