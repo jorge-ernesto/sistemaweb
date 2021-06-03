@@ -261,14 +261,12 @@ class ClienteController extends Controller {
     function valruc_sunat($data){
         $ch=curl_init();
         curl_setopt($ch, CURLOPT_URL, 'http://services.opensysperu.com/tid/pe/ruc/'.$data["key"].'/'.$data["taxid"]);
-		  error_log('http://services.opensysperu.com/tid/pe/ruc/'.$data["key"].'/'.$data["taxid"]);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $content=curl_exec($ch);
         $status=curl_getinfo($ch, CURLINFO_HTTP_CODE); 
         curl_close($ch);
         if($status=="200"){
-			  	error_log(json_encode( $this->regular_expresion(array("content"=>$content,"taxid"=>$data["taxid"])) ));
             return $this->regular_expresion(array("content"=>$content,"taxid"=>$data["taxid"]));
         }
         return array("operation"=>2);

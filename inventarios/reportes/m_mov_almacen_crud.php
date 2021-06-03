@@ -260,8 +260,8 @@ class MovimientoAlmacenCRUDModel {
 
 			$sql = "
 			SELECT 
-				MOVI.mov_numero AS nu_formulario, --1
-				TO_CHAR(MOVI.mov_fecha,'dd/mm/yyyy hh24:mi:ss') AS fe_emision, --2 DESC
+				MOVI.mov_numero AS nu_formulario,
+				TO_CHAR(MOVI.mov_fecha,'dd/mm/yyyy hh24:mi:ss') AS fe_emision,
 				TO_CHAR(MOVI.mov_fecha,'dd/mm/yyyy') AS fe_sistema,
 				PROVEE.pro_codigo AS id_proveedor,
 				PROVEE.pro_razsocial AS no_razon_social,

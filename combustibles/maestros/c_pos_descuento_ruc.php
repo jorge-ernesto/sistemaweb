@@ -52,9 +52,6 @@ class PosDescuentoRucController extends Controller {
 		$usuario	= $_SESSION['auth_usuario'];
 		//evaluar y ejecutar $action
 
-		//VERSION ENERGIGAS
-		$version_energigas = true;
-
 		switch ($this->action) {
 			case "Excel":
 				$tipo  	= trim($_REQUEST['tipo_doc']);
@@ -97,20 +94,8 @@ class PosDescuentoRucController extends Controller {
 				$tipo = $_REQUEST['tipo'];
 				$validar = PosDescuentoRucModel::validarRuc(trim(pg_escape_string($_REQUEST['ruc'])));
 
-            $errores = array();
+                $errores = array();
 
-				/**
-				 * Para Notas de Despacho (1)
-				 * -Valida que RUC exista
-				 * 
-				 * Para Factura (2)
-				 * -No valida que RUC exista
-				 * -Valida que el RUC tenga 11 digitos y que sea numerico
-				 * 
-				 * Boleta (3)
-				 * -No valida que RUC exista
-				 * -Valida que sea numerico
-				 */
 				if ($tipo == '3' and !is_numeric($ruc)) {
 					$errores[] = "Ingrese un RUC con solo numeros";
 				}else if ($tipo == '2' and (strlen($ruc) < 11 || !is_numeric($ruc))) {
@@ -119,13 +104,6 @@ class PosDescuentoRucController extends Controller {
 					$errores[] = "no existe RUC en clientes";
 				}
 
-				/**
-				 * Validaciones adicionales:
-				 * -El descuento tiene que ser numerico
-				 * -Codigo de Producto no puede estar vacio
-				 * -Debe seleccionar un estado para el descuento (Activo o Inactivo)
-				 * -El descuento no puede ser 0
-				 */
 				if (!is_numeric($descuento)) {
 				    $errores[] = "El campo descuento tiene que ser un valor numerico";
 				}
@@ -212,11 +190,7 @@ class PosDescuentoRucController extends Controller {
             	break;
 
             case 'descargarFormatoExcel':		
-				if($version_energigas == true){
-					$filename = '/sistemaweb/assets/downloads/descuentos_ruc_optimizado.xls';
-				}else{
-					$filename = '/sistemaweb/assets/downloads/descuentos_ruc.xls';
-				}
+				$filename = '/sistemaweb/assets/downloads/descuentos_ruc.xls';
 				if (file_exists($filename)) {
 					header("Content-type: application/vnd.ms-excel");
 					header("Content-Disposition: attachment; filename=$filename");
@@ -228,21 +202,10 @@ class PosDescuentoRucController extends Controller {
 
 			case "ImportarDescuentos":
 
-				echo "<script>console.log('REQUEST: " . json_encode($_REQUEST) . "')</script>";
-				echo "<script>console.log('FILES:" . json_encode($_FILES) . "')</script>";
-
 				$filename 	= $_FILES['ubica']['name'];
-				$resultado 	= $modelo->extension($filename); //Extension del archivo
+				$resultado 	= $modelo->extension($filename);
 				$tamano 	= $_FILES['ubica']['size']/1024/1024;
 				$tamano 	= substr($tamano,0,5);
-
-				echo "<script>console.log('" . json_encode( 
-					array( 
-						"filename"  => $filename, 
-						"resultado" => $resultado, 
-						"tamano"    => $tamano 
-					) 
-				) . "')</script>";
 
 				if ($_FILES['ubica']["error"] > 1){
 					echo "<script>alert('Error al ubicar el archivo')</script>";
@@ -251,19 +214,12 @@ class PosDescuentoRucController extends Controller {
 				} elseif ($resultado != 'xls') {
 					?><script>alert("<?php echo 'Error la extension debe de ser .xls' ; ?> ");</script><?php
 				}else{
-					
-					//MOVEMOS ARCHIVO EXCEL
-					move_uploaded_file($_FILES['ubica']['tmp_name'],"/sistemaweb/combustibles/excel_descuentos_ruc/" . $_FILES['ubica']['name']); //move_uploaded_file ( string $filename , string $destination )
+
+					move_uploaded_file($_FILES['ubica']['tmp_name'],"/sistemaweb/combustibles/excel_descuentos_ruc/" . $_FILES['ubica']['name']);
 					$archivo	= "/sistemaweb/combustibles/excel_descuentos_ruc/".$_FILES['ubica']['name'];
-					
-					//OBTENEMOS DATOS DE ARCHIVO EXCEL
-					$datos		= new Spreadsheet_Excel_Reader($archivo);					
+					$datos		= new Spreadsheet_Excel_Reader($archivo);
 					$result     = $template->ImportarDataExcel();
-					if($version_energigas == true){
-						$result .= $template->MostrarDataExcelOptimizado($datos, $filename);
-					}else{
-						$result .= $template->MostrarDataExcel($datos, $filename);
-					}
+					$result		.= $template->MostrarDataExcel($datos, $filename);
 
 			    	$this->visor->addComponent("ContentB", "content_body", $result);
 
