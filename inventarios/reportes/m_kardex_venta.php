@@ -122,7 +122,13 @@ class KardexVentaActModel extends Model {
                         inv.mov_almacen,
                         inv.art_codigo ,
                         sum(inv.mov_cantidad) as  mov_cantidad,
-                        round((sum(inv.mov_costototal)/sum(inv.mov_cantidad)),4) as mov_costounitario,
+                        
+                        --round((sum(inv.mov_costototal)/sum(inv.mov_cantidad)),4) as mov_costounitario,
+                        CASE 
+                            WHEN ( sum(inv.mov_costototal) = 0 AND sum(inv.mov_cantidad) = 0 ) THEN round(0,4)
+                            ELSE round((sum(inv.mov_costototal)/sum(inv.mov_cantidad)),4)
+                        END as mov_costounitario,
+
                         sum(inv.mov_costopromedio) as mov_costopromedio,
                         sum(inv.mov_costototal) as mov_costototal
                 FROM inv_movialma  inv
@@ -219,7 +225,13 @@ class KardexVentaActModel extends Model {
                         inv.art_codigo ,
                         inv.tran_codigo ,
                         sum(inv.mov_cantidad) as  mov_cantidad,
-                       round((sum(inv.mov_costototal)/sum(inv.mov_cantidad)),4) as mov_costounitario,
+                       
+                        --round((sum(inv.mov_costototal)/sum(inv.mov_cantidad)),4) as mov_costounitario,
+                        CASE 
+                            WHEN ( sum(inv.mov_costototal) = 0 AND sum(inv.mov_cantidad) = 0 ) THEN round(0,4)
+                            ELSE round((sum(inv.mov_costototal)/sum(inv.mov_cantidad)),4)
+                        END as mov_costounitario,
+
                         sum(inv.mov_costopromedio) as mov_costopromedio,
                         sum(inv.mov_costototal) as mov_costototal,
                         inv_t.tran_descripcion
@@ -279,7 +291,13 @@ class KardexVentaActModel extends Model {
                         inv.mov_almacen,
                         inv.art_codigo ,
                         sum(inv.mov_cantidad) as  mov_cantidad,
-                        round((sum(inv.mov_costototal)/sum(inv.mov_cantidad)),4) as mov_costounitario,
+                        
+                        --round((sum(inv.mov_costototal)/sum(inv.mov_cantidad)),4) as mov_costounitario,
+                        CASE 
+                            WHEN ( sum(inv.mov_costototal) = 0 AND sum(inv.mov_cantidad) = 0 ) THEN round(0,4)
+                            ELSE round((sum(inv.mov_costototal)/sum(inv.mov_cantidad)),4)
+                        END as mov_costounitario,
+
                         sum(inv.mov_costopromedio) as mov_costopromedio,
                         sum(inv.mov_costototal) as mov_costototal
                 FROM inv_movialma  inv
