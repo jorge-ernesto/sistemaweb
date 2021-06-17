@@ -372,7 +372,7 @@ class EstadoCuentaModel extends Model {
 				5;
 		";
 
-		echo "<pre>".$sql."</pre>";
+		// echo "<pre>".$sql."</pre>";
 
 		if ($sqlca->query($sql)<=0)
 			return $sqlca->get_error();
