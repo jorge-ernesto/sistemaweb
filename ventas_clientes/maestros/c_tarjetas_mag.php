@@ -54,7 +54,9 @@ class TarjetasMagneticasController extends Controller{
 			}
 		}
 
+		error_log("request");
 		error_log(json_encode(array($this->request)));
+		error_log("action");
 		error_log(json_encode(array($this->action)));
 	
 		switch ($this->request)  {
@@ -197,11 +199,11 @@ class TarjetasMagneticasController extends Controller{
 
 						if ($otros!='NO_GRUPO'){
 							if($_REQUEST['validar']=='1'){
-								// $result = TarjetasMagneticasModel::validarPlaca($_REQUEST['tarjeta']['numpla']);
-								// if($result[0] == '1'){
-								// 	$result = TarjetasMagneticasTemplate::errorResultado('ERROR: Ya existe Nro. Placa: '.$_REQUEST['tarjeta']['numpla']);
-								// 	$this->visor->addComponent("error", "error_body", $result);
-								// }elseif($result[0] == '2'){
+								$result = TarjetasMagneticasModel::validarPlaca($_REQUEST['tarjeta']['numpla'], $_REQUEST["registroid"]);
+								if($result[0] == '1'){
+									$result = TarjetasMagneticasTemplate::errorResultado('ERROR: Ya existe Nro. Placa: '.$_REQUEST['tarjeta']['numpla']);
+									$this->visor->addComponent("error", "error_body", $result);
+								}elseif($result[0] == '2'){
 									$result = TarjetasMagneticasModel::guardarRegistro($_REQUEST["registroid"], $ip, $usuario);
 									if ($result!=''){
 										$result = TarjetasMagneticasTemplate::errorResultado('ERROR: LA TARJETA YA EXISTE');
@@ -212,7 +214,7 @@ class TarjetasMagneticasController extends Controller{
 										$result = TarjetasMagneticasTemplate::errorResultado('SE GRABO/ACTUALIZO CORRECTAMENTE LA TARJETA '.$_REQUEST['tarjeta']['numtar'].' !!!');
 										$this->visor->addComponent("error", "error_body", $result);
 									}
-								// }
+								}
 							}
 							if($_REQUEST['validar']=='2'){//MODIFICAR
 								$result = TarjetasMagneticasModel::guardarRegistro($_REQUEST["registroid"], $ip, $usuario);

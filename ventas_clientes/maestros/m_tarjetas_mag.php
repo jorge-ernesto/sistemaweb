@@ -77,17 +77,39 @@ class TarjetasMagneticasModel extends Model{
     }
   }
 
-	/* VALIDAR PLACA */
+	/**
+	 * VALIDAR PLACA
+	 */
 
-	function validarPlaca($placa){
+	function validarPlaca($placa, $registroid = ""){
 		global $sqlca;
+		
+		/**
+		 * Aqui evaluamos si queremos insertar o actualizar
+		 * Si queremos actualizar: excluimos de la validacion el propio registro en si
+		 * Si queremos insertar: no agregamos nada
+		 */
+		$sql_excluir = "";
+		if($registroid != '') { //Si ya existe el registro (actualizar)
+			$sql_excluir = "AND TRIM(numtar) != '".TRIM($registroid)."' ";
+		}else{ //Si es registro nuevo (insertar)
+			$sql_excluir = "";
+		}
 
 		if(!empty($placa)){
 
-		$query =" SELECT trim(numpla) ".
-			" FROM pos_fptshe1 ".
-			" WHERE numpla = '".$placa."' AND estblo = 'N'".
-			" ORDER BY numpla ";
+		$query =" SELECT 
+							trim(numpla)
+						FROM 
+							pos_fptshe1
+						WHERE 
+							numpla = '".$placa."' 
+							AND estblo = 'N'
+							$sql_excluir
+						ORDER BY 
+							numpla ";
+		error_log("Query validarPlaca");
+		error_log($query);
 
 		$result = $sqlca->query($query);
 		$numrows = $sqlca->numrows();
@@ -181,7 +203,9 @@ class TarjetasMagneticasModel extends Model{
 			$query_funcion = "select interface_central_fn_maestros_consulta( to_date( to_char( now(),'yyyy-mm-dd'),'yyyy-mm-dd' ) )" ;
 
 			if ($sqlca->query($query_funcion) < 0){
-			} else { return $sqlca->get_error();}
+			} else { 
+				return $sqlca->get_error();
+			}
 
 			return '';
 
@@ -354,6 +378,8 @@ class TarjetasMagneticasModel extends Model{
 				codcli,
 				numtar
 			";
+		error_log("Query Listado tarjetas magneticas");
+		error_log($query);
 	
 		$resultado_1	= $sqlca->query($query);
 		$numrows	= $sqlca->numrows();
@@ -502,6 +528,7 @@ class TarjetasMagneticasModel extends Model{
   		global $sqlca;
 
   		$query = "select cli_grupo from int_clientes where cli_codigo='".TRIM($codigo)."'";
+		error_log($query);
 
 		$sqlca->query($query);
 
@@ -512,22 +539,23 @@ class TarjetasMagneticasModel extends Model{
 		}else{
 
 			$query = "SELECT cast(max(substring(numtar from 8 for 3)) as numeric)+1 as maximo FROM pos_fptshe1 where SUBSTRING(numtar from 5 for 3)='".trim($result2['cli_grupo'])."'";
+			error_log($query);
 
 			$sqlca->query($query);
 
 			$result = $sqlca->fetchRow();
 
 			if (is_null($result['maximo'])){
-	    			$result['maximo']="7055".trim($result2['cli_grupo'])."001";
-	    		}else{
-	    			if (substr($result['maximo'],0,4)=='7056'){
-	    				$result['maximo']="EXCEDIO_LIMITE";
-	    			}else{
-	    				$result['maximo'] = '7055'.trim($result2['cli_grupo']).substr('000'.$result['maximo'],strlen('000'.$result['maximo'])-3);
-	    			}
-	    		}
+				$result['maximo']="7055".trim($result2['cli_grupo'])."001";
+			}else{
+				if (substr($result['maximo'],0,4)=='7056'){
+					$result['maximo']="EXCEDIO_LIMITE";
+				}else{
+					$result['maximo'] = '7055'.trim($result2['cli_grupo']).substr('000'.$result['maximo'],strlen('000'.$result['maximo'])-3);
+				}
+			}
 
-	    	}
+	   }
 
 	  	return $result['maximo'];
 
