@@ -345,7 +345,7 @@ class TarjetasMagneticasModel extends Model{
 		$cond2 = '';
 		
 		if (!empty($filtro["codigo"]))
-			$cond = " WHERE trim(cli.cli_razsocial)||''||trim(numtar)||''||trim(codcli)||''||trim(nomusu)||''||trim(numpla) ~ '".$filtro["codigo"]."' ";
+			$cond = " WHERE trim( COALESCE(cli.cli_razsocial,'') )||''||trim( COALESCE(numtar,'') )||''||trim( COALESCE(codcli,'') )||''||trim( COALESCE(nomusu,'') )||''||trim( COALESCE(numpla,'') ) ~ '".$filtro["codigo"]."' ";
 
 		if (!empty($placas)){
 
