@@ -34,7 +34,6 @@ class ReporteTurnoModel extends Model {
 						WHEN t.codigo='11620303' THEN '97' 
 						WHEN t.codigo='11620304' THEN 'DB5' 
 						WHEN t.codigo='11620305' THEN '95' 
-						WHEN t.codigo='11620306' THEN 'KEROSENE' 
 						WHEN t.codigo='11620307' THEN 'GLP' 
 						END AS codigo_gasolina           
 					FROM 
@@ -91,11 +90,7 @@ class ReporteTurnoModel extends Model {
 						tipo,
 						codigo;
 				";		
-	   
-		// echo "<pre>";
-		// echo $sql
-		// echo "</pre>";
-
+       
 		if ($sqlca->query($sql) < 0) 
 			return null;
 
@@ -105,7 +100,6 @@ class ReporteTurnoModel extends Model {
 			$registro[] = $reg;
 		}
 
-		//echo "<script>console.log('" . json_encode($registro) . "')</script>";
 		return $registro; 
 	}
 
@@ -130,20 +124,6 @@ class ReporteTurnoModel extends Model {
 			$registro[] = $reg;
 		}
 
-		return $registro; 
-	}
-
-	function getArticuloDescripcionBreve() {
-		global $sqlca;
-
-		$sql = "SELECT art_codigo, art_descripcion, art_descbreve FROM int_articulos WHERE art_codigo IN ('11620301','11620302','11620303','11620304','11620305','11620306','11620307') ORDER BY art_codigo;";
-		if($sqlca->query($sql)<0) return false;	
-
-		while($reg = $sqlca->fetchRow()) {
-			$registro[trim($reg['art_codigo'])] = trim($reg['art_descbreve']);
-		}
-		
-		//echo "<script>console.log('" . json_encode($registro) . "')</script>";
 		return $registro; 
 	}
 }

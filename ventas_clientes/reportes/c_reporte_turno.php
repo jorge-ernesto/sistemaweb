@@ -8,7 +8,7 @@ class ReporteTurnoController extends Controller {
 
 	function Titulos($pdf,$fecha) {
 	//Títulos de las columnas
-		$header=array('     '.$fecha,'       84','       90','       95','       97','        BD5','        KEROSENE','         Total Liquido','        GLP');
+		$header=array('     '.$fecha,'       84','       90','       95','       97','        BD5','         Total Liquido','        GLP');
 		$header2=array('Galones','importe');
 	//Carga de datos
 		$pdf->SetFont('Arial','',8);
@@ -39,7 +39,6 @@ class ReporteTurnoController extends Controller {
 		ob_start();
 		$this->estaciones=ReporteTurnoModel::obtieneListaEstaciones();
 		$this->reporte=ReporteTurnoModel::reporte_turno();
-		$this->articulos=ReporteTurnoModel::getArticuloDescripcionBreve(); 		
 		$pdf=new pdf_turno("P","mm","A3");
 		$workbook = new Workbook($chrFileName);
 		$formato0 =$workbook->add_format();
