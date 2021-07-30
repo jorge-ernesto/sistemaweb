@@ -699,27 +699,84 @@
             }
         }
 
-        function getArchivo(){
+        function getOIDLogo(){
             global $sqlca;
 
             $result = array();
             $sql = "
                 SELECT
-                    ruc as ruc
+                    par_valor
                 FROM
-                    int_ta_sucursales
+                    int_parametros
                 WHERE
-                    ch_sucursal = '" . $_SESSION['almacen'] . "'
-                LIMIT 1
+                    par_nombre = 'oidlog'
+                LIMIT 1;
             ";
+            error_log($sql);
 
             if($sqlca->query($sql) < 0) {
                 return null;
             } else {
                 $row = $sqlca->fetchRow();
-                return $row['ruc'] . ".png";
+                return $row['par_valor'];
             }
         }
+
+        function getImageLargeObject($logo_oid){            
+            $dbconn = pg_connect("host=127.0.0.1 user=postgres dbname=integrado port=5432") or die('Could not connect: ' . pg_last_error());
+
+            //Comenzamos transaccion
+            pg_query($dbconn, "BEGIN") or die('BEGIN failed: ' . pg_last_error());
+
+            //Recurso de large object
+            $lo_handle = pg_lo_open($dbconn, $logo_oid, "r") or die('pg_lo_open failed: ' . pg_last_error());
+                        
+            //Leemos large object
+            $logo_data = pg_lo_read($lo_handle, '50000') or die('pg_lo_read failed: ' . pg_last_error());
+            if ($logo_data === false)
+                return "";
+
+            //Cerramos transaccion
+            pg_lo_close($lo_handle) or die('pg_lo_close failed: ' . pg_last_error());
+            pg_query($dbconn, "COMMIT;")  or die('COMMIT failed: ' . pg_last_error());
+            pg_close($dbconn);
+            
+            return $logo_data;
+        }
+
+        // function getImageLargeObject($logo_oid){            
+        //     $dbconn = pg_connect("host=127.0.0.1 user=postgres dbname=integrado port=5432") or die('Could not connect: ' . pg_last_error());
+
+        //     //Comenzamos transaccion
+        //     pg_query($dbconn, "BEGIN") or die('BEGIN failed: ' . pg_last_error());
+
+        //     //Generamos recurso de imagen
+        //     $logo_file = 'logocliente.jpg';
+        //     $logo_handle = fopen($logo_file, 'wb') or die('Cannot open file:  '.$logo_file);
+        //     $chunk_size = 50000;
+
+        //     //Recurso de large object
+        //     $lo_handle = pg_lo_open($dbconn, $logo_oid, "r") or die('pg_lo_open failed: ' . pg_last_error());
+                        
+        //     //Leemos large object
+        //     $logo_data = pg_lo_read($lo_handle, '50000') or die('pg_lo_read failed: ' . pg_last_error());
+        //     if ($logo_data === false)
+        //         return "";
+
+        //     //Obtenemos largo de imagen
+        //     $data_len = strlen($logo_data);
+
+        //     //Reenscribimos recurso de imagen
+        //     fwrite($logo_handle, $logo_data, $data_len) or die('Cannot write to file:  '.$logo_file);
+
+        //     //Cerramos transaccion
+        //     fclose($logo_handle) or die('Cannot close file:  '.$logo_file);
+        //     pg_lo_close($lo_handle) or die('pg_lo_close failed: ' . pg_last_error());
+        //     pg_query($dbconn, "COMMIT;")  or die('COMMIT failed: ' . pg_last_error());
+        //     pg_close($dbconn);
+
+        //     return $logo_file;
+        // }
 
         function reportePdf($num_liquidacion, $ch_cliente, $Factura, $forma, $parametro_opcional) {
             $reporte_array = array();
@@ -833,18 +890,32 @@
                     $reporte->definirColumna("BLANCO", $reporte->TIPO_TEXTO, 91, "R", "_nrovales");
                     $reporte->definirColumna("NROVALES2", $reporte->TIPO_TEXTO, 91, "L", "_nrovales");                    
 
-                    $archivo = "logocliente.jpg";
-                    // $archivo = $this->getArchivo();
-                    $ruta = "/sistemaweb/$archivo";
+                    //OBTENEMOS IMAGEN DESDE RUTA DE SERVIDOR
+                    // $ruta = "/sistemaweb/logocliente.jpg";
  
                     //Comprueba si existe el archivo y la ubicacion del archivo
+                    // $existe = false;
+                    // if (file_exists($ruta)) {
+                    //     $existe = true;
+                    // }
+
+                    // if($existe){
+                    //     $reporte->definirCabeceraImagen(1,3,$ruta, 100, 50);                                                 
+                    // }
+
+                    //OBTENEMOS IMAGEN DESDE LARGE OBJECT EN BASE DE DATOS
+                    $ruta = "";
+                    $oid = $this->getOIDLogo();
+                    $large_object = ( is_null($oid) || empty($oid) ) ? "" : $this->getImageLargeObject($oid);
+
+                    //Comprueba si existe large object
                     $existe = false;
-                    if (file_exists($ruta)) {
+                    if($large_object != ""){
                         $existe = true;
                     }
 
                     if($existe){
-                        $reporte->definirCabeceraImagen(1,3,$ruta, 100, 50);                                                 
+                        $reporte->definirCabeceraImagenLargeObject(1,3,$ruta, 100, 50, $large_object);                                                 
                     }
 
                     $reporte->definirCabeceraSize(4, "C", "courier,B,15", "LIQUIDACION DE FACTURAS");                                             
