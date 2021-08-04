@@ -948,6 +948,79 @@ function Image($file,$x,$y,$w=0,$h=0,$type='',$link='')
 		$this->Link($x,$y,$w,$h,$link);
 }
 
+function ImageLargeObject($file,$x,$y,$w=0,$h=0,$type='',$link='',$large_object='')
+{
+	//Obtenemos large object
+	$logo_data = $large_object;
+
+	//Generamos recurso de imagen
+	$file = 'logo.jpg';
+	$logo_handle = fopen($file, 'wb') or die('Cannot open file:  '.$file);
+	$chunk_size = 50000;
+
+	//Obtenemos largo de imagen
+	$data_len = strlen($logo_data);
+
+	//Reenscribimos recurso de imagen
+	fwrite($logo_handle, $logo_data, $data_len) or die('Cannot write to file:  '.$file);
+
+	//Cerramos transaccion
+	fclose($logo_handle) or die('Cannot close file:  '.$file);
+
+	//Put an image on the page
+	if(!isset($this->images[$file]))
+	{
+		//First use of image, get info
+		if($type=='')
+		{
+			$pos=strrpos($file,'.');
+			if(!$pos)
+				$this->Error('Image file has no extension and no type was specified: '.$file);
+			$type=substr($file,$pos+1);
+		}
+        $type=strtolower($type);
+        if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+            $mqr=get_magic_quotes_runtime();
+            set_magic_quotes_runtime(0);
+        }
+		if($type=='jpg' || $type=='jpeg')
+			$info=$this->_parsejpg($file);
+		elseif($type=='png')
+			$info=$this->_parsepng($file);
+		else
+		{
+			//Allow for additional formats
+			$mtd='_parse'.$type;
+			if(!method_exists($this,$mtd))
+				$this->Error('Unsupported image type: '.$type);
+			$info=$this->$mtd($file);
+        }
+        if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+            set_magic_quotes_runtime($mqr);
+        }
+		$info['i']=count($this->images)+1;
+		$this->images[$file]=$info;
+	}
+	else
+		$info=$this->images[$file];
+	//Automatic width and height calculation if needed
+	if($w==0 && $h==0)
+	{
+		//Put image at 72 dpi
+		$w=$info['w']/$this->k;
+		$h=$info['h']/$this->k;
+	}
+	if($w==0)
+		$w=$h*$info['w']/$info['h'];
+	if($h==0)
+		$h=$w*$info['h']/$info['w'];
+	$this->_out(sprintf('q %.2f 0 0 %.2f %.2f %.2f cm /I%d Do Q', $w*$this->k, $h*$this->k, $x*$this->k, ($this->h-($y+$h))*$this->k, $info['i']));
+	if($link)
+		$this->Link($x,$y,$w,$h,$link);
+	
+	unlink($file);
+}
+
 function Ln($h='')
 {
 	//Line feed; default value is last cell height

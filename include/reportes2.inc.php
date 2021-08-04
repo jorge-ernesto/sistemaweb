@@ -54,6 +54,15 @@ class CReportes2 extends FPDF
 		$this->cabeceraImagen['alto'] = $alto;
 		$this->cabeceraImagen['ancho'] = $ancho;
     }
+
+	 function definirCabeceraImagenLargeObject($lini, $lfin, $url, $alto, $ancho, $large_object){
+		$this->cabeceraImagen['linea_ini'] = $lini;
+		$this->cabeceraImagen['linea_fin'] = $lfin;
+		$this->cabeceraImagen['url'] = $url;
+		$this->cabeceraImagen['alto'] = $alto;
+		$this->cabeceraImagen['ancho'] = $ancho;
+		$this->cabeceraImagen['large_object'] = $large_object;
+    }
     
     function definirCabeceraPredeterminada($valores, $template="_default"){
 		$this->cab_default[$template] = $valores;
@@ -165,7 +174,11 @@ class CReportes2 extends FPDF
          if($this->cabeceraImagen)
          {
 	       $temp = $this->ParseHeaderImagen($this->cabeceraImagen['url']);
-               $this->Image($temp, $this->GetX(), $this->GetY(), $this->cabeceraImagen['alto'], $this->cabeceraImagen['ancho']);
+					if( isset($this->cabeceraImagen['large_object']) ){
+						$this->ImageLargeObject($temp, $this->GetX(), $this->GetY(), $this->cabeceraImagen['alto'], $this->cabeceraImagen['ancho'], '', '', $this->cabeceraImagen['large_object']);
+					}else{
+						$this->Image($temp, $this->GetX(), $this->GetY(), $this->cabeceraImagen['alto'], $this->cabeceraImagen['ancho']);
+					}
 
                for($i=$this->cabeceraImagen['linea_ini']; $i<=$this->cabeceraImagen['linea_fin']; $i++)
                {
