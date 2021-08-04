@@ -10686,7 +10686,7 @@ WHERE
 						ELSE 'H'
 					END AS ddh,
 					--CASE WHEN sum(d.nu_fac_importeneto) is null THEN cast(0.00 as decimal) ELSE round(FIRST(t.nu_fac_valortotal),2)-round(FIRST(t.nu_fac_impuesto1),2) END as importe, --Agregado para que redondee correctamente
-					CASE WHEN sum(d.nu_fac_importeneto) is null THEN cast(0.00 as decimal) ELSE round(sum(d.nu_fac_valortotal) - sum(d.nu_fac_impuesto1),2) END as importe, --CAMBIO
+					CASE WHEN sum(d.nu_fac_importeneto) is null THEN cast(0.00 as decimal) ELSE round(sum(d.nu_fac_valortotal),2) - round(sum(d.nu_fac_impuesto1),2) END as importe, --CAMBIO
 					'VENTA MANUALES ' || substring(t.dt_fac_fecha::text from 9 for 2) || '-' || substring(t.dt_fac_fecha::text from 6 for 2) || '-' || substring(t.dt_fac_fecha::text from 3 for 2) ||' '::text as venta, 
 					t.ch_almacen as sucursal , 
 					t.ch_fac_seriedocumento || '-' ||  substr(t.ch_fac_numerodocumento,2)::text as dnumdoc,
