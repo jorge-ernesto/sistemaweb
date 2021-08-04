@@ -10875,44 +10875,44 @@ WHERE
 		// return false;
 
 		// Nueva forma de corrección de centimos
-		$arrData = array();
-	    $sSerieNumeroDocumento = '';
-	    $fTotal4070 = 0;
-	    $fTotal12 = 0;
-		if ($sqlca->query($diferencia)>0){
-			while ($reg = $sqlca->fetchRow()){
-		        if( substr($reg[4],0,2) == '12' && $sSerieNumeroDocumento != $reg[11]){
-		            $fTotal4070 = 0.00;
-		            $fTotal12 = $reg[9];
-		            $sSerieNumeroDocumento = $reg[11];
-		        }
+		// $arrData = array();
+	   //  $sSerieNumeroDocumento = '';
+	   //  $fTotal4070 = 0;
+	   //  $fTotal12 = 0;
+		// if ($sqlca->query($diferencia)>0){
+		// 	while ($reg = $sqlca->fetchRow()){
+		//         if( substr($reg[4],0,2) == '12' && $sSerieNumeroDocumento != $reg[11]){
+		//             $fTotal4070 = 0.00;
+		//             $fTotal12 = $reg[9];
+		//             $sSerieNumeroDocumento = $reg[11];
+		//         }
 
-		        if( substr($reg[4],0,2) != '12' && $sSerieNumeroDocumento == $reg[11]){
-		            $fTotal4070 += $reg[9];
-		        }
+		//         if( substr($reg[4],0,2) != '12' && $sSerieNumeroDocumento == $reg[11]){
+		//             $fTotal4070 += $reg[9];
+		//         }
 
-		        if ( substr($reg[4],0,2) == '40' && $sSerieNumeroDocumento == $reg[11] ){//Solo se restará a la cuenta IGV 40
-		            $arrData = array(
-		            	"subdia" => $reg[0],
-		            	"dcompro" => $reg[1],
-		                "documento" => $reg[11],
-		                "cuenta" => $reg[4],
-		                "importe" => $reg[9],
-		            );
-		        }
+		//         if ( substr($reg[4],0,2) == '40' && $sSerieNumeroDocumento == $reg[11] ){//Solo se restará a la cuenta IGV 40
+		//             $arrData = array(
+		//             	"subdia" => $reg[0],
+		//             	"dcompro" => $reg[1],
+		//                 "documento" => $reg[11],
+		//                 "cuenta" => $reg[4],
+		//                 "importe" => $reg[9],
+		//             );
+		//         }
 
-		        if ( $sSerieNumeroDocumento == $reg[11] && ($fTotal4070 == ($fTotal12 + 0.01) || $fTotal4070 == ($fTotal12 - 0.01)) ) {
-		            if( $fTotal12 > $fTotal4070) {
-		            	$fTotal = (double)$arrData['importe'] + 0.01;
-						$sale = $sqlca->query("UPDATE tmp_concar_centimo SET dimport = ".$fTotal." WHERE dcompro='".trim($arrData['dcompro'])."' AND dcuenta='" . $arrData['cuenta'] . "' AND trim(dcodane)='' AND trim(dsubdia)='".trim($arrData['subdia'])."';", "queryaux2");
-		            } else {
-		            	$fTotal = (double)$arrData['importe'] - 0.01;
-		            	$sale = $sqlca->query("UPDATE tmp_concar_centimo SET dimport = ".$fTotal." WHERE dcompro='".trim($arrData['dcompro'])."' AND dcuenta='" . $arrData['cuenta'] . "' AND trim(dcodane)='' AND trim(dsubdia)='".trim($arrData['subdia'])."';", "queryaux2");
-		            }
-		        }
-		    }
-		}
-		error_log("PASO 3: Actualizamos tmp_concar_centimo");
+		//         if ( $sSerieNumeroDocumento == $reg[11] && ($fTotal4070 == ($fTotal12 + 0.01) || $fTotal4070 == ($fTotal12 - 0.01)) ) {
+		//             if( $fTotal12 > $fTotal4070) {
+		//             	$fTotal = (double)$arrData['importe'] + 0.01;
+		// 				$sale = $sqlca->query("UPDATE tmp_concar_centimo SET dimport = ".$fTotal." WHERE dcompro='".trim($arrData['dcompro'])."' AND dcuenta='" . $arrData['cuenta'] . "' AND trim(dcodane)='' AND trim(dsubdia)='".trim($arrData['subdia'])."';", "queryaux2");
+		//             } else {
+		//             	$fTotal = (double)$arrData['importe'] - 0.01;
+		//             	$sale = $sqlca->query("UPDATE tmp_concar_centimo SET dimport = ".$fTotal." WHERE dcompro='".trim($arrData['dcompro'])."' AND dcuenta='" . $arrData['cuenta'] . "' AND trim(dcodane)='' AND trim(dsubdia)='".trim($arrData['subdia'])."';", "queryaux2");
+		//             }
+		//         }
+		//     }
+		// }
+		// error_log("PASO 3: Actualizamos tmp_concar_centimo");
 
 		// pasando la nueva tabla a texto2
 		$qfinal = "SELECT * FROM tmp_concar_centimo ORDER BY dsubdia, dcodane2, dcompro, dcuenta, dsecue; ";
