@@ -170,30 +170,32 @@ class ValeCRUDTemplate extends Template {
 				</div>
 		  		<div class="column">
 		            <label class="label">Turno </label>
-	    			<span class="select">
-					    <select id="cbo-Nu_Turno" class="combobox required" name="cbo-Nu_Turno">
-					    </select>
-					    <p class="help"></p>
-					</span>
+						<span class="select eliminar_cbo-Nu_Turno">
+							<select id="cbo-Nu_Turno" class="combobox required" name="cbo-Nu_Turno">
+							</select>
+							<p class="help"></p>
+						</span>
 				</div>
 
 		  		<div class="column">
 		            <label class="label">Caja </label>
-	    			<span class="select">
-					    <select id="cbo-Nu_Caja" class="combobox required" name="cbo-Nu_Caja">
-					    </select>
-					    <p class="help"></p>
-					</span>
-				</div>
+						<span class="select eliminar_cbo-Nu_Caja">
+							<select id="cbo-Nu_Caja" class="combobox required" name="cbo-Nu_Caja">
+							</select>
+							<p class="help"></p>
+						</span>
+					</div>
 
 		  		<div class="column cbo-Nu_Lado">
 		            <label class="label">Lado </label>
-	    			<span class="select">
-					    <select id="cbo-Nu_Lado" class="combobox" name="cbo-Nu_Lado">
-					    </select>
-					    <p class="help"></p>
-					</span>
+						<span class="select eliminar_cbo-Nu_Lado">
+							<select id="cbo-Nu_Lado" class="combobox" name="cbo-Nu_Lado">
+							</select>
+							<p class="help"></p>
+						</span>
 				</div>
+
+				<input type="hidden" id="opensoftCentral" value=""></input>
 	        </div>
 
 	        <div class="columns">

@@ -59,6 +59,9 @@ try {
 	}else if($accion == "deleteVale") {
 		$response = $objValeModel->deleteVale($_POST["data"]);
 		echo json_encode($response);
+	}else if($accion == "getOpensoftCentral") {
+		$response = $objValeModel->getOpensoftCentral();
+		echo json_encode($response);
 	}
 } catch (Exception $r) {
 	echo $r->getMessage();

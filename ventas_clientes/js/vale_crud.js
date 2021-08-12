@@ -26,6 +26,10 @@ function edit_vale(Nu_Almacen, Fe_Emision, Ch_Documento, Nu_Turno, Nu_Lado){
 		accion 	: 'editVale',
 		data  	: data,
 	}, function(response){
+		console.log('editVale');
+		console.log(response);
+		// return;
+
 		$( '.message-header-text' ).html('');
 		$( '.message-body' ).html('');
 
@@ -95,40 +99,74 @@ function edit_vale(Nu_Almacen, Fe_Emision, Ch_Documento, Nu_Turno, Nu_Lado){
 			var arrCajas = response.arrCajas;
 			var arrLados = response.arrLados;
 
-			$( "#cbo-Nu_Turno" ).prop( "disabled", false );
-			$( "select[name=cbo-Nu_Turno]" ).html('<option value="">Seleccionar..</option>');
-			for (var i = 1; i <= arrTurnos[0].turno; i++){
-				var selected = '';
-				if(response.arrValeCabecera['ch_turno'] == i)
-					selected = "selected";
-	    		$('#cbo-Nu_Turno').append( '<option value="'+i+'" ' + selected + '>'+i+'</option>' );
-			}
+			/**
+			 * OPENSOFT-82: Registro de vales en Opensoft Central
+			 *	Crear un parámetro "opensoftCentral" en la tabla int_parametros. Cuando éste exista y su valor sea "1", el programa Registro de Vales mostrará inputs:
+          *
+			 *	Turno: 1 caracter numérico
+			 *	Caja: 1 caracter numérico
+			 *	Lado: 2 caracteres numéricos; logitud fija, ceros a la izquierda para completar.
+			 *
+			 *	Los tres campos seguirán manteniendo su condición de obligatoriedad (o no).          
+			 */
+			if( response.arrOpensoftCentral['par_valor'] == 1 ){ //SI EL PARAMETRO EXISTE
+				console.log("Tiene parametro opensoftCentral");
+				$('#opensoftCentral').val('1');
 
-			if ( arrCajas != null ) {
-				$( "#cbo-Nu_Caja" ).prop( "disabled", false );
-				$( "select[name=cbo-Nu_Caja]" ).html('<option value="">Seleccionar..</option>');
-				for (var i = 0; i < arrCajas.length; i++){
+				$('.eliminar_cbo-Nu_Turno').html('');
+				$('.eliminar_cbo-Nu_Caja').html('');
+				$('.eliminar_cbo-Nu_Lado').html('');
+
+				$('.eliminar_cbo-Nu_Turno').removeClass('select');
+				$('.eliminar_cbo-Nu_Caja').removeClass('select');
+				$('.eliminar_cbo-Nu_Lado').removeClass('select');
+
+				var ch_turno = response.arrValeCabecera['ch_turno'].trim();
+				var nu_caja = response.arrValeCabecera['nu_caja'].trim();
+				var nu_lado = response.arrValeCabecera['nu_lado'].trim();
+
+				$('.eliminar_cbo-Nu_Turno').html(`<input type="text" class="input" id="cbo-Nu_Turno" name="cbo-Nu_Turno" value="${ch_turno}" minlength="1" maxlength="1" placeholder="Ingrese turno" required>`);
+				$('.eliminar_cbo-Nu_Caja').html(`<input type="text"  class="input" id="cbo-Nu_Caja"  name="cbo-Nu_Caja"  value="${nu_caja}"  minlength="1" maxlength="1" placeholder="Ingrese caja"  required>`);
+				$('.eliminar_cbo-Nu_Lado').html(`<input type="text"  class="input" id="cbo-Nu_Lado"  name="cbo-Nu_Lado"  value="${nu_lado}"  minlength="2" maxlength="2" placeholder="Ingrese lado"  required>`);				
+			} else { //SI EL PARAMETRO NO EXISTE
+				console.log("No tiene parametro opensoftCentral");
+				$('#opensoftCentral').val('0');
+
+				$( "#cbo-Nu_Turno" ).prop( "disabled", false );
+				$( "select[name=cbo-Nu_Turno]" ).html('<option value="">Seleccionar..</option>');
+				for (var i = 1; i <= arrTurnos[0].turno; i++){
 					var selected = '';
-					if(response.arrValeCabecera['nu_caja'] == arrCajas[i]['caja'])
+					if(response.arrValeCabecera['ch_turno'] == i)
 						selected = "selected";
-		    		$('#cbo-Nu_Caja').append( '<option value="' + arrCajas[i]['caja']+'" ' + selected + '>' + arrCajas[i]['caja'] + '</option>' );
+					$('#cbo-Nu_Turno').append( '<option value="'+i+'" ' + selected + '>'+i+'</option>' );
 				}
-			}
 
-			if ( arrLados != null ) {
-				if(arrLados.length > 0){
-					$( "#cbo-Nu_Lado" ).prop( "disabled", false );
-					$( "#cbo-Nu_Lado" ).addClass('required');
-					$( "select[name=cbo-Nu_Lado]" ).html('<option value="">Seleccionar..</option>');
-					for (var i = 0; i < arrLados.length; i++){
+				if ( arrCajas != null ) {
+					$( "#cbo-Nu_Caja" ).prop( "disabled", false );
+					$( "select[name=cbo-Nu_Caja]" ).html('<option value="">Seleccionar..</option>');
+					for (var i = 0; i < arrCajas.length; i++){
 						var selected = '';
-						if(response.arrValeCabecera['nu_lado'] == arrLados[i]['pump'])
+						if(response.arrValeCabecera['nu_caja'] == arrCajas[i]['caja'])
 							selected = "selected";
-			    		$('#cbo-Nu_Lado').append( '<option value="' + arrLados[i]['pump'] + '" ' + selected + '>' + arrLados[i]['pump'] + '</option>' );
+						$('#cbo-Nu_Caja').append( '<option value="' + arrCajas[i]['caja']+'" ' + selected + '>' + arrCajas[i]['caja'] + '</option>' );
 					}
-				}else{
-					$( ".cbo-Nu_Lado" ).hide();
-					$( "#cbo-Nu_Lado" ).removeClass('required');
+				}
+
+				if ( arrLados != null ) {
+					if(arrLados.length > 0){
+						$( "#cbo-Nu_Lado" ).prop( "disabled", false );
+						$( "#cbo-Nu_Lado" ).addClass('required');
+						$( "select[name=cbo-Nu_Lado]" ).html('<option value="">Seleccionar..</option>');
+						for (var i = 0; i < arrLados.length; i++){
+							var selected = '';
+							if(response.arrValeCabecera['nu_lado'] == arrLados[i]['pump'])
+								selected = "selected";
+							$('#cbo-Nu_Lado').append( '<option value="' + arrLados[i]['pump'] + '" ' + selected + '>' + arrLados[i]['pump'] + '</option>' );
+						}
+					}else{
+						$( ".cbo-Nu_Lado" ).hide();
+						$( "#cbo-Nu_Lado" ).removeClass('required');
+					}
 				}
 			}
 
@@ -342,6 +380,48 @@ $( function() {
 		$( "#cbo-Nu_Almacen" ).prop( "disabled", false );
 		$( "#cbo-Nu_Almacen" ).val("");
 
+		/**
+		 * OPENSOFT-82: Registro de vales en Opensoft Central
+		 *	Crear un parámetro "opensoftCentral" en la tabla int_parametros. Cuando éste exista y su valor sea "1", el programa Registro de Vales mostrará inputs:
+		 *
+		 *	Turno: 1 caracter numérico
+		 *	Caja: 1 caracter numérico
+		 *	Lado: 2 caracteres numéricos; logitud fija, ceros a la izquierda para completar.
+		 *
+		 *	Los tres campos seguirán manteniendo su condición de obligatoriedad (o no).          
+		 */
+		$.post( "reportes/c_vale_crud.php", {
+			accion 		: 'getOpensoftCentral',
+		}, function(response){
+			if (response.status == 'success'){
+				if ( response.arrOpensoftCentral['par_valor'] == 1 ) { //SI EL PARAMETRO EXISTE
+					console.log("Tiene parametro opensoftCentral");
+					$('#opensoftCentral').val('1');
+
+					$('.eliminar_cbo-Nu_Turno').html('');
+					$('.eliminar_cbo-Nu_Caja').html('');
+					$('.eliminar_cbo-Nu_Lado').html('');
+
+					$('.eliminar_cbo-Nu_Turno').removeClass('select');
+					$('.eliminar_cbo-Nu_Caja').removeClass('select');
+					$('.eliminar_cbo-Nu_Lado').removeClass('select');
+
+					// var ch_turno = response.arrValeCabecera['ch_turno'].trim();
+					// var nu_caja = response.arrValeCabecera['nu_caja'].trim();
+					// var nu_lado = response.arrValeCabecera['nu_lado'].trim();
+
+					$('.eliminar_cbo-Nu_Turno').html(`<input type="text" class="input" id="cbo-Nu_Turno" name="cbo-Nu_Turno" value="" minlength="1" maxlength="1" placeholder="Ingrese turno" required>`);
+					$('.eliminar_cbo-Nu_Caja').html(`<input type="text"  class="input" id="cbo-Nu_Caja"  name="cbo-Nu_Caja"  value=""  minlength="1" maxlength="1" placeholder="Ingrese caja"  required>`);
+					$('.eliminar_cbo-Nu_Lado').html(`<input type="text"  class="input" id="cbo-Nu_Lado"  name="cbo-Nu_Lado"  value=""  minlength="2" maxlength="2" placeholder="Ingrese lado"  required>`);				
+				} else { //SI EL PARAMETRO NO EXISTE
+					console.log("No tiene parametro opensoftCentral");
+					$('#opensoftCentral').val('0');
+				}
+			}else{
+				alert('Error al obtener parametro opensoftCentral');
+			}
+		}, 'JSON');
+
 		$.post( "../assets/helper.php", {
 	    	accion 		: 'getAlmacenes',
 		}, function(response){
@@ -437,6 +517,7 @@ $( function() {
 		$( '#table-credit_detail >tbody' ).empty();
     })
 
+	//GUARDAR O EDITAR
 	$( "#btn-save" ).click(function(){
 		/* Validacion de Formulario */
 	    var verify_inputs_required = true;
@@ -484,6 +565,26 @@ $( function() {
 				'Nu_Total' 					: $('#txt-Nu_Total').val(),
 			};
 
+			//OPENSOFT-82: Registro de vales en Opensoft Central					
+			//Validamos existencia de parametro opensoftCentral
+			var opensoftCentral = $('#opensoftCentral').val();			
+			console.log( 'opensoftCentral:', opensoftCentral );
+
+			//Obtenemos value de inputs turno / caja / lado
+			if( opensoftCentral == 1 ){
+				arrFormAgregarVale.Nu_Turno = $('#cbo-Nu_Turno').val();
+				arrFormAgregarVale.Nu_Caja  = $('#cbo-Nu_Caja').val();
+				arrFormAgregarVale.Nu_Lado  = $('#cbo-Nu_Lado').val();
+
+				//Validacion de existencia turno / caja / lado en inputs
+				if( arrFormAgregarVale.Nu_Turno === undefined || arrFormAgregarVale.Nu_Turno === '' ||
+				    arrFormAgregarVale.Nu_Caja  === undefined || arrFormAgregarVale.Nu_Caja  === '' ||
+					 arrFormAgregarVale.Nu_Lado  === undefined || arrFormAgregarVale.Nu_Lado  === '' ){
+					alert('Debe ingresar turno / caja / lado');					
+					return;
+				}
+			}			
+
 			/* Agregar valores opcionales solo si tienen valor */
 			($( "#txt-Nu_Documento_Identidad_Chofer" ).val().length > 0 ? arrFormAgregarVale.Nu_Documento_Identidad_Chofer = $('#txt-Nu_Documento_Identidad_Chofer').val() : '');
 			($( "#txt-Nu_Odometro" ).val().length > 0 ? arrFormAgregarVale.Nu_Odometro = $('#txt-Nu_Odometro').val() : '');
@@ -517,6 +618,10 @@ $( function() {
 
 					arrDetailCreditVoucher.push(obj);
 				});
+
+				console.log(save_accion);
+				console.log(arrFormAgregarVale);			
+				console.log(arrDetailCreditVoucher);				
 
 				$.post( "reportes/c_vale_crud.php", {
 					accion 				: save_accion,

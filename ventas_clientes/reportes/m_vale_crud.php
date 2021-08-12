@@ -998,8 +998,45 @@ WHERE
 		}
 	}
 
+	public function getOpensoftCentral() {
+		global $sqlca;
+
+		//OPENSOFT-82: Registro de vales en Opensoft Central		
+		//Obtenemos parametro opensoftCentral de int_parametros
+		$arrOpensoftCentral = array();
+		$sql_opensoftCentral = "SELECT par_nombre, par_valor FROM int_parametros WHERE par_nombre = 'opensoftCentral';";
+		$sqlca->query($sql_opensoftCentral);
+		$arrOpensoftCentral = $sqlca->fetchRow();
+
+		//Validamos si no existe parametro
+		if( is_null($arrOpensoftCentral) || empty($arrOpensoftCentral) ){
+			$arrOpensoftCentral['par_nombre'] = 'opensoftCentral';
+			$arrOpensoftCentral['par_valor'] = 0;
+		}
+		
+		//Retornamos dato opensoftCentral
+		$response = array(
+			'status' => 'success',
+			'arrOpensoftCentral' => $arrOpensoftCentral,
+		);			
+		return $response;
+	}
+
 	public function editVale($data) {
 		global $sqlca;
+
+		//OPENSOFT-82: Registro de vales en Opensoft Central		
+		//Obtenemos parametro opensoftCentral de int_parametros
+		$arrOpensoftCentral = array();
+		$sql_opensoftCentral = "SELECT par_nombre, par_valor FROM int_parametros WHERE par_nombre = 'opensoftCentral';";
+		$sqlca->query($sql_opensoftCentral);
+		$arrOpensoftCentral = $sqlca->fetchRow();
+
+		//Validamos si no existe parametro
+		if( is_null($arrOpensoftCentral) || empty($arrOpensoftCentral) ){
+			$arrOpensoftCentral['par_nombre'] = 'opensoftCentral';
+			$arrOpensoftCentral['par_valor'] = 0;
+		}
 
 		$arrValeCabecera = array();
 		$arrValeDetalle = array();
@@ -1103,32 +1140,43 @@ WHERE
 			$arrCajas = array();
 			$arrLados = array();
 
-			$sql = "
-			SELECT
-				ch_posturno::INTEGER AS turno
-			FROM
-			   	pos_aprosys
-			WHERE
-			   	da_fecha = '" . $Fe_Emision . "';
-			";
+			//OPENSOFT-82: Registro de vales en Opensoft Central		
+			//Si no existe el parametro buscamos turnos, cajas y lados
+			if( $arrOpensoftCentral['par_valor'] == 0 ){
+				// Turnos
+				$sql = "
+				SELECT
+					ch_posturno::INTEGER AS turno
+				FROM
+						pos_aprosys
+				WHERE
+						da_fecha = '" . $Fe_Emision . "';
+				";
 
-			if ($sqlca->query($sql) < 0)
-				return false;
-
-			$arrTurnos = $sqlca->fetchAll();
-
-			// Cajas
-			$sql = "SELECT DISTINCT caja FROM " . $postrans . " WHERE dia = '" . $Fe_Emision . "' ORDER BY 1;";
-			if ($sqlca->query($sql) < 0)
-				return false;
-			$arrCajas = $sqlca->fetchAll();
-
-			//Lados
-			if($Nu_Lado != ""){
-				$sql = "SELECT DISTINCT pump FROM " . $postrans . " WHERE dia = '".$Fe_Emision."' AND tipo = 'C' ORDER BY 1;";
 				if ($sqlca->query($sql) < 0)
 					return false;
-				$arrLados = $sqlca->fetchAll();
+
+				$arrTurnos = $sqlca->fetchAll();
+				error_log("SQL Turnos");
+				error_log($sql);
+
+				// Cajas
+				$sql = "SELECT DISTINCT caja FROM " . $postrans . " WHERE dia = '" . $Fe_Emision . "' ORDER BY 1;";
+				if ($sqlca->query($sql) < 0)
+					return false;
+				$arrCajas = $sqlca->fetchAll();
+				error_log("SQL Cajas");
+				error_log($sql);
+
+				//Lados
+				if($Nu_Lado != ""){
+					$sql = "SELECT DISTINCT pump FROM " . $postrans . " WHERE dia = '".$Fe_Emision."' AND tipo = 'C' ORDER BY 1;";
+					if ($sqlca->query($sql) < 0)
+						return false;
+					$arrLados = $sqlca->fetchAll();
+				}
+				error_log("SQL Lados");
+				error_log($sql);
 			}
 
 			if($response['status'] == 'error'){
@@ -1146,6 +1194,7 @@ WHERE
 					'arrTurnos' => $arrTurnos,
 					'arrCajas' => $arrCajas,
 					'arrLados' => $arrLados,
+					'arrOpensoftCentral' => $arrOpensoftCentral,
 				);			
 			}
 		}
