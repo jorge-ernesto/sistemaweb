@@ -703,6 +703,8 @@ class InterfaceConcarActModel extends Model {
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 3, 0, '$compra_cuenta_proveedor');
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 3, 1, '$compra_cuenta_impuesto');
 							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 3, 2, '$compra_cuenta_mercaderia');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 3, 3, 'INAFECTO');
+							INSERT INTO public.concar_confignew (concar_confignew_id, ch_sucursal, module, category, subcategory, account) VALUES (nextval('seq_concar_confignew_id'), '$ch_sucursal', 5, 3, 4, 'PERCEPCION');
 						");
 
 						if ((int)$iStatus < 0) {
@@ -3649,8 +3651,10 @@ GROUP BY
  ext.fe1
 )
 			ORDER BY dia, venta, tip2, tip, trans, DCUENTA, ddh;";
-			
+		
+		echo "<pre>";
 		echo "VENTAS COMBUSTIBLE: \n\n".$sql."\n\n";	
+		echo "</pre>";
 		
 		$q1 = "CREATE TABLE tmp_concar (dsubdia character varying(7), dcompro character varying(6), dsecue character varying(7), dfeccom character varying(6), dcuenta character varying(12), dcodane character varying(18),
 			dcencos character varying(6), dcodmon character varying(2), ddh character varying(1), dimport numeric(14,2), dtipdoc character varying(2), dnumdoc character varying(30), 
@@ -11660,9 +11664,11 @@ WHERE
 				,c11.account AS compra_market_cuenta_proveedor 		
 				,c12.account AS compra_cuenta_impuesto 		
 				,c13.account AS compra_market_cuenta_bi 
+				,c14.account AS compra_cuenta_inafecto 
+				,c15.account AS compra_cuenta_percepcion 
 
-				,c14.account AS compra_subdiario_glp
-				,c15.account AS compra_subdiario_market
+				,c16.account AS compra_subdiario_glp
+				,c17.account AS compra_subdiario_market
 			FROM 
 				concar_confignew c1
 				LEFT JOIN concar_confignew c2 ON   c2.module = 0   AND c2.category = 2   AND c2.subcategory = 0   --Centro de Costo Combustible
@@ -11680,9 +11686,11 @@ WHERE
 				LEFT JOIN concar_confignew c11 ON   c11.module = 5   AND c11.category = 3   AND c11.subcategory = 0   --Cuenta Compra Proveedor Market
 				LEFT JOIN concar_confignew c12 ON   c12.module = 5   AND c12.category = 3   AND c12.subcategory = 1   --Cuenta Compra Impuesto
 				LEFT JOIN concar_confignew c13 ON   c13.module = 5   AND c13.category = 3   AND c13.subcategory = 2   --Cuenta Compra BI Market
+				LEFT JOIN concar_confignew c14 ON   c14.module = 5   AND c14.category = 3   AND c14.subcategory = 3   --Cuenta Compra Inafecto
+				LEFT JOIN concar_confignew c15 ON   c15.module = 5   AND c15.category = 3   AND c15.subcategory = 4   --Cuenta Compra Percepcion
 
-				LEFT JOIN concar_confignew c14 ON   c14.module = 5   AND c14.category = 0   AND c14.subcategory = 1   --Subdiario de Compra GLP
-				LEFT JOIN concar_confignew c15 ON   c15.module = 5   AND c15.category = 0   AND c15.subcategory = 2   --Subdiario de Compra Market
+				LEFT JOIN concar_confignew c16 ON   c16.module = 5   AND c16.category = 0   AND c16.subcategory = 1   --Subdiario de Compra GLP
+				LEFT JOIN concar_confignew c17 ON   c17.module = 5   AND c17.category = 0   AND c17.subcategory = 2   --Subdiario de Compra Market
 			WHERE
 				c1.module = 5   AND c1.category = 0   AND c1.subcategory = 0;   --Subdiario de Compra Combustible
 		";
@@ -11708,10 +11716,324 @@ WHERE
 		$compra_market_cuenta_proveedor      = $a[10];
 		$compra_cuenta_impuesto              = $a[11];
 		$compra_market_cuenta_bi             = $a[12];
+		$compra_cuenta_inafecto              = $a[13];
+		$compra_cuenta_percepcion            = $a[14];
 
-		$vcsubdiario_glp                     = $a[13];
-		$vcsubdiario_market                  = $a[14];
+		$vcsubdiario_glp                     = $a[15];
+		$vcsubdiario_market                  = $a[16];
 
+		//FUNCIONALIDAD PARA RECORRER UNO A UNO LOS REGISTROS DE COMPRAS Y GENERAR ASIENTOS, DE MODO QUE REEMPLAZAREMOS QUERY CON UNIONS
+		$sql = "
+			SELECT
+				to_char(date(c.pro_cab_fechaemision),'YYMMDD') as dia,
+				''::text as DCUENTA,
+				c.pro_codigo::text as pro,
+				c.pro_cab_numdocumento::text as trans,
+				'1'::text as tip,
+				'H'::text as ddh,	
+				
+				-- round(FIRST(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_imptotal ELSE c.pro_cab_imptotal + pro_cab_impinafecto END), 2) as importe_total,	
+				-- round(FIRST(c.pro_cab_impto1), 2) as importe_igv,	
+				-- round(FIRST(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_impafecto ELSE c.pro_cab_impafecto + pro_cab_impinafecto END), 2) as importe_bi,	
+			
+				round(FIRST(COALESCE(c.pro_cab_imptotal,0)), 2) as importe_total,	
+				round(FIRST(COALESCE(c.pro_cab_impto1,0)), 2) as importe_impuesto,	
+				round(FIRST(COALESCE(c.pro_cab_impafecto,0)), 2) as importe_bi,	
+				round(FIRST(COALESCE(c.pro_cab_impinafecto,0)), 2) as importe_inafecto,	
+				round(FIRST(COALESCE(c.regc_sunat_percepcion,0)), 2) as importe_percepcion,	
+			
+				'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
+				c.pro_cab_almacen as sucursal,
+				c.pro_cab_seriedocumento|| '-' ||c.pro_cab_numdocumento::text as dnumdoc,
+				'08'::TEXT AS subdiario,
+				''::text as DCENCOS,
+				'C'::text as tip2,
+				c.pro_cab_tipdocumento::TEXT AS nutd,
+				CASE										
+					WHEN TRIM(FIRST(MOVI.art_codigo)) NOT IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles) THEN 'MARKET'
+					WHEN TRIM(FIRST(MOVI.art_codigo)) IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles WHERE ch_codigocombustible = '11620307') THEN 'GLP'
+					WHEN TRIM(FIRST(MOVI.art_codigo)) IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles WHERE ch_codigocombustible != '11620307') THEN 'COMBUSTIBLE'					
+					ELSE CASE
+								WHEN TRIM(rubro.ch_descripcion_breve)::text = 'COMBUSTIBLE' THEN 'COMBUSTIBLE'
+								ELSE 'MARKET'
+							END
+				END AS tipo_documento,
+				FIRST(c.pro_cab_tipdocumento) as pro_cab_tipdocumento,
+				FIRST(c.pro_cab_seriedocumento) as pro_cab_seriedocumento,
+				FIRST(c.pro_cab_numdocumento) as pro_cab_numdocumento
+			FROM
+				cpag_ta_cabecera c
+				INNER JOIN cpag_ta_detalle d ON (c.pro_cab_tipdocumento = d.pro_cab_tipdocumento AND c.pro_cab_seriedocumento = d.pro_cab_seriedocumento AND c.pro_cab_numdocumento = d.pro_cab_numdocumento AND c.pro_codigo = d.pro_codigo)
+				LEFT JOIN cpag_ta_rubros rubro ON(rubro.ch_codigo_rubro = c.pro_cab_rubrodoc)
+				LEFT JOIN inv_movialma AS MOVI ON (c.pro_cab_tipdocumento = MOVI.mov_tipdocuref AND c.pro_cab_seriedocumento || '' || c.pro_cab_numdocumento = MOVI.mov_docurefe)
+			WHERE
+				date(c.pro_cab_fechaemision) BETWEEN '$FechaIni' AND '$FechaFin'
+				AND c.pro_cab_almacen = '$almacen'				
+				AND (	TRIM(MOVI.art_codigo) IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles WHERE ch_codigocombustible != '11620307')
+						OR TRIM(MOVI.art_codigo) IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles WHERE ch_codigocombustible = '11620307')				
+						OR TRIM(MOVI.art_codigo) NOT IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles) )
+				--AND ( MOVI.art_codigo IS NOT NULL OR TRIM(rubro.ch_descripcion_breve)::text = 'SERVICIOS VARIOS' )
+			GROUP BY
+				dia,
+				pro,
+				subdiario,
+				c.pro_cab_almacen,
+				trans,
+				c.pro_cab_seriedocumento,
+				rubro.ch_descripcion_breve,
+				c.pro_cab_tipdocumento
+			ORDER BY
+				dia, trans, pro, ddh DESC;
+		";
+
+		echo "<pre>";		
+		echo "COMPRAS: \n\n".$sql."\n\n";	
+		echo "</pre>";
+
+		//RECORREMOS UNO A UNO LAS COMPRAS PARA GENERAR LOS ASIENTOS
+		$data_asientos = array();
+		if ($sqlca->query($sql)>0) {
+			while ($reg = $sqlca->fetchRow()) {
+								
+				//DETERMINAMOS DE QUE TIPO ES LA COMPRA (COMBUSTIBLE, GLP O MARKET)
+				$es_tipo = $reg['tipo_documento'];
+				$cuenta_total      = "";
+				$cuenta_impuesto   = "";
+				$cuenta_bi         = "";
+				$cuenta_inafecto   = "";
+				$cuenta_percepcion = "";
+				if ( TRIM($es_tipo) == "COMBUSTIBLE" ) {
+					$cuenta_total      = $compra_combustible_cuenta_proveedor;
+					$cuenta_impuesto   = $compra_cuenta_impuesto;
+					$cuenta_bi         = $compra_combustible_cuenta_bi;
+					$cuenta_inafecto   = $compra_cuenta_inafecto;
+					$cuenta_percepcion = $compra_cuenta_percepcion;
+				} else if ( TRIM($es_tipo) == "GLP" ) {
+					$cuenta_total      = $compra_glp_cuenta_proveedor;
+					$cuenta_impuesto   = $compra_cuenta_impuesto;
+					$cuenta_bi         = $compra_glp_cuenta_bi;
+					$cuenta_inafecto   = $compra_cuenta_inafecto;
+					$cuenta_percepcion = $compra_cuenta_percepcion;
+				} else if ( TRIM($es_tipo) == "MARKET" ) {
+					$cuenta_total      = $compra_market_cuenta_proveedor;
+					$cuenta_impuesto   = $compra_cuenta_impuesto;
+					$cuenta_bi         = $compra_market_cuenta_bi;
+					$cuenta_inafecto   = $compra_cuenta_inafecto;
+					$cuenta_percepcion = $compra_cuenta_percepcion;
+				}
+
+				//CREAMOS LOS ASIENTOS POR CADA REGISTRO DE COMPRA
+				//TOTAL
+				$data_asientos[] = array(
+					0 => $reg['dia'],
+					1 => $cuenta_total,
+					2 => $reg['pro'],
+					3 => $reg['trans'],
+					4 => $reg['tip'],
+					5 => 'H', //ddh
+					6 => round($reg['importe_total'] + $reg['importe_inafecto'] + $reg['importe_percepcion'],2), //importe
+					7 => $reg['venta'],
+					8 => $reg['sucursal'],
+					9 => $reg['dnumdoc'],
+					10 => $reg['subdiario'],
+					11 => $reg['dcencos'],
+					12 => $reg['tip2'],
+					13 => $reg['nutd'],
+					//DATA PARA DESGLOSE
+					14 => $reg['pro_cab_tipdocumento'], //TIPO DOCUMENTO
+					15 => $reg['pro_cab_seriedocumento'], //SERIE
+					16 => $reg['pro_cab_numdocumento'], //NUMERO
+					17 => '-'
+				);
+
+				//IMPUESTO
+				$data_asientos[] = array(
+					0 => $reg['dia'],
+					1 => $cuenta_impuesto,
+					2 => $reg['pro'],
+					3 => $reg['trans'],
+					4 => $reg['tip'],
+					5 => 'D',
+					6 => $reg['importe_impuesto'],
+					7 => $reg['venta'],
+					8 => $reg['sucursal'],
+					9 => $reg['dnumdoc'],
+					10 => $reg['subdiario'],
+					11 => $reg['dcencos'],
+					12 => $reg['tip2'],
+					13 => $reg['nutd'],
+					//DATA PARA DESGLOSE
+					14 => $reg['pro_cab_tipdocumento'], //TIPO DOCUMENTO
+					15 => $reg['pro_cab_seriedocumento'], //SERIE
+					16 => $reg['pro_cab_numdocumento'], //NUMERO
+					17 => '-'
+				);
+
+				//INAFECTO SOLO SI EXISTE
+				if ( $reg['importe_inafecto'] > 0 ) {					
+					$data_asientos[] = array(
+						0 => $reg['dia'],
+						1 => $cuenta_inafecto,
+						2 => $reg['pro'],
+						3 => $reg['trans'],
+						4 => $reg['tip'],
+						5 => 'D',
+						6 => $reg['importe_inafecto'],
+						7 => $reg['venta'],
+						8 => $reg['sucursal'],
+						9 => $reg['dnumdoc'],
+						10 => $reg['subdiario'],
+						11 => $reg['dcencos'],
+						12 => $reg['tip2'],
+						13 => $reg['nutd'],	
+						//DATA PARA DESGLOSE
+						14 => $reg['pro_cab_tipdocumento'], //TIPO DOCUMENTO
+						15 => $reg['pro_cab_seriedocumento'], //SERIE
+						16 => $reg['pro_cab_numdocumento'], //NUMERO
+						17 => '-'
+					);
+				}
+
+				//PERCEPCION SOLO SI EXISTE
+				if ( $reg['importe_percepcion'] > 0 ) {
+					$data_asientos[] = array(
+						0 => $reg['dia'],
+						1 => $cuenta_percepcion,
+						2 => $reg['pro'],
+						3 => $reg['trans'],
+						4 => $reg['tip'],
+						5 => 'D',
+						6 => $reg['importe_percepcion'],
+						7 => $reg['venta'],
+						8 => $reg['sucursal'],
+						9 => $reg['dnumdoc'],
+						10 => $reg['subdiario'],
+						11 => $reg['dcencos'],
+						12 => $reg['tip2'],
+						13 => $reg['nutd'],	
+						//DATA PARA DESGLOSE
+						14 => $reg['pro_cab_tipdocumento'], //TIPO DOCUMENTO
+						15 => $reg['pro_cab_seriedocumento'], //SERIE
+						16 => $reg['pro_cab_numdocumento'], //NUMERO
+						17 => '-'
+					);
+				}
+
+				//BI
+				$data_asientos[] = array(
+					0 => $reg['dia'],
+					1 => $cuenta_bi,
+					2 => $reg['pro'],
+					3 => $reg['trans'],
+					4 => $reg['tip'],
+					5 => 'D',
+					6 => $reg['importe_bi'],
+					7 => $reg['venta'],
+					8 => $reg['sucursal'],
+					9 => $reg['dnumdoc'],
+					10 => $reg['subdiario'],
+					11 => $reg['dcencos'],
+					12 => $reg['tip2'],
+					13 => $reg['nutd'],
+					//DATA PARA DESGLOSE
+					14 => $reg['pro_cab_tipdocumento'], //TIPO DOCUMENTO
+					15 => $reg['pro_cab_seriedocumento'], //SERIE
+					16 => $reg['pro_cab_numdocumento'], //NUMERO
+					17 => ( TRIM($es_tipo) == "COMBUSTIBLE" || TRIM($es_tipo) == "GLP" ) ? 'ES_DESGLOSE' : '-' //SI ES COMBUSTIBLE LA BASE IMPONIBLE SE DESGLOSA
+				);
+			}
+		}
+		echo "<pre>";
+		print_r($data_asientos);
+		echo "</pre>";
+
+		//RECORREMOS LOS ASIENTOS DE COMPRAS
+		$data_asientos_ = array();
+		foreach ($data_asientos as $key => $value) {
+			//INGRESAMOS LA INFORMACION EN EL NUEVO ARRAY
+			if( $value['17'] == '-' ) {
+				$data_asientos_[] = array(
+					0 => $value[0],
+					1 => $value[1],
+					2 => $value[2],
+					3 => $value[3],
+					4 => $value[4],
+					5 => $value[5],
+					6 => $value[6],
+					7 => $value[7],
+					8 => $value[8],
+					9 => $value[9],
+					10 => $value[10],
+					11 => $value[11],
+					12 => $value[12],
+					13 => $value[13],
+				);
+			}
+			
+			if ( $value[17] == 'ES_DESGLOSE' ) { //SI ES COMBUSTIBLE LA BASE IMPONIBLE SE DESGLOSA
+				$sql_desglose = "
+					SELECT 
+						SUM(MOVI.mov_costototal) as mov_costototal,
+						FIRST(q.codigo_concar) as codigo_concar
+					FROM
+						inv_movialma as MOVI 
+						LEFT JOIN interface_equivalencia_producto q ON (MOVI.art_codigo = q.art_codigo)
+					WHERE
+						'".TRIM($value[14])."' = MOVI.mov_tipdocuref AND '".TRIM($value[15])."' || '' || '".TRIM($value[16])."' = MOVI.mov_docurefe
+					GROUP BY 
+						MOVI.art_codigo;
+				";
+				echo "<pre>";		
+				echo "COMPRAS COMBUSTIBLE - DESGLOSE BI: \n\n".$sql_desglose."\n\n";
+				echo "</pre>";
+
+				if ($sqlca->query($sql_desglose)>0) {
+					while ($regdes = $sqlca->fetchRow()) {
+						$data_asientos_[] = array(
+							0 => $value[0],
+							1 => $regdes['codigo_concar'],
+							2 => $value[2],
+							3 => $value[3],
+							4 => $value[4],
+							5 => $value[5],
+							6 => $regdes['mov_costototal'],
+							7 => $value[7],
+							8 => $value[8],
+							9 => $value[9],
+							10 => $value[10],
+							11 => $value[11],
+							12 => $value[12],
+							13 => $value[13],
+						);
+					}
+				} else {
+					$data_asientos_[] = array(
+						0 => $value[0],
+						1 => $value[1],
+						2 => $value[2],
+						3 => $value[3],
+						4 => $value[4],
+						5 => $value[5],
+						6 => $value[6],
+						7 => $value[7],
+						8 => $value[8],
+						9 => $value[9],
+						10 => $value[10],
+						11 => $value[11],
+						12 => $value[12],
+						13 => $value[13],
+					);
+				}
+			}
+		}
+		$data_asientos = $data_asientos_;
+
+		echo "<pre>";
+		print_r($data_asientos);
+		echo "</pre>";
+		//CERRAR FUNCIONALIDAD PARA RECORRER UNO A UNO LOS REGISTROS DE COMPRAS Y GENERAR ASIENTOS, DE MODO QUE REEMPLAZAREMOS QUERY CON UNIONS
+
+		/* QUERY METODO VIEJO CON UNIONS
 		$sql = "
 			SELECT * FROM(
 				--COMPRAS DE COMBUSTIBLE
@@ -12070,6 +12392,9 @@ WHERE
 		echo "<pre>";		
 		echo "COMPRAS: \n\n".$sql."\n\n";	
 		echo "</pre>";
+		return;
+		*/
+		// return;
 		
 		$q1 = "CREATE TABLE tmp_concar (dsubdia character varying(7), dcompro character varying(6), dsecue character varying(7), dfeccom character varying(6), dcuenta character varying(12), dcodane character varying(18),
 			dcencos character varying(6), dcodmon character varying(2), ddh character varying(1), dimport numeric(14,2), dtipdoc character varying(2), dnumdoc character varying(20), 
@@ -12082,10 +12407,10 @@ WHERE
 		$contador 		= '0000';  
 		$k 				= 0;
 		$subdia 		= null;
-      
-		if ($sqlca->query($sql)>0) {
+      		
+		if ( count($data_asientos) > 0 ){
 			$correlativo = ($FechaDiv[1] * 10000) + $num_actual;			
-			while ($reg = $sqlca->fetchRow()) {
+			foreach ($data_asientos as $key => $reg) {
 	
 				//reiniciar el numerador cuando sea un dia diferente
 				/*if($subdia != $reg[10]){ ANTES 12/10/2016
@@ -12198,9 +12523,9 @@ WHERE
 		$pc 			= 0;
 		$cons 			= 0;
 			
-		if ($sqlca->query($sql)>0) {
+		if ( count($data_asientos) > 0 ){
 			$correlativo = ($FechaDiv[1] * 10000) + $num_actual;
-			while ($reg = $sqlca->fetchRow()) {
+			foreach ($data_asientos as $key => $reg) {
 
 				//reiniciar el numerador cuando sea un dia diferente
 				/*if($subdia != $reg[10]){ ANTES 12/10/2016
