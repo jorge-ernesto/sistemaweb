@@ -107,20 +107,33 @@ class Tarjetas_Credito_Template extends Template {
 							$sumimporte = $sumimporte + $valor_cadena['importe'];
 							$tickets = count($data); 
 
+							$fontbold = '';
+							if( TRIM($valor_cadena['tm']) != 'A' ){ //No debe ser extorno
+								if( $valor_cadena['efectivo'] > $valor_cadena['importe_total'] ){ //Campo km > importe
+									$estila = "fila_repetida";
+									$fontbold = "style='font-weight: bold;'";
+								}
+							}
+
 		                                        echo "<tr class='$estila'>";
-		                                        echo "<td align='center'>" . $valor_cadena['tipo'] . "</td>";
-		                                        echo "<td align='center'>" . $valor_cadena['numtar'] . "</td>";
-		                                        echo "<td align='left'>" . $valor_cadena['nomtar'] . "</td>";
-		                                        echo "<td align='left'>" . $valor_cadena['cliente'] . "</td>";
-		                                        echo "<td align='center'>" . $valor_cadena['caja'] . "</td>";
-		                                        echo "<td align='right'>" . $valor_cadena['cantidad'] . "</td>";
-		                                        echo "<td align='right'>" . $valor_cadena['importe'] . "</td>";
-		                                        echo "<td align='center'>" . $valor_cadena['ticket'] . "</td>";
-		                                        echo "<td align='center'>" . $valor_cadena['fecha'] . "</td>";
-		                                        echo "<td align='center'>" . $valor_cadena['hora'] . "</td>";
-		                                        if ($valor_cadena['contador'] == 2){
-		                                        echo "<td style='background-color: #FFFFFF' align='center'>AP/REF Repetido</td>";
-		                                        }
+		                                        echo "<td align='center' $fontbold>" . $valor_cadena['tipo'] . "</td>";
+		                                        echo "<td align='center' $fontbold>" . $valor_cadena['numtar'] . "</td>";
+		                                        echo "<td align='left' $fontbold>" . $valor_cadena['nomtar'] . "</td>";
+		                                        echo "<td align='left' $fontbold>" . $valor_cadena['cliente'] . "</td>";
+		                                        echo "<td align='center' $fontbold>" . $valor_cadena['caja'] . "</td>";
+		                                        echo "<td align='right' $fontbold>" . $valor_cadena['cantidad'] . "</td>";
+		                                        echo "<td align='right' $fontbold>" . $valor_cadena['importe'] . "</td>";
+		                                        echo "<td align='center' $fontbold>" . $valor_cadena['ticket'] . "</td>";
+		                                        echo "<td align='center' $fontbold>" . $valor_cadena['fecha'] . "</td>";
+		                                        echo "<td align='center' $fontbold>" . $valor_cadena['hora'] . "</td>";
+		                                       if ($valor_cadena['contador'] == 2){
+		                                        	echo "<td style='background-color: #FFFFFF' align='center'>AP/REF Repetido</td>";
+		                                       }
+															if( TRIM($valor_cadena['tm']) != 'A' ){ //No debe ser extorno
+																if( $valor_cadena['efectivo'] > $valor_cadena['importe_total'] ){ //Campo km > importe
+																	echo "<td style='background-color: #FFFFFF' align='center'>Parte en efectivo mayor a importe</td>";
+																}
+															}
 		                                        echo "</tr>";
 
 		                                        $i++;
