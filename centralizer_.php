@@ -2500,6 +2500,212 @@ FROM
 			echo $comprimido;
 		break;
 
+		/**
+		 * Para ejecutar en modo prueba:
+		 * http://172.18.8.12/sistemaweb/centralizer_.php?mod=VALES_CLIENTES_CREDITO&from=20200801&to=20200831&warehouse_id=003&desde=01/08/2020&hasta=31/08/2020
+		 */
+		case 'VALES_CLIENTES_CREDITO':
+			argRangedCheck();
+			//pg_escape_string
+			$warehouse_id = $_REQUEST['warehouse_id'];
+			$desde = $_REQUEST['desde'];
+			$hasta = $_REQUEST['hasta'];
+
+			//Datos para obtener tabla pos_trans
+			$fecha_explode = explode("/", $hasta);
+			$dYear       = $fecha_explode['2'];
+			$dMonth      = $fecha_explode['1'];
+			$dDay        = $fecha_explode['0'];
+			$pos_transYM = "pos_trans" . $dYear . $dMonth;
+
+			//Desde
+			$porciones_desde = explode("/", $desde);
+			$desde_ = $porciones_desde = $porciones_desde[2] . "-" . $porciones_desde[1] . "-" . $porciones_desde[0];
+
+			//Hasta
+			$porciones_hasta = explode("/", $hasta);
+			$hasta_ = $porciones_desde = $porciones_hasta[2] . "-" . $porciones_hasta[1] . "-" . $porciones_hasta[0];
+
+			//RUCs
+			$clientes = $_REQUEST['clientes'];
+			$clientes = explode("|", $clientes);
+			
+			$clientes_ = '';			
+			foreach ($clientes as $key => $cliente){
+				$clientes_ .= "'" . $clientes[$key] . "',";
+			}
+			$clientes_ = substr($clientes_, 0, -1);
+
+			$sql_vales_clientes_credito = "
+			SELECT
+				TO_CHAR(cab.dt_fecha, 'DD/MM/YYYY') AS fecha,  
+				(  SELECT 
+						TO_CHAR(PT.fecha, 'HH24:MI:SS') 
+					FROM 
+						".$pos_transYM." PT 
+					WHERE 
+						PT.caja||'-'||PT.trans = cab.ch_documento 
+						OR PT.trans::VARCHAR = cab.ch_documento 
+					LIMIT 1 ) AS hora, 
+				--TO_CHAR(PT.fecha, 'HH24:MI:SS') AS hora,
+				--TO_CHAR(cab.fecha_replicacion, 'HH24:MI:SS') AS hora,
+				'ESTACION' AS estacion,
+				cab.ch_documento AS numero,
+				cab.ch_placa AS placa,
+				cab.nu_odometro AS odometro,
+				pf.nomusu AS chofer,
+				art.art_codigo AS codigo,
+				art.art_descbreve AS producto,
+				det.nu_cantidad AS cantidad,
+				det.nu_importe AS importe,
+				CASE
+					when cli.cli_anticipo='S' then fac.cod_hermandad 
+					else
+					fac.ch_fac_seriedocumento||'-'||fac.ch_fac_numerodocumento
+				end AS documento --AQUI OBTIENE EL CAMPO #FACTURA
+			FROM
+				val_ta_cabecera AS cab
+				LEFT JOIN val_ta_detalle AS det
+				 ON(cab.ch_sucursal = det.ch_sucursal AND cab.ch_documento = det.ch_documento AND cab.dt_fecha = det.dt_fecha)
+				LEFT JOIN val_ta_complemento AS com --Numero de vale
+				 ON(cab.ch_sucursal = com.ch_sucursal AND cab.ch_documento = com.ch_documento AND cab.dt_fecha = com.dt_fecha)
+				LEFT JOIN val_ta_complemento_documento AS fac
+				 ON(fac.art_codigo = det.ch_articulo AND fac.ch_numeval = cab.ch_documento AND fac.ch_cliente = cab.ch_cliente AND cab.ch_sucursal = cab.ch_sucursal AND fac.dt_fecha = cab.dt_fecha)
+				LEFT JOIN fac_ta_factura_cabecera AS fac2
+				 ON(fac2.ch_liquidacion = cab.ch_liquidacion)
+				LEFT JOIN pos_fptshe1 AS pf
+				 ON(pf.numtar = cab.ch_tarjeta)
+				LEFT JOIN inv_ta_almacenes AS alma
+				 ON(cab.ch_sucursal = alma.ch_almacen)
+				LEFT JOIN int_clientes AS cli
+				 ON(cli.cli_codigo = cab.ch_cliente)
+				LEFT JOIN int_articulos AS art
+				 ON(art.art_codigo = det.ch_articulo)
+				/*
+				LEFT JOIN (
+						SELECT
+							pos.caja as caja,
+							pos.trans as trans,
+							FIRST(pos.fecha) as fecha --ESTO YA LO LIMITA A 1
+						FROM
+							".$pos_transYM." pos
+						GROUP BY
+							1,2      
+					) AS PT ON(PT.caja||'-'||PT.trans = cab.ch_documento OR PT.trans::VARCHAR = cab.ch_documento)
+				*/
+			WHERE
+				cab.dt_fecha BETWEEN '" . pg_escape_string($desde_) . "' AND '" . pg_escape_string($hasta_) . "'
+				AND TRIM(cab.ch_cliente) IN ($clientes_)
+			ORDER BY
+				cab.ch_cliente,
+				cab.ch_sucursal,
+				cab.dt_fecha DESC,
+				hora DESC;
+			";
+			error_log('VALES_CLIENTES_CREDITO');
+			error_log($sql_vales_clientes_credito);
+			$contenido['vales_clientes_credito'] = SQLImplodeArray($sql_vales_clientes_credito);
+
+			$data = json_encode($contenido);
+			$comprimido = gzcompress($data);
+			echo $comprimido;
+		break;
+
+		/**
+		 * Para ejecutar en modo prueba:
+		 * http://172.18.8.12/sistemaweb/centralizer_.php?mod=COMPROBANTES_COBRANZA&from=20200801&to=20200831&warehouse_id=003&desde=01/08/2020&hasta=31/08/2020&ruc=-&state=0
+		 */
+		case 'COMPROBANTES_COBRANZA':
+			argRangedCheck();
+			//pg_escape_string
+			$warehouse_id = $_REQUEST['warehouse_id'];
+			$desde = $_REQUEST['desde'];
+			$hasta = $_REQUEST['hasta'];
+
+			//Datos para obtener tabla pos_trans
+			$fecha_explode = explode("/", $hasta);
+			$dYear       = $fecha_explode['2'];
+			$dMonth      = $fecha_explode['1'];
+			$dDay        = $fecha_explode['0'];
+			$pos_transYM = "pos_trans" . $dYear . $dMonth;
+
+			//Desde
+			$porciones_desde = explode("/", $desde);
+			$desde_ = $porciones_desde = $porciones_desde[2] . "-" . $porciones_desde[1] . "-" . $porciones_desde[0];
+
+			//Hasta
+			$porciones_hasta = explode("/", $hasta);
+			$hasta_ = $porciones_desde = $porciones_hasta[2] . "-" . $porciones_hasta[1] . "-" . $porciones_hasta[0];
+
+			//RUC
+			$cli_codigo = $_REQUEST['ruc'];
+
+			//State
+			$state = $_REQUEST['state'];
+
+			/**
+			 * Webflotas:
+			 * Pendiente - 0
+			 * Cancelado - 1
+			 * Todos - 2
+			 * 
+			 * Reglas state:
+			 * Pendientes (Saldo <>0)
+			 * Cancelados (Saldo=0)
+			 * Todos (ambos)
+			 */
+			$where_state = "";
+			if($state == 0){
+				$where_state = "AND nu_importesaldo <> 0";
+			}else if($state == 1){
+				$where_state = "AND nu_importesaldo = 0";
+			}else if($state == 2){
+				$where_state = "AND (nu_importesaldo <> 0 OR nu_importesaldo = 0)";
+			}
+
+			$sql_comprobantes_cobranza = "
+			SELECT  
+				--ch_tipdocumento,
+				-- CASE 
+					-- WHEN ch_tipdocumento = '10' THEN '10'
+					-- WHEN ch_tipdocumento = '20' THEN '20'
+					-- WHEN ch_tipdocumento = '21' THEN '21'
+					-- WHEN ch_tipdocumento = '22' THEN '22'			
+				-- END as ch_tipdocumento,
+				gen.tab_descripcion AS ch_tipdocumento,
+				cab.ch_seriedocumento,
+				cab.ch_numdocumento,
+				cab.cli_codigo,
+				cab.dt_fechaemision,
+				cab.nu_dias_vencimiento,
+				cab.dt_fechavencimiento,
+				--ch_moneda,
+				(CASE WHEN cab.ch_moneda = '01' THEN 'S/' ELSE '$' END) as ch_moneda,
+				cab.nu_importetotal,
+				(cab.nu_importetotal - cab.nu_importesaldo) AS nu_importepagos,
+				cab.nu_importesaldo,
+				cab.dt_fechasaldo
+			FROM 
+				ccob_ta_cabecera AS cab
+				LEFT JOIN int_tabla_general AS gen ON(cab.ch_tipdocumento = substring(trim(gen.tab_elemento) for 2 from length(trim(gen.tab_elemento))-1) AND gen.tab_tabla ='08' AND gen.tab_elemento != '000000')
+			WHERE
+				cab.dt_fechaemision BETWEEN '" . pg_escape_string($desde_) . "' AND '" . pg_escape_string($hasta_) . "'
+				AND TRIM(cab.cli_codigo) = '" . TRIM($cli_codigo) . "'
+				$where_state
+			ORDER BY
+				cab.cli_codigo,
+				cab.ch_sucursal,
+				cab.dt_fechaemision DESC;
+			";
+			error_log('COMPROBANTES_COBRANZA');
+			error_log($sql_comprobantes_cobranza);
+			$contenido['comprobantes_cobranza'] = SQLImplodeArray($sql_comprobantes_cobranza);
+
+			$data = json_encode($contenido);
+			$comprimido = gzcompress($data);
+			echo $comprimido;
+		break;
+
 		case 'TOTALS_STATISTICS_SALE':
 			argRangedCheck();
 			//pg_escape_string
