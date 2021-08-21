@@ -36,6 +36,17 @@ class SobrantesFaltantesTrabajadorController extends Controller {
 				break;
 
 			case "actualizaAgregar":
+				// echo "<script>console.log('" . json_encode($_REQUEST) . "')</script>";
+				
+				//Cambiamos formato de fecha
+				if( isset($_REQUEST['dia']) ){
+					$newDate = date( "d/m/Y", strtotime($_REQUEST['dia']) );
+					$_REQUEST['dia'] = $newDate;
+				}
+				//Cerramos Cambiamos formato de fecha
+
+				// echo "<script>console.log('" . json_encode($_REQUEST) . "')</script>";
+				
 				$almacenes = SobrantesFaltantesTrabajadorModel::obtenerAlmacenes();
 				$trabajadores = SobrantesFaltantesTrabajadorModel::obtenerTrabajadores($_REQUEST['dia'],$_REQUEST['turno']);
 				$result = SobrantesFaltantesTrabajadorTemplate::formAgregar($almacenes, $trabajadores,$_REQUEST);
@@ -43,7 +54,17 @@ class SobrantesFaltantesTrabajadorController extends Controller {
 				break;
 
 			case "Guardar":
+				// echo "<script>console.log('" . json_encode($_REQUEST) . "')</script>";
 				
+				//Cambiamos formato de fecha
+				if( isset($_REQUEST['dia']) ){
+					$newDate = date( "d/m/Y", strtotime($_REQUEST['dia']) );
+					$_REQUEST['dia'] = $newDate;
+				}
+				//Cerramos Cambiamos formato de fecha
+
+				// echo "<script>console.log('" . json_encode($_REQUEST) . "')</script>";
+
 				$flag = SobrantesFaltantesTrabajadorModel::validaDia($_REQUEST['dia']);
 
 				if($flag == 1){
@@ -71,6 +92,17 @@ class SobrantesFaltantesTrabajadorController extends Controller {
 				$result_f = "";
 				break;
 			case "doImportar":
+				// echo "<script>console.log('" . json_encode($_REQUEST) . "')</script>";
+
+				//Cambiamos formato de fecha
+				if( isset($_REQUEST['fecha']) ){
+					$newDate = date( "d/m/Y", strtotime($_REQUEST['fecha']) );
+					$_REQUEST['fecha'] = $newDate;
+				}
+				//Cerramos Cambiamos formato de fecha
+
+				// echo "<script>console.log('" . json_encode($_REQUEST) . "')</script>";
+
 				$res = SobrantesFaltantesTrabajadorModel::importarDia($_REQUEST['fecha']);
 				if ($res=="OK") {
 					$almacenes = SobrantesFaltantesTrabajadorModel::obtenerAlmacenes();

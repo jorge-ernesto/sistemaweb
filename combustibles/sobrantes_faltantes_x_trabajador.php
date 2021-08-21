@@ -61,6 +61,7 @@ function actualizaTrabajador() {
 function preValidateSubmit() {
 	document.getElementById('action').value = 'Guardar';
 	document.getElementById('submitButton').click();
+	document.getElementById('action').value = 'actualizaAgregar';
 }
 
 function goBack() {

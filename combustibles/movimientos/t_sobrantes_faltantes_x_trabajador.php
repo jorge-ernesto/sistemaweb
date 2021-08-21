@@ -38,6 +38,8 @@ class SobrantesFaltantesTrabajadorTemplate extends Template {
 	}
 
 	function formImportar() {
+		$fecha_actual = date("Y-m-d");
+
 		$form = new Form('', "Agregar", FORM_METHOD_POST, "control.php", '', "control");
 		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("rqst", "MOVIMIENTOS.SOBRANTESFALTANTESTRABAJADOR"));
 		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("action", "doImportar"));
@@ -45,7 +47,8 @@ class SobrantesFaltantesTrabajadorTemplate extends Template {
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("<table style='width:400px;'><tr><td style='width:50%;text-align:right;'>"));
 
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("Fecha:</td><td style='text-align:left;'>"));
-		$form->addElement(FORM_GROUP_MAIN, new form_element_text("", "fecha", date("d/m/Y"), '<a href="javascript:show_calendar(\'Agregar.fecha\');"><img src="/sistemaweb/images/showcalendar.gif" border=0></a><div style="position:relative"><div id="overDiv" style="position:absolute;float:right; visibility:hidden; z-index:0;"></div></div></td></tr><tr><td style="text-align:right;">', '', 10, 10, true));
+		// $form->addElement(FORM_GROUP_MAIN, new form_element_text("", "fecha", date("d/m/Y"), '<a href="javascript:show_calendar(\'Agregar.fecha\');"><img src="/sistemaweb/images/showcalendar.gif" border=0></a><div style="position:relative"><div id="overDiv" style="position:absolute;float:right; visibility:hidden; z-index:0;"></div></div></td></tr><tr><td style="text-align:right;">', '', 10, 10, true));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<input type="date" name="fecha" id="fecha" value="'.$fecha_actual.'"></td></tr><tr><td style="text-align:right;">'));
 
 		$form->addElement(FORM_GROUP_MAIN, new form_element_submit("submitbutton", "Importar", '', '', 20));
 
@@ -55,6 +58,14 @@ class SobrantesFaltantesTrabajadorTemplate extends Template {
 	}
 
 	function formAgregar($almacenes, $trabajadores,$fila=Array()) {
+		$fecha_actual = date("Y-m-d");
+
+		//Cambiamos formato de fecha
+		if( isset($fila['dia']) ){
+			$fecha = explode("/", $fila['dia']);
+			$fila['dia'] = $fecha[2] . "-" . $fecha[1] . "-" . $fecha[0];
+		}
+		//Cerramos Cambiamos formato de fecha
 
 		$form = new Form('','editar', FORM_METHOD_POST, "control.php", '', 'control');
 		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("rqst", "MOVIMIENTOS.SOBRANTESFALTANTESTRABAJADOR"));
@@ -62,9 +73,10 @@ class SobrantesFaltantesTrabajadorTemplate extends Template {
 		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("action\" id=\"action", "actualizaAgregar"));
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("<table style='width:400px;'><tr><td style='width:50%;text-align:right;'>"));
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("Almacen:</td><td style='width:50%;text-align:left;'>"));
-		$form->addElement(FORM_GROUP_MAIN, new form_element_combo('','almacen',$fila['es'],'</td></tr><tr><td style="text-align:right;">','', '', $almacenes, false, 'onBlur=""'));
+		$form->addElement(FORM_GROUP_MAIN, new form_element_combo('','almacen',$fila['almacen'],'</td></tr><tr><td style="text-align:right;">','', '', $almacenes, false, 'onBlur=""'));
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("Dia:</td><td style='text-align:left;'>"));
-		$form->addElement(FORM_GROUP_MAIN, new form_element_text('', 'dia" id="dia', (isset($fila['dia'])?$fila['dia']:date("d/m/Y")), '<a href="javascript:show_calendar(\'editar.dia\');"><img src="/sistemaweb/images/showcalendar.gif" border=0></a><div style="position:relative"><div id="overDiv" style="position:absolute;float:right; visibility:hidden; z-index:0;"></div></div></td></tr><tr><td style="text-align:right;">', '', 10, 10, true,'onChange="actualizaTrabajador();"'));
+		// $form->addElement(FORM_GROUP_MAIN, new form_element_text('', 'dia" id="dia', (isset($fila['dia'])?$fila['dia']:date("d/m/Y")), '<a href="javascript:show_calendar(\'editar.dia\');"><img src="/sistemaweb/images/showcalendar.gif" border=0></a><div style="position:relative"><div id="overDiv" style="position:absolute;float:right; visibility:hidden; z-index:0;"></div></div></td></tr><tr><td style="text-align:right;">', '', 10, 10, true,'onChange="actualizaTrabajador();"'));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<input type="date" name="dia" id="dia" value="'.(isset($fila['dia'])?$fila['dia']:$fecha_actual).'" onchange="actualizaTrabajador();"></td></tr><tr><td style="text-align:right;">'));
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("Turno:</td><td style='text-align:left;'>"));
 		$form->addElement(FORM_GROUP_MAIN, new form_element_text('', 'turno" id="turno', $fila['turno'], '</td></tr><tr><td style="text-align:right;">', '', 10, 15, false,'onChange="actualizaTrabajador();"'));
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("Trabajador:</td><td style='text-align:left;'>"));

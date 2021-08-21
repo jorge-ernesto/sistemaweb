@@ -50,6 +50,9 @@ class SobrantesFaltantesTrabajadorModel extends Model {
 		$almacen = $_SESSION['almacen'];
 
 		$sql = " SELECT validar_consolidacion('$dia',$turno,'$almacen') ";
+		// echo "<pre>";
+		// echo $sql;
+		// echo "</pre>";
 
 		$sqlca->query($sql);
 
@@ -68,7 +71,7 @@ class SobrantesFaltantesTrabajadorModel extends Model {
 	function obtenerTrabajadores($dia,$turno) {
 		global $sqlca;
 
-		if ($dia=="" || $turno=="")
+		if ($dia=="" || $turno==""){
 			$sql =	"	SELECT
 						ch_codigo_trabajador,
 						TRIM(ch_apellido_paterno)||' '||TRIM(ch_nombre1)
@@ -76,7 +79,7 @@ class SobrantesFaltantesTrabajadorModel extends Model {
 						pla_ta_trabajadores
 					ORDER BY
 						ch_codigo_trabajador ASC";
-		else
+		}else{
 			$sql = "SELECT DISTINCT
 					p1.ch_codigo_trabajador,
 					TRIM(p1.ch_apellido_paterno)||' '||TRIM(p1.ch_nombre1)
@@ -85,9 +88,13 @@ class SobrantesFaltantesTrabajadorModel extends Model {
 					INNER JOIN pos_historia_ladosxtrabajador p2 ON (p1.ch_codigo_trabajador=p2.ch_codigo_trabajador)
 				WHERE
 					p2.dt_dia=to_date('$dia','DD/MM/YYYY')
-						AND p2.ch_posturno='$turno'
+					AND p2.ch_posturno='$turno'
 				ORDER BY
 					p1.ch_codigo_trabajador ASC";
+		}			
+		// echo "<pre>";
+		// echo $sql;
+		// echo "</pre>";
 
 		if ($sqlca->query($sql) < 0)
 			return false;
@@ -233,6 +240,9 @@ class SobrantesFaltantesTrabajadorModel extends Model {
 					pos_aprosys
 				WHERE
 					da_fecha = to_date('$dia','DD/MM/YYYY');";
+		// echo "<pre>";
+		// echo $sql;
+		// echo "</pre>";
 		if ($sqlca->query($sql)<0)
 			return "INTERNAL_ERROR_ID1";
 		if ($sqlca->numrows()==0)
