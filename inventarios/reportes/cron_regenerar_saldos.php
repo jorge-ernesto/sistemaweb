@@ -1,7 +1,4 @@
 <?php
-
-ini_set('memory_limit', '-1');
-
 include_once('/sistemaweb/include/dbsqlca.php');
 $sqlca = new pgsqlDB('localhost', 'postgres', 'postgres', 'integrado');
 

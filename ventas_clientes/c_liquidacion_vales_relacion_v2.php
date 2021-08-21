@@ -153,8 +153,8 @@ try {
                     $listo_para_facturar       = LiquidacionValesController::AgruparRegistoFacturaNormal($rsdata, $sucursal);
                     
                     /* Validacion de envio de data */
-                    //echo json_encode( array($rsdata, $datos_inicales_documento, $datoscliente, $sucursal, $listo_para_facturar, ) );
-                    //return;
+                    // echo json_encode( array($rsdata, $datos_inicales_documento, $datoscliente, $sucursal, $listo_para_facturar, ) );
+                    // return;
                     /* Fin Validacion de envio de data */
 
 					if (array_key_exists('N', $listo_para_facturar)) {

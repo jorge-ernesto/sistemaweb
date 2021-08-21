@@ -46,19 +46,14 @@ class InterfaceMovController extends Controller {
 				
 					case 'Actualizar': {
 										
-						error_log("Request");
 						error_log(json_encode($_REQUEST));
 						$Funcion = InterfaceMovModel::ActualizarInterfaces($_REQUEST['datos']['fechaini'],$_REQUEST['datos']['sucursal'],$_REQUEST['datos']['modulos']);
-						error_log("ActualizarInterfaces");
-						error_log(json_encode($Funcion));
-
 						$Resultados[$llave] = $Funcion;
 
-						if (file_exists("/tmp/data.zip")){ //Verifica que el archivo exista
-							unlink("/tmp/data.zip"); //Elimina archivo
-						}
+						if (file_exists("/tmp/data.zip")) 
+							unlink("/tmp/data.zip");
 
-						$cmd = "zip -j -m /tmp/data.zip /home/jlachira/*";
+						$cmd = "zip -j -m /tmp/data.zip /home/data/*";
 						exec($cmd);
 
 						list($dia, $mes, $ano) = explode('[-/]', $_REQUEST['datos']['fechaini']);
@@ -66,7 +61,7 @@ class InterfaceMovController extends Controller {
 						header("Content-Type: application/x-zip-compressed");
 						header('Content-Disposition: attachment; filename="' . $archivo . '"');
 						readfile("/tmp/data.zip");
-						unlinkRecursive("/home/jlachira");
+						unlinkRecursive("/home/data");
 			
 					}
 					break;

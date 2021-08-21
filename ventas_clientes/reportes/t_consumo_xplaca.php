@@ -70,8 +70,6 @@ class Consumos_Placa_Template extends Template {
 				    <th class="grid_cabecera">Precio</th>
 				    <th class="grid_cabecera">Cantidad</th>
 				    <th class="grid_cabecera">Importe</th>
-					 <th class="grid_cabecera">Recorrido</th>
-					 <th class="grid_cabecera">Rendimiento</th>
 		    	</tr>
 			</thead>
 			<tbody>
@@ -91,20 +89,16 @@ class Consumos_Placa_Template extends Template {
 
 				$tickets = count($data);
 				for($i=0; $i < $tickets; $i++){
-					$es_primer_registro_cliente = false;
-
 					$estila = "grid_detalle_impar";
 					if ($i % 2 == 0)
 						$estila = "grid_detalle_par";
 
 					if($placa != $data[$i]['placa']){
-						$es_primer_registro_cliente = true;
 						if($i!=0){
 							echo "<tr class='bgcolor'>";
 								echo "<td colspan='7' align='right' bgcolor='#F8F8F8'><p style='font-size:1.1em; color:black;'><b>Total por Placa: </td>";
 								echo "<td align='right' bgcolor='#F8F8F8'><p style='font-size:1.1em; color:black;'><b>".number_format($cantidadplaca, 2, '.', ',')."</b></p></td>";
 								echo "<td align='right' bgcolor='#F8F8F8'><p style='font-size:1.1em; color:black;'><b>".number_format($importeplaca, 2, '.', ',')."</b></p></td>";
-								echo "<td colspan='2' align='right' bgcolor='#F8F8F8'></td>";
 							echo "</tr>";
 							$cantidadplaca = 0;
 							$importeplaca = 0;
@@ -115,7 +109,6 @@ class Consumos_Placa_Template extends Template {
 									echo "<td colspan='7' align='right' bgcolor='#F8F8F8'><p style='font-size:1.1em; color:black;'><b>Total por Cliente: </b></td>";
 									echo "<td align='right' bgcolor='#F8F8F8'><p style='font-size:1.1em; color:black;'><b>".number_format($cantidadcli, 2, '.', ',')."</b></p></td>";
 									echo "<td align='right' bgcolor='#F8F8F8'><p style='font-size:1.1em; color:black;'><b>".number_format($importecli, 2, '.', ',')."</b></p></td>";
-									echo "<td colspan='2' align='right' bgcolor='#F8F8F8'></td>";
 							    echo "</tr>";
 								$cantidadcli = 0;
 								$importecli = 0;
@@ -124,7 +117,7 @@ class Consumos_Placa_Template extends Template {
 						}
 
 						echo "<tr class='" . $estila . "'>";
-							echo "<td colspan='11' align='left' bgcolor='#F8F8F8'><p style='font-size:1.1em; color:black;'><b>Placa: </b>" . $data[$i]['placa'] . " <b>Cliente: </b>".$data[$i]['codcliente']." - ".$data[$i]['descliente']."</p></td>";
+							echo "<td colspan='9' align='left' bgcolor='#F8F8F8'><p style='font-size:1.1em; color:black;'><b>Placa: </b>" . $data[$i]['placa'] . " <b>Cliente: </b>".$data[$i]['codcliente']." - ".$data[$i]['descliente']."</p></td>";
 						echo "</tr>";
 						$placa = $data[$i]['placa'];
 					}
@@ -140,16 +133,6 @@ class Consumos_Placa_Template extends Template {
 	                        echo "<td align='center'>" . number_format($data[$i]['precio'], 2, '.', ',') . "</td>";
 	                        echo "<td align='right'>" . number_format($data[$i]['cantidad'], 2, '.', ',') . "</td>";
 	                        echo "<td align='right'>" . number_format($data[$i]['importe'], 2, '.', ',') . "</td>";
-									if($i == 0 || $es_primer_registro_cliente){
-										echo "<td align='right'> - </td>";
-										echo "<td align='right'> - </td>";
-									}else{
-										$recorrido = $data[$i]['odometro'] - $data[$i - 1]['odometro'];
-										$rendimiento = $recorrido / $data[$i - 1]['cantidad'];
-
-										echo "<td align='right'>" . $recorrido . "</td>";
-										echo "<td align='right'>" . round($rendimiento, 2) . "</td>";
-									}
 	                    echo "</tr>";
 	                }
 
@@ -166,32 +149,27 @@ class Consumos_Placa_Template extends Template {
 					echo "<td colspan='7' align='right' bgcolor='#F8F8F8'><p style='font-size:1.1em; color:black;'><b>Total por Placa: </td>";
 					echo "<td align='right' bgcolor='#F8F8F8'><p style='font-size:1.1em; color:black;'><b>".number_format($cantidadplaca, 2, '.', ',')."</b></p></td>";
 					echo "<td align='right' bgcolor='#F8F8F8'><p style='font-size:1.1em; color:black;'><b>".number_format($importeplaca, 2, '.', ',')."</b></p></td>";
-					echo "<td colspan='2' align='right' bgcolor='#F8F8F8'></td>";
 		        echo "</tr>";
 				echo "<tr class='$estila'>";
 					echo "<td colspan='7' align='right' bgcolor='#F8F8F8'><p style='font-size:1.1em; color:black;'><b>Total por Cliente: </b></td>";
 					echo "<td align='right' bgcolor='#F8F8F8'><p style='font-size:1.1em; color:black;'><b>".number_format($cantidadcli, 2, '.', ',')."</b></p></td>";
 					echo "<td align='right' bgcolor='#F8F8F8'><p style='font-size:1.1em; color:black;'><b>".number_format($importecli, 2, '.', ',')."</b></p></td>";
-					echo "<td colspan='2' align='right' bgcolor='#F8F8F8'></td>";
 			    echo "</tr>";
                 echo "<thead>";
                 	echo "<tr>";
 	                    echo "<th class='grid_cabecera' colspan='8' style='text-align:right''>Total Documentos: </th>";
 	                    echo "<th class='grid_cabecera' style='text-align:right'>" . $tickets . "</th>";
-							  echo "<th  colspan='2' class='grid_cabecera' style='text-align:right'></th>";
 					echo "</tr>";
                 echo "</thead>";
                 echo "<thead>";
                 	echo "<tr>";
 		                echo "<th class='grid_cabecera' colspan='8' style='text-align:right'>Total Cantidad: </th>";
 		                echo "<th class='grid_cabecera' style='text-align:right'>" . number_format($sumcantidad, 2 , '.', ',') . "</th>";
-							 echo "<th  colspan='2' class='grid_cabecera' style='text-align:right'></th>";
 					echo "</tr>";
                 echo "<thead>";
                 	echo "<tr>";
 	                    echo "<th class='grid_cabecera' colspan='8' style='text-align:right'>Total Importe: </th>";
 	                    echo "<th class='grid_cabecera' style='text-align:right'>" . number_format($sumimporte, 2 , '.', ',') . "</th>";
-							  echo "<th  colspan='2' class='grid_cabecera' style='text-align:right'></th>";
 					echo "</tr>";
                 echo "</thead>";
 				?>

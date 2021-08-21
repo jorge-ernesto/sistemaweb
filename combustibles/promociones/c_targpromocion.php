@@ -271,8 +271,6 @@ class TargpromocionController extends Controller {
 					break;
 
 						case 'Excel':
-							ini_set('memory_limit', '-1');
-							set_time_limit(0);
 						$tipobusqueda	= $_REQUEST['tipobusqueda'];
 						$filtro	= strtoupper(trim($_REQUEST['busqueda']));
 						$almacen	= $_REQUEST['almacen'];
@@ -281,14 +279,13 @@ class TargpromocionController extends Controller {
 						$busqueda	= TargpromocionModel::tmListado($filtro,$tipobusqueda,$_REQUEST['rxp'],$_REQUEST['pagina'],$almacen,"TODOS");
 						$result	= TargpromocionTemplate::listado($busqueda['datos']);
 						$this->visor->addComponent("ListadoB", "resultados_grid", $result);
-						// echo "<script>console.log('" . json_encode($busqueda) . "')</script>";
 
 							ob_end_clean();
-							$buff = "Fecha Registro, Numero Cuenta, Titular Cuenta, Puntos Cuenta, Numero Tarjeta, Nombre Tarjeta, Placa, Direccion, Telefono, DNI, Email, F. Nacimiento, Tipo Cuenta, Puntos Tarjeta, Almacen, Usuario\n";
+							$buff = "Fecha Registro, Numero Cuenta, Titular Cuenta, Puntos Cuenta, Numero Tarjeta, Nombre Tarjeta, Placa, Direccion, Telefono, DNI, Email, F. Nacimiento, Tipo Cuenta, Puntos Tarjeta,\n";
 
 							for ($i = 0; $i < count($arrData); $i++) {
 								$A = $arrData[$i];
-								$buff .= "{$A['fecha_creacion']}, {$A['nu_cuenta_numero']}, {$A['ch_cuenta_nombres']}, {$A['puntos_cuenta']}, {$A['numero_tarjeta']}, {$A['nombre_tarjeta']}, {$A['placa']}, {$A['direccion']}, {$A['telefono']}, {$A['dni']}, {$A['email']}, {$A['f_nacimiento']}, {$A['tipo_cuenta']}, {$A['puntos_tarjeta']}, {$A['almacen']}, {$A['usuario']}\n";
+								$buff .= "{$A['fecha_creacion']}, {$A['nu_cuenta_numero']}, {$A['ch_cuenta_nombres']}, {$A['puntos_cuenta']}, {$A['numero_tarjeta']}, {$A['nombre_tarjeta']}, {$A['placa']}, {$A['direccion']}, {$A['telefono']}, {$A['dni']}, {$A['email']}, {$A['f_nacimiento']}, {$A['tipo_cuenta']}, {$A['puntos_tarjeta']}\n";
 							}
 							header("Content-type: text/csv");
 							header("Content-Disposition: attachment; filename=\"Cliente_.csv\"");

@@ -113,12 +113,6 @@ class InterfaceExactusModel extends Model {
 	}
 
 	function ActualizarInterfaces($Parametros,$FechaIni,$FechaFin,$CodAlmacen) {
-		include("/sistemaweb/include/mssqlemu.php");
-
-		echo "<pre>";
-		print_r( array($Parametros,$FechaIni,$FechaFin,$CodAlmacen) );
-		echo "</pre>";
-
 		global $sqlca;
 
 		$MSSQLDBHost = $Parametros[0];
@@ -139,7 +133,6 @@ class InterfaceExactusModel extends Model {
 			return "INDALID_DATE";
 		}
 
-		/*
 		$mssql = mssql_connect($MSSQLDBHost,$MSSQLDBUser,$MSSQLDBPass);
 		if ($mssql===FALSE) {
 			return "CONNECT_EXACTUS";
@@ -170,20 +163,19 @@ class InterfaceExactusModel extends Model {
 			return onError_AIExit($mssql,"PROCESS_EXECUTED");
 
 		$WorkingInstance = "%%*OPENSOFT_WORKING_ES$CodAlmacen*%%";
-		*/
 
 /*******************************************************************************
 * Clientes por RUC (pos_trans / ruc)                                           *
 *******************************************************************************/
 echo "========== SINCRONIZANDO CLIENTES ==========\n";
-		// $Clientes = Array();
-		// $res=mssql_query("SELECT RUC,ClientID FROM Opensoft.Opensoft_Client",$mssql);
-		// if ($res===FALSE) {
-		// 	return "ERROR_PREPARE_CLIENTSYNC";
-		// }
-		// while ($row = mssql_fetch_row($res))
-		// 	$Clientes[trim($row[0])] = trim($row[1]);
-		// mssql_free_result($res);
+		$Clientes = Array();
+		$res=mssql_query("SELECT RUC,ClientID FROM Opensoft.Opensoft_Client",$mssql);
+		if ($res===FALSE) {
+			return "ERROR_PREPARE_CLIENTSYNC";
+		}
+		while ($row = mssql_fetch_row($res))
+			$Clientes[trim($row[0])] = trim($row[1]);
+		mssql_free_result($res);
 
 		$sql ="	SELECT
 				q.RUC,
@@ -212,10 +204,6 @@ echo "========== SINCRONIZANDO CLIENTES ==========\n";
 				LEFT JOIN ruc r ON (q.RUC = r.ruc)
 			GROUP BY
 				1";
-			echo "<pre>";
-			echo $sql;
-			echo "</pre>";
-			// die();
 /*		$sql ="	SELECT
 				DISTINCT trim(t.ruc),
 				r.razsocial
@@ -225,32 +213,31 @@ echo "========== SINCRONIZANDO CLIENTES ==========\n";
 			WHERE
 				t.ruc != '';";*/
 
-		// if ($sqlca->query($sql)<0)
-		// 	return OnError_AIExit($mssql,"PG_CLIENT_SYNC_Q01".$sqlca->get_error());
+		if ($sqlca->query($sql)<0)
+			return OnError_AIExit($mssql,"PG_CLIENT_SYNC_Q01".$sqlca->get_error());
 
-		// while ($reg = $sqlca->fetchRow())
-		// 	if (!isset($Clientes[$reg[0]])) {
-		// 		if (mssql_query("INSERT INTO Opensoft.Opensoft_Client (RUC,Name) VALUES ('{$reg[0]}','" . os_mssql_escape($reg[1]) . "');",$mssql)==FALSE)
-		// 			return OnError_AIExit($mssql,"ERROR_CLIENTSYNC_INSERT");
-		// 		$Clientes[$reg[0]] = mssql_scope_identity($mssql);
-		// 	}
+		while ($reg = $sqlca->fetchRow())
+			if (!isset($Clientes[$reg[0]])) {
+				if (mssql_query("INSERT INTO Opensoft.Opensoft_Client (RUC,Name) VALUES ('{$reg[0]}','" . os_mssql_escape($reg[1]) . "');",$mssql)==FALSE)
+					return OnError_AIExit($mssql,"ERROR_CLIENTSYNC_INSERT");
+				$Clientes[$reg[0]] = mssql_scope_identity($mssql);
+			}
 
-		// $Clientes['1'] = 1;
-		// $Clientes['9999'] = 1;
+		$Clientes['1'] = 1;
+		$Clientes['9999'] = 1;
 
 /*******************************************************************************
 * ARTICULOS (int_articulos)                                                    *
 *******************************************************************************/
-echo "========== SINCRONIZANDO ARTICULOS ==========\n";
 
-		// $Articulos = Array();
-		// $res=mssql_query("SELECT ProductID,ProductCode FROM Opensoft.Opensoft_Product",$mssql);
-		// if ($res===FALSE) {
-		// 	return "ERROR_PREPARE_ARTSYNC";
-		// }
-		// while ($row = mssql_fetch_row($res))
-		// 	$Articulos[trim($row[1])] = trim($row[0]);
-		// mssql_free_result($res);
+		$Articulos = Array();
+		$res=mssql_query("SELECT ProductID,ProductCode FROM Opensoft.Opensoft_Product",$mssql);
+		if ($res===FALSE) {
+			return "ERROR_PREPARE_ARTSYNC";
+		}
+		while ($row = mssql_fetch_row($res))
+			$Articulos[trim($row[1])] = trim($row[0]);
+		mssql_free_result($res);
 
 		$sql ="	SELECT
 				q.Codigo AS ProductCode,
@@ -290,26 +277,21 @@ echo "========== SINCRONIZANDO ARTICULOS ==========\n";
 				LEFT JOIN int_articulos a ON (q.Codigo = a.art_codigo)
 			GROUP BY
 				1;";
-		echo "<pre>";
-		echo $sql;
-		echo "</pre>";
-		// die();
 
-		// if ($sqlca->query($sql)<0)
-		// 	return OnError_AIExit($mssql,"PG_ART_SYNC_Q01".$sqlca->get_error());
+		if ($sqlca->query($sql)<0)
+			return OnError_AIExit($mssql,"PG_ART_SYNC_Q01".$sqlca->get_error());
 
-// echo "========== SINCRONIZANDO ARTICULOS  ==========\n";
-		// while ($reg = $sqlca->fetchRow())
-		// 	if (!isset($Articulos[$reg[0]])) {
-		// 		if (mssql_query("INSERT INTO Opensoft.Opensoft_Product (ProductCode,Description) VALUES ('{$reg[0]}','" . addslashes_mssql($reg[1]) . "');",$mssql)==FALSE)
-		// 			return OnError_AIExit($mssql,"ERROR_ARTSYNC_INSERT_1");
-		// 		$Articulos[$reg[0]] = mssql_scope_identity($mssql);
-		// 	}
+echo "========== SINCRONIZANDO ARTICULOS  ==========\n";
+		while ($reg = $sqlca->fetchRow())
+			if (!isset($Articulos[$reg[0]])) {
+				if (mssql_query("INSERT INTO Opensoft.Opensoft_Product (ProductCode,Description) VALUES ('{$reg[0]}','" . addslashes_mssql($reg[1]) . "');",$mssql)==FALSE)
+					return OnError_AIExit($mssql,"ERROR_ARTSYNC_INSERT_1");
+				$Articulos[$reg[0]] = mssql_scope_identity($mssql);
+			}
 
 /*******************************************************************************
 * CABECERAS DE VENTAS (pos_trans GB)                                           *
 *******************************************************************************/
-echo "========== SINCRONIZANDO CABECERAS DE VENTAS ==========\n";
 
 		$sql ="	SELECT
 				'12'::text AS DocumentType,
@@ -346,52 +328,47 @@ echo "========== SINCRONIZANDO CABECERAS DE VENTAS ==========\n";
 				t.trans,
 				t.caja,
 				t.dia";
-		echo "<pre>";
-		echo $sql;
-		echo "</pre>";
-		// die();
 
-		// if ($sqlca->query($sql)<0)
-		// 	return onError_AIExit($mssql,"PG_SELECT_Q01".$sqlca->get_error());
-// echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
-// 		$DocHead_ID = Array();
-// 		while ($reg = $sqlca->fetchRow()) {
-// 			$sql ="	INSERT INTO
-// 					Opensoft.Opensoft_Document
-// 				(
-// 					DocumentType,
-// 					DocumentNumber,
-// 					WarehouseID,
-// 					MovementType,
-// 					MovementDate,
-// 					ClientID,
-// 					TenderType,
-// 					CardType,
-// 					Total,
-// 					Tax,
-// 					GrandTotal
-// 				) VALUES (
-// 					'{$reg[0]}',
-// 					'{$reg[1]}',
-// 					{$reg[2]},
-// 					{$reg[3]},
-// 					'{$reg[4]}',
-// 					{$Clientes[$reg[5]]},
-// 					{$reg[6]},
-// 					" . ((strlen($reg[7])>0)?$reg[7]:"NULL") . ",
-// 					{$reg[8]},
-// 					{$reg[9]},
-// 					{$reg[10]}
-// 				);";
-// 			if (mssql_query($sql,$mssql)===FALSE)
-// 				return onError_AIExit($mssql,"ERROR_INSERT_Q01");
-// 			$DocHead_ID[$reg[1]] = mssql_scope_identity($mssql);
-// 		}
+		if ($sqlca->query($sql)<0)
+			return onError_AIExit($mssql,"PG_SELECT_Q01".$sqlca->get_error());
+echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
+		$DocHead_ID = Array();
+		while ($reg = $sqlca->fetchRow()) {
+			$sql ="	INSERT INTO
+					Opensoft.Opensoft_Document
+				(
+					DocumentType,
+					DocumentNumber,
+					WarehouseID,
+					MovementType,
+					MovementDate,
+					ClientID,
+					TenderType,
+					CardType,
+					Total,
+					Tax,
+					GrandTotal
+				) VALUES (
+					'{$reg[0]}',
+					'{$reg[1]}',
+					{$reg[2]},
+					{$reg[3]},
+					'{$reg[4]}',
+					{$Clientes[$reg[5]]},
+					{$reg[6]},
+					" . ((strlen($reg[7])>0)?$reg[7]:"NULL") . ",
+					{$reg[8]},
+					{$reg[9]},
+					{$reg[10]}
+				);";
+			if (mssql_query($sql,$mssql)===FALSE)
+				return onError_AIExit($mssql,"ERROR_INSERT_Q01");
+			$DocHead_ID[$reg[1]] = mssql_scope_identity($mssql);
+		}
 
 /*******************************************************************************
 * DETALLE DE VENTAS (pos_trans)                                                *
 *******************************************************************************/
-echo "========== SINCRONIZANDO DETALLE DE VENTAS ==========\n";
 
 		$sql ="	SELECT
 				lpad(t.caja,3,'000'::text) || '-' || to_char(t.trans,'FM9999999999') AS DocumentNumber,
@@ -407,37 +384,32 @@ echo "========== SINCRONIZANDO DETALLE DE VENTAS ==========\n";
 				AND t.es = '{$CodAlmacen}'
 			ORDER BY
 				t.trans;";
-		echo "<pre>";
-		echo $sql;
-		echo "</pre>";
-		// die();
 
-// 		if ($sqlca->query($sql)<0)
-// 			return onError_AIExit($mssql,"PG_SELECT_Q02".$sqlca->get_error());
-// //echo "========== SINCRONIZANDO DETALLE DE TICKETS MANUALES ==========\n";
-// 		while ($reg = $sqlca->fetchRow()) {
-// 			$sql ="	INSERT INTO
-// 					Opensoft.Opensoft_DocumentLine
-// 				(
-// 					DocumentID,
-// 					ProductID,
-// 					UnitPrice,
-// 					Quantity,
-// 					LineTotal
-// 				) VALUES (
-// 					{$DocHead_ID[$reg[0]]},
-// 					{$Articulos[$reg[1]]},
-// 					{$reg[2]},
-// 					{$reg[3]},
-// 					{$reg[4]}
-// 				);";
-// 			if (mssql_query($sql,$mssql)===FALSE)
-// 				return onError_AIExit($mssql,"ERROR_INSERT_Q02_$sql");
-// 		}
+		if ($sqlca->query($sql)<0)
+			return onError_AIExit($mssql,"PG_SELECT_Q02".$sqlca->get_error());
+//echo "========== SINCRONIZANDO DETALLE DE TICKETS MANUALES ==========\n";
+		while ($reg = $sqlca->fetchRow()) {
+			$sql ="	INSERT INTO
+					Opensoft.Opensoft_DocumentLine
+				(
+					DocumentID,
+					ProductID,
+					UnitPrice,
+					Quantity,
+					LineTotal
+				) VALUES (
+					{$DocHead_ID[$reg[0]]},
+					{$Articulos[$reg[1]]},
+					{$reg[2]},
+					{$reg[3]},
+					{$reg[4]}
+				);";
+			if (mssql_query($sql,$mssql)===FALSE)
+				return onError_AIExit($mssql,"ERROR_INSERT_Q02_$sql");
+		}
 /*******************************************************************************
 * CABECERAS DE DOCUMENTOS MANUALES (fac_ta_factura_cabecera)                   *
 *******************************************************************************/
-echo "========== CABECERAS DE DOCUMENTOS MANUALES (fac_ta_factura_cabecera) ==========\n";
 
 		$sql ="	SELECT
 				CASE
@@ -467,52 +439,47 @@ echo "========== CABECERAS DE DOCUMENTOS MANUALES (fac_ta_factura_cabecera) ====
 				fc.ch_fac_tipodocumento IN ('10','11','20','35')
 				AND fc.dt_fac_fecha BETWEEN '$FechaIni' AND '$FechaFin'
 				AND fc.ch_almacen = '$CodAlmacen'";
-			echo "<pre>";
-			echo $sql;
-			echo "</pre>";
-			// die();
 
-// 		if ($sqlca->query($sql)<0)
-// 			return onError_AIExit($mssql,"PG_SELECT_Q03".$sqlca->get_error());
-// echo "========== SINCRONIZANDO CABECERAS DE DOCUMENTOS MANUALES ==========\n";
-// 		$DocHead_ID = Array();
-// 		while ($reg = $sqlca->fetchRow()) {
-// 			$sql ="	INSERT INTO
-// 					Opensoft.Opensoft_Document
-// 				(
-// 					DocumentType,
-// 					DocumentNumber,
-// 					WarehouseID,
-// 					MovementType,
-// 					MovementDate,
-// 					ClientID,
-// 					TenderType,
-// 					CardType,
-// 					Total,
-// 					Tax,
-// 					GrandTotal
-// 				) VALUES (
-// 					'{$reg[0]}',
-// 					'{$reg[1]}',
-// 					{$reg[2]},
-// 					{$reg[3]},
-// 					'{$reg[4]}',
-// 					" . $Clientes[$reg[5]] . ",
-// 					{$reg[6]},
-// 					NULL,
-// 					{$reg[8]},
-// 					{$reg[9]},
-// 					{$reg[10]}
-// 				);";
-// 			if (mssql_query($sql,$mssql)===FALSE)
-// 				return onError_AIExit($mssql,"ERROR_INSERT_Q03");
-// 			$DocHead_ID[$reg[1]] = mssql_scope_identity($mssql);
-// 		}
+		if ($sqlca->query($sql)<0)
+			return onError_AIExit($mssql,"PG_SELECT_Q03".$sqlca->get_error());
+echo "========== SINCRONIZANDO CABECERAS DE DOCUMENTOS MANUALES ==========\n";
+		$DocHead_ID = Array();
+		while ($reg = $sqlca->fetchRow()) {
+			$sql ="	INSERT INTO
+					Opensoft.Opensoft_Document
+				(
+					DocumentType,
+					DocumentNumber,
+					WarehouseID,
+					MovementType,
+					MovementDate,
+					ClientID,
+					TenderType,
+					CardType,
+					Total,
+					Tax,
+					GrandTotal
+				) VALUES (
+					'{$reg[0]}',
+					'{$reg[1]}',
+					{$reg[2]},
+					{$reg[3]},
+					'{$reg[4]}',
+					" . $Clientes[$reg[5]] . ",
+					{$reg[6]},
+					NULL,
+					{$reg[8]},
+					{$reg[9]},
+					{$reg[10]}
+				);";
+			if (mssql_query($sql,$mssql)===FALSE)
+				return onError_AIExit($mssql,"ERROR_INSERT_Q03");
+			$DocHead_ID[$reg[1]] = mssql_scope_identity($mssql);
+		}
 
 /*******************************************************************************
 * DETALLE DE DOCUMENTOS MANUALES (fac_ta_factura_detalle)                      *
 *******************************************************************************/
-echo "========== DETALLE DE DOCUMENTOS MANUALES (fac_ta_factura_detalle) ==========\n";
 
 		$sql ="	SELECT
 				fc.ch_fac_seriedocumento || '-' || fc.ch_fac_numerodocumento AS DocNro,
@@ -527,38 +494,34 @@ echo "========== DETALLE DE DOCUMENTOS MANUALES (fac_ta_factura_detalle) =======
 				fc.ch_fac_tipodocumento IN ('10','11','20','35')
 				AND fc.dt_fac_fecha BETWEEN '$FechaIni' AND '$FechaFin'
 				AND fc.ch_almacen = '$CodAlmacen';";
-			echo "<pre>";
-			echo $sql;
-			echo "</pre>";
-			// die();
 
-// 		if ($sqlca->query($sql)<0)
-// 			return onError_AIExit($mssql,"PG_SELECT_Q04".$sqlca->get_error());
-// echo "========== SINCRONIZANDO DETALLE DE DOCUMENTOS MANUALES ==========\n";
-// 		while ($reg = $sqlca->fetchRow()) {
-// 			$sql ="	INSERT INTO
-// 					Opensoft.Opensoft_DocumentLine
-// 				(
-// 					DocumentID,
-// 					ProductID,
-// 					UnitPrice,
-// 					Quantity,
-// 					LineTotal
-// 				) VALUES (
-// 					{$DocHead_ID[$reg[0]]},
-// 					{$Articulos[$reg[1]]},
-// 					{$reg[2]},
-// 					{$reg[3]},
-// 					{$reg[4]}
-// 				);";
-// 			if (mssql_query($sql,$mssql)===FALSE)
-// 				return onError_AIExit($mssql,"ERROR_INSERT_Q04");
-// 		}
+		if ($sqlca->query($sql)<0)
+			return onError_AIExit($mssql,"PG_SELECT_Q04".$sqlca->get_error());
+echo "========== SINCRONIZANDO DETALLE DE DOCUMENTOS MANUALES ==========\n";
+		while ($reg = $sqlca->fetchRow()) {
+			$sql ="	INSERT INTO
+					Opensoft.Opensoft_DocumentLine
+				(
+					DocumentID,
+					ProductID,
+					UnitPrice,
+					Quantity,
+					LineTotal
+				) VALUES (
+					{$DocHead_ID[$reg[0]]},
+					{$Articulos[$reg[1]]},
+					{$reg[2]},
+					{$reg[3]},
+					{$reg[4]}
+				);";
+			if (mssql_query($sql,$mssql)===FALSE)
+				return onError_AIExit($mssql,"ERROR_INSERT_Q04");
+		}
 
 /*******************************************************************************
 * KARDEX (inv_movialma)                                                        *
 *******************************************************************************/
-echo "========== KARDEX (inv_movialma) ==========\n";
+
 
 		$sql ="	SELECT
 				{$Almacenes[$CodAlmacen]} AS WarehouseID,
@@ -581,39 +544,35 @@ echo "========== KARDEX (inv_movialma) ==========\n";
 			WHERE
 				m.mov_fecha BETWEEN '$FechaIni' AND '$FechaFin 23:59:59'
 				AND m.mov_almacen = '$CodAlmacen';";
-		echo "<pre>";
-		echo $sql;
-		echo "</pre>";
-		die();
 
-// 		if ($sqlca->query($sql)<0)
-// 			return onError_AIExit($mssql,"PG_SELECT_Q05".$sqlca->get_error());
-// echo "========== SINCRONIZANDO KARDEX ==========\n";
-// 		while ($reg = $sqlca->fetchRow()) {
-// 			$sql ="	INSERT INTO
-// 					Opensoft.Opensoft_Movement
-// 				(
-// 					WarehouseID,
-// 					MovementDate,
-// 					ReferenceDocument,
-// 					ReferenceDocumentType,
-// 					ProductID,
-// 					UnitPrice,
-// 					Quantity,
-// 					MovementTotal
-// 				) VALUES (
-// 					{$reg[0]},
-// 					'{$reg[1]}',
-// 					'{$reg[2]}',
-// 					'{$reg[3]}',
-// 					{$Articulos[$reg[4]]},
-// 					{$reg[5]},
-// 					{$reg[6]},
-// 					{$reg[7]}
-// 				);";
-// 			if (mssql_query($sql,$mssql)===FALSE)
-// 				return onError_AIExit($mssql,"ERROR_INSERT_Q05_$sql");
-// 		}
+		if ($sqlca->query($sql)<0)
+			return onError_AIExit($mssql,"PG_SELECT_Q05".$sqlca->get_error());
+echo "========== SINCRONIZANDO KARDEX ==========\n";
+		while ($reg = $sqlca->fetchRow()) {
+			$sql ="	INSERT INTO
+					Opensoft.Opensoft_Movement
+				(
+					WarehouseID,
+					MovementDate,
+					ReferenceDocument,
+					ReferenceDocumentType,
+					ProductID,
+					UnitPrice,
+					Quantity,
+					MovementTotal
+				) VALUES (
+					{$reg[0]},
+					'{$reg[1]}',
+					'{$reg[2]}',
+					'{$reg[3]}',
+					{$Articulos[$reg[4]]},
+					{$reg[5]},
+					{$reg[6]},
+					{$reg[7]}
+				);";
+			if (mssql_query($sql,$mssql)===FALSE)
+				return onError_AIExit($mssql,"ERROR_INSERT_Q05_$sql");
+		}
 
 		$sqlca->query("INSERT INTO exactus_migraciones (ch_almacen,fecha_inicio,fecha_fin,ch_usuario) VALUES ('$CodAlmacen','$FechaIni','$FechaFin','{$_SESSION['auth_usuario']}');");
 		$sqlca->query("COMMIT;");
@@ -640,10 +599,6 @@ echo "========== KARDEX (inv_movialma) ==========\n";
 				  WHERE ch_almacen = '".pg_escape_string($sucursal)."' and fecha_inicio between to_date('" . pg_escape_string($desde) . "','DD/MM/YYYY') and to_date('" . pg_escape_string($hasta) . "','DD/MM/YYYY')
 				  ORDER BY fecha_inicio DESC;";
 		}
-		echo "<pre>";
-		echo $query;
-		echo "</pre>";
-
          	if ($sqlca->query($query) < 0) return null;
 		$resultado = array();
 		for ($i = 0; $i < $sqlca->numrows(); $i++) {

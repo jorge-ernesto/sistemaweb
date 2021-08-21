@@ -487,7 +487,7 @@ GROUP BY
 
         $sql_campo_valor_venta = "
 (SELECT
- SUM(nu_fac_importeneto) --IMPONIBLE
+ SUM(nu_fac_importeneto)
 FROM
  fac_ta_factura_detalle
 WHERE
@@ -500,7 +500,7 @@ WHERE
 
         $sql_campo_impuesto = "
 (SELECT
- SUM(nu_fac_impuesto1) --IMPUESTO
+ SUM(nu_fac_impuesto1)
 FROM
  fac_ta_factura_detalle
 WHERE
@@ -513,7 +513,7 @@ WHERE
 
         $sql_campo_total = "
 (SELECT
- SUM(nu_fac_valortotal) --TOTAL
+ SUM(nu_fac_valortotal)
 FROM
  fac_ta_factura_detalle
 WHERE
@@ -763,8 +763,8 @@ INSERT INTO fac_ta_factura_cabecera(
  ch_fac_cd_impuesto1,
  ch_fac_forma_pago,
  flg_replicacion,
- nu_fac_impuesto1, --IMPUESTO
- nu_fac_valorbruto, --IMPONIBLE
+ nu_fac_impuesto1,
+ nu_fac_valorbruto,
  nu_tipo_pago,
  fe_vencimiento,
  ch_fac_tiporecargo2,
@@ -822,19 +822,13 @@ INSERT INTO fac_ta_factura_cabecera(
             if ($nu_importe == 0) {
 				throw new Exception("Error Al procesar la divion BY ZERO($nu_importe/$nu_cantidad)");
 			}
-            //TOTAL
             $fTotalItem = (float)$nu_importe;
-            $fTotalItem = round($fTotalItem, 2);
-
             $fCantidadItem = (float)$nu_cantidad;
 
 		    $fPrecioItem = round($fTotalItem / $fCantidadItem, 4);
 
-            //IMPONIBLE
-            $sql_campo_valor_venta = "ROUND( (" . $fTotalItem . " / (1 + round(util_fn_igv() / 100, 2))), 4)";
-
-            //IMPUESTO
-            $sql_campo_impuesto = $fTotalItem . " - ROUND( (" . $fTotalItem . " / (1 + (round(util_fn_igv() / 100, 2)))), 4)";
+            $sql_campo_valor_venta = "(" . $fTotalItem . " / (1 + round(util_fn_igv() / 100, 2)))";
+            $sql_campo_impuesto = $nu_importe . " - (" . $nu_importe . " / (1 + (round(util_fn_igv() / 100, 2))))";
 
             if ( $sCodigoImpuesto == 'S') {// Exonerada
                 $sql_campo_valor_venta = $fTotalItem;
@@ -1138,7 +1132,6 @@ INSERT INTO fac_ta_factura_detalle(
                                 			}
                             			}
 
-                        //INGRESA DETALLE EN FAC_TA_FACTURA_CABECERA (ESTO ES LO QUE ME)
                         LiquidacionValesModel::InsertarDocumentoDetalle($DOCUMENTO, $SERIE, $NUMERO_DOCUMENTO, $codigo_cliente, $art_codigo, $valores['importe'], $valores['cantidad'], $valores['des'], $sCodigoImpuesto);
 						LiquidacionValesModel::ActualizarVales_Liquidacion($DOCUMENTO, $f_inicio, $f_fina, $codigo_cliente, $cadena_vales, $SERIE, $NUMERO_DOCUMENTO, $art_codigo, $NUMERO_LIQUIDACION, $fecha_liqu_fact, $valores['importe'], $codigo_hermandad);
 						$inicio_vales++;
@@ -2088,7 +2081,7 @@ GROUP BY
         }
     }
 
-    function LiquidacionValesUnicoCliente($fecha_inicio, $fecha_final, $ruc, $vales, $estado_nega = "") { //LISTADO DE VALES
+    function LiquidacionValesUnicoCliente($fecha_inicio, $fecha_final, $ruc, $vales, $estado_nega = "") {
 		global $sqlca;
 
 		try {

@@ -23,7 +23,7 @@ class InterfaceController extends Controller {
 				unlink("/tmp/$res");
 			}
 
-			$cmd = "zip -j -m /tmp/$res /home/jlachira/*";							
+			$cmd = "zip -j -m /tmp/$res /home/data/*";							
 							
 			exec($cmd);
 

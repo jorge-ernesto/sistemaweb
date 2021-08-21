@@ -8,8 +8,8 @@ class LiquidacionValesController extends Controller {
 			$art_codigo = trim($value['art_codigo']);
 			$ch_sucursal = trim($value['ch_sucursal']);
 			//$ch_sucursal
-			$factura_procesada[$cli_anticipo][$ch_cliente][$sucursal][$art_codigo]['importe']+=$value['importe']; //IMPORTE
-			$factura_procesada[$cli_anticipo][$ch_cliente][$sucursal][$art_codigo]['cantidad']+=round($value['nu_cantidad'],4); //CANTIDAD
+			$factura_procesada[$cli_anticipo][$ch_cliente][$sucursal][$art_codigo]['importe']+=$value['importe'];
+			$factura_procesada[$cli_anticipo][$ch_cliente][$sucursal][$art_codigo]['cantidad']+=round($value['nu_cantidad'],4);
 			$factura_procesada[$cli_anticipo][$ch_cliente][$sucursal][$art_codigo]['des'] = $value['desproducto'];
 			$factura_procesada[$cli_anticipo][$ch_cliente][$sucursal][$art_codigo]['cli_fpago_credito'] = $value['cli_fpago_credito'];
 			$factura_procesada[$cli_anticipo][$ch_cliente][$sucursal][$art_codigo]['ch_fac_credito'] = 'S';

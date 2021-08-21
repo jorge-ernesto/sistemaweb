@@ -57,17 +57,17 @@ try {
 		$flag = RegistroCajasModel::validaDia($dia);
 		$dInicialSistema = RegistroCajasModel::obtenerDiaInicialSistema();
 
-		// if($flag == 1){
-		// 	echo $flag;
-		// } else if ($dia < $dInicialSistema) {
-		// 	echo 2;//La fecha es menor a la fecha de inicio del sistema
-		// } else {
+		if($flag == 1){
+			echo $flag;
+		} else if ($dia < $dInicialSistema) {
+			echo 2;//La fecha es menor a la fecha de inicio del sistema
+		} else {
 			$result = RegistroCajasModel::obtenerTipoDocumnetos_otros();
 			echo "<select id='cmbtipo_doc'>";
 			foreach ($result as $key => $value)
 				echo "<option value='" . $value[0] . "'>" . $value[1] . "</option>";
 			echo "</select>";
-		// }
+		}
 
 	} else if ($accion == "mostar_resultado_data") {
 
@@ -131,13 +131,13 @@ try {
 		$nu_almacen = $_REQUEST['nu_almacen'];
 		$dEntry = $_REQUEST['dEntry'];
 
-		// $flag = RegistroCajasModel::validaDia($dEntry);
+		$flag = RegistroCajasModel::validaDia($dEntry);
 
-		// if($flag == 1){
-		// 	//echo "<blink style='color: red'><b>¡ Dia consolidado, seleccionar otra fecha !</blink>";
-		// 	echo "{'sStatus':'warning','sMessage':'¡ Dia consolidado, no se puede anular !'}";
-		// 	exit();
-		// }else{
+		if($flag == 1){
+			//echo "<blink style='color: red'><b>¡ Dia consolidado, seleccionar otra fecha !</blink>";
+			echo "{'sStatus':'warning','sMessage':'¡ Dia consolidado, no se puede anular !'}";
+			exit();
+		}else{
 			try {
 				RegistroCajasModel::IniciarTransaccion(); //INICIAR TRANSACION 
 				RegistroCajasModel::Anular_Registro_Ingreso_Caja_solo_cliente($id_transacion, 0, $nu_almacen);
@@ -148,7 +148,7 @@ try {
 				RegistroCajasModel::ROLLBACKTransaccion();
 				throw $e;
 			}
-		// }
+		}
 	} else if ($accion == "buscar_cliente") {
 
 		$ruc_identi	= trim($_REQUEST['ruc']);
@@ -156,12 +156,12 @@ try {
 		$tc		= trim($_REQUEST['tc']);
 		$moneda		= trim($_REQUEST['moneda']);
 
-		// $flag = RegistroCajasModel::validaDia($dia);
+		$flag = RegistroCajasModel::validaDia($dia);
 
-		// if($flag == 1){
-		// 	echo "<blink style='color: red'><b>¡ Dia consolidado, seleccionar otra fecha !</blink>";
-		// 	exit();
-		// }else{
+		if($flag == 1){
+			echo "<blink style='color: red'><b>¡ Dia consolidado, seleccionar otra fecha !</blink>";
+			exit();
+		}else{
 
 			try {
 				$dat_cuentas_x_cobrar = RegistroCajasModel::DataCuentasCobrar($ruc_identi);
@@ -172,7 +172,7 @@ try {
 				exit();
 			}
 
-		// }
+		}
 
 	} else if ($accion == "buscar_cuenta_cobrar_recivo") {
 
