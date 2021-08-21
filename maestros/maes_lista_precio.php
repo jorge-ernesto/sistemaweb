@@ -73,6 +73,9 @@ if($boton == "Agregar") {
 					pre_lista_precio = '".$new_lista_precio."'
 					AND art_codigo = '".$new_articulo."';
 				";
+	// echo "<pre>";
+	// echo $sqlai;
+	// echo "</pre>";
 
 	$xsqlai = pg_exec($coneccion,$sqlai);
 	$ilimitai = pg_numrows($xsqlai);
@@ -118,6 +121,9 @@ if($boton == "Modificar") {
 					art_descripcion
 				".$bddsql.";
 				";
+	// echo "<pre>";
+	// echo $sql2;
+	// echo "</pre>";
 
 	$xsql2 = pg_exec($coneccion,$sql2);
 	$ilimit2 = pg_numrows($xsql2);

@@ -260,8 +260,8 @@ class MovimientoAlmacenCRUDModel {
 
 			$sql = "
 			SELECT 
-				MOVI.mov_numero AS nu_formulario,
-				TO_CHAR(MOVI.mov_fecha,'dd/mm/yyyy hh24:mi:ss') AS fe_emision,
+				MOVI.mov_numero AS nu_formulario, --1
+				TO_CHAR(MOVI.mov_fecha,'dd/mm/yyyy hh24:mi:ss') AS fe_emision, --2 DESC
 				TO_CHAR(MOVI.mov_fecha,'dd/mm/yyyy') AS fe_sistema,
 				PROVEE.pro_codigo AS id_proveedor,
 				PROVEE.pro_razsocial AS no_razon_social,
@@ -1194,6 +1194,9 @@ RETURNING
 	function CRUDCostoUnitario($Nu_Documento_Identidad, $Nu_Id_Producto, $Nu_Costo_Unitario, $usuario, $ip, $Nu_Codigo_Moneda){
 		global $sqlca;
 
+		error_log("Etapa 1");
+		error_log(json_encode( array( $Nu_Documento_Identidad, $Nu_Id_Producto, $Nu_Costo_Unitario, $usuario, $ip, $Nu_Codigo_Moneda ) ));
+
 		if($Nu_Documento_Identidad != "" && $Nu_Documento_Identidad != "1"){
 
 			$sqlca->query("
@@ -1206,8 +1209,21 @@ RETURNING
 				AND art_codigo 	= '" . $Nu_Id_Producto . "';
 			");
 
+			error_log("Etapa 2");
+			error_log("
+			SELECT
+				COUNT(*) AS existe_costo_unitario
+			FROM
+				com_rec_pre_proveedor
+			WHERE
+				pro_codigo 		= '" . $Nu_Documento_Identidad . "'
+				AND art_codigo 	= '" . $Nu_Id_Producto . "';
+			");
+
 			$row = $sqlca->fetchRow();
 			$sql = "";
+			error_log(json_encode($row));
+			die();
 
 			if($row["existe_costo_unitario"] == 1){
 				$sql = "
@@ -1222,6 +1238,19 @@ RETURNING
 					pro_codigo 		= '" . $Nu_Documento_Identidad . "'
 					AND art_codigo 	= '" . $Nu_Id_Producto . "';
 				";
+
+				error_log("
+				UPDATE
+					com_rec_pre_proveedor 
+				SET
+					rec_precio				= " . $Nu_Costo_Unitario . ",
+					rec_fecha_ultima_compra = now(),
+					rec_usuario				= '" . $usuario . "',
+					rec_ip					= '" . $ip . "'
+				WHERE
+					pro_codigo 		= '" . $Nu_Documento_Identidad . "'
+					AND art_codigo 	= '" . $Nu_Id_Producto . "';
+				");
 
 				if ($sqlca->query($sql) < 0)
 					return false;

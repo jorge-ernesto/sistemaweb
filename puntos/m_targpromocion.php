@@ -374,11 +374,11 @@ class TargpromocionModel {
 			if ($tipo =='D') {
 				$wherec = " c.ch_cuenta_dni = '".pg_escape_string($filtro)."' ";
 				$ordby = " c.ch_cuenta_dni ASC ";
-				$fromc = " prom_ta_cuentas c LEFT JOIN prom_ta_tarjetas t ON (t.id_cuenta  = c.id_cuenta) LEFT JOIN inv_ta_almacenes alma ON (c.ch_sucursal = alma.ch_almacen) ";
+				$fromc = " prom_ta_cuentas c LEFT JOIN prom_ta_tarjetas t ON (t.id_cuenta  = c.id_cuenta) LEFT JOIN inv_ta_almacenes alma ON (c.ch_sucursal = alma.ch_almacen) "; //TABLAS
 			} else if ($tipo =='C') {
 				$wherec = " c.nu_cuenta_numero = ".pg_escape_string($filtro)." ";
 				$ordby = " c.nu_cuenta_numero ASC ";
-				$fromc = " prom_ta_cuentas c LEFT JOIN prom_ta_tarjetas t ON (t.id_cuenta  = c.id_cuenta) LEFT JOIN inv_ta_almacenes alma ON (c.ch_sucursal = alma.ch_almacen) ";
+				$fromc = " prom_ta_cuentas c LEFT JOIN prom_ta_tarjetas t ON (t.id_cuenta  = c.id_cuenta) LEFT JOIN inv_ta_almacenes alma ON (c.ch_sucursal = alma.ch_almacen) "; //TABLAS
 			} else if ($tipo =='T') {
 				$wherec = " t.nu_tarjeta_numero = ".pg_escape_string($filtro)." ";
 				$ordby = " t.nu_tarjeta_numero ASC ";
@@ -387,11 +387,11 @@ class TargpromocionModel {
 				$fn = $anio.'-'.$mes.'-'.$dia;
 				$wherec = " c.dt_fecha_creacion = '$fn' ";
 				$ordby = " c.dt_fecha_creacion DESC ";
-				$fromc = " prom_ta_cuentas c LEFT JOIN prom_ta_tarjetas t ON (t.id_cuenta  = c.id_cuenta) LEFT JOIN inv_ta_almacenes alma ON (c.ch_sucursal = alma.ch_almacen) ";
+				$fromc = " prom_ta_cuentas c LEFT JOIN prom_ta_tarjetas t ON (t.id_cuenta  = c.id_cuenta) LEFT JOIN inv_ta_almacenes alma ON (c.ch_sucursal = alma.ch_almacen) "; //TABLAS
 			} else {
 				$wherec = " c.ch_cuenta_nombres LIKE '%".pg_escape_string($filtro)."%' OR c.ch_cuenta_apellidos LIKE '%".pg_escape_string($filtro)."%' ";
 				$ordby = " c.ch_cuenta_nombres,c.ch_cuenta_apellidos ";
-				$fromc = " prom_ta_cuentas c LEFT JOIN prom_ta_tarjetas t ON (t.id_cuenta  = c.id_cuenta) LEFT JOIN inv_ta_almacenes alma ON (c.ch_sucursal = alma.ch_almacen) ";
+				$fromc = " prom_ta_cuentas c LEFT JOIN prom_ta_tarjetas t ON (t.id_cuenta  = c.id_cuenta) LEFT JOIN inv_ta_almacenes alma ON (c.ch_sucursal = alma.ch_almacen) "; //TABLAS
 			}
 		}
 
@@ -486,7 +486,9 @@ class TargpromocionModel {
 				prom_ta_tarjetas t 
 				LEFT JOIN prom_ta_cuentas c ON (t.id_cuenta  = c.id_cuenta)
 				LEFT JOIN inv_ta_almacenes alma ON (c.ch_sucursal = alma.ch_almacen) ".$cond;*/
-				
+	
+		error_log("tmListado");
+		error_log(json_encode($query));
 		$resultado_1 = $sqlca->query($query);
 		$numrows = $sqlca->numrows();
 

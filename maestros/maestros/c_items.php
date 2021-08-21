@@ -12,6 +12,8 @@ class ItemsController extends Controller {
 
 	function Init() {
 
+        // error_log("Entro");
+
         	$this->visor = new Visor();
 
         	isset($_REQUEST['action']) ? $this->action = $_REQUEST['action'] : $this->action = "";
@@ -59,7 +61,7 @@ class ItemsController extends Controller {
 		$listado	= false;
 		$result		= "";
 		$Impuestos	= $objModelItem->ObtieneItemImpuestos();
-		$blockearexcael = false;
+		$blockearexcael = false;        
 
 		switch ($this->task) {
             		case 'ValTipoLi':
@@ -265,6 +267,9 @@ class ItemsController extends Controller {
             case "Modificar.Grabar":
 
             	//echo "Modicando22=>";
+                // echo "<pre>";
+                // print_r($_REQUEST);
+                // echo "</pre>";
 
             	$listacodigos = $_REQUEST['listacod'];
             	$listaprecios = $_REQUEST['listaprecio'];
@@ -280,6 +285,9 @@ class ItemsController extends Controller {
 				}
 
 				$item			= ItemsModel::ObtieneItem($_REQUEST['codigo']);
+                // echo "<pre>";
+                // print_r($item);
+                // echo "</pre>";
 				$lineas 		= ItemsModel::ObtieneTablaGeneral('20', $ValCbTipos);
 				$tipos 			= ItemsModel::ObtieneTablaGeneral('21');
 				$marcas 		= ItemsModel::ObtieneTablaGeneral('MARC');
@@ -288,6 +296,7 @@ class ItemsController extends Controller {
 				$ubicaciones 	= ItemsModel::ObtieneUbicaciones();
 				$result 		= ItemsTemplate::formModificar($item, $lineas, $tipos, $marcas, $plus, $unidades, $ubicaciones, $Impuestos, $listas);
 
+                // error_log("Modificando precio");
                 $precios_modif  = ItemsModel::PrecioModificar($_REQUEST['codigo'], $listacodigos, $listaprecios); 
             
 				if(trim($item['art_plutipo']) != trim($_REQUEST['comboplu'])){

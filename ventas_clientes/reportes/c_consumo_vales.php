@@ -24,10 +24,10 @@ $_SESSION['data_excel'] = null;
 
 try {
 	if ($accion == "buscar") {
-		$almacen 	= $_REQUEST['almacen'];
-		$fdesde	 	= $_REQUEST['fecha_ini'];
-		$fhasta	 	= $_REQUEST['fecha_fin'];
-		$Nu_Documento_Identidad	= $_POST['Nu_Documento_Identidad'];
+		$almacen 	= $_REQUEST['almacen']; //ME INTERESA
+		$fdesde	 	= $_REQUEST['fecha_ini']; //ME INTERESA
+		$fhasta	 	= $_REQUEST['fecha_fin']; //ME INTERESA
+		$Nu_Documento_Identidad	= $_POST['Nu_Documento_Identidad']; //ME INTERESA
 		$liquidacion	= $_REQUEST['liquidacion'];
 		$factura		= $_REQUEST['factura'];
 		$orden		= $_REQUEST['orden'];

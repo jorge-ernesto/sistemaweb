@@ -176,11 +176,11 @@
 		                data: {accion: 'tipo_documento_gennerar', fecha:$('#fecha_mostar').val()},
 		                success:function(xm){
                         console.log(xm);
-						if(xm == 1 || xm == '1'){
-							alert('Dia consolidado, seleccionar otra fecha');
-						} else if (xm == 2 || xm == '2') {
-                            alert('La fecha seleccionada, es menor a la fecha de inicio del sistema');
-                        } else {
+						// if(xm == 1 || xm == '1'){
+						// 	alert('Dia consolidado, seleccionar otra fecha');
+						// } else if (xm == 2 || xm == '2') {
+                  //           alert('La fecha seleccionada, es menor a la fecha de inicio del sistema');
+                  //       } else {
                     		$( "#fecha_mostar" ).prop("disabled", true);
 
 					            // var html_sin_cliente="<div style='float: left;width: auto;border: 1px;color:red;'>";
@@ -217,7 +217,7 @@
 						    $('#contenidoTablaSelecionar').html(html_sin_cliente);
 						    $('#tipo_accion').val('sin_cliente');
 						    $('#btnbuscar').css('display','none');
-						}
+						// }
 
                         		}
 

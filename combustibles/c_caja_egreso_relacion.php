@@ -59,11 +59,11 @@ try {
 		$flag = RegistroCajasModel::verificar_dia($fecha);
 		$dInicialSistema = RegistroCajasModel::obtenerDiaInicialSistema();
 
-		if($flag == 1) {
-			echo $flag;
-		} else if($fecha < $dInicialSistema) {
-			echo 2;//La fecha es menor a la fecha de inicio del sistema
-		} else {
+		// if($flag == 1) {
+		// 	echo $flag;
+		// } else if($fecha < $dInicialSistema) {
+		// 	echo 2;//La fecha es menor a la fecha de inicio del sistema
+		// } else {
 			$result = RegistroCajasModel::obtenerTipoDocumnetos_otros();
 			echo "<select id='cmbtipo_doc'>";
 			foreach ($result as $key => $value) {
@@ -71,7 +71,7 @@ try {
 			}
 
 			echo "</select>";
-		}
+		// }
 
 	} else if($accion == "TipoCambio") {
 		$fecha	= $_REQUEST['fecha'];
@@ -96,10 +96,10 @@ try {
 		$iWarehouse = $_REQUEST['iWarehouse'];
 		$dEntry = $_REQUEST['dEntry'];
 		$flag = RegistroCajasModel::verificar_dia($dEntry);
-		if($flag == 1) {
-			echo "{'sStatus':'warning','sMessage':'¡ Dia consolidado, no se puede anular !'}";
-			exit();
-		} else {
+		// if($flag == 1) {
+		// 	echo "{'sStatus':'warning','sMessage':'¡ Dia consolidado, no se puede anular !'}";
+		// 	exit();
+		// } else {
 			try {
 				RegistroCajasModel::IniciarTransaccion(); //INICIAR TRANSACION
 				RegistroCajasModel::Anular_Registro_Egreso_Caja_solo_cliente($id_transacion, 0);
@@ -110,7 +110,7 @@ try {
 				RegistroCajasModel::ROLLBACKTransaccion();
 				throw $e;
 			}
-		}
+		// }
 	} else if($accion == "count_bank") {
 		$dat_banco = RegistroCajasModel::obtenerBanco();
 		$data_cuentas = RegistroCajasModel::ReporteCuentasBancarias();

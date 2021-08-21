@@ -68,6 +68,9 @@ class PosDescuentoRucModel extends Model {
      */
 
 
+	/**
+	 * Obtiene extension de archivo subido
+	 */
 	function extension($archivo){
 		$partes = explode(".", $archivo);
 		$extension = end($partes);
@@ -75,6 +78,16 @@ class PosDescuentoRucModel extends Model {
 		return $extension;
 	}
 
+	/**
+	 * Por defecto hace esto:
+	 * -Verifica existencia del articulo en int_articulos
+	 * -Obtiene descripcion del articulo
+	 * 
+	 * Cuando se le pasa codigo de cliente:
+	 * -Verifica existencia del cliente en int_clientes, ruc
+	 * -Obtiene razon social del cliente
+	 * -Verifica si hay un registro insertado en pos_descuento_ruc (Busca por codigo de cliente, tipo de documento, codigo de articulo)
+	 */
 	function ValidarExcel($nuproducto, $notd, $codcliente) {
 		global $sqlca;
 
@@ -92,7 +105,7 @@ class PosDescuentoRucModel extends Model {
 				$condcliente 	= ", '1' existe_cliente,
 									".$codcliente." nocliente,
 									(SELECT count(*) FROM pos_descuento_ruc WHERE ruc = '".trim($codcliente)."' AND tipo = ".$nutipo." AND art_codigo = '".$nuproducto."') existe_descuento";
-			}else{
+			}else{ //NOTA DE DESPACHO
 				//error_log('$4');
 				$nutipo 		= '1';
 				$condcliente 	= ", (SELECT count(*) FROM int_clientes WHERE cli_codigo = '".$codcliente."') existe_cliente,
@@ -113,7 +126,8 @@ class PosDescuentoRucModel extends Model {
 			WHERE
 				art_codigo = '".trim($nuproducto)."'
 		";
-		//echo "\n" . $sql . "\n";
+		error_log("Verificamos informacion Excel");
+		error_log($sql);
 
 		$sqlca->query($sql);
 		$data = Array();

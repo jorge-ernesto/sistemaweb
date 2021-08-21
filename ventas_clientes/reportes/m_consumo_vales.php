@@ -81,7 +81,7 @@ class ConsumoValesModel extends Model {
 					SELECT
 						pos.caja as caja,
 						pos.trans as trans,
-						FIRST(pos.fecha) as fecha
+						FIRST(pos.fecha) as fecha --ESTO YA LO LIMITA A 1
 					FROM
 						" . $pos_transYM . " pos
 					GROUP BY
