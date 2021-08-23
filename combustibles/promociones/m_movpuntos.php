@@ -11,6 +11,7 @@ Class MovpuntosModel extends Model{
         $ip = $row[0];
 
         $url = "http://" . $ip . "/sistemaweb/puntos/index.php?action=movpuntos&proc=" . urlencode($procedimiento);
+		  error_log($url);
 
         foreach($parametros as $parametro=>$valor) {
         	$url .= "&" . $parametro . "=" . urlencode($valor);

@@ -26,7 +26,7 @@ class MovpuntosTemplate extends Template {
 		                      <tr class="grid_header">';
 		    $listado .='<td class="grid_cabecera" rowspan="2">FECHA Y HORA</td>
 						<td class="grid_cabecera" rowspan="2">TIPO MOV.</td>
-						<td class="grid_cabecera" colspan="4">REFERENCIA</td>
+						<td class="grid_cabecera" colspan="6">REFERENCIA</td>
 						<td class="grid_cabecera" rowspan="2">PUNTOS</td>
 						<td class="grid_cabecera" rowspan="2">USUARIO</td>
 						<td class="grid_cabecera" rowspan="2">SUCURSAL</td>		
@@ -35,7 +35,9 @@ class MovpuntosTemplate extends Template {
 								<td class="grid_cabecera">TD</td>
 								<td class="grid_cabecera">CAJA</td>
 								<td class="grid_cabecera">NUMERO</td>
-								<td class="grid_cabecera">ITEM</td>					
+								<td class="grid_cabecera">ITEM</td>
+								<td class="grid_cabecera">CANTIDAD</td>
+								<td class="grid_cabecera">IMPORTE</td>
 								</tr>';
 						
 		    	//detalle
@@ -62,10 +64,14 @@ class MovpuntosTemplate extends Template {
 					$listado .= '<tr>';		
 					$listado .='<td class="'.$color.'">'.$reg["dt_punto_fecha"].'&nbsp;</td>';
 					$listado .='<td class="'.$color.'">'.$tipomov.'&nbsp;</td>';
+
 					$listado .='<td class="'.$color.'">'.$reg["ch_trans_td"].'&nbsp;</td>';
 					$listado .='<td class="'.$color.'">'.$reg["ch_trans_caja"].'&nbsp;</td>';
 					$listado .='<td class="'.$color.'">'.$reg["ch_trans_numero"].'&nbsp;</td>';
 					$listado .='<td class="'.$color.'">'.$reg["ch_trans_codigo"].'&nbsp;</td>';
+					$listado .='<td class="'.$color.'">'.$reg["nu_trans_cantidad"].'&nbsp;</td>';
+					$listado .='<td class="'.$color.'">'.$reg["nu_trans_importe"].'&nbsp;</td>';
+					
 					$listado .='<td class="'.$color.'">'.$reg["nu_punto_puntaje"].'&nbsp;</td>';
 					$listado .='<td class="'.$color.'">'.$reg["ch_usuario"].'&nbsp;</td>';
 					$listado .='<td class="'.$color.'">'.$reg["ch_sucursal"].'&nbsp;</td>';
