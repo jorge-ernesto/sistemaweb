@@ -625,8 +625,8 @@
                                 data    : arrDataPOST,
                                 success:function(xm){
                                     /* Validacion de envio de data */
-                                    // console.log(xm);
-                                    // return;
+                                    //console.log(xm);
+                                    //return;
                                     /* Fin Validacion de envio de data */
 
                                     var cadenaretorno=xm.substring(0, 7);
