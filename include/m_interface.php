@@ -125,7 +125,9 @@ SELECT
  cli.cli_anticipo AS ANTICIPO,
  cli.cli_ndespacho_efectivo AS DESPACHO_EFECTIVO,
  p.ch_numeval AS NUMERO_MANUAL,
- VREF.id_origen AS REF_MANUAL
+ VREF.id_origen AS REF_MANUAL,
+ c.nu_odometro AS odometro,
+ pf.nomusu AS chofer
 FROM
  val_ta_detalle AS d
  LEFT JOIN val_ta_cabecera AS c ON (c.ch_documento = d.ch_documento AND c.dt_fecha = d.dt_fecha AND c.ch_sucursal = d.ch_sucursal)
@@ -144,6 +146,7 @@ FROM
   JOIN (SELECT ch_documento AS id_trans, ch_numeval AS id_manual FROM val_ta_complemento WHERE dt_fecha BETWEEN '" . $FechaIni . "' AND '" . $FechaIni . "') AS VTCOM
    ON (VTCOM.id_trans = PTORIGEN.id_caja||'-'||PTORIGEN.id_trans)
   ) AS VREF ON (VREF.id_trans = c.ch_documento)
+  LEFT JOIN pos_fptshe1 AS pf ON(pf.numtar = c.ch_tarjeta)
  WHERE
   c.dt_fecha BETWEEN '" . $FechaIni . "' AND '" . $FechaFin . "'
   AND c.ch_sucursal LIKE '%{$CodAlmacen}%';
@@ -169,6 +172,8 @@ FROM
 						17	=>	"DESPACHO_EFECTIVO",
 						18	=>	"NUMERO_MANUAL",
 						19	=>	"REF_MANUAL",
+						20 => "ODOMETRO",
+						21 => "CHOFER"
 			);
 
 			CSVFromQuery($sql,$ExportDir."vales.txt",$headers);
