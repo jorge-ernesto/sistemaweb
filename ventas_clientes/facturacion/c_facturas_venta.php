@@ -170,7 +170,7 @@ class controllerSalesInvoice {
 		return $modelSalesInvoice->check_get_plates_generated_settlement_vouchers($arrGet);
 	}
 
-	public function generate_printed_representation_pdf_FE_sunat($arrGet, $arrDataHelper){
+	public function generate_printed_representation_pdf_FE_sunat($arrGet, $arrDataHelper){ //METODO PARA REPRESENTACION PDF / ENVIO A SUNAT
 		$bStatusFESunat = true;
 
 		error_log('Obtener compania');
@@ -936,7 +936,7 @@ EOT;
 		return true;
 	}
 
-	private function generate_document_content_SUNAT_format_OCS($arrData, $arrDataHelper) {
+	private function generate_document_content_SUNAT_format_OCS($arrData, $arrDataHelper) { //METODO PARA OBTENER CAMPO CONTENT EN EBI_QUEUE
 		$arrCadenaFESUNAT = "";
 
 		if ( $arrData["arrHeader"]["no_anulado"] == "S" ) {
@@ -1055,7 +1055,8 @@ EOT;
 				foreach ($arrData["arrTaxCode"] as $row2) {
 					$iCodigoImpuesto = $row2["iCodigoImpuesto"];
 					if ( $iCodigoImpuesto == "10" ) {//10=Op. Gravadas
-						$fCostoUnitario = round($row["ss_precio_venta_item"] / $row2["fImpuesto"], 4, PHP_ROUND_HALF_UP);
+						// $fCostoUnitario = round($row["ss_precio_venta_item"] / $row2["fImpuesto"], 4, PHP_ROUND_HALF_UP);
+						$fCostoUnitario = round($row["ss_subtotal"] / $row["qt_cantidad"], 6, PHP_ROUND_HALF_UP);
 					}
 				}
 
