@@ -10,7 +10,7 @@ class ArqueoTemplate extends Template {
 		return number_format($number, 2, '.', ',');
 	}
 
-	function formSearch($almacen, $fecha, $type) {
+	function formSearch($almacen, $fecha, $type = NULL) {
 		if ($almacen == "") 
 			$almacen = $_SESSION['almacen'];
 

@@ -177,7 +177,7 @@ class ReportesController extends Controller {
 
 			case "ARQUEO" :
 				include "reportes/c_arqueo.php";
-				$Controlador = new ArqueoController();
+				$Controlador = new ArqueoController("");
 			break;
 
 			default :
