@@ -346,7 +346,10 @@ $( function() {
 				if($Fe_Emision_Compra.val() != ''){
 					Nu_Tipo_Documento_Compra = $.trim($( "#cbo-Nu_Tipo_Documento_Compra option:selected" ).val());
 					//if(Nu_Naturaleza_Movimiento_Inventario.val() == 2 && (Nu_Tipo_Documento_Compra == '09' || Nu_Tipo_Documento_Compra == '10' || Nu_Tipo_Documento_Compra == '11' || Nu_Tipo_Documento_Compra == '35' || Nu_Tipo_Documento_Compra == '20')){
-					if( Nu_Tipo_Documento_Compra == '10' || Nu_Tipo_Documento_Compra == '11' || Nu_Tipo_Documento_Compra == '35' || Nu_Tipo_Documento_Compra == '20' ){
+					/**
+					 * OPENSOFT-88: TC-0000007537 - Permitir "Registro de compras sunat" para tipo de documento 97 y 98
+					 */
+					if( Nu_Tipo_Documento_Compra == '10' || Nu_Tipo_Documento_Compra == '11' || Nu_Tipo_Documento_Compra == '35' || Nu_Tipo_Documento_Compra == '20' || Nu_Tipo_Documento_Compra == '97' || Nu_Tipo_Documento_Compra == '98' ){
 						$( ".div-PrincipalRegistroCompras" ).show();
 
 						if (Nu_Tipo_Documento_Compra == '11' || Nu_Tipo_Documento_Compra == '20') {
