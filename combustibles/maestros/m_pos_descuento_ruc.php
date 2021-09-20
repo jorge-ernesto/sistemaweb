@@ -90,14 +90,14 @@ class PosDescuentoRucModel extends Model {
 				//error_log('$3');
 				$nutipo 		= '3';
 				$condcliente 	= ", '1' existe_cliente,
-									".$codcliente." nocliente,
+									'".$codcliente."' nocliente,
 									(SELECT count(*) FROM pos_descuento_ruc WHERE ruc = '".trim($codcliente)."' AND tipo = ".$nutipo." AND art_codigo = '".$nuproducto."') existe_descuento";
 			}else{
 				//error_log('$4');
 				$nutipo 		= '1';
 				$condcliente 	= ", (SELECT count(*) FROM int_clientes WHERE cli_codigo = '".$codcliente."') existe_cliente,
-									(SELECT cli_codigo || ' - ' || cli_rsocialbreve FROM int_clientes WHERE ruc = '".$codcliente."') nocliente,
-									(SELECT count(*) FROM pos_descuento_ruc WHERE cli_codigo = '".trim($codcliente)."' AND tipo = ".$nutipo." AND art_codigo = '".$nuproducto."') existe_descuento";
+									(SELECT cli_codigo || ' - ' || cli_rsocialbreve FROM int_clientes WHERE cli_codigo = '".$codcliente."') nocliente,
+									(SELECT count(*) FROM pos_descuento_ruc WHERE ruc = '".trim($codcliente)."' AND tipo = ".$nutipo." AND art_codigo = '".$nuproducto."') existe_descuento";
 			}
 		}
 
@@ -126,8 +126,8 @@ class PosDescuentoRucModel extends Model {
 	function InsertarExcel($data, $usuario, $ip, $nuproducto, $notd, $nutd){
 		global $sqlca;
 
-		$arrCeldasNombres 	= $data->sheets[0]['cells'];
-		$arrCeldas 			= $data->sheets[0]['cellsInfo'];
+		$arrCeldasNombres = $data->sheets[0]['cells'];
+		$arrCeldas = $data->sheets[0]['cellsInfo'];
 
 		$resultados = count($arrCeldas);
 		$codcliente	= '';
@@ -136,44 +136,48 @@ class PosDescuentoRucModel extends Model {
 		$b = 0;
 		$c = 0;
 
-		for ($i = 4; $i <= $resultados; $i++) {
-			$codcliente	= $arrCeldas[$i][1]['raw'];
-			$nuimporte	= $arrCeldas[$i][2]['raw'];
+		if(strlen($arrCeldasNombres[4][1]) > 0 && strlen($arrCeldas[4][2]['raw']) > 0) {
+			for ($i = 4; $i <= $resultados; $i++) {
+				$codcliente	= stripslashes($arrCeldasNombres[$i][1]);
+				$codcliente = trim($codcliente,"'");
+				$nuimporte	= $arrCeldas[$i][2]['raw'];
 
-			$datos = PosDescuentoRucModel::ValidarExcel(trim($nuproducto), $notd, $codcliente);
+				$datos = PosDescuentoRucModel::ValidarExcel(trim($nuproducto), $notd, $codcliente);
+				// echo "<script>console.log('".json_encode($datos)."')</script>";
 
-			if($codigoexcel == $codcliente && $codigoexcel1 == $nuimporte){
-				$a++;//CANTIDAD DE PRODUCTOS NO INSERTADOS
-			} else {
-				$b++;//CANTIDAD DE PRODUCTOS INSERTADOS
-				$codclienteb .= $codcliente.",";
-				$sql = "
-					INSERT INTO
-						pos_descuento_ruc(
-						   ruc,
-						   art_codigo,
-						   descuento,
-						   activo,
-						   tipo,
-						   usuario,
-						   ip
-						) VALUES (
-							'".$codcliente."',
-							'".$nuproducto."',
-							".$nuimporte.",
-							'1',
-							'".$nutd."',
-							'".TRIM($usuario)."',
-							'".TRIM($ip)."'
-						);
-				";
-				if ($sqlca->query($sql) < 0)
-					return false;
-			//} else {
-				//$c++;//CANTIDAD DE PRODUCTOS EXISTENTES
+				if($codigoexcel == $codcliente && $codigoexcel1 == $nuimporte){
+					$a++;//CANTIDAD DE PRODUCTOS NO INSERTADOS
+				} else {
+					$b++;//CANTIDAD DE PRODUCTOS INSERTADOS
+					$codclienteb .= $codcliente.",";
+					$sql = "
+						INSERT INTO
+							pos_descuento_ruc(
+								ruc,
+								art_codigo,
+								descuento,
+								activo,
+								tipo,
+								usuario,
+								ip
+							) VALUES (
+								'".$codcliente."',
+								'".$nuproducto."',
+								".$nuimporte.",
+								'1',
+								'".$nutd."',
+								'".TRIM($usuario)."',
+								'".TRIM($ip)."'
+							);
+					";
+					if ($sqlca->query($sql) < 0)
+						return false;
+				//} else {
+					//$c++;//CANTIDAD DE PRODUCTOS EXISTENTES
+				}
+				$codigoexcel = $codcliente;
+				$codigoexcel1 = $nuimporte;
 			}
-			$codigoexcel = $codcliente;
-			$codigoexcel1 = $nuimporte;
 		}
 		return array(true, $a, $b, $c, $codclienteb);
 	}

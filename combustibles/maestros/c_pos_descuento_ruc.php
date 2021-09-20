@@ -33,6 +33,14 @@ class PosDescuentoRucController extends Controller {
 
 		$this->visor->addComponent('ContentT', 'content_title', $template->titulo());
 
+		//VALORES INICIALES DE PAGINACION
+		if ( !isset($_REQUEST['rxp']) ){
+			$_REQUEST['rxp'] = 100;
+		}
+		if ( !isset($_REQUEST['pagina']) ){
+			$_REQUEST['pagina'] = 0;
+		}
+
 		if (isset($_REQUEST['rxp']) && !$_REQUEST['rxp'] && !$_REQUEST['pagina']) {
 			$_REQUEST['rxp'] = 100;
 			$_REQUEST['pagina'] = 0;

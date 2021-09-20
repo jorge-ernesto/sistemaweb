@@ -203,9 +203,9 @@ class PosDescuentoRucTemplate extends Template {
 		$codigoexcel = '';
 		$codigoexcel1 = '';
 
-		if(strlen($arrCeldas[4][1]['raw']) > 0 && strlen($arrCeldas[4][2]['raw']) > 0) {
+		if(strlen($arrCeldasNombres[4][1]) > 0 && strlen($arrCeldas[4][2]['raw']) > 0) {
 			for ($i = 4; $i <= $resultados; $i++) {
-				$codcliente	= stripslashes($arrCeldas[$i][1]['raw']);
+				$codcliente	= stripslashes($arrCeldasNombres[$i][1]);
 				$codcliente = trim($codcliente,"'");
 				$nuimporte	= $arrCeldas[$i][2]['raw'];
 
