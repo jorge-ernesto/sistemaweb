@@ -807,7 +807,8 @@ SELECT
  ROUND(VC.nu_fac_valortotal, 2) AS ss_total,
  VC.nu_fac_recargo3 AS nu_estado_documento_sunat,
  VC.ch_liquidacion AS nu_liquidacion,
- TRIM(VCOM.ch_cat_sunat) AS ch_cat_sunat
+ TRIM(VCOM.ch_cat_sunat) AS ch_cat_sunat,
+ CASE WHEN CLI.cli_anticipo = 'S' AND CLI.cli_ndespacho_efectivo = 1 THEN 'S' ELSE 'N' END AS no_venta_adelantada_cliente
 FROM
  fac_ta_factura_cabecera AS VC
  JOIN inv_ta_almacenes AS ALMA

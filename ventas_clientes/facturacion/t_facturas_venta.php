@@ -931,6 +931,7 @@ class templateSalesInvoice {
 								        	<input type="hidden" class="input" id="hidden-filtro-cliente-ruc" autocomplete="off" value="<?php echo ($sTitle=='Agregar' ? '' : $arrDataEdit->arrData[0]["nu_ruc_cliente"]); ?>" />
 								        	<input type="hidden" class="input" id="hidden-filtro-cliente-direccion" autocomplete="off" value="<?php echo ($sTitle=='Agregar' ? '' : $arrDataEdit->arrData[0]["txt_direccion_cliente"]); ?>" />
 								        	<input type="hidden" class="input" id="hidden-filtro-cliente-anticipo" autocomplete="off" value="<?php echo ($sTitle=='Agregar' ? '' : $arrDataEdit->arrData[0]["no_anticipo_cliente"]); ?>" />
+											<input type="hidden" class="input" id="hidden-filtro-cliente-venta-adelantada" autocomplete="off" value="<?php echo ($sTitle=='Agregar' ? '' : $arrDataEdit->arrData[0]["no_venta_adelantada_cliente"]); ?>" />
 								        	<input type="text" class="input" id="txt-filtro-cliente-nombre" autocomplete="off" value="<?php echo ($sTitle=='Agregar' ? '' : $arrDataEdit->arrData[0]["no_nombre_cliente"]); ?>" placeholder="Ingresar código / nombre"  onkeyup="autocompleteBridge(0)" <?php echo $is_disabled; ?>/>
 								            <p class="help is-danger"></p>
 							    		</div>

@@ -311,7 +311,7 @@ $(document).ready(function() {
 		searchNumberBySaleSerial();
 	});
 
-	$( '#cbo-add-forma_pago' ).change(function() {
+	$( '#cbo-add-forma_pago' ).change(function() { //Combo Forma Pago
 		var iCredito = $(this).val();
 		$( '.div-fecha_credito' ).hide();
 
@@ -323,7 +323,7 @@ $(document).ready(function() {
 
 		$( "#cbo-add-transferencia_gratuita" ).prop( "disabled", false );
 
-		if ( iCredito == '06' ) {
+		if ( iCredito == '06' ) { //Opcion: CREDITO
 		 	if ( $( '#txt-lista_precio' ).val().length === 0 ) {
 		 		$( "#cbo-add-forma_pago option[value='']" ).remove();
 				$( "#cbo-add-forma_pago" ).append( '<option value="">- SELECCIONAR -</option>' );
@@ -333,8 +333,14 @@ $(document).ready(function() {
 			} else {
 				$( '.div-fecha_credito' ).show();
 
-				$( "#cbo-add-anticipado" ).val("N");
-				$( "#cbo-add-anticipado" ).prop( "disabled", true );
+				var es_cliente_venta_adelantada = $( "#hidden-filtro-cliente-venta-adelantada" ).val();		
+				if( es_cliente_venta_adelantada == 'S' ){ //Es venta adelantada
+					$( "#cbo-add-anticipado" ).val("N");
+					$( "#cbo-add-anticipado" ).prop( "disabled", false );
+				}else{ //No es venta adelantada
+					$( "#cbo-add-anticipado" ).val("N");
+					$( "#cbo-add-anticipado" ).prop( "disabled", true );
+				}
 
 				$( "#cbo-add-credito" ).val("S");
 				$( "#cbo-add-credito" ).prop( "disabled", true );
@@ -907,7 +913,7 @@ function getCustomerCreditDays(){
 	}, 'JSON');
 }
 
-function getOtherCustomerFields(){
+function getOtherCustomerFields(){ //Funcion para autocompletar clientes
 	var iIdCliente = $.trim($("#hidden-filtro-cliente-id").val());
 
 	var params = {
@@ -917,6 +923,9 @@ function getOtherCustomerFields(){
 
 	url = '/sistemaweb/ventas_clientes/facturas_venta.php';
 
+	$( "#cbo-add-anticipado" ).val("N");
+	$( "#cbo-add-anticipado" ).prop( "disabled", true );
+
 	$.post( url, params, function( response ) {
 		$( '.help' ).empty();
 		if (response.sStatus === 'success'){
@@ -924,18 +933,33 @@ function getOtherCustomerFields(){
 				$( "#hidden-filtro-cliente-ruc" ).val( $.trim(response.rowData.cli_ruc) );
 				$( "#hidden-filtro-cliente-direccion" ).val( $.trim(response.rowData.cli_direccion) );
 				$( "#hidden-filtro-cliente-anticipo" ).val( $.trim(response.rowData.cli_anticipo) );
+				
+				//Validamos que sea cliente tipo Venta Adelantada
+				if(response.rowData.cli_anticipo == 'S' && response.rowData.cli_ndespacho_efectivo == '1'){
+					$( "#hidden-filtro-cliente-venta-adelantada" ).val( 'S' );
+				}else{
+					$( "#hidden-filtro-cliente-venta-adelantada" ).val( 'N' );
+				}
 			} else {
 				if ( $.trim(response.rowData.cli_anticipo) == 'N' ) {
 					$( "#hidden-filtro-cliente-id" ).val( '' );
 					$( "#hidden-filtro-cliente-ruc" ).val( '' );
 					$( "#hidden-filtro-cliente-direccion" ).val( '' );
 					$( "#hidden-filtro-cliente-anticipo" ).val( '' );
+					$( "#hidden-filtro-cliente-venta-adelantada" ).val( '' );
 					$( "#txt-filtro-cliente-nombre" ).val( '' );
-					$( "#txt-filtro-cliente-nombre" ).closest('.form-group').find('.help').html('El Cliente <b>' + $.trim(response.rowData.cli_razsocial) + '</b> no puede tener anticipos');
+					$( "#txt-filtro-cliente-nombre" ).closest('.form-group').find('.help').html('El Cliente <b>' + $.trim(response.rowData.cli_razsocial) + '</b> no puede tener anticipos'); //Mensaje de validacion 'El Cliente X no puede tener anticipos'
 				} else {
 					$( "#hidden-filtro-cliente-ruc" ).val( $.trim(response.rowData.cli_ruc) );
 					$( "#hidden-filtro-cliente-direccion" ).val( $.trim(response.rowData.cli_direccion) );
 					$( "#hidden-filtro-cliente-anticipo" ).val( $.trim(response.rowData.cli_anticipo) );
+
+					//Validamos que sea cliente tipo Venta Adelantada
+					if(response.rowData.cli_anticipo == 'S' && response.rowData.cli_ndespacho_efectivo == '1'){
+						$( "#hidden-filtro-cliente-venta-adelantada" ).val( 'S' );
+					}else{
+						$( "#hidden-filtro-cliente-venta-adelantada" ).val( 'N' );
+					}
 				}
 			}	
 		} else {

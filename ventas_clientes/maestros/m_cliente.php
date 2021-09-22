@@ -117,7 +117,7 @@ class ClienteModel extends Model {
 	}
 
 	//function guardarRegistro($datos, $datosxml) {
-	function guardarRegistro($datos) {
+	function guardarRegistro($datos) { //FUNCIONALIDAD PARA GUARDAR O EDITAR CLIENTE
 		global $sqlca;
 
 		$ip_remoto = $_SERVER["REMOTE_ADDR"];
@@ -145,6 +145,30 @@ class ClienteModel extends Model {
 
 		// Tipos de agente - 31/07/2019
 		$datos['cli_estado'] = ($datos['cbo-sTipoAgente']=='N'?null:$datos['cbo-sTipoAgente']);
+
+		/**
+		* OPENSOFT-XX: Venta adelantada
+			- TIPOS DE CLIENTES:
+		 		ANTICIPO:                     cli_ndespacho_efectivo = '0' / cli_anticipo = 'S'
+		 		CREDITO:                      cli_ndespacho_efectivo = '0' / cli_anticipo = 'N'
+		 		NOTA DE DESPACHO EN EFECTIVO: cli_ndespacho_efectivo = '1' / cli_anticipo = 'N'
+		 		VENTA ADELANTADA:             cli_ndespacho_efectivo = '1' / cli_anticipo = 'S'
+		*/
+
+		//Cargamos configuracion del tipo de cliente para guardar o modificar
+		if ($datos['tcliente'] == 0) { //Anticipo
+			$datos['cli_ndespacho_efectivo'] = '0';
+			$datos['cli_anticipo']           = 'S';
+		} elseif ($datos['tcliente'] == 1) { //Credito
+			$datos['cli_ndespacho_efectivo'] = '0';
+			$datos['cli_anticipo']           = 'N';
+		} elseif ($datos['tcliente'] == 2) { //Nota de despacho en efectivo
+			$datos['cli_ndespacho_efectivo'] = '1';
+			$datos['cli_anticipo']           = 'N';
+		} elseif ($datos['tcliente'] == 3) { //Venta adelantada
+			$datos['cli_ndespacho_efectivo'] = '1';
+			$datos['cli_anticipo']           = 'S';
+		}
 
 		if (isset($_REQUEST["registroid"]) && $_REQUEST["registroid"] != "") {
 			$registroid = trim($_REQUEST["registroid"]);
@@ -292,15 +316,58 @@ INSERT INTO int_clientes(
     	//return '<error>Error</error>';
   	}
 
+	/**
+	* @param client: Codigo de cliente
+	* @param lim: Limite de credio en soles o saldo
+	* @param ctype: Variable pasada al llamar la funcion, verificar lo que se envia
+		- ctype:  
+			2: Efectivo
+			1: Anticipo
+			0: Credito
+			4: Venta adelantada
+	*/
 	function obtenerLCDisponible($client,$lim,$ctype) {
 		global $sqlca;
+		
+		if($ctype == 4){ //Es venta adelantada
+			$limit = $lim;
+
+			//Facturas del cliente con flag anticipo
+			$sql = "SELECT
+							COALESCE(sum(f.nu_fac_valortotal),0)
+						FROM
+							fac_ta_factura_cabecera f
+						WHERE
+							f.cli_codigo = '{$client}'
+							AND f.ch_fac_anticipo = 'S' --Flag anticipo
+							AND f.nu_tipo_pago = '06' --Tipo de pago: Credito";
+			$sqlca->query($sql);
+			error_log("Es venta adelantada: ".$sql);
+			if ($rr = $sqlca->fetchRow())
+				$limit = $rr[0]; //Obtiene nuevo limite de credito en soles
+
+			//Vales consumidos por el cliente o vales liquidados
+			$sql = "SELECT
+							COALESCE(sum(h.nu_importe),0)
+						FROM
+							val_ta_cabecera h
+						WHERE
+							h.ch_cliente = '{$client}'
+							AND TRIM(ch_liquidacion) = 'LIQ'";
+			$sqlca->query($sql);
+			error_log("Es venta adelantada: ".$sql);
+			if ($rr = $sqlca->fetchRow())
+				$limit -= $rr[0];
+			
+			return $limit;
+		}
 
 		$limit  = $lim;
-		if ($limit == NULL || $limit == 0 || $ctype == 2)
+		if ($limit == NULL || $limit == 0 || $ctype == 2) //Limite de credito en soles == vacio / Limite de credito en soles == 0 / Es efectivo
 			$limit = NULL;
 
 		// Money already paid by the client
-		if ($ctype == 1) {
+		if ($ctype == 1) { //Es anticipo
 			$limit = 0;
 
 			$sql =	"	SELECT" .
@@ -310,13 +377,14 @@ INSERT INTO int_clientes(
 				"	WHERE" .
 				"		h.cli_codigo = '{$client}'" .
 				"		AND h.ch_tipdocumento = '21';";
-			$sqlca->query($sql);trigger_error($sql);
+			$sqlca->query($sql);
+			error_log("Es anticipo: ".$sql);
 			if ($rr = $sqlca->fetchRow())
-				$limit = $rr[0];
+				$limit = $rr[0]; //Obtiene nuevo limite de credito en soles
 		}
 
 		// Clients sales not invoices
-		if (($ctype == 0 && $limit != NULL) || $ctype == 1) {
+		if (($ctype == 0 && $limit != NULL) || $ctype == 1) { //Es credito && Limite de credito en soles != vacio / Es anticipo
 			$sql =	"	SELECT" .
 				"		COALESCE(sum(h.nu_importe),0)" .
 				"	FROM" .
@@ -324,12 +392,13 @@ INSERT INTO int_clientes(
 				"	WHERE" .
 				"		h.ch_cliente = '{$client}'" .
 				"		AND ch_liquidacion IS NULL;";
-			$sqlca->query($sql);trigger_error($sql);
+			$sqlca->query($sql);
+			error_log("Es credito && Limite de credito en soles != vacio / Es anticipo: ".$sql);
 			if ($rr = $sqlca->fetchRow())
 				$limit -= $rr[0];
 		}
 
-		if ($ctype == 1) {// Anticipo
+		if ($ctype == 1) { //Es anticipo
 			// Preapid invoiced
 			$sql =	"	SELECT" .
 				"		COALESCE(sum(h.nu_importesaldo),0)" .
@@ -338,10 +407,11 @@ INSERT INTO int_clientes(
 				"	WHERE" .
 				"		h.cli_codigo = '{$client}'" .
 				"		AND h.ch_tipdocumento = '22';";
-			$sqlca->query($sql);trigger_error($sql);
+			$sqlca->query($sql);
+			error_log("Es anticipo: ".$sql);
 			if ($rr = $sqlca->fetchRow())
 				$limit -= $rr[0];
-		} else if ( $ctype == 0 && $limit != NULL ) { // Crédito y saldo != vacio
+		} else if ( $ctype == 0 && $limit != NULL ) { //Es credito && Limite de credito en soles != vacio
 			// Payment pending invoices
 			$sql =	"	SELECT" .
 				"		COALESCE(sum(x.xv),0)" .
@@ -359,12 +429,13 @@ INSERT INTO int_clientes(
 				"		GROUP BY" .
 				"			h.ch_tipdocumento" .
 				"	) x;";
-			$sqlca->query($sql);trigger_error($sql);
+			$sqlca->query($sql);
+			error_log("Es credito && Limite de credito en soles != vacio: ".$sql);
 			if ($rr = $sqlca->fetchRow())
 				$limit -= $rr[0];
 		}
 
-		if ($ctype == 1) {// Anticipo - NC
+		if ($ctype == 1) { //Es anticipo - NC
 		// Preapid invoiced
 			$sql =	"	SELECT" .
 				"		COALESCE(sum(h.nu_importesaldo),0)" .
@@ -373,7 +444,8 @@ INSERT INTO int_clientes(
 				"	WHERE" .
 				"		h.cli_codigo = '{$client}'" .
 				"		AND h.ch_tipdocumento = '20';";
-			$sqlca->query($sql);trigger_error($sql);
+			$sqlca->query($sql);
+			error_log("Es anticipo - NC: ".$sql);
 			if ($rr = $sqlca->fetchRow())
 				$limit -= $rr[0];
 		}
@@ -387,7 +459,7 @@ INSERT INTO int_clientes(
 
 		$query = "
 SELECT
- cli_codigo,
+ cli_codigo, --0
  cli_razsocial,
  cli_rsocialbreve,
  cli_direccion,
@@ -401,14 +473,14 @@ SELECT
  cli_email,
  cli_lista_precio,
  cli_mantenimiento,
- cli_creditosol,
- cli_creditodol,
- cli_anticipo,
+ cli_creditosol, --14
+ cli_creditodol, --15
+ cli_anticipo, --16
  cli_fpago_credito,
  cli_grupo,
  cli_tipo,
  cli_descuento,
- cli_ndespacho_efectivo,
+ cli_ndespacho_efectivo, --21
  cli_estado
 FROM
  int_clientes
@@ -425,16 +497,26 @@ WHERE
 // Disponible 22
     		if ($reg = $sqlca->fetchRow()) {
 			$registro = $reg;
-			error_log( json_encode( $registro ) );
+			error_log( 'Cliente: '.json_encode( $registro ) );
 
-			if ($registro[21] == "1")
+			if ($registro[21] == "1" && $registro[16] == "N") { //Es efectivo
 				$ctype = 2;
-			else
-				$ctype = (($registro[16] == "S") ? 1 : 0);
-trigger_error("CType: " . $ctype);
+			} else {
+				if ($registro[16] == "S" && $registro[21] == "0") { //Es anticipo
+					$ctype = 1;
+				} else if ($registro[16] == "N" && $registro[21] == "0") { //Es credito
+					$ctype = 0;
+				} else if ($registro[16] == "S" && $registro[21] == "1") { //Es venta adelantada
+					$ctype = 4;
+				} else {
+					$ctype = 0;
+				}
+			}
+			error_log("CType: ".$ctype);
 
 			error_log( json_encode( array( $registro[0],$registro[14],$ctype ) ) );
 			$registro[22] = ClienteModel::obtenerLCDisponible($registro[0],$registro[14],$ctype);
+			error_log("Linea disponible: ".$registro[22]);
 			if ($registro[22] === NULL)
 				$registro[22] = "Ilimitado";
 /*
@@ -545,7 +627,7 @@ FROM
 		$filtro["tcliente"] = isset($filtro["tcliente"]) ? $filtro["tcliente"] : '0';
 		if (isset($filtro["codigo"])) {
 			if ($filtro["codigo"] == "") {
-				if ($filtro["tcliente"] == "0")
+				if ($filtro["tcliente"] == "0") //TODOS
 					$cond2 = "";
 				elseif ($filtro["tcliente"] == "1")//CREDITO
 					$cond2 = "WHERE cli_ndespacho_efectivo = '0' AND cli_anticipo = 'N'";
@@ -553,6 +635,8 @@ FROM
 					$cond2 = "WHERE cli_ndespacho_efectivo = '1' AND cli_anticipo = 'N'";
 				elseif ($filtro["tcliente"] == "S")//ANTICIPO
 					$cond2 = "WHERE cli_anticipo = 'S' AND cli_ndespacho_efectivo='0'";
+				elseif ($filtro["tcliente"] == "3")//VENTA ADELANTADA
+					$cond2 = "WHERE cli_ndespacho_efectivo = '1' AND cli_anticipo = 'S'";
 			}
 
 			if ($filtro["codigo"] != "" && $filtro["tcliente"] != "0") {
@@ -564,6 +648,8 @@ FROM
 					$cond .= "AND cli_ndespacho_efectivo = '1' AND cli_anticipo = 'N'";
 				elseif ($filtro["tcliente"] == "S")//ANTICIPO
 					$cond .= "AND cli_anticipo = 'S' AND cli_ndespacho_efectivo='0'";
+				elseif ($filtro["tcliente"] == "3")//VENTA ADELANTADA
+					$cond .= "AND cli_ndespacho_efectivo = '1' AND cli_anticipo = 'S'";
 			} elseif ($filtro["codigo"] != "") {
 				$cond = "WHERE
 					trim(cli_codigo)||''||trim(cli_razsocial)||''||trim(cli_ruc) ~ '".$filtro["codigo"]."'";
@@ -590,6 +676,7 @@ FROM
 				WHEN cli_ndespacho_efectivo = '0' AND cli_anticipo = 'N' THEN 'CREDITO'
 				WHEN cli_ndespacho_efectivo = '1' AND cli_anticipo = 'N' THEN 'EFECTIVO'
 				WHEN cli_ndespacho_efectivo = '0' AND cli_anticipo = 'S' THEN 'ANTICIPO'
+				WHEN cli_ndespacho_efectivo = '1' AND cli_anticipo = 'S' THEN 'VENTA ADELANTADA'
 			END) AS tipo_cliente,
 			cli_distrito,
 			cli_creditosol,

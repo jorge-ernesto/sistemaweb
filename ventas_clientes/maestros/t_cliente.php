@@ -53,7 +53,7 @@ class ClienteTemplate extends Template {
 
 	function formBuscar($paginacion, $datos) {
 
-		$type_client = array("0"=>"Todos", "S"=>"Anticipo", "1"=>"Credito", "2"=>"Efectivo");
+		$type_client = array("0"=>"Todos", "S"=>"Anticipo", "1"=>"Credito", "2"=>"Efectivo", "3"=>"Venta Adelantada");
 
 		$form = new form2('', 'Buscar', FORM_METHOD_POST, 'control.php', '', 'control');
 
@@ -120,6 +120,35 @@ class ClienteTemplate extends Template {
 		$CbSiNo2 = array(0=>'No',
 				 1=>'Si');
     
+		/**
+		* OPENSOFT-XX: Venta adelantada
+			- TIPOS DE CLIENTES:
+		 		ANTICIPO:                     cli_ndespacho_efectivo = '0' / cli_anticipo = 'S'
+		 		CREDITO:                      cli_ndespacho_efectivo = '0' / cli_anticipo = 'N'
+		 		NOTA DE DESPACHO EN EFECTIVO: cli_ndespacho_efectivo = '1' / cli_anticipo = 'N'
+		 		VENTA ADELANTADA:             cli_ndespacho_efectivo = '1' / cli_anticipo = 'S'
+		*/
+		$CbTipoCliente = array(
+				 0=>'Anticipo',
+				 1=>'Credito',
+				 2=>'Nota de despacho en efectivo',
+				 3=>'Venta adelantada');
+
+		//Cargar nuevo combo 'Tipo Cliente' con el tipo de cliente
+		if ( isset($datos['cli_ndespacho_efectivo']) && isset($datos['cli_anticipo']) ) {
+
+			if ( $datos['cli_ndespacho_efectivo'] == '0' && $datos['cli_anticipo'] == 'S' ) { //Anticipo
+				$datos['tcliente'] = 0;
+			} elseif ( $datos['cli_ndespacho_efectivo'] == '0' && $datos['cli_anticipo'] == 'N' ) { //Credito
+				$datos['tcliente'] = 1;
+			} elseif ( $datos['cli_ndespacho_efectivo'] == '1' && $datos['cli_anticipo'] == 'N' ) { //Nota de despacho en efectivo
+				$datos['tcliente'] = 2;
+			} elseif ( $datos['cli_ndespacho_efectivo'] == '1' && $datos['cli_anticipo'] == 'S' ) { //Venta adelantada
+				$datos['tcliente'] = 3;
+			}
+
+		}
+
 		$Money = array(	'01'=>'S/. - Nuevos Soles',
 				'02'=>'US$ - Dolares Americanos');
     
@@ -220,10 +249,13 @@ class ClienteTemplate extends Template {
 		$form->addElement(FORM_GROUP_MAIN, new f2element_text ('datos[cli_mantenimiento]','Mantenimiento</td><td>: ', @$datos["cli_mantenimiento"], '', 12, 11, array("class"=>"form_input_numeric","onKeyPress"=>"return validar(event,3);")));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td>'));
 
-		$form->addElement(FORM_GROUP_MAIN, new f2element_combo('datos[cli_anticipo]','Anticipos </td><td>: ', trim(@$datos["cli_anticipo"]), $CbSiNo, espacios(3)));
-		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td>'));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_combo('datos[tcliente]','Tipo Cliente </td><td>: ', trim(@$datos["tcliente"]), $CbTipoCliente, espacios(3)));
+		// $form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td>'));
+		
+		// $form->addElement(FORM_GROUP_MAIN, new f2element_combo('datos[cli_anticipo]','Anticipos </td><td>: ', trim(@$datos["cli_anticipo"]), $CbSiNo, espacios(3)));
+		// $form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td>'));
 
-		$form->addElement(FORM_GROUP_MAIN, new f2element_combo('datos[cli_ndespacho_efectivo]','Nota de Despacho en Efectivo </td><td>: ', trim(@$datos["cli_ndespacho_efectivo"]), $CbSiNo2, espacios(3)));
+		// $form->addElement(FORM_GROUP_MAIN, new f2element_combo('datos[cli_ndespacho_efectivo]','Nota de Despacho en Efectivo </td><td>: ', trim(@$datos["cli_ndespacho_efectivo"]), $CbSiNo2, espacios(3)));
 
 		if (isset($datos[22])) {
 			$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags("</td></tr><tr><td><span class=form_label >Linea Disponible</span></td><td>: {$datos[22]}"));
@@ -245,9 +277,10 @@ class ClienteTemplate extends Template {
 		$html_option = '<option value="N" '.$sSelectedTipoAgenteN.'>Ninguno</option>';
 		$html_option .= '<option value="R" '.$sSelectedTipoAgenteR.'>Retencion</option>';
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<tr>'));
-		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<td align="right"><span class=form_label>Tipo agente</span></td>'));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<td align="left"><span class=form_label>Tipo agente</span></td>'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<td align="left">'));
 			$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags(
+				':' . espacios(2) .
 				'<select id="datos[cbo-sTipoAgente]" name="datos[cbo-sTipoAgente]">
 					' . $html_option . '
 				</select>'
