@@ -637,7 +637,8 @@ function getControlInventarioNuevo($almacen,$cod_combustible,$fechad,$fechaa,$un
 
 	// Lo movi aca JCP 04/09/2010
 	if(trim($cod_combustible)=='11620307' && $unidadmedida=='Galones'){
-		$factor=3.785411784;
+		// $factor=3.785411784;
+		$factor=1;
 	}else{
 		$factor=1; //Por defecto todo esta en litros
 	}	

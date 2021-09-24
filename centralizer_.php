@@ -1281,7 +1281,7 @@ WHERE
  c.ch_fac_tipodocumento='45'
  AND c.ch_almacen = '" . $warehouse_id . "'
  AND c.dt_fac_fecha BETWEEN '" . $BeginDate . "' AND '" . $EndDate . "'
- AND art.art_unidad NOT IN('000GLN', '0000GL')
+ AND art.art_unidad NOT IN('000GLN', '0000GL')--
 ) AS TOT_MARKET;
 			";
 
@@ -1561,7 +1561,7 @@ FROM
  WHERE
   c.ch_fac_tipodocumento='45'
   AND c.ch_almacen = '" . $warehouse_id . "'
-  AND art.art_unidad NOT IN('000GLN', '0000GL')
+  AND art.art_unidad NOT IN('000GLN', '0000GL')--
   AND c.dt_fac_fecha BETWEEN '" . $BeginDate . "' AND '" . $EndDate . "'
  GROUP BY
   linea.tab_elemento
@@ -2018,7 +2018,8 @@ FROM
 						importe as nu_ventavalor,
 
 						CASE
-							WHEN TRIM(codigo) = '11620307' AND 'GALONES' = '$unidadmedida' THEN cantidad/$factor
+							WHEN TRIM(codigo) = '11620307' AND 'Litros_a_Galones' = '$unidadmedida' THEN cantidad/$factor
+							WHEN TRIM(codigo) = '11620307' AND 'Galones_a_Litros' = '$unidadmedida' THEN cantidad*$factor							
 							ELSE cantidad
 						END AS nu_ventagalon,
 
@@ -2083,7 +2084,8 @@ FROM
 						importe as nu_ventavalor,
 						
 						CASE
-							WHEN TRIM(codigo) = '11620307' AND 'GALONES' = '$unidadmedida' THEN cantidad/$factor
+							WHEN TRIM(codigo) = '11620307' AND 'Litros_a_Galones' = '$unidadmedida' THEN cantidad/$factor
+							WHEN TRIM(codigo) = '11620307' AND 'Galones_a_Litros' = '$unidadmedida' THEN cantidad*$factor
 							ELSE cantidad
 						END AS nu_ventagalon,
 
@@ -2547,7 +2549,6 @@ FROM
 						PT.caja||'-'||PT.trans = cab.ch_documento 
 						OR PT.trans::VARCHAR = cab.ch_documento 
 					LIMIT 1 ) AS hora, 
-				--TO_CHAR(PT.fecha, 'HH24:MI:SS') AS hora,
 				--TO_CHAR(cab.fecha_replicacion, 'HH24:MI:SS') AS hora,
 				'ESTACION' AS estacion,
 				cab.ch_documento AS numero,
@@ -2562,7 +2563,9 @@ FROM
 					when cli.cli_anticipo='S' then fac.cod_hermandad 
 					else
 					fac.ch_fac_seriedocumento||'-'||fac.ch_fac_numerodocumento
-				end AS documento --AQUI OBTIENE EL CAMPO #FACTURA
+				end AS documento, --AQUI OBTIENE EL CAMPO #FACTURA
+				cab.ch_cliente codcliente,
+ 				cli.cli_razsocial nomcliente
 			FROM
 				val_ta_cabecera AS cab
 				LEFT JOIN val_ta_detalle AS det
@@ -2581,18 +2584,6 @@ FROM
 				 ON(cli.cli_codigo = cab.ch_cliente)
 				LEFT JOIN int_articulos AS art
 				 ON(art.art_codigo = det.ch_articulo)
-				/*
-				LEFT JOIN (
-						SELECT
-							pos.caja as caja,
-							pos.trans as trans,
-							FIRST(pos.fecha) as fecha --ESTO YA LO LIMITA A 1
-						FROM
-							".$pos_transYM." pos
-						GROUP BY
-							1,2      
-					) AS PT ON(PT.caja||'-'||PT.trans = cab.ch_documento OR PT.trans::VARCHAR = cab.ch_documento)
-				*/
 			WHERE
 				cab.dt_fecha BETWEEN '" . pg_escape_string($desde_) . "' AND '" . pg_escape_string($hasta_) . "'
 				AND TRIM(cab.ch_cliente) IN ($clientes_)

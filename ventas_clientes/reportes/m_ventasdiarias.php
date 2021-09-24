@@ -125,7 +125,8 @@ error_log($sql);
 	    $nu_ventavalor -= $fAmountAfericion;
 
 	    if ($ch_codigocombustible=='11620307') {
-			$nu_ventagalon=round($nu_ventagalon/3.785411784,2);
+			// $nu_ventagalon=round($nu_ventagalon/3.785411784,2);
+			$nu_ventagalon=round($nu_ventagalon/1);
 	    }
 	    
 	    /* Si no esta resumido, totalizar venta por dia */
@@ -542,7 +543,8 @@ error_log($sql);
 	    $nu_ventavalor -= $fAmountAfericion;
 
 	    if ($ch_codigocombustible=='11620307') {
-			$nu_ventagalon=round($nu_ventagalon/3.785411784,2);
+			// $nu_ventagalon=round($nu_ventagalon/3.785411784,2);
+			$nu_ventagalon=round($nu_ventagalon/1);
 	    }
 	    
 	    /* Si no esta resumido, totalizar venta por dia */

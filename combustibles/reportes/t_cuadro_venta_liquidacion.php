@@ -1,7 +1,7 @@
 <?php
 class CuadroVentaLiquidacionTemplate extends Template {
 	function getTitulo() {
-		return '<h2 align="center"><b>Reporte Diario - Ventas del Día (Requerimiento)</b></h2>';
+		return '<h2 align="center"><b>Reporte Diario - Ventas del Día</b></h2>';
     }
     
 	function formPrincipal($arrAlmacenes, $iAlmacen, $dInicial, $dFinal, $dCierre) {

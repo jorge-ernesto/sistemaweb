@@ -7722,7 +7722,14 @@ GROUP BY
  FIRST(PTA.cantidad) AS quantity,
  ROUND((FIRST(PTA.precio) / ".$param['tax']."), 4) AS price,
  '".$param['sap_tax_code']."' AS taxcode,
- ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / 1) * 100) / (FIRST(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1))) / 1), 4) AS discprcnt,
+ --ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / 1) * 100) / (FIRST(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1))) / 1), 4) AS discprcnt,
+ CASE
+   WHEN 
+      (FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / 1) * 100) = 0 
+      OR (FIRST(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1))) / 1) = 0
+   THEN 0
+   ELSE ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / 1) * 100) / (FIRST(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1))) / 1), 4)
+ END AS discprcnt,
  FIRST(SAPLINEA.sap_codigo) AS ocrcode,
  FIRST(SAPCC.sap_codigo) AS ocrcode2,
  '' AS u_exc_dispensador,
@@ -8377,8 +8384,11 @@ GROUP BY
 		);
 	}
 
-	public function getItemCreditNote($noperacion, $itemcode, $arrOrigenDocumento) {
+	public function getItemCreditNote($noperacion, $itemcode, $arrOrigenDocumento) { //ACA
 		error_log('BUSCANDO REFERENCIA');
+		error_log('==================');
+		error_log( json_encode($this->creditNote) );
+		error_log( json_encode( array( $noperacion, $itemcode, $arrOrigenDocumento ) ) );
 		error_log('==================');
 		error_log('$this->creditNote[' . $noperacion . ']');
 		foreach ($this->creditNote[$noperacion] as $key => $value) {
@@ -8518,7 +8528,7 @@ ORDER BY 1;";
 							'sSerieDocumentoOrigen' => $u_exx_serdocor,
 							'sNumeroDocumentoOrigen' => $u_exx_cordocor,
 						);
-						$itemref = $this->getItemCreditNote($reg['noperacion'], $this->cleanStr($reg['itemcode']), $arrOrigenDocumento);
+						$itemref = $this->getItemCreditNote($reg['noperacion'], $this->cleanStr($reg['itemcode']), $arrOrigenDocumento); //ACA
 						if (!$itemref['isFind']) {
 							$item = NULL;
 							$data['item'] = NULL;
@@ -9912,7 +9922,8 @@ WHERE se.systemdate = '".$req['initial_systemdate']."' ORDER BY se.systemdate;";
 	 */
 	function converterUM($data) {
 		if($data['type'] == 0) {
-			return $data['co'] / 3.785411784;//11620307 - GLP
+			// return $data['co'] / 3.785411784;//11620307 - GLP
+			return $data['co'] / 1;//11620307 - GLP
 		} else if($data['type'] == 1) {
 			return $data['co'] / 3.15;//11620308 - GNV
 		} else {

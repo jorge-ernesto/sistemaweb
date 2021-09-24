@@ -473,8 +473,10 @@ class InterfaceSAPTemplate extends Template {
 					$fQuantity = $row['quantity'];
 					$fPrice = $row['price'];
 					if ( trim($row['itemcodeocs']) == '11620307' ){
-						$fQuantity = $row['quantity'] / 3.785411784;
-						$fPrice = $row['price'] * 3.785411784;
+						// $fQuantity = $row['quantity'] / 3.785411784;
+						// $fPrice = $row['price'] * 3.785411784;
+						$fQuantity = $row['quantity'] / 1;
+						$fPrice = $row['price'] * 1;
 					}
 
 					$fPrice = $fPrice / $fTax['tax'];
@@ -626,8 +628,10 @@ class InterfaceSAPTemplate extends Template {
 				$fQuantity = $row['quantity'];
 				$fPrice = $row['price'];
 				if ( trim($row['itemcodeocs']) == '11620307' ){
-					$fQuantity = $row['quantity'] / 3.785411784;
-					$fPrice = $row['price'] * 3.785411784;
+					// $fQuantity = $row['quantity'] / 3.785411784;
+					// $fPrice = $row['price'] * 3.785411784;
+					$fQuantity = $row['quantity'] / 1;
+					$fPrice = $row['price'] * 1;
 				}
 
 				$fPrice = $fPrice / $fTax['tax'];

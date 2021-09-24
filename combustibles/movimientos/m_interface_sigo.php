@@ -488,10 +488,12 @@ class InterfaceMovModel extends Model {
 				replace(to_char(cpag.PER, '0000000000000.99'),'.','') AS PER,
 				replace(to_char(cpag.IGV, '0000000000000.99'),'.','') AS cuenta_base_igv_2,
 				CASE WHEN inv.art_codigo = '11620307' THEN
-				replace(to_char(ROUND(inv.mov_cantidad/3.785411784,5), '0000000000.99999'),'.','')
+				--replace(to_char(ROUND(inv.mov_cantidad/3.785411784,5), '0000000000.99999'),'.','')
+				replace(to_char(ROUND(inv.mov_cantidad/1), '0000000000.99999'),'.','')
 				ELSE replace(to_char(inv.mov_cantidad, '0000000000.99999'),'.','') END AS cantidad,
 				CASE WHEN inv.art_codigo = '11620307' THEN
-				replace(to_char(ROUND(inv.mov_costounitario*3.785411784,5), '0000000000000.99999'),'.','') 
+				--replace(to_char(ROUND(inv.mov_costounitario*3.785411784,5), '0000000000000.99999'),'.','') 
+				replace(to_char(ROUND(inv.mov_costounitario*1), '0000000000000.99999'),'.','') 
 				ELSE replace(to_char(inv.mov_costounitario, '0000000000000.99999'),'.','') END AS precio_unitario,
 				replace(to_char(cpag.nutipocambio,'00000000.9999999') ,'.','') AS nu_tipocambio,
 				cpag.nuregistrocompra,

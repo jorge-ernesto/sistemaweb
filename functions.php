@@ -836,10 +836,15 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 	$C = pg_fetch_row($comb,0);
 	$cod_combustible=$C[0];
 	// Lo movi aca JCP 04/09/2010
-	if(trim($cod_combustible)=='11620307'&&$unidadmedida=='Galones'){
+	if(trim($cod_combustible)=='11620307'&&$unidadmedida=='Litros_a_Galones'){
 		$factor=3.785411784;
-	}else{
-		$factor=1; //Por defecto todo esta en litros
+                $operacion='/';
+	}else if(trim($cod_combustible)=='11620307'&&$unidadmedida=='Galones_a_Litros'){
+		$factor=3.785411784;
+                $operacion='*';
+        }else{
+                $factor=1; //Por defecto todo esta en litros
+                $operacion='/';
         }
         
         // echo "Query 1:";
@@ -910,7 +915,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
                 if($buscar_por_tanque){
                         $qe =  "SELECT
 				to_char(dt_fechamedicion,'DD-MM-YYYY') AS fecha,
-				ROUND(SUM(nu_medicion)/'$factor',3) AS saldo
+				ROUND(SUM(nu_medicion) $operacion '$factor',3) AS saldo
 			FROM	
 				comb_ta_mediciondiaria
 			WHERE 
@@ -925,7 +930,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
                 }else{
                         $qe =  "SELECT 
 				to_char(dt_fechamedicion,'DD-MM-YYYY') AS fecha,
-				ROUND(SUM(nu_medicion)/'$factor',3) AS saldo
+				ROUND(SUM(nu_medicion) $operacion '$factor',3) AS saldo
 			FROM	
 				comb_ta_mediciondiaria med
                                 INNER JOIN comb_ta_tanques tan ON (med.ch_tanque = tan.ch_tanque)
@@ -970,7 +975,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 		$limit = count($fec)-1;
 		$rs1 = pg_exec("SELECT 
 					to_char(mov_fecha::DATE,'DD-MM-YYYY') AS fecha,
-					ROUND(SUM(mov_cantidad)/'$factor',3) AS compra
+					ROUND(SUM(mov_cantidad) $operacion '$factor',3) AS compra
 				FROM
 					inv_movialma mov 
 				WHERE 
@@ -999,7 +1004,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 		$rs1 = pg_exec("
 				SELECT
 					TO_CHAR(a.dia, 'DD-MM-YYYY') AS fecha,
-					ROUND(SUM(a.cantidad)/'$factor',3) AS medicion
+					ROUND(SUM(a.cantidad) $operacion '$factor',3) AS medicion
 				FROM
 					pos_ta_afericiones a
 					LEFT JOIN comb_ta_tanques t ON(t.ch_codigocombustible = a.codigo AND t.ch_sucursal = a.es)
@@ -1028,7 +1033,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
                 if($buscar_por_tanque){
 		$rs1 = pg_exec("SELECT 
 					to_char(dt_fechaparte,'DD-MM-YYYY') AS fecha,
-					ROUND(SUM(cont.nu_ventagalon)/'$factor',3) AS venta,
+					ROUND(SUM(cont.nu_ventagalon) $operacion '$factor',3) AS venta,
                     CASE 
                     WHEN SUM(cont.nu_ventagalon) = 0 THEN 0.00
                     ELSE
@@ -1046,7 +1051,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
                 }else{
                 $rs1 = pg_exec("SELECT 
 					to_char(dt_fechaparte,'DD-MM-YYYY') AS fecha,
-					ROUND(SUM(cont.nu_ventagalon)/'$factor',3) AS venta,
+					ROUND(SUM(cont.nu_ventagalon) $operacion '$factor',3) AS venta,
                     CASE 
                     WHEN SUM(cont.nu_ventagalon) = 0 THEN 0.00
                     ELSE
@@ -1090,7 +1095,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 		//INGRESO
 		$rs1 = pg_exec("SELECT 
 					to_char(mov_fecha::date,'DD-MM-YYYY') AS fecha,
-					ROUND(SUM(mov_cantidad)/'$factor',3) AS compra
+					ROUND(SUM(mov_cantidad) $operacion '$factor',3) AS compra
 				FROM 
 					inv_movialma
 				WHERE 
@@ -1119,7 +1124,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 		//SALIDA
 		$rs1 = pg_exec("SELECT 
 					to_char(mov_fecha::date,'DD-MM-YYYY') AS fecha,
-					ROUND(SUM(mov_cantidad)/'$factor',3) AS compra
+					ROUND(SUM(mov_cantidad) $operacion '$factor',3) AS compra
 				FROM 
 					inv_movialma
 				WHERE 
@@ -1152,7 +1157,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
                 if($buscar_por_tanque){
 		$rs1 = pg_exec("SELECT 
 					to_char(dt_fechamedicion,'DD-MM-YYYY') AS fecha,
-					ROUND(SUM(nu_medicion)/'$factor',3) AS saldo
+					ROUND(SUM(nu_medicion) $operacion '$factor',3) AS saldo
 				FROM 
 					comb_ta_mediciondiaria
 				WHERE 
@@ -1167,7 +1172,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
                 }else{
                 $rs1 = pg_exec("SELECT 
 					to_char(dt_fechamedicion,'DD-MM-YYYY') AS fecha,
-					ROUND(SUM(nu_medicion)/'$factor',3) AS saldo
+					ROUND(SUM(nu_medicion) $operacion '$factor',3) AS saldo
 				FROM 
 					comb_ta_mediciondiaria med
                                         INNER JOIN comb_ta_tanques tan ON (med.ch_tanque = tan.ch_tanque)
@@ -1230,20 +1235,23 @@ function DetalleComprasReporte($almacen,$cod_tanque,$fechad,$fechaa,$unidadmedid
 	$C = pg_fetch_row($comb,0);
 	$cod_combustible=$C[0];
 
-	if(trim($cod_combustible)=='11620307'&&$unidadmedida=='Galones'){
-		$factor=1;
-	}elseif(trim($cod_combustible)=='11620307' and $unidadmedida=='Litros'){
+        if(trim($cod_combustible)=='11620307'&&$unidadmedida=='Litros_a_Galones'){
 		$factor=3.785411784;
-	}else{
-		$factor=1;
-	}
+                $operacion='/';
+	}else if(trim($cod_combustible)=='11620307'&&$unidadmedida=='Galones_a_Litros'){
+		$factor=3.785411784;
+                $operacion='*';
+        }else{
+                $factor=1; //Por defecto todo esta en litros
+                $operacion='/';
+        }
 
 	$qf = "	SELECT
 			to_char(a.mov_fecha,'DD-MM-YYYY') as fecha,
 			a.mov_tipdocuref||' - '||a.mov_docurefe as documento,
 			b.kilos as kilos,
 			b.ge as ge,
-			CASE WHEN '$codigo_combustible'='11620307' THEN  b.galones  ELSE round(a.mov_cantidad/$factor,5) END as galones
+			CASE WHEN '$codigo_combustible'='11620307' THEN  b.galones  ELSE round(a.mov_cantidad $operacion $factor,5) END as galones
 		FROM
 			inv_movialma  a 
 			LEFT JOIN inv_calculo_glp b ON (a.mov_numero=b.mov_numero AND a.tran_codigo=b.tran_codigo AND a.art_codigo=b.art_codigo AND date_trunc('day',a.mov_fecha)=date_trunc('day', b.mov_fecha))

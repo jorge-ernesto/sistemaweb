@@ -377,8 +377,9 @@ pg_close();
 		</td>
 		<td>
 			<select name="unidadmedida">
-				<OPTION value="Galones"<?php if (isset($_REQUEST["unidadmedida"]) && $_REQUEST["unidadmedida"] == "Galones") echo " selected=\"1\""; ?>>Galones</OPTION>
-				<OPTION value="Litros"<?php if (isset($_REQUEST["unidadmedida"]) && $_REQUEST["unidadmedida"] == "Litros") echo " selected=\"1\""; ?>>Litros</OPTION>
+				<OPTION value="-"<?php if (isset($_REQUEST["unidadmedida"]) && $_REQUEST["unidadmedida"] == "-") echo " selected=\"1\""; ?>>No convertir unidades</OPTION>
+				<OPTION value="Litros_a_Galones"<?php if (isset($_REQUEST["unidadmedida"]) && $_REQUEST["unidadmedida"] == "Litros_a_Galones") echo " selected=\"1\""; ?>>Convertir de litros a galones</OPTION>
+				<OPTION value="Galones_a_Litros"<?php if (isset($_REQUEST["unidadmedida"]) && $_REQUEST["unidadmedida"] == "Galones_a_Litros") echo " selected=\"1\""; ?>>Convertir de galones a litros</OPTION>
 			</select>
 		</td>
 	<tr>
