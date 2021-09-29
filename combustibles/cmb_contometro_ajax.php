@@ -32,7 +32,7 @@ if($_REQUEST['accion'] == 'aprosys'){
 		die();
 	}
 
-}else if($_REQUEST['accion'] == 'eliminar'){
+}/*else if($_REQUEST['accion'] == 'eliminar'){
 
 	$hoy = $_REQUEST['fecha'];
 
@@ -64,5 +64,4 @@ if($_REQUEST['accion'] == 'aprosys'){
 
 	}
 
-}
-
+}*/

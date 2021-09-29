@@ -1,5 +1,7 @@
-
-<html>
+<?php
+http_response_code(404);
+die("Not Found");
+?><html>
 <head>
         <link rel="stylesheet" href="/sistemaweb/css/sistemaweb.css" type="text/css">
 	<script src="/sistemaweb/js/jquery-2.0.3.js" type="text/javascript"></script>

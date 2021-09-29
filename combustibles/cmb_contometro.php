@@ -1,4 +1,6 @@
 <?php
+header("Location: rep_venta_combustible_x_lado.php");
+die("");
 
 include("/sistemaweb/valida_sess.php");
 include("/sistemaweb/functions.php");

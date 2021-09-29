@@ -1,4 +1,6 @@
 <?php
+http_response_code(404);
+die("Not Found");
 include("../config.php");
 extract($_REQUEST);
 $fecha = $_REQUEST["fecha"];

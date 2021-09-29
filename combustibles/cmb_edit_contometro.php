@@ -1,4 +1,6 @@
 <?php
+http_response_code(404);
+die("Not Found");
 //session_start();
 include("../config.php");
 //include("../combustibles/inc_top.php");
