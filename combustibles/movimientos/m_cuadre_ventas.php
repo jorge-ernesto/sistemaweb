@@ -834,12 +834,51 @@ class CuadreVentasModel extends Model {
 		$reporte['apertura'] = $apertura;
 		$reporte['cierre'] = $cierre;
 
+		//OBTENER VENTA MARKET POR DIA, TURNO Y LINEA		
+		$caja_linea = array();
+		$sql = "
+			SELECT
+				art.art_linea AS linea,
+				max(tab.tab_descripcion) AS descripcion_linea,
+				sum(pt.cantidad),
+				sum(pt.importe)-sum(COALESCE(pt.km,0))
+			FROM
+				$postrans pt
+				RIGHT JOIN int_articulos art ON (art.art_codigo=pt.codigo)
+				LEFT JOIN int_tabla_general tab ON (tab.tab_tabla='20' AND tab.tab_elemento=art.art_linea)
+			WHERE
+				pt.dia = '$dia'
+				AND pt.turno = '$turno'					
+				AND pt.tipo = 'M'
+				AND (pt.tm = 'V' OR pt.tm = 'D' AND pt.fpago='2')
+				AND pt.es = '".$_SESSION['almacen']."'
+			GROUP BY
+				art.art_linea
+			ORDER BY
+				art.art_linea;
+		";
+		if ($sqlca->query($sql)<0)
+			return FALSE;
+
+		for ($i = 0; $i < $sqlca->numrows(); $i++) {
+			$a = $sqlca->fetchRow();
+
+			$caja_linea[] = array(
+				'linea'             => $a[0],
+				'descripcion_linea' => $a[1],
+				'cantidad'          => $a[2],
+				'importe'           => $a[3]
+			);
+		}			
+		$reporte['resumen_market_linea'] = $caja_linea;
+		//CERRAR OBTENER VENTA MARKET POR DIA, TURNO Y LINEA							
+
 		return $reporte;
 	}
 
 
 
-	function obtenerReporteTurnoConsolidacion($dia,$turno,$trabajador,$almacen) {
+	function obtenerReporteTurnoConsolidacion($dia,$turno,$trabajador,$almacen) { //Sobrantes y faltantes
 		global $sqlca;
 
 		$dt = explode("-",$dia);

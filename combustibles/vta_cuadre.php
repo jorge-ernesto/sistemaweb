@@ -742,6 +742,37 @@
 		table tr td.width70 {
 			width: 70%;
 		}
+
+		.celdaResumenEncabezado{
+			font-size: 14px;
+		}
+		.celdaResumenConcepto{
+			font-size: 14px;
+			font-weight: normal;
+		}
+		.celdaResumenImporte{
+			font-size: 14px;
+			font-weight: normal;
+		}
+		.celdaResumenOperacion{
+			font-size: 14px;
+			font-weight: normal;
+		}
+		.celdaResumenTotal{
+			font-size: 14px;
+			font-weight: normal;
+		}
+		.celdaResumenImporteTotal{
+			font-size: 14px;
+			font-weight: normal;
+		} 
+		.celdaResumenOperacion{
+			font-size: 14px;
+			font-weight: normal;
+		}
+		.bg-success{
+			background-color: #28a745!important;
+		}
 	</style>
 <?php include "../menu_princ.php"; ?>
 <div id="content">
