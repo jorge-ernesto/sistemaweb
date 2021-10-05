@@ -332,6 +332,8 @@ Fecha de Impresion: 17/11/2010 16:03
 		$result .= $CRLF;
 		$result .= $CRLF;
 
+		// echo $result;
+		// die();
 		return $result;
 	}
 }

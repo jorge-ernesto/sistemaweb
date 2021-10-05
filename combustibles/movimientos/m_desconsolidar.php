@@ -56,8 +56,14 @@ class DesconsolidarModel extends Model {
 			AND turno 	= $turno
 			AND estado 	= '1';
 		";
+		// echo "<pre>";
+		// echo $query;
+		// echo "</pre>";
 
-		if ($sqlca->query($query) < 0)	
+		if ($sqlca->query($query) < 0) //Si hay un error en la query
+			return false;
+
+		if ($sqlca->query($query) == 0) //Si no hay registros devueltos por la query
 			return false;
 	
 		$query2 = "UPDATE pos_consolidacion SET estado = '0', usuario = '".$usuario."', ip = '".$ip."', fecha = now() WHERE dia='".$fecha."' AND turno = ".$turno." AND almacen = '".$almacen."';";

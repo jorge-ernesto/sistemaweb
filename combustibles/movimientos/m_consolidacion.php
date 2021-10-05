@@ -105,6 +105,87 @@ ORDER BY
 		return TRUE;
 	}
 
+	function obtenerHuecos($almacen, $siguiente){
+		global $sqlca;							
+
+		//Obtenemos dias a consolidar en pos_consolidacion (estado = 0), de dias anteriores
+		if(!empty($almacen)){
+			$sql="
+			SELECT
+				c.dia, --0
+				c.turno, --1
+				to_char(c.dia,'DD/MM/YYYY') --2
+			FROM
+				pos_consolidacion c
+			WHERE
+				almacen    = '" . $almacen . "'
+				AND estado = '0'
+				AND c.dia  < '" . $siguiente['dia'] . "'
+			ORDER BY
+				c.dia ASC,
+				c.turno ASC
+			LIMIT
+				1;
+			";
+			// echo "<pre>";
+			// echo "<b>obtenerHuecos dias anteriores</b><br>";
+			// echo $sql;
+			// echo "</pre>";
+		}
+
+		if ($sqlca->query($sql)<0) //Si falla la query
+			return FALSE;
+
+		if ($sqlca->query($sql)>0) { //Si hay registros
+			$r = $sqlca->fetchRow();
+			$ret = Array();
+			$ret['dia'] 	= $r[0];
+			$ret['diab'] 	= $r[2];
+			$ret['turno'] 	= $r[1];
+			$ret['flag']   = 0;
+
+			return $ret;
+		}
+
+		//Obtenemos dias a consolidar en pos_consolidacion (estado = 0), del mismo dia pero turnos anteriores
+		if(!empty($almacen)){
+			$sql="
+			SELECT
+				c.dia, --0
+				c.turno, --1
+				to_char(c.dia,'DD/MM/YYYY') --2
+			FROM
+				pos_consolidacion c
+			WHERE
+				almacen 	   = '" . $almacen . "'
+				AND estado  = '0'
+				AND c.dia   = '" . $siguiente['dia'] . "'
+				AND c.turno < '" . $siguiente['turno'] . "'
+			ORDER BY
+				c.dia ASC,
+				c.turno ASC
+			LIMIT
+				1;
+			";
+			// echo "<pre>";
+			// echo "<b>obtenerHuecos mismo dia</b><br>";
+			// echo $sql;
+			// echo "</pre>";
+		}
+
+		if ($sqlca->query($sql)<0 || $sqlca->numrows()==0) //Si falla la query o no retorna datos
+			return FALSE;		
+
+		$r = $sqlca->fetchRow();
+		$ret = Array();
+		$ret['dia'] 	= $r[0];
+		$ret['diab'] 	= $r[2];
+		$ret['turno'] 	= $r[1];
+		$ret['flag']   = 0;
+		
+		return $ret;			
+	}
+
 	function obtenerSiguiente($almacen){
 		global $sqlca;
 	
@@ -112,13 +193,13 @@ ORDER BY
 
 			$sql="
 			SELECT
-				c.dia,
-				max(c.turno),
-				max(a.ch_posturno),
-				(c.dia + 1),
-				max(c.turno) + 1,
-				to_char(c.dia,'DD/MM/YYYY'),
-				to_char((c.dia + 1),'DD/MM/YYYY')
+				c.dia, --0
+				max(c.turno), --1
+				max(a.ch_posturno), --2
+				(c.dia + 1), --3
+				max(c.turno) + 1, --4
+				to_char(c.dia,'DD/MM/YYYY'), --5
+				to_char((c.dia + 1),'DD/MM/YYYY') --6
 			FROM
 				pos_consolidacion c
 				LEFT JOIN pos_aprosys a ON (c.dia = a.da_fecha)
@@ -132,6 +213,10 @@ ORDER BY
 			LIMIT
 				1
 			;";
+			// echo "<pre>";
+			// echo "<b>obtenerSiguiente</b><br>";
+			// echo $sql;
+			// echo "</pre>";
 		}
 
 		if ($sqlca->query($sql)<0 || $sqlca->numrows()==0)
@@ -139,12 +224,13 @@ ORDER BY
 
 		$r = $sqlca->fetchRow();
 		$ret = Array();
+		// echo "<script>console.log('" . json_encode($r) . "')</script>";
 
 		settype($r[1],"int");
 		settype($r[2],"int");
 		settype($r[4],"int");
 
-		if ($r[4]==$r[2]) {
+		if ($r[4]==$r[2]) { //Dia siguiente turno 1
 			$ret['dia'] 	= $r[3];
 			$ret['diab'] 	= $r[6];
 			$ret['turno'] 	= 1;
@@ -436,7 +522,11 @@ ORDER BY
 	*/
 	public function validateDateTurnLast($arrParams){
 		global $sqlca;
-		$sql = "SELECT ch_posturno-1 FROM pos_aprosys WHERE da_fecha ='".$arrParams['dEntry']."';";
+		$sql = "SELECT ch_posturno-1 FROM pos_aprosys WHERE da_fecha ='".$arrParams['dEntry']."';"; //Aca muestra el ultimo turno de pos_aprosys del indicado -1
+		// echo "<pre>";
+		// echo "<b>validateDateTurnLast</b><br>";
+		// echo $sql;
+		// echo "</pre>";
 		$iStatus = $sqlca->query($sql);
 		if ((int)$iStatus==0 || (int)$iStatus<0)
 			return array('bStatus' => false, 'sMessage' => 'No hay datos para verificar consolidación');

@@ -30,10 +30,12 @@ class DesconsolidarController extends Controller {
 		switch ($this->action) {
 
 			case 'Desconsolidar':
+				// echo "<script>console.log('" . json_encode($_REQUEST) . "')</script>";
+				// die();
 
 				$almacen	= trim($_REQUEST['almacen']);
-				$fecha 		= trim($_REQUEST['fecha']);
-				$turno 		= trim($_REQUEST['turno']);
+				$fecha   = trim($_REQUEST['fecha']);
+				$turno 	= trim($_REQUEST['turno']);
 
 				$validar = DesconsolidarModel::FechaInicio($almacen);
 				
@@ -41,7 +43,11 @@ class DesconsolidarController extends Controller {
 					echo '<script name="accion">alert("No se puede desconsolidar la fecha de inicio del Sistema") </script>';	
 				} else {
 					$result = DesconsolidarModel::desconsolidar($almacen, $fecha, $turno, $_SESSION['auth_usuario'], $ip);
-					echo '<script name="accion">alert("Se desconsolido el dia '.$fecha.' ,  turno '.$turno.'.") </script>';	
+					if($result === false){
+						echo '<script name="accion">alert("Dia y turno no fueron consolidados") </script>';	
+					}else{
+						echo '<script name="accion">alert("Se desconsolido el dia '.$fecha.' ,  turno '.$turno.'.") </script>';
+					}
 					$almacenes 	= DesconsolidarModel::GetAlmacenes();
 					$siguiente 	= DesconsolidarModel::obtenerSiguiente($almacen);
 					$result 	= DesconsolidarTemplate::formDesconsolidar($siguiente, $almacenes, $almacen);		    		
@@ -50,9 +56,37 @@ class DesconsolidarController extends Controller {
 					$this->visor->addComponent("ContentF", "content_footer", "");			
 				}
 
-				break;
+			break;
 
-		    	default:
+			case 'Desconsolidar dia y turno':
+				// echo "<script>console.log('" . json_encode($_REQUEST) . "')</script>";
+				// die();
+
+				$almacen	= trim($_REQUEST['almacen_']);
+				$fecha   = trim($_REQUEST['fecha_']);
+				$turno 	= trim($_REQUEST['turno_']);
+
+				$validar = DesconsolidarModel::FechaInicio($almacen);
+				
+				if ($validar == 1){
+					echo '<script name="accion">alert("No se puede desconsolidar la fecha de inicio del Sistema") </script>';	
+				} else {
+					$result = DesconsolidarModel::desconsolidar($almacen, $fecha, $turno, $_SESSION['auth_usuario'], $ip);
+					if($result === false){
+						echo '<script name="accion">alert("Dia y turno no fueron consolidados") </script>';	
+					}else{
+						echo '<script name="accion">alert("Se desconsolido el dia '.$fecha.' ,  turno '.$turno.'.") </script>';
+					}
+					$almacenes 	= DesconsolidarModel::GetAlmacenes();
+					$siguiente 	= DesconsolidarModel::obtenerSiguiente($almacen);
+					$result 	= DesconsolidarTemplate::formDesconsolidar($siguiente, $almacenes, $almacen);		    		
+			    		$this->visor->addComponent("ContentT", "content_title", DesconsolidarTemplate::titulo());				
+					$this->visor->addComponent("ContentB", "content_body", $result);
+					$this->visor->addComponent("ContentF", "content_footer", "");			
+				}
+			break;
+
+		   default:
 
 				$almacenes 	= DesconsolidarModel::GetAlmacenes();
 		    		$siguiente	= DesconsolidarModel::obtenerSiguiente($_REQUEST['almacen']);

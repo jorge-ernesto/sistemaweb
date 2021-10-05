@@ -147,7 +147,12 @@ class ConsolidacionController extends Controller {
 				}
 			default:
 
-				$siguiente 	= ConsolidacionModel::obtenerSiguiente($_REQUEST['almacen']);
+				$siguiente 	= ConsolidacionModel::obtenerSiguiente($_REQUEST['almacen']); //Al buscar un almacen
+				$huecos = ConsolidacionModel::obtenerHuecos($_REQUEST['almacen'], $siguiente);
+				if(is_array($huecos) && isset($huecos) && !empty($huecos)){
+					$siguiente = $huecos;
+				}
+
 				$almacen 	= ConsolidacionModel::GetAlmacenes();
 				$result 	= ConsolidacionTemplate::formSearch($siguiente, $almacen, $_REQUEST['almacen']);
 			break;
