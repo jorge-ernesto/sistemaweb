@@ -1,9 +1,12 @@
 <?php
+/*
 $version = explode('.', PHP_VERSION);
 $php_version = $version[0] . '.' . $version[1];
 if ( $php_version == '5.6' ) {
 	session_start();
 }
+*/
+session_start();
 
 date_default_timezone_set('America/Lima');
 
@@ -35,10 +38,13 @@ else if (getenv("REMOTE_ADDR") && strcasecmp(getenv("REMOTE_ADDR"), "unknown"))
 else if (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], "unknown"))
 	$ip = $_SERVER['REMOTE_ADDR'];
 
+$usuario = $_SESSION['auth_usuario'];
+/*
 $usuario = 'ADMIN';
 if ( $php_version == '5.6' ) {
 	$usuario = $_SESSION['auth_usuario'];
 }
+*/
 
 try {
 	if ($accion == "listAll") {
