@@ -117,6 +117,23 @@ function ejecutarInsert($inserts, $tabcab, $tabdet, $tabcan) {
 
 class InterfaceConcarActModel extends Model {
 
+	function getVersionConcar() {
+		global $sqlca;
+
+		$_SESSION['es_requerimiento_concar_nuevomundo'] = false;
+
+		$sqlca->query("SELECT par_valor FROM int_parametros WHERE par_nombre = 'version_concar';");
+		$a = $sqlca->fetchRow(); 
+
+		/* Versiones Concar
+		 * Concar 1: Original
+		 * Concar 2: Nuevomundo
+		 */
+		if($a[0] == "Nuevo_Mundo"){ 
+			$_SESSION['es_requerimiento_concar_nuevomundo'] = true;
+		}
+	}
+
 	function getMigracionConcar() {
 		global $sqlca;
 
@@ -3649,8 +3666,10 @@ GROUP BY
  ext.fe1
 )
 			ORDER BY dia, venta, tip2, tip, trans, DCUENTA, ddh;";
-			
+		
+		echo "<pre>";
 		echo "VENTAS COMBUSTIBLE: \n\n".$sql."\n\n";	
+		echo "</pre>";
 		
 		$q1 = "CREATE TABLE tmp_concar (dsubdia character varying(7), dcompro character varying(6), dsecue character varying(7), dfeccom character varying(6), dcuenta character varying(12), dcodane character varying(18),
 			dcencos character varying(6), dcodmon character varying(2), ddh character varying(1), dimport numeric(14,2), dtipdoc character varying(2), dnumdoc character varying(30), 
@@ -6473,6 +6492,18 @@ digvcom, dtpconv, dflgcom, danecom, dtipaco, dmedpag, dtidref, dndoref, dfecref,
 	function interface_cobrar_combustible($FechaIni, $FechaFin, $almacen, $codEmpresa, $num_actual) {// CUENTAS POR COBRAR COMBUSTIBLE
 		global $sqlca;
 
+		/**
+		 * Requerimiento nuevomundo:
+		 * Mostrar detalle para documentos factura o boleta pagados con tarjeta. 
+		 * Obtenemos cuenta de concar_config_caja si fuera factura o boleta y si pago con tarjeta mostramos dicha cuenta
+		 */
+		//Obtenemos parametros para version concar
+		InterfaceConcarActModel::getVersionConcar();
+		$detalle_boletas_nuevomundo = false;
+		if($_SESSION['es_requerimiento_concar_nuevomundo'] == true){
+			$detalle_boletas_nuevomundo = true;
+		}
+
 		if(trim($num_actual)=="")
 			$num_actual = 0;
 
@@ -7025,8 +7056,10 @@ WHERE
 			trans,
 			caja,
 			sucursal
-		)--FIN DE TICKETS BOLETAS DE VENTAS
-			/*
+		)--FIN DE TICKETS BOLETAS DE VENTAS";
+		
+		if($detalle_boletas_nuevomundo == true){
+			$sql .= "	
 			UNION--INICIO DE BOLETAS ELECTRONICAS DE VENTAS
 			(
 				--BOLETAS PAGADAS EN EFECTIVO (COMBUSTIBLE)
@@ -7339,8 +7372,10 @@ WHERE
 					es,
 					caja
 			)--FIN DE BOLETAS ELECTRONICAS DE VENTAS
-			*/		
-			UNION--INICIO DE BOLETAS ELECTRONICAS DE VENTAS ¡¡¡AGRUPADAS COMO ASIENTOS DE VENTAS!!!
+			";
+		}else{
+			$sql .= "
+			UNION--INICIO DE BOLETAS ELECTRONICAS DE VENTAS ¡¡¡AGRUPADAS COMO ASIENTOS DE VENTAS COMBUSTIBLES!!!
 			(				
 				SELECT 
 					to_char(date(dia),'YYMMDD') as dia, 		
@@ -7417,7 +7452,11 @@ WHERE
 					cfp.nu_posz_z_serie,
 					cfp.ch_posz_pos,
 					SUBSTR(TRIM(usr), 0, 5)
-			)--FIN DE BOLETAS ELECTRONICAS DE VENTAS ¡¡¡AGRUPADAS COMO ASIENTOS DE VENTAS!!!			
+			)--FIN DE BOLETAS ELECTRONICAS DE VENTAS ¡¡¡AGRUPADAS COMO ASIENTOS DE VENTAS COMBUSTIBLES!!!	
+			";
+		}	
+			
+		$sql .= "
 			UNION--INICIO DE TICKETS FACTURAS DE VENTAS
 			(
 				SELECT 
@@ -8274,13 +8313,12 @@ WHERE
 		$codane 		= $a[3];
 		$opcion         = $a[4];
 		$cchaberglp     = $a[5];//GLP
-		$ccdebeglp 		= $a[6];//GLP
-		
-		$detalle_boletas_pagadas_efectivo = false;
+		$ccdebeglp 		= $a[6];//GLP		
+
 		$where_agrupar_documentos_efectivo = "";
 
-		// Datos de tarjetas para concar			
-		if($detalle_boletas_pagadas_efectivo == true){
+		// Datos de tarjetas para concar					
+		if($detalle_boletas_nuevomundo == true){
 			$sql_cc = "SELECT
 						id_config, idtipodoc, idformapago, descripcion, cuenta10, cuenta12 
 					FROM  
@@ -8457,7 +8495,7 @@ WHERE
 				$nu_secue = $secue;
 			}
 			
-			if($detalle_boletas_pagadas_efectivo == true){
+			if($detalle_boletas_nuevomundo == true){
 				//SI ES BOLETA O FACTURA Y SI PAGO CON TARJETA
 				if(($reg['td'] == 'B' || $reg['td'] == 'F') && $reg['tarjeta'] != '0' && $reg['doctype'] != 'NA'){ 
 					//reiniciar el numerador cuando sea diferente dia DSECUE
