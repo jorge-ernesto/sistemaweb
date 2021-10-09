@@ -11615,6 +11615,13 @@ WHERE
 	function interface_compras($FechaIni, $FechaFin, $almacen, $codEmpresa, $num_actual) { // COMPRAS
 		global $sqlca;
 
+		//Obtenemos parametros para version concar
+		InterfaceConcarActModel::getVersionConcar();
+		$es_desglose = true;
+		if($_SESSION['es_requerimiento_concar_nuevomundo'] == true){
+			$es_desglose = false;
+		}
+
 		if(trim($num_actual)=="")
 			$num_actual = 0;
 
@@ -11975,7 +11982,7 @@ WHERE
 					14 => $reg['pro_cab_tipdocumento'], //TIPO DOCUMENTO
 					15 => $reg['pro_cab_seriedocumento'], //SERIE
 					16 => $reg['pro_cab_numdocumento'], //NUMERO
-					17 => ( TRIM($es_tipo) == "COMBUSTIBLE" || TRIM($es_tipo) == "GLP" ) ? 'ES_DESGLOSE' : '-' //SI ES COMBUSTIBLE LA BASE IMPONIBLE SE DESGLOSA
+					17 => ( TRIM($es_tipo) == "COMBUSTIBLE" || TRIM($es_tipo) == "GLP" ) && $es_desglose == true ? 'ES_DESGLOSE' : '-' //SI ES COMBUSTIBLE LA BASE IMPONIBLE SE DESGLOSA
 				);
 			}
 		}
