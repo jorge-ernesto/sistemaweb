@@ -923,8 +923,10 @@ function getOtherCustomerFields(){ //Funcion para autocompletar clientes
 
 	url = '/sistemaweb/ventas_clientes/facturas_venta.php';
 
-	$( "#cbo-add-anticipado" ).val("N");
-	$( "#cbo-add-anticipado" ).prop( "disabled", true );
+	if ( $( "#cbo-add-forma_pago" ).val() == "06" ){ //Opcion: CREDITO
+		$( "#cbo-add-anticipado" ).val("N");
+		$( "#cbo-add-anticipado" ).prop( "disabled", true );
+	}
 
 	$.post( url, params, function( response ) {
 		$( '.help' ).empty();
