@@ -205,16 +205,17 @@ class ParteLiquidacionTemplate extends Template {
 		$result .= '<tr><td>Credito Anticipos</td><td align="right">'. htmlentities(number_format($array[4], 2, '.', ',')) .'</td></tr>';
 		$result .= '<tr><td>Tarjetas de Credito</td><td align="right">'. htmlentities(number_format($array[5], 2, '.', ',')) .'</td></tr>';
 		$result .= '<tr><td>Descuentos</td><td align="right">'. htmlentities(number_format($array[6], 2, '.', ',')) .'</td></tr>';
+		$result .= '<tr><td>Redondeo Efectivo</td><td align="right">'. htmlentities(number_format($array[16], 2, '.', ',')) .'</td></tr>';
 		$result .= '<tr><td>Faltantes Trabajador</td><td align="right">'. htmlentities(number_format($array[9], 2, '.', ',')) .'</td></tr>';
 		$result .= '<tr><td>Sobrantes Trabajador</td><td align="right">'. htmlentities(number_format($array[10], 2, '.', ',')) .'</td></tr>';
 		$result .= '<tr><td>Efectivo Soles</td><td align="right">'. htmlentities(number_format($array[7], 2, '.', ',')) .'</td></tr>';
 		$result .= '<tr><td>Efectivo Dolares</td><td align="right">'. htmlentities(number_format($array[8], 2, '.', ',')) .'</td></tr>';
-		$result .= '<tr><td style="font-weight:bold">SUSTENTO</td><td align="right" style="color:blue;font-weight:bold">'. htmlentities(number_format($array[3]+$array[4]+$array[5]+$array[6]+$array[7]+$array[8]+$array[9]+$array[10], 2, '.', ',')) .'</td></tr>';
+		$result .= '<tr><td style="font-weight:bold">SUSTENTO</td><td align="right" style="color:blue;font-weight:bold">'. htmlentities(number_format($array[3]+$array[4]+$array[5]+$array[6]+$array[16]+$array[7]+$array[8]+$array[9]+$array[10], 2, '.', ',')) .'</td></tr>';
 		$result .= '<tr><td colspan="2">&nbsp;</td></tr>';
 		if($totalventa=='M'){
-			$result .= '<tr><td style="font-weight:bold">DIFERENCIA</td><td align="right" style="color:blue;font-weight:bold">'. htmlentities(number_format($array[2]-($array[3]+$array[4]+$array[5]+$array[6]+$array[7]+$array[8]+$array[9]+$array[10]), 2, '.', ',')) .'</td></tr>';
+			$result .= '<tr><td style="font-weight:bold">DIFERENCIA</td><td align="right" style="color:blue;font-weight:bold">'. htmlentities(number_format($array[2]-($array[3]+$array[4]+$array[5]+$array[6]+$array[16]+$array[7]+$array[8]+$array[9]+$array[10]), 2, '.', ',')) .'</td></tr>';
 		} else {
-			$result .= '<tr><td style="font-weight:bold">DIFERENCIA</td><td align="right" style="color:blue;font-weight:bold">'. htmlentities(number_format(($array[0] - $array[1])-($array[3]+$array[4]+$array[5]+$array[6]+$array[7]+$array[8]+$array[9]+$array[10]), 2, '.', ',')) .'</td></tr>';
+			$result .= '<tr><td style="font-weight:bold">DIFERENCIA</td><td align="right" style="color:blue;font-weight:bold">'. htmlentities(number_format(($array[0] - $array[1])-($array[3]+$array[4]+$array[5]+$array[6]+$array[16]+$array[7]+$array[8]+$array[9]+$array[10]), 2, '.', ',')) .'</td></tr>';
 		}
 		
 		if($totalventa=='C'){

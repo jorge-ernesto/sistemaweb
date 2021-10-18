@@ -132,7 +132,27 @@ WHERE
 ";
 
 	$x_difprecio = pg_query($conector_id, $sql);
-	
+
+	//OPENSOFT-98: Redondeo de documentos en efectivo en reportes de liquidación
+	$sql = "
+SELECT 
+	sum(x) as total
+FROM 
+	(SELECT 
+		round((((first(t.soles_km)*100)%10)/100),2) AS x 
+	FROM 
+		pos_trans" . $ano_del . $mes_del . " AS t
+	WHERE 
+		t.es='" . pg_escape_string($almacen) . "'
+		AND t.td IN ('B','F')
+		AND t.fpago = '1' 
+		AND t.dia BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "' 
+	GROUP BY 
+		t.caja,t.trans) x;
+";
+
+	$x_redondeo_efectivo = pg_query($conector_id, $sql);
+	//Cerrar OPENSOFT-98: Redondeo de documentos en efectivo en reportes de liquidación
 	
 	$sql = "SELECT 
 			SUM(importe) AS afericiones
@@ -1263,6 +1283,7 @@ function getBalance($arrData){
 
 	$descuentos 	= pg_fetch_all($x_descuentos);
 	$difprecio 	= pg_fetch_all($x_difprecio);
+	$redefectivo 	= pg_fetch_all($x_redondeo_efectivo);
 	$afericiones 	= pg_fetch_all($x_afericiones);
 	$depositos_pos 	= pg_fetch_all($x_depositos_pos);
 
@@ -1318,11 +1339,12 @@ function getBalance($arrData){
 	
 	$vales_de_credito 	= number_format($vales_credito[0]['valescredito'],2);
 	$difprecio_total 	= number_format($difprecio[0]['difprecio'],2);
+	$redefectivo_total 	= number_format($redefectivo[0]['total'],2);
 	$tarjetas_de_credito	= number_format($tarjetas_credito_total[0]['tarjetascredito'],2); //tarjetas de credito total
 	$descuentos_total 	= number_format(abs($descuentos[0]['descuentos']),2);
 	$afericiones_total 	= number_format($afericiones[0]['afericiones'],2);
 	
-	$TVCO = $vales_credito[0]['valescredito']+$tarjetas_credito_total[0]['tarjetascredito']+abs($descuentos[0]['descuentos'])+$difprecio[0]['difprecio']+$afericiones[0]['afericiones']; //TVCO: Total Venta Creditos y Otros
+	$TVCO = $vales_credito[0]['valescredito']+$tarjetas_credito_total[0]['tarjetascredito']+abs($descuentos[0]['descuentos'])+$difprecio[0]['difprecio']+$redefectivo[0]['total']+$afericiones[0]['afericiones']; //TVCO: Total Venta Creditos y Otros
 	$total_venta_creditos_otros = number_format($TVCO,2);
 	
 	$TVContado = $TV - $TVCO; //TVContado: Total Venta Contado
@@ -1450,15 +1472,29 @@ function getBalance($arrData){
 	$reporte->Ln();	
 	$reporte->lineaH();
 
-	$reporte->nuevaFila(array("field"=>"     5. Descuentos","value"=>$descuentos_total		));
+	$reporte->nuevaFila(array("field"=>"     5. Descuentos","value"=>' '));
 	$reporte->Ln();	
 	$reporte->lineaH();
 
+	$reporte->nuevaFila(array("field"=>"        5.1 Descuentos","value"=>$descuentos_total		));
+	$reporte->Ln();	
+	$reporte->lineaH();
+	
+	$reporte->nuevaFila(array("field"=>"        5.2 Diferencia de Precio de Vales","value"=>$difprecio_total		));
+	$reporte->Ln();	
+	$reporte->lineaH();
+
+	$reporte->nuevaFila(array("field"=>"        5.3 Redondeo Efectivo","value"=>$redefectivo_total		));
+	$reporte->Ln();	
+	$reporte->lineaH();
+
+	/*
 	$reporte->nuevaFila(array("field"=>"     6. Diferencia de Precio de Vales","value"=>$difprecio_total		));
 	$reporte->Ln();	
 	$reporte->lineaH();
+	*/
 
-	$reporte->nuevaFila(array("field"=>"     7. Afericiones","value"=>$afericiones_total		));
+	$reporte->nuevaFila(array("field"=>"     6. Afericiones","value"=>$afericiones_total		));
 	$reporte->Ln();	
 
 	$reporte->nuevaFila(array("field"=>"                TOTAL VENTA CREDITOS Y OTROS NO AL CONTADO",		"value"=>$total_venta_creditos_otros));
@@ -1471,7 +1507,7 @@ function getBalance($arrData){
 	$reporte->Ln();	
 	$reporte->lineaH();
 
-	$reporte->nuevaFila(array("field"=>"     8. Sobrantes y Faltantes por Trabajador","value"=>""	));
+	$reporte->nuevaFila(array("field"=>"     7. Sobrantes y Faltantes por Trabajador","value"=>""	));
 	$reporte->Ln();	
 
 	foreach($dif_trabajadores as $d) {
@@ -1505,14 +1541,14 @@ function getBalance($arrData){
 	$reporte->Ln();	
 
 	$reporte->lineaH();
-	$reporte->nuevaFila(array("field"=>"     10. Ingresos","value"=>' '		));
+	$reporte->nuevaFila(array("field"=>"     8. Ingresos","value"=>' '		));
 	$reporte->Ln();	
 
 	$val_igre = 0; 
 	foreach($caja_ingresos_contado_dia as $igre) {
 		$val_igre = $val_igre + $igre['ingresos'];
 	}
-	$reporte->nuevaFila(array("field"=>"        10.1 Ingresos al contado del dia", "value"=>$val_igre		));
+	$reporte->nuevaFila(array("field"=>"        8.1 Ingresos al contado del dia", "value"=>$val_igre		));
 	$reporte->Ln();	
 
 	foreach($caja_ingresos_contado_dia as $m){
@@ -1525,7 +1561,7 @@ function getBalance($arrData){
 	foreach($caja_ingresos_cobranzas as $igre) {
 		$val_igre = $val_igre + $igre['ingresos'];
 	}
-	$reporte->nuevaFila(array("field"=>"        10.2 Cobranzas y amortizacion por CC", "value"=>$val_igre		));
+	$reporte->nuevaFila(array("field"=>"        8.2 Cobranzas y amortizacion por CC", "value"=>$val_igre		));
 	$reporte->Ln();		
 
 	foreach($caja_ingresos_cobranzas as $m){
@@ -1548,7 +1584,7 @@ function getBalance($arrData){
 	}
 	$a5=$val_egre;
 	$reporte->lineaH();
-	$reporte->nuevaFila(array("field"=>"     12. Egresos","value"=>$val_egre		));
+	$reporte->nuevaFila(array("field"=>"     9. Egresos","value"=>$val_egre		));
 	$reporte->Ln();	
 
 	foreach($caja_egresos as $m){
@@ -1557,7 +1593,7 @@ function getBalance($arrData){
 	}
 
 	$reporte->lineaH();
-	$reporte->nuevaFila(array("field"=>"     13. Documentos de Venta Manual","value"=>$total_manuales		));
+	$reporte->nuevaFila(array("field"=>"     10. Documentos de Venta Manual","value"=>$total_manuales		));
 	$reporte->Ln();	
 
 	foreach($manuales as $m){
@@ -1568,14 +1604,14 @@ function getBalance($arrData){
 	$calculo=( ($a1+$a2) - ($a3_1) ) - $a5;
 	$calculo = htmlentities(number_format($calculo,2));
 	$reporte->lineaH();
-	$reporte->nuevaFila(array("field"=>"     14. Saldo Neto a Depositar","value"=>$calculo		));
+	$reporte->nuevaFila(array("field"=>"     11. Saldo Neto a Depositar","value"=>$calculo		));
 	$reporte->Ln();	
 
 	$resultado_ = searchCajaBanco($iAlmacen, $dYear, $dMonth, $pos_transYM);
 	$result_ = listadoCajaBanco($resultado_, $iAlmacen, $dYear, $dMonth, $dDay);
 	$saldo_acumulado_caja_banco = htmlentities(number_format($result_,2));	
 	$reporte->lineaH();
-	$reporte->nuevaFila(array("field"=>"     15. Saldo acumulado Caja y Banco","value"=>$saldo_acumulado_caja_banco		));
+	$reporte->nuevaFila(array("field"=>"     12. Saldo acumulado Caja y Banco","value"=>$saldo_acumulado_caja_banco		));
 	$reporte->Ln();	
 
 	$reporte->Ln();	$reporte->Ln();	

@@ -590,6 +590,7 @@ class CuadreVentasModel extends Model {
 			$cuadre['nde'] = $notase;
 			$notase = NULL;
 
+			//Query Tarjetas de Credito
 			$sql =	"
 					SELECT
 						t.trans,
@@ -632,6 +633,42 @@ class CuadreVentasModel extends Model {
 			$tarjetas['total'] = $total_tarjetas;
 			$cuadre['tc'] = $tarjetas;
 			$tarjetas = NULL;
+
+			//OPENSOFT-98: Redondeo de documentos en efectivo en reportes de liquidación
+			$sql =	"
+					SELECT 
+						sum(x) 
+					FROM 
+						(SELECT 
+							round((((first(t.soles_km)*100)%10)/100),2) AS x 
+						FROM 
+							$postrans t
+						WHERE 
+							t.td IN ('B','F')
+							AND t.fpago = '1' 
+							AND t.dia = '$dia'
+							AND t.turno = '$turno'
+							AND $filtrotrans
+						GROUP BY 
+							t.caja,t.trans) x;
+			";
+
+			if ($sqlca->query($sql)<0)
+				return FALSE;
+
+			$total_redondeo_efe = 0;
+			$redondeo_efe = Array();
+			for ($i=0;$i<$sqlca->numrows();$i++) {
+				$a                    = $sqlca->fetchRow();
+				$redondeo             = Array();
+				$redondeo['importe']  = $a[0];
+				$total_redondeo_efe  += $a[0];
+				$redondeo_efe[]       = $redondeo;
+			}
+			$redondeo_efe['total']       = $total_redondeo_efe;
+			$cuadre['redondeo_efectivo'] = $redondeo_efe;
+			$redondeo_efe                = NULL;
+			//Cerrar OPENSOFT-98: Redondeo de documentos en efectivo en reportes de liquidación
 
 			$sql =	"	SELECT
 						t.trans,
@@ -823,7 +860,7 @@ class CuadreVentasModel extends Model {
 				$cuadre['fs'] = ($total_depositos - $venta_ticket) + ($total_notas + $total_tarjetas + ($total_descuentos_efectivo * -1) + ($total_devoluciones_efectivo * -1));
 */
 
-			$cuadre['fs'] = ($total_depositos - $venta_exigible) + ($total_notas + $total_tarjetas + ($total_descuentos * -1) + ($total_devoluciones_efectivo * -1) + $total_afericiones + $total_transgrat);
+			$cuadre['fs'] = ($total_depositos - $venta_exigible) + ($total_notas + $total_tarjetas + $total_redondeo_efe + ($total_descuentos * -1) + ($total_devoluciones_efectivo * -1) + $total_afericiones + $total_transgrat);
 
 			$reporte['cuadres'][] = $cuadre;
 			$cuadre = NULL;
@@ -1387,6 +1424,7 @@ class CuadreVentasModel extends Model {
 			$cuadre['nde'] = $notase;
 			$notase = NULL;
 
+			//Query Tarjetas de Credito
 			$sql =	"
 					SELECT
 						t.trans,
@@ -1429,6 +1467,42 @@ class CuadreVentasModel extends Model {
 			$tarjetas['total'] = $total_tarjetas;
 			$cuadre['tc'] = $tarjetas;
 			$tarjetas = NULL;
+
+			//OPENSOFT-98: Redondeo de documentos en efectivo en reportes de liquidación
+			$sql =	"
+					SELECT 
+						sum(x) 
+					FROM 
+						(SELECT 
+							round((((first(t.soles_km)*100)%10)/100),2) AS x 
+						FROM 
+							$postrans t
+						WHERE 
+							t.td IN ('B','F')
+							AND t.fpago = '1' 
+							AND t.dia = '$dia'
+							AND t.turno = '$turno'
+							AND $filtrotrans
+						GROUP BY 
+							t.caja,t.trans) x;
+			";
+
+			if ($sqlca->query($sql)<0)
+				return FALSE;
+
+			$total_redondeo_efe = 0;
+			$redondeo_efe = Array();
+			for ($i=0;$i<$sqlca->numrows();$i++) {
+				$a                    = $sqlca->fetchRow();
+				$redondeo             = Array();
+				$redondeo['importe']  = $a[0];
+				$total_redondeo_efe  += $a[0];
+				$redondeo_efe[]       = $redondeo;
+			}
+			$redondeo_efe['total']       = $total_redondeo_efe;
+			$cuadre['redondeo_efectivo'] = $redondeo_efe;
+			$redondeo_efe                = NULL;
+			//Cerrar OPENSOFT-98: Redondeo de documentos en efectivo en reportes de liquidación
 
 			$sql =	"	SELECT
 						t.trans,
@@ -1620,7 +1694,7 @@ class CuadreVentasModel extends Model {
 				$cuadre['fs'] = ($total_depositos - $venta_ticket) + ($total_notas + $total_tarjetas + ($total_descuentos_efectivo * -1) + ($total_devoluciones_efectivo * -1));
 */
 
-			$cuadre['fs'] = ($total_depositos - $venta_exigible) + ($total_notas + $total_tarjetas + ($total_descuentos * -1) + ($total_devoluciones_efectivo * -1) + $total_afericiones + $total_transgrat);
+			$cuadre['fs'] = ($total_depositos - $venta_exigible) + ($total_notas + $total_tarjetas + $total_redondeo_efe + ($total_descuentos * -1) + ($total_devoluciones_efectivo * -1) + $total_afericiones + $total_transgrat);
 
 			$reporte['cuadres'][] = $cuadre;
 			$cuadre = NULL;

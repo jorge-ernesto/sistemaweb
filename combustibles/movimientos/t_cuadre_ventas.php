@@ -435,6 +435,12 @@ class CuadreVentasTemplate extends Template {
 				$result .= "<tr>\n";
 				$result .= "<td class=\"celdaConcepto\">Total Tarjetas de Cr&eacute;dito</td>\n";
 				$result .= "<td class=\"celdaImporte\">" . showNumber($cuadre['tc']['total']) . "</td>\n";
+				$result .= "<td class=\"celdaOperacion\">-</td>\n";
+				$result .= "</tr>\n";
+
+				$result .= "<tr>\n";
+				$result .= "<td class=\"celdaConcepto\">Total Redondeo Efectivo</td>\n";
+				$result .= "<td class=\"celdaImporte\">" . showNumber($cuadre['redondeo_efectivo']['total']) . "</td>\n";
 				$result .= "<td class=\"celdaOperacion\">+</td>\n";
 				$result .= "</tr>\n";
 
@@ -478,14 +484,15 @@ class CuadreVentasTemplate extends Template {
 
 				$result .= "</td></tr></table></td></tr>\n";
 
-				$venta_exigible_acumulada       += $cuadre['venta_exigible'];
-				$nd_total_acumulada             += $cuadre['nd']['total'];
-				$tc_total_acumulada             += $cuadre['tc']['total'];
-				$desc_total_efectivo_acumulada  += $cuadre['desc']['total_efectivo'];
-				$devol_total_efectivo_acumulada += $cuadre['devol']['total_efectivo'];
-				$afer_total_acumulada           += $cuadre['afer']['total'];
-				$depositos_total_acumulada      += $cuadre['depositos']['total'];
-				$fs_acumulada                   += $cuadre['fs'];
+				$venta_exigible_acumulada          += $cuadre['venta_exigible'];
+				$nd_total_acumulada                += $cuadre['nd']['total'];
+				$tc_total_acumulada                += $cuadre['tc']['total'];
+				$redondeo_efectivo_total_acumulada += $cuadre['redondeo_efectivo']['total'];
+				$desc_total_efectivo_acumulada     += $cuadre['desc']['total_efectivo'];
+				$devol_total_efectivo_acumulada    += $cuadre['devol']['total_efectivo'];
+				$afer_total_acumulada              += $cuadre['afer']['total'];
+				$depositos_total_acumulada         += $cuadre['depositos']['total'];
+				$fs_acumulada                      += $cuadre['fs'];
 			}
 		}
 		$result .= "</table></center><br/>\n";
@@ -532,11 +539,11 @@ class CuadreVentasTemplate extends Template {
 		$result .= "<table class=\"tablaResumen\" style=\"width: 50%;\">\n";
 
 		$result .= "<tr>\n";
-		$result .= "<td class=\"celdaResumenEncabezado\" colspan=\"3\">Cierre de Cajas Jefe de Playa/Asistente Oficina: {$td['dia']} Turno: {$td['turno']}</td>\n";
+		$result .= "<td class=\"celdaResumenEncabezado\" colspan=\"3\">Cierre Caja: {$td['dia']} Turno: {$td['turno']}</td>\n";
 		$result .= "</tr>\n";
 
 		$result .= "<tr>\n";
-		$result .= "<td class=\"celdaResumenConcepto\">Venta Total (C. Liquidos, GLP, Productos Lubricantes)</td>\n"; //
+		$result .= "<td class=\"celdaResumenConcepto\">Venta Total</td>\n"; //
 		$result .= "<td class=\"celdaResumenImporte\">" . showNumber($venta_exigible_acumulada) . "</td>\n";
 		$result .= "<td class=\"celdaResumenOperacion\">-</td>\n";
 		$result .= "</tr>\n";
@@ -550,6 +557,12 @@ class CuadreVentasTemplate extends Template {
 		$result .= "<tr>\n";
 		$result .= "<td class=\"celdaResumenConcepto\">Total Tarjetas de Cr&eacute;dito</td>\n";
 		$result .= "<td class=\"celdaResumenImporte\">" . showNumber($tc_total_acumulada) . "</td>\n";
+		$result .= "<td class=\"celdaResumenOperacion\">-</td>\n";
+		$result .= "</tr>\n";
+
+		$result .= "<tr>\n";
+		$result .= "<td class=\"celdaResumenConcepto\">Total Redondeo Efectivo</td>\n";
+		$result .= "<td class=\"celdaResumenImporte\">" . showNumber($redondeo_efectivo_total_acumulada) . "</td>\n";
 		$result .= "<td class=\"celdaResumenOperacion\">+</td>\n";
 		$result .= "</tr>\n";
 
@@ -572,7 +585,7 @@ class CuadreVentasTemplate extends Template {
 		$result .= "</tr>\n";
 
 		$result .= "<tr>\n";
-		$result .= "<td class=\"celdaResumenConcepto\">Total Efectivo a Banco del Turno {$td['turno']} (Depositos en Boveda)</td>\n";
+		$result .= "<td class=\"celdaResumenConcepto\">Total Depositos</td>\n";
 		$result .= "<td class=\"celdaResumenImporte\">" . showNumber($depositos_total_acumulada) . "</td>\n";
 		$result .= "<td class=\"celdaResumenOperacion\">=</td>\n";
 		$result .= "</tr>\n";
@@ -583,28 +596,17 @@ class CuadreVentasTemplate extends Template {
 			$word = "Faltante";
 
 		$result .= "<tr>\n";
-		$result .= "<td class=\"celdaResumenEncabezado\">Sumatoria de Faltantes y Sobrantes Griferos del Turno {$td['turno']}</td>\n";
-		$result .= "<td class=\"celdaResumenEncabezado\">" . showNumber($fs_acumulada) . "</td>\n";
-		$result .= "<td class=\"celdaResumenEncabezado\">&nbsp;</td>\n";
+		$result .= "<td class=\"celdaResumenConcepto\">Sumatoria Sobrantes y Faltantes</td>\n";
+		$result .= "<td class=\"celdaResumenImporte\">" . showNumber($fs_acumulada) . "</td>\n";
+		$result .= "<td class=\"celdaResumenOperacion\">&nbsp;</td>\n";
 		$result .= "</tr>\n";
 
 		$result .= "<tr>\n";
-		$result .= "<td class=\"celdaResumenConcepto\">TOTAL DINERO ENVIAR AL BANCO</td>\n";
+		$result .= "<td class=\"celdaResumenConcepto\">TOTAL EFECTIVO EN BÓVEDA</td>\n";
 		$result .= "<td class=\"celdaResumenImporte\">" . showNumber($depositos_total_acumulada - $fs_acumulada) . "</td>\n";
 		$result .= "<td class=\"celdaResumenOperacion\">&nbsp;</td>\n";
 		$result .= "</tr>\n";
 		
-		$result .= "<tr style=\"display: none\">\n";
-		$result .= "<td class=\"celdaResumenConcepto\">Total Venta Contado</td>\n";
-		$result .= "<td class=\"celdaResumenImporte\">" . showNumber($venta_exigible_acumulada - $nd_total_acumulada - $tc_total_acumulada + $desc_total_efectivo_acumulada + $devol_total_efectivo_acumulada - $afer_total_acumulada) . "</td>\n";
-		$result .= "<td class=\"celdaResumenOperacion\">&nbsp;</td>\n";
-		$result .= "</tr>\n";
-
-		$result .= "<tr style=\"display: none\">\n";
-		$result .= "<td class=\"celdaResumenConcepto\">Total Venta Contado + Sobrantes y Faltantes</td>\n";
-		$result .= "<td class=\"celdaResumenImporte\">" . showNumber( ($venta_exigible_acumulada - $nd_total_acumulada - $tc_total_acumulada + $desc_total_efectivo_acumulada + $devol_total_efectivo_acumulada - $afer_total_acumulada) + $fs_acumulada ) . "</td>\n";
-		$result .= "<td class=\"celdaResumenOperacion\">&nbsp;</td>\n";
-		$result .= "</tr>\n";
 
 		$result .= "</table><br/>\n";
 

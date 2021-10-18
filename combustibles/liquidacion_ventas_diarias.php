@@ -11,7 +11,11 @@ list($dia_al, $mes_al, $ano_al)    = explode('/',$_REQUEST['dia_al']);
 
 $funcion     = new class_funciones;
 $conector_id = $funcion->conectar("","","","","");
-$debug       = false;
+
+//Debug
+$_SESSION['debug'] = false;
+$debug = ($_SESSION['debug']) ? true : false;
+
 $no_mostrar  = "style='display:none;'";
 
 if (strlen($dia_del) == 0) {
@@ -33,7 +37,7 @@ $fecha_al = $ano_al."-".$mes_al."-".$dia_al;
 // verifica fecha de inicio consolidada
 
 if ($_REQUEST['boton'] == "Consultar") {
-	$flag = validaDia($fecha_del,$_POST['almacen']);
+	$flag = validaDia($fecha_del,$_POST['almacen']); //Funcionalidad para verificar consolidacion de fecha
 	if ($flag == 1) { 
 		echo "<script>alert('La fecha de inicio debe estar consolidada!');</script>";	
 		$dia_del=date("d");
@@ -195,7 +199,7 @@ WHERE
 $x_descuentos = pg_query($conector_id, $sql);
 if($debug){
 	echo "<pre>";
-	echo "<b>Query 5. Descuentos</b><br>";
+	echo "<b>Query 5.1 Descuentos</b><br>";
 	echo $sql;
 	echo "</pre>";
 }
@@ -217,10 +221,37 @@ WHERE
 $x_difprecio = pg_query($conector_id, $sql);
 if($debug){
 	echo "<pre>";
-	echo "<b>Query 6. Diferencias de Precio de Vales</b><br>";
+	echo "<b>Query 5.2 Diferencias de Precio de Vales</b><br>";
 	echo $sql;
 	echo "</pre>";
 }
+
+//OPENSOFT-98: Redondeo de documentos en efectivo en reportes de liquidación
+$sql = "
+SELECT 
+	sum(x) as total
+FROM 
+	(SELECT 
+		round((((first(t.soles_km)*100)%10)/100),2) AS x 
+	FROM 
+		pos_trans" . $ano_del . $mes_del . " AS t
+	WHERE 
+		t.es='" . pg_escape_string($almacen) . "'
+		AND t.td IN ('B','F')
+		AND t.fpago = '1' 
+		AND t.dia BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "' 
+	GROUP BY 
+		t.caja,t.trans) x;
+";
+
+$x_redondeo_efectivo = pg_query($conector_id, $sql);
+if($debug){
+	echo "<pre>";
+	echo "<b>Query 5.3. Redondeo Efectivo</b><br>";
+	echo $sql;
+	echo "</pre>";
+}
+//Cerrar OPENSOFT-98: Redondeo de documentos en efectivo en reportes de liquidación
 
 $sql = "SELECT 
 		SUM(importe) AS afericiones
@@ -233,7 +264,7 @@ $sql = "SELECT
 $x_afericiones = pg_query($conector_id, $sql);
 if($debug){
 	echo "<pre>";
-	echo "<b>Query 7. Afericiones</b><br>";
+	echo "<b>Query 6. Afericiones</b><br>";
 	echo $sql;
 	echo "</pre>";
 }
@@ -350,7 +381,7 @@ $sql ="	SELECT
 $diferencia_trabajadores = pg_query($conector_id, $sql);
 if($debug){
 	echo "<pre>";
-	echo "<b>Query 8. Sobrantes Faltantes por Trabajador</b><br>";
+	echo "<b>Query 7. Sobrantes Faltantes por Trabajador</b><br>";
 	echo $sql;
 	echo "</pre>";
 }
@@ -369,7 +400,7 @@ $sql = "SELECT
 $x_totmanuales = pg_query($conector_id, $sql);
 if($debug){
 	echo "<pre>";
-	echo "<b>Query 13. Documentos de Venta Manual - Total</b><br>";
+	echo "<b>Query 10. Documentos de Venta Manual - Total</b><br>";
 	echo $sql;
 	echo "</pre>";
 }
@@ -399,7 +430,7 @@ ORDER BY
 $x_manuales = pg_query($conector_id, $sql);
 if($debug){
 	echo "<pre>";
-	echo "<b>Query 13. Documentos de Venta Manual - Detalle</b><br>";
+	echo "<b>Query 10. Documentos de Venta Manual - Detalle</b><br>";
 	echo $sql;
 	echo "</pre>";
 }
@@ -424,7 +455,7 @@ $sql ="
 $x_caja_ingresos = pg_query($conector_id, $sql);
 if($debug){
 	echo "<pre>";
-	echo "<b>Query 10. Ingresos</b><br>";
+	echo "<b>Query 8. Ingresos</b><br>";
 	echo $sql;
 	echo "</pre>";
 }
@@ -454,7 +485,7 @@ $sql ="
 $x_caja_ingresos_contado_dia = pg_query($conector_id, $sql);
 if($debug){
 	echo "<pre>";
-	echo "<b>Query 10.1 Ingresos al contado del dia</b><br>";
+	echo "<b>Query 8.1 Ingresos al contado del dia</b><br>";
 	echo $sql;
 	echo "</pre>";
 }
@@ -481,7 +512,7 @@ $sql ="
 $x_caja_ingresos_cobranzas = pg_query($conector_id, $sql);
 if($debug){
 	echo "<pre>";
-	echo "<b>Query 10.2 Cobranzas y Amortizaciones por CC</b><br>";
+	echo "<b>Query 8.2 Cobranzas y Amortizaciones por CC</b><br>";
 	echo $sql;
 	echo "</pre>";
 }
@@ -553,7 +584,7 @@ $sql ="
 $x_caja_egresos = pg_query($conector_id, $sql);
 if($debug){
 	echo "<pre>";
-	echo "<b>Query 12. Egresos</b><br>";
+	echo "<b>Query 9. Egresos</b><br>";
 	echo $sql;
 	echo "</pre>";
 }
@@ -826,6 +857,14 @@ echo "</pre>";*/
 		$turno = 0;
 
 		$sql = " SELECT validar_consolidacion('$dia',$turno,'$almacen') ";
+		if($_SESSION['debug']){
+			echo "<pre>";
+			echo "<b>Validar consolidacion</b><br>";
+			echo $sql;
+			echo "<br><br><b>Query que hace internamente en la funcion validar_consolidacion</b><br>";
+			echo "SELECT estado FROM pos_consolidacion WHERE dia = '$dia' AND almacen = '$almacen' ORDER BY turno LIMIT 1;";
+			echo "</pre>";
+		}
 //echo $sql;
 		$sqlca->query($sql);
 
@@ -1604,6 +1643,7 @@ function getBalance($arrData){
 
 	$descuentos 	= pg_fetch_all($x_descuentos);
 	$difprecio 	= pg_fetch_all($x_difprecio);
+	$redefectivo 	= pg_fetch_all($x_redondeo_efectivo);
 	$afericiones  	= pg_fetch_all($x_afericiones);
 	$depositos_pos 	= pg_fetch_all($x_depositos_pos);
 
@@ -1669,11 +1709,12 @@ function getBalance($arrData){
 	
 	$vales_de_credito	= number_format($vales_credito[0]['valescredito'],2);
 	$difprecio_total 	= number_format($difprecio[0]['difprecio'],2);
+	$redefectivo_total 	= number_format($redefectivo[0]['total'],2);
 	$tarjetas_de_credito 	= number_format($tarjetas_credito_total[0]['tarjetascredito'],2); //tarjetas de credito total
 	$descuentos_total 	= number_format(abs($descuentos[0]['descuentos']),2);
 	$afericiones_total 	= number_format($afericiones[0]['afericiones'],2);
 	
-	$TVCO = $vales_credito[0]['valescredito']+$tarjetas_credito_total[0]['tarjetascredito']+abs($descuentos[0]['descuentos'])+$difprecio[0]['difprecio']+$afericiones[0]['afericiones']; //TVCO: Total Venta Creditos y Otros
+	$TVCO = $vales_credito[0]['valescredito']+$tarjetas_credito_total[0]['tarjetascredito']+abs($descuentos[0]['descuentos'])+$difprecio[0]['difprecio']+$redefectivo[0]['total']+$afericiones[0]['afericiones']; //TVCO: Total Venta Creditos y Otros
 	$total_venta_creditos_otros = number_format($TVCO,2);
 	
 	$TVContado = $TV - $TVCO;
@@ -1791,23 +1832,37 @@ function getBalance($arrData){
 		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
 	</tr>
 	<tr>
-		<td style="font-size:1.2em">5.&nbsp;Descuentos</td> <!-- 5. Descuentos -->
+		<td width="85%" style="font-size:1.2em" colspan="3">5.&nbsp;Descuentos</td> <!-- 5. Descuentos -->
+	</tr>
+	<tr>
+		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;5.1.&nbsp;Descuentos</td> <!-- 5.1 Descuentos -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><?php echo htmlentities($descuentos_total); ?></p></td>
 	</tr>
 	<tr>
-		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
+		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;5.2.&nbsp;Diferencia de Precio de Vales</td> <!-- 5.2 Diferencias de Precio de Vales -->
+		<td>&nbsp;</td>
+		<td><p align="right" style="font-size:1.5em"><?php echo htmlentities($difprecio_total); ?></p></td>
 	</tr>
 	<tr>
-		<td style="font-size:1.2em">6.&nbsp;Diferencias de Precio de Vales</td> <!-- 6. Diferencias de Precio de Vales -->
+		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;5.3.&nbsp;Redondeo Efectivo</td> <!-- 5.3 Redondeo Efectivo -->
+		<td>&nbsp;</td>
+		<td><p align="right" style="font-size:1.5em"><?php echo htmlentities($redefectivo_total); ?></p></td>
+	</tr>
+	<tr>
+		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
+	</tr>
+	<!-- 6. Diferencias de Precio de Vales -->
+	<!-- <tr>
+		<td style="font-size:1.2em">6.&nbsp;Diferencias de Precio de Vales</td>
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><?php echo htmlentities($difprecio_total); ?></p></td>
 	</tr>
 	<tr>
 		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
-	</tr>
+	</tr> -->
 	<tr>
-		<td style="font-size:1.2em">7.&nbsp;Afericiones</td> <!-- 7. Afericiones -->
+		<td style="font-size:1.2em">6.&nbsp;Afericiones</td> <!-- 6. Afericiones -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><?php echo htmlentities($afericiones_total); ?></p></td>
 	</tr>
@@ -1818,7 +1873,7 @@ function getBalance($arrData){
 		<td style="font-size:1.2em">
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Venta Creditos y Otros No al Contado</b>			
 			<br><br>
-			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b style="font-size:0.6em; color:red">(3+4+5+6+7)<b>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b style="font-size:0.6em; color:red">(3+4+5+6)<b>
 		</td> <!-- Total Venta Creditos y Otros No al Contado -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php echo htmlentities($total_venta_creditos_otros); ?></b></p></td>
@@ -1851,7 +1906,7 @@ function getBalance($arrData){
 
 	<?php if($sobfal == "S"){ ?>
 	<tr>
-		<td style="font-size:1.2em" colspan="3">8.&nbsp;Sobrantes Faltantes por Trabajador</td> <!-- 8. Sobrantes Faltantes por Trabajador -->
+		<td style="font-size:1.2em" colspan="3">7.&nbsp;Sobrantes Faltantes por Trabajador</td> <!-- 7. Sobrantes Faltantes por Trabajador -->
 	</tr>
 
 	<?php foreach($dif_trabajadores as $d){?>
@@ -1924,11 +1979,11 @@ function getBalance($arrData){
 	<tr><td colspan="3" style="font-size:1.2em">&nbsp;</td></tr>
 
 	<tr>
-		<td style="font-size:1.2em" colspan="3">10.&nbsp;Ingresos</td> <!-- 10. Ingresos -->
+		<td style="font-size:1.2em" colspan="3">8.&nbsp;Ingresos</td> <!-- 8. Ingresos -->
 	</tr>
 
 	<tr>
-		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;10.1&nbsp;Ingresos al contado del dia</b></td> <!-- 10.1 Ingresos al contado del dia -->
+		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;8.1&nbsp;Ingresos al contado del dia</b></td> <!-- 8.1 Ingresos al contado del dia -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php
 
@@ -1961,7 +2016,7 @@ function getBalance($arrData){
 	<tr><td colspan="3" style="font-size:1.2em">&nbsp;</td></tr>	
 
 	<tr>
-		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;10.2&nbsp;Cobranzas y Amortizaciones por CC</b></td> <!-- 10.2 Cobranzas y Amortizaciones por CC -->
+		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;8.2&nbsp;Cobranzas y Amortizaciones por CC</b></td> <!-- 8.2 Cobranzas y Amortizaciones por CC -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php
 
@@ -1990,6 +2045,7 @@ function getBalance($arrData){
 
 	<tr><td colspan="3" style="font-size:1.2em">&nbsp;</td></tr>
 
+	<!-- Esto nunca muestra nada por eso se uso el display:none -->
 	<tr <?= $no_mostrar ?>>
 		<td style="font-size:1.2em">11. Otros Ingresos</b></td> <!-- 11. Otros Ingresos -->
 		<td>&nbsp;</td>
@@ -2018,9 +2074,10 @@ function getBalance($arrData){
 		<?php 	}	?>
 
 	<tr <?= $no_mostrar ?>><td colspan="3" style="font-size:1.2em">&nbsp;</td></tr>
+	<!-- Cerrar Esto nunca muestra nada por eso se uso el display:none -->
 
 	<tr>
-		<td style="font-size:1.2em">12. Egresos</b></td> <!-- 12. Egresos -->
+		<td style="font-size:1.2em">9. Egresos</b></td> <!-- 9. Egresos -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php
 
@@ -2051,7 +2108,7 @@ function getBalance($arrData){
 	<?php
 	if($sDocumentoManualVenta == "S"){ ?>
 	<tr>
-		<td style="font-size:1.2em">13. Documentos de Venta Manual</b></td> <!-- 13. Documentos de Venta Manual -->
+		<td style="font-size:1.2em">10. Documentos de Venta Manual</b></td> <!-- 10. Documentos de Venta Manual -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php echo htmlentities($total_manuales); ?></b></p></td>
 		<?php
@@ -2070,10 +2127,10 @@ function getBalance($arrData){
 
 	<tr>
 		<td style="font-size:1.2em"> <!-- title="((Venta contado + Faltantes)) + (Ingresos + Ingresos otros)) - Egresos" -->
-			14. Saldo Neto a Depositar
+			11. Saldo Neto a Depositar
 			<br><br>
 			<b style="font-size:0.6em; color:red">(Total Venta Contado + Sobrantes y Faltantes - Ingresos al contado del dia - Egresos)<b>
-		</td> <!-- 14. Saldo Neto a Depositar -->
+		</td> <!-- 11. Saldo Neto a Depositar -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b>
 		
@@ -2093,8 +2150,8 @@ function getBalance($arrData){
 
 	<tr>
 		<td style="font-size:1.2em"> <!-- title="((Venta contado + Faltantes)) + (Ingresos + Ingresos otros)) - Egresos" -->
-			15. Saldo acumulado Caja y Banco			
-		</td> <!-- 14. Saldo Neto a Depositar -->
+			12. Saldo acumulado Caja y Banco			
+		</td> <!-- 12. Saldo acumulado Caja y Banco -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b>
 		

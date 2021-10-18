@@ -25,8 +25,8 @@ class CuadreVentasController extends Controller {
 			case "Imprimir":
 			case "Procesar":
 				$reporte = CuadreVentasModel::obtenerReporte($_REQUEST['dia1'],$_REQUEST['dia1'],$_REQUEST['turno1'],$_REQUEST['turno1'],$_REQUEST['trabajador']);
-				// echo "Reporte";
-				// echo "<script>console.log('" . json_encode($reporte) . "')</script>";
+				//echo "Reporte";
+				//echo "<script>console.log('" . json_encode($reporte) . "')</script>";
 				if ($reporte===FALSE)
 					$result_f = "<script>alert('Error al obtener el reporte. Verifique los parametros.')</script>";
 				else {

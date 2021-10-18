@@ -330,6 +330,25 @@ class ParteLiquidacionModel extends Model {
 
 			";
 
+		$sqlA_redondeo = "
+			SELECT 
+				sum(x) 
+			FROM 
+				(SELECT 
+					round((((first(t.soles_km)*100)%10)/100),2) AS x 
+				FROM 
+					pos_trans". substr($desde,6,4) . substr($desde,3,2) . " t 
+				WHERE 
+					t.es = '" . pg_escape_string($estaciones) . "'
+					AND t.codigo != '11620307'
+					AND t.tipo = 'C'
+					AND t.dia BETWEEN to_date('" . pg_escape_string($desde) . "', 'DD/MM/YYYY') and to_date('" . pg_escape_string($hasta) . "', 'DD/MM/YYYY')
+					AND t.td IN ('B','F')
+					AND t.fpago = '1' 
+				GROUP BY 
+					t.caja,t.trans) x;
+		";
+
 		$sqlA1 = "SELECT CASE WHEN CH_RESPONSABLE<>'' THEN 'Parte Manual' ELSE '' END 
 			FROM 	comb_ta_contometros 
 			WHERE 	ch_codigocombustible!='11620307'
@@ -502,6 +521,16 @@ class ParteLiquidacionModel extends Model {
 			@$result['propiedades'][$propio]['almacenes'][$ch_sucursal][6] = $a[4]; // DESCUENTOS
 		}
 
+		echo "<pre>";
+		echo "\n".'- QUERY REDONDEO EFECTIVO - COMBUSTIBLE:'.$sqlA_redondeo.' -';
+		echo "</pre>";
+		if ($sqlca->query($sqlA_redondeo) < 0) 
+			return false;
+		for ($i = 0; $i < $sqlca->numrows(); $i++) {
+			$a_redefe = $sqlca->fetchRow();
+			@$result['propiedades'][$propio]['almacenes'][$ch_sucursal][16] = $a_redefe[0]; // REDONDEO EFECTIVO COMBUSTIBLE
+		}
+
 		echo "\n".'- COMBUSTIBLE:'.$sqlA1.' -';
 		if ($sqlca->query($sqlA1) < 0) 
 			return false;
@@ -640,6 +669,25 @@ class ParteLiquidacionModel extends Model {
 			) A on A.codigo = C.combustible;
 		";
 
+		$sqlA_redondeo = "
+			SELECT 
+				sum(x) 
+			FROM 
+				(SELECT 
+					round((((first(t.soles_km)*100)%10)/100),2) AS x 
+				FROM 
+					pos_trans". substr($desde,6,4) . substr($desde,3,2) . " t 
+				WHERE 
+					t.es = '" . pg_escape_string($estaciones) . "'
+					AND t.codigo = '11620307'
+					--AND t.tipo = 'C'
+					AND t.dia BETWEEN to_date('" . pg_escape_string($desde) . "', 'DD/MM/YYYY') and to_date('" . pg_escape_string($hasta) . "', 'DD/MM/YYYY')
+					AND t.td IN ('B','F')
+					AND t.fpago = '1' 
+				GROUP BY 
+					t.caja,t.trans) x;
+		";
+
 		$sqlA1 = "SELECT CASE WHEN CH_RESPONSABLE<>'' THEN 'Parte Manual' ELSE '' END 
 			FROM 	comb_ta_contometros 
 			order by CH_RESPONSABLE desc";
@@ -754,6 +802,16 @@ class ParteLiquidacionModel extends Model {
 			@$result['propiedades'][$propio]['almacenes'][$ch_sucursal][6] = $a[4];
 		}
 
+		echo "<pre>";
+		echo "\n".'- QUERY REDONDEO EFECTIVO - GLP:'.$sqlA_redondeo.' -';
+		echo "</pre>";
+		if ($sqlca->query($sqlA_redondeo) < 0) 
+			return false;
+		for ($i = 0; $i < $sqlca->numrows(); $i++) {
+			$a_redefe = $sqlca->fetchRow();
+			@$result['propiedades'][$propio]['almacenes'][$ch_sucursal][16] = $a_redefe[0]; // REDONDEO EFECTIVO GLP
+		}
+
 		echo "\n".'GLP:'.$sqlA1.' -';
 		if ($sqlca->query($sqlA1) < 0) 
 			return false;
@@ -825,6 +883,25 @@ class ParteLiquidacionModel extends Model {
 			F.ch_fac_seriedocumento='" . pg_escape_string($estaciones) . "' AND 
 			F.ch_fac_tipodocumento='45' AND
 			F.dt_fac_fecha BETWEEN to_date('" . pg_escape_string($desde) . "', 'DD/MM/YYYY') AND to_date('" . pg_escape_string($hasta) . "', 'DD/MM/YYYY')";
+
+	$sqlA_redondeo = "
+		SELECT 
+			sum(x) 
+		FROM 
+			(SELECT 
+				round((((first(t.soles_km)*100)%10)/100),2) AS x 
+			FROM 
+				pos_trans". substr($desde,6,4) . substr($desde,3,2) . " t 
+			WHERE 
+				t.es = '" . pg_escape_string($estaciones) . "'
+				AND t.codigo NOT IN (select ch_codigocombustible from comb_ta_combustibles)
+				--AND t.tipo = 'C'
+				AND t.dia BETWEEN to_date('" . pg_escape_string($desde) . "', 'DD/MM/YYYY') and to_date('" . pg_escape_string($hasta) . "', 'DD/MM/YYYY')
+				AND t.td IN ('B','F')
+				AND t.fpago = '1' 
+			GROUP BY 
+				t.caja,t.trans) x;
+	";
 
 	$sqlA1 = "SELECT
 			SUM(CASE WHEN t.fpago='2' THEN t.importe-COALESCE(t.km,0) ELSE 0 END) AS tarjetascredito,
@@ -1024,6 +1101,16 @@ class ParteLiquidacionModel extends Model {
 			@$result['propiedades'][$propio]['almacenes'][$ch_sucursal][0] = $a[0];
 			@$result['propiedades'][$propio]['almacenes'][$ch_sucursal][1] = '0';
 			@$result['propiedades'][$propio]['almacenes'][$ch_sucursal][2] = $a[0];
+		}
+
+		echo "<pre>";
+		echo "\n".'- QUERY REDONDEO EFECTIVO - MARKET:'.$sqlA_redondeo.' -';
+		echo "</pre>";
+		if ($sqlca->query($sqlA_redondeo) < 0) 
+			return false;
+		for ($i = 0; $i < $sqlca->numrows(); $i++) {
+			$a_redefe = $sqlca->fetchRow();
+			@$result['propiedades'][$propio]['almacenes'][$ch_sucursal][16] = $a_redefe[0]; // REDONDEO EFECTIVO MARKET
 		}
 
 		echo "\n".'- MARKET:'.$sqlA1.' -';
