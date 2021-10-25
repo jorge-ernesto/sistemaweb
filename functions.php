@@ -843,7 +843,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 		$factor=3.785411784;
                 $operacion='*';
         }else{
-                $factor=1; //Por defecto todo esta en litros
+                $factor=1; //Por defecto todo esta en litros, mencionar que segun lo indicado en OPENSOFT-93, por defecto la unidad de medida de GLP vendra en Galones, ya no en Litros
                 $operacion='/';
         }
         
@@ -1242,7 +1242,7 @@ function DetalleComprasReporte($almacen,$cod_tanque,$fechad,$fechaa,$unidadmedid
 		$factor=3.785411784;
                 $operacion='*';
         }else{
-                $factor=1; //Por defecto todo esta en litros
+                $factor=1; //Por defecto todo esta en litros, mencionar que segun lo indicado en OPENSOFT-93, por defecto la unidad de medida de GLP vendra en Galones, ya no en Litros
                 $operacion='/';
         }
 
