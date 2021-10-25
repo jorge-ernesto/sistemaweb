@@ -1832,7 +1832,7 @@ function getBalance($arrData){
 		<td colspan="3" style="font-size:1.2em">&nbsp;</td>
 	</tr>
 	<tr>
-		<td width="85%" style="font-size:1.2em" colspan="3">5.&nbsp;Descuentos</td> <!-- 5. Descuentos -->
+		<td width="85%" style="font-size:1.2em" colspan="3">5.&nbsp;Diferencias</td> <!-- 5. Diferencias -->
 	</tr>
 	<tr>
 		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;5.1.&nbsp;Descuentos</td> <!-- 5.1 Descuentos -->
