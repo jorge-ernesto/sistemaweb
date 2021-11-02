@@ -1107,10 +1107,20 @@ INSERT INTO fac_ta_factura_detalle (
 	    	$dFechaEmisionReferencia = strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['dFechaEmisionReferencia']));
 	    }
 
+		 //Detraccion
 	    $sNumeroCuentaImportePorcentajeCodigoBienesServicio = '';
-	    if ( strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iDetraccion'])) == 'S' ) {
+	    if ( strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iDetraccion'])) == 'S' ) { //Combo SPOT para las operaciones: 'Ninguna', 'Detraccion', 'Retencion'
 	    	$sNumeroCuentaImportePorcentajeCodigoBienesServicio = strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iNumeroCuentaDetraccion'])) . '*' . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['fImporteDetraccion'])) . '*' . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iPorcentajeDetraccion'])) . '*' . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iCodigoBienServicioDetraccion']));
 	    }
+
+		 //Retencion
+		 $sImporteRetencion = '';
+		 if ( strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iDetraccion'])) == 'R' ) { //Combo SPOT para las operaciones: 'Ninguna', 'Detraccion', 'Retencion'
+			$sImporteRetencion = strip_tags(stripslashes('R')) . '*' . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['fImporteRetencion']));
+
+			//Asignamos data de retencion a la variable que se usa para insertar la informacion SPOT en fac_ta_factura_complemento
+			$sNumeroCuentaImportePorcentajeCodigoBienesServicio = $sImporteRetencion;
+		 }
 
 		$cat_sunat = NULL;
 		if( strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['iTipoDocumento'])) == '20' ){ //SI ES NC
@@ -1368,10 +1378,20 @@ INSERT INTO inv_movialma (
 	    	$dFechaEmisionReferencia = strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['dFechaEmisionReferencia']));
 	    }
 
+		 //Detraccion
 	    $sNumeroCuentaImportePorcentajeCodigoBienesServicio = '';
 	    if ( strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iDetraccion'])) == 'S' ) {
 	    	$sNumeroCuentaImportePorcentajeCodigoBienesServicio = strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iNumeroCuentaDetraccion'])) . '*' . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['fImporteDetraccion'])) . '*' . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iPorcentajeDetraccion'])) . '*' . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iCodigoBienServicioDetraccion']));
 	    }
+
+		 //Retencion
+		 $sImporteRetencion = '';
+		 if ( strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iDetraccion'])) == 'R' ) { //Combo SPOT para las operaciones: 'Ninguna', 'Detraccion', 'Retencion'
+			$sImporteRetencion = strip_tags(stripslashes('R')) . '*' . strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['fImporteRetencion']));
+
+			//Asignamos data de retencion a la variable que se usa para insertar la informacion SPOT en fac_ta_factura_complemento
+			$sNumeroCuentaImportePorcentajeCodigoBienesServicio = $sImporteRetencion;
+		 }
 
 		$cat_sunat = NULL;
 		if( strip_tags(stripslashes($arrPost['arrComplementarySaleInvoice']['iTipoDocumento'])) == '20' ){ //SI ES NC
@@ -1696,7 +1716,8 @@ SELECT
  VC.ch_liquidacion AS nu_liquidacion,
  VC.nu_fac_recargo3 AS nu_estado_documento_sunat,
  TRIM(VCOM.ch_cat_sunat) AS ch_cat_sunat,
- TRIM(VC.nu_tipo_pago) AS nu_tipo_pago
+ TRIM(VC.nu_tipo_pago) AS nu_tipo_pago,
+ (string_to_array(VCOM.nu_fac_complemento_direccion, '*'))[2] AS ss_importe_spot --Aqui esta o bien la Detraccion o Retencion
 FROM
  fac_ta_factura_cabecera AS VC
  LEFT JOIN fac_ta_factura_complemento AS VCOM

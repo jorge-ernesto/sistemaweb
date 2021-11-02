@@ -1010,10 +1010,12 @@ class templateSalesInvoice {
 			$bActivarDocumentoReferencia = false;
 			
 			$bActivarDetraccion = false;
+			$bActivarRetencion = false;
 			$iNumeroCuentaDetraccion='';
 			$fImporteDetraccion='';
 			$iPorcentajeDetraccion='';
 			$iCodigoBienesServicioDetraccion='';
+			$fImporteRetencion='';
 			if (
 				!empty($arrDataEdit->arrData[0]["txt_observaciones"]) ||
 				!empty($arrDataEdit->arrData[0]["numero_serie_tipo_documento_referencia"]) ||
@@ -1028,6 +1030,7 @@ class templateSalesInvoice {
 					$sSerieDocumentoReferencia=$arrDocumentoReferencia[1];
 					$iTipoDocumentoReferencia=$arrDocumentoReferencia[2];
 				}
+				//Es Detraccion - Además considerar que Detraccion y Retención son excluyentes
 				if (!empty($arrDataEdit->arrData[0]["numcuenta_importe_porcentaje_codigoimpuestoservicio_detraccion"])){
 					$bActivarDetraccion = true;
 
@@ -1036,6 +1039,22 @@ class templateSalesInvoice {
 					$fImporteDetraccion=$arrDetraccion[1];
 					$iPorcentajeDetraccion=$arrDetraccion[2];
 					$iCodigoBienesServicioDetraccion=$arrDetraccion[3];
+
+					//Es Retención - Además considerar que Detraccion y Retención son excluyentes
+					if($iNumeroCuentaDetraccion == 'R'){						
+						//Eliminamos valores de detracción
+						$iNumeroCuentaDetraccion='';
+						$fImporteDetraccion='';
+						$iPorcentajeDetraccion='';
+						$iCodigoBienesServicioDetraccion='';
+
+						//Asignamos valores a Retención
+						$fImporteRetencion=$arrDetraccion[1];
+
+						//Desactivamos detraccion - Activamos retencion
+						$bActivarDetraccion = false;
+						$bActivarRetencion  = true;
+					}
 				}
 			}// ./ Verificar si se activará datos complementarios
 
@@ -1178,21 +1197,31 @@ class templateSalesInvoice {
 							</div><!-- ./ Desktop Mensaje de verificacion del documento de referencia -->
 
 				            <div class="columns">
-				                <div class="column is-1">
+				                <div class="column is-2">
 				            		<div class="columns is-mobile">
-									  	<div class="column is-1 form-group">
+									  	<div class="column is-2 form-group">
+											<!--
 								        	<label class="label">¿Detracción?</label>
 							    			<span class="select">
 												<select class="is-select" id="cbo-add-detraccion">
 													<option value="N" <?php echo ( $sTitle == 'Agregar' ) ? '' : (($bActivarDetraccion) ? '' : 'selected="selected"') ;?>>No</option>
 													<option value="S" <?php echo ( $sTitle == 'Agregar' ) ? '' : (($bActivarDetraccion) ? 'selected="selected"' : '') ;?>>Si</option>
 												</select>
-							    			</span>
+											</span>
+											-->
+											<label class="label">¿SPOT?</label>
+											<span class="select">
+												<select class="is-select" id="cbo-add-detraccion"> <!-- Se usara como un combo SPOT para las operaciones: 'Ninguna', 'Detraccion', 'Retencion' -->
+													<option value="N" <?php echo ( $sTitle == 'Agregar' ) ? '' : (($bActivarDetraccion && $bActivarRetencion) ? '' : 'selected="selected"') ;?> >Ninguna</option>
+													<option value="S" <?php echo ( $sTitle == 'Agregar' ) ? '' : (($bActivarDetraccion) ? 'selected="selected"' : '') ;?> >Detracción</option>
+													<option value="R" <?php echo ( $sTitle == 'Agregar' ) ? '' : (($bActivarRetencion)  ? 'selected="selected"' : '') ;?> >Retención</option>
+												</select>
+											</span>
 								    	</div><!-- ./ is-1 -->
 								    </div><!-- ./ Mobile -->
 							    </div><!-- ./ is-1 -->
 
-				                <div class="column is-3 <?php echo ($bActivarDetraccion ? '' : 'div-detraccion'); ?>">
+				                <div class="column is-3 div-detraccion">
 				            		<div class="columns is-mobile">
 									  	<div class="column is-12 form-group">
 								        	<label class="label">Nro. Cuenta</label>
@@ -1202,7 +1231,7 @@ class templateSalesInvoice {
 							    	</div><!-- ./ Mobile -->
 							    </div><!-- ./ is-3 -->
 
-				                <div class="column is-5 <?php echo ($bActivarDetraccion ? '' : 'div-detraccion'); ?>">
+				                <div class="column is-5 div-detraccion">
 				            		<div class="columns is-mobile">
 									  	<div class="column is-4 form-group">
 								        	<label class="label">Importe</label>
@@ -1223,6 +1252,20 @@ class templateSalesInvoice {
 								        </div>
 							    	</div><!-- ./ Mobile -->
 							    </div><!-- ./ Desktop is-5 -->
+
+								<div class="column is-5 div-retencion">
+				            	<div class="columns is-mobile">
+										<div class="column is-4 form-group">
+								        	<label class="label">Importe</label>
+								        	<input type="text" class="input input-decimal" id="txt-retencion-importe" value="<?php echo ($sTitle=='Agregar' ? '' : $fImporteRetencion); ?>" autocomplete="off" maxlength="10" />
+								        	<p class="help is-danger"></p>
+								      </div>
+							    	</div><!-- ./ Mobile -->
+							   </div><!-- ./ is-3 -->
+
+								<input type="hidden" id="activarDetraccion" value="<?php echo $bActivarDetraccion ?>">
+								<input type="hidden" id="activarRetencion" value="<?php echo $bActivarRetencion ?>">
+
 							</div><!-- ./ Desktop Detraccion-->
 							<?php
 							if ( $sTitle == 'Editar' ) { ?>

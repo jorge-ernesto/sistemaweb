@@ -1269,7 +1269,14 @@ EOT;
 					return $arrLineXEstablecimiento = array('sStatus' => 'danger', 'sMessage' => 'Problemas al obtener dirección del establecimiento - Linea X', 'sContent' => $arrLineXEstablecimiento["line"]);
 				$arrCadenaFESUNAT .= "\n" . $arrLineXEstablecimiento["line"];
 			}
-			
+
+			// OPENSOFT-99: Mejoras en gestión de importes del SPOT en facturas de venta
+			// Descontaremos el importe SPOT del importe de la unica cuota
+			$importe_spot = 0;
+			if (!empty($arrData["arrHeader"]["ss_importe_spot"])){
+				$importe_spot = $arrData["arrHeader"]["ss_importe_spot"]; //Aqui esta o bien la Detraccion o Retencion
+			}
+
 			// OPENSOFT-59: R.S. 193-2020/SUNAT 
 			// X|X0038|ID_CUOTA|MONTO|FECHA_PAGO
 			// ID_CUOTA será siempre 001, pues sólo se calcularán cronogramas con una cuota; MONTO es el importe total del comprobante; y FECHA_PAGO es la fecha calculada a partir de la fecha de emisión + los días de crédito.
@@ -1278,7 +1285,7 @@ EOT;
 					'X',
 					'X0038',
 					'001',
-					(float)$arrData['arrHeader']['ss_total'],
+					(float)$arrData['arrHeader']['ss_total'] - (float)$importe_spot,
 					$arrData["arrHeader"]["fe_vencimiento"]
 				);
 

@@ -87,8 +87,20 @@ $(document).ready(function() {
 	$( '.div-complementarios' ).hide();
 	$( '.div-message-sale_invoice_referencia' ).hide();
 	$( '.div-detraccion' ).hide();
+	$( '.div-retencion' ).hide();
 	$( '#div-sales_invoice_detail' ).hide();
 	$( '#btn-save-sale_invoice' ).prop( "disabled", true );
+
+	/*Validacion para activar div Retencion y Detraccion para la edicion*/
+	let activarDetraccion = $("#activarDetraccion").val();
+	let activarRetencion  = $("#activarRetencion").val();
+	
+	if( activarDetraccion == 1 ){
+		$( '.div-detraccion' ).show();
+	}else if( activarRetencion == 1 ){
+		$( '.div-retencion' ).show();
+	}
+	/*Cerrar Validacion para activar div Retencion y Detraccion para la edicion*/
 
 	$( '#btn-html-sales_invoice' ).click(function() {
 		searchSalesInvoice(1);
@@ -440,8 +452,12 @@ $(document).ready(function() {
 
 	$( '#cbo-add-detraccion' ).change(function(){
 		$( '.div-detraccion' ).hide();
-		if ($(this).val() === 'S')
+		$( '.div-retencion' ).hide();
+		if ($(this).val() === 'S'){
 			$( '.div-detraccion' ).show();
+		}else if( $(this).val() === 'R' ){
+			$( '.div-retencion' ).show();
+		}
 	})
 
 	$( '#btn-add-product_detail' ).click(function() {
@@ -629,6 +645,7 @@ $(document).ready(function() {
 	$( '#btn-save-sale_invoice_complementary' ).click(function() {
 		$( '.help' ).empty();
 		var $fImporteDetraccion = (isNaN(parseFloat($( '#txt-detraccion-importe' ).val())) ? 0 : parseFloat($( '#txt-detraccion-importe' ).val()));
+		var $fImporteRetencion  = (isNaN(parseFloat($( '#txt-retencion-importe' ).val()))  ? 0 : parseFloat($( '#txt-retencion-importe' ).val()));
 
 		if ( ($( '#cbo-filtro-tipo_documento' ).val() == '20' || $( '#cbo-filtro-tipo_documento' ).val() == '11') && $( '#txt-observaciones' ).val().length < 7 ){//Validar si es NC ó ND, debe tener observación
 			$( '#txt-observaciones' ).closest('.form-group').find('.help').html('Ingresar observación');	    	
@@ -646,6 +663,8 @@ $(document).ready(function() {
 	    	$( '#txt-detraccion-porcentaje' ).closest('.form-group').find('.help').html('Ingresar porcentaje');
 		} else if ( $( '#cbo-add-detraccion' ).val() == 'S' && $( '#txt-detraccion-codigo_bienes_servicios' ).val().length < 3 ) {
 	    	$( '#txt-detraccion-codigo_bienes_servicios' ).closest('.form-group').find('.help').html('Ingresar código de bien / servicio');
+		} else if ( $( '#cbo-add-detraccion' ).val() == 'R' && $fImporteRetencion <= 0 ) {
+			$( '#txt-retencion-importe' ).closest('.form-group').find('.help').html('Importe debe ser mayor a 0');
 		} else {
 			saveSalesInvoiceComplementary();
 		}
@@ -1210,6 +1229,8 @@ function saveSalesInvoice(){
 												fImporteDetraccion : (isNaN(parseFloat($( '#txt-detraccion-importe' ).val())) ? '' : parseFloat($( '#txt-detraccion-importe' ).val())),
 												iPorcentajeDetraccion : $( '#txt-detraccion-porcentaje' ).val(),
 												iCodigoBienServicioDetraccion : $( '#txt-detraccion-codigo_bienes_servicios' ).val(),
+												//Retención
+												fImporteRetencion : (isNaN(parseFloat($( '#txt-retencion-importe' ).val())) ? '' : parseFloat($( '#txt-retencion-importe' ).val())),
 												//Otros datos tenian anteriormente la tabla
 												sNombreCliente : $.trim($( '#txt-filtro-cliente-nombre' ).val()),
 												iNumeroDocumentoIdentidadCliente : $( '#hidden-filtro-cliente-ruc' ).val(),
@@ -1424,6 +1445,8 @@ function saveSalesInvoiceComplementary(){
 				fImporteDetraccion : (isNaN(parseFloat($( '#txt-detraccion-importe' ).val())) ? '' : parseFloat($( '#txt-detraccion-importe' ).val())),
 				iPorcentajeDetraccion : $( '#txt-detraccion-porcentaje' ).val(),
 				iCodigoBienServicioDetraccion : $( '#txt-detraccion-codigo_bienes_servicios' ).val(),
+				//Retencion
+				fImporteRetencion : (isNaN(parseFloat($( '#txt-retencion-importe' ).val())) ? '' : parseFloat($( '#txt-retencion-importe' ).val())),
 			}
 			//console.log(arrComplementarySaleInvoice);
 			//return
@@ -1465,6 +1488,7 @@ function validatePreviousDocumentToSave(){
 	var bEstadoValidacion = true;
 
 	var $fImporteDetraccion = (isNaN(parseFloat($( '#txt-detraccion-importe' ).val())) ? 0 : parseFloat($( '#txt-detraccion-importe' ).val()));
+	var $fImporteRetencion  = (isNaN(parseFloat($( '#txt-retencion-importe' ).val()))  ? 0 : parseFloat($( '#txt-retencion-importe' ).val()));
 
 	if ( $( '#cbo-filtro-tipo_documento' ).val() == 0){
 		$( '#cbo-filtro-tipo_documento' ).closest('.form-group').find('.help').html('Seleccionar tipo');
@@ -1537,7 +1561,12 @@ function validatePreviousDocumentToSave(){
     	bEstadoValidacion = false;
 
     	scrollToError($( '#txt-detraccion-codigo_bienes_servicios' ));
-	} else if ( $( '#cbo-add-forma_pago' ).val() == '' ) {
+	} else if ( $( '#cbo-add-detraccion' ).val() === 'R' && $fImporteRetencion <= 0 ) {
+		$( '#txt-retencion-importe' ).closest('.form-group').find('.help').html('Importe debe ser mayor a 0');
+    	bEstadoValidacion = false;
+
+    	scrollToError($( '#txt-retencion-importe' ));
+  	} else if ( $( '#cbo-add-forma_pago' ).val() == '' ) {
     	$( '#cbo-add-forma_pago' ).closest('.form-group').find('.help').html('Seleccionar F. Pago');
     	bEstadoValidacion = false;
 
