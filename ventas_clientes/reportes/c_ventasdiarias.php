@@ -26,19 +26,19 @@ class VentasDiariasController extends Controller{
 		switch ($this->action) {
 			case "Reporte":
 				if ($_REQUEST['modo'] == "DETALLADO") $bResumido = false; else $bResumido = true;
-				$results = $objModel->obtieneVentas($_REQUEST['desde'], $_REQUEST['hasta'], $_REQUEST['estacion'], $bResumido);
+				$results = $objModel->obtieneVentas($_REQUEST['desde'], $_REQUEST['hasta'], $_REQUEST['estacion'], $_REQUEST['unidad_medida'], $bResumido);
 				$result_f = $objTemplate->reporte($results, $_REQUEST['desde'], $_REQUEST['hasta'], $_REQUEST['modo'], $_REQUEST['estacion']);
 			break;
 
 	    	case "pdf":
 				if ($_REQUEST['modo'] == "DETALLADO") $bResumido = false; else $bResumido = true;
-				$results = $objModel->obtieneVentas($_REQUEST['desde'], $_REQUEST['hasta'], $_REQUEST['estacion'], $bResumido);
+				$results = $objModel->obtieneVentas($_REQUEST['desde'], $_REQUEST['hasta'], $_REQUEST['estacion'], $_REQUEST['unidad_medida'], $bResumido);
 				$result_f = $objTemplate->reporte($results, $_REQUEST['desde'], $_REQUEST['hasta'], $_REQUEST['modo'], $_REQUEST['estacion']);				
 				$result_f .= $objTemplate->reportePDF($results, $_REQUEST['desde'], $_REQUEST['hasta']);
 			break;
 
 			case "Excel":
-				$res = $objModel->obtieneVentas($_REQUEST['desde'], $_REQUEST['hasta'], $_REQUEST['estacion'], false);				
+				$res = $objModel->obtieneVentas($_REQUEST['desde'], $_REQUEST['hasta'], $_REQUEST['estacion'], $_REQUEST['unidad_medida'], false);				
 				$resultt = $objTemplate->reporteExcel($res, $_REQUEST['estacion'], $_REQUEST['desde'], $_REQUEST['hasta'] ) ;
 				echo "<script>console.log('" . json_encode($res) . "')</script>";
 			break;

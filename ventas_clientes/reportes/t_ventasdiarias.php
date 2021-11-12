@@ -12,6 +12,10 @@ class VentasDiariasTemplate extends Template{
 
 		$estaciones['TODAS'] = "Todas las estaciones";
 
+		$unidad_medida['-']                = "No convertir unidades";
+		$unidad_medida['Litros_a_Galones'] = "Convertir de litros a galones";
+		$unidad_medida['Galones_a_Litros'] = "Convertir de galones a litros";
+
 		$form = new form2("", "form_ventas_diarias", FORM_METHOD_POST, "control.php", '', "control");
 		$form->addElement(FORM_GROUP_HIDDEN, new f2element_hidden("rqst", "REPORTES.VENTASDIARIAS"));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<br><table border="0">'));
@@ -36,6 +40,9 @@ class VentasDiariasTemplate extends Template{
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<tr><td align="right">Tipo Reporte: <td>'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_radio("modo", "Detallado", "DETALLADO", '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;', '', Array("checked")));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_radio("modo", "Resumido", "RESUMIDO", ''));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr>'));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<tr><td align="right">Seleccionar Unidad de Medida: <td>'));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_combo("unidad_medida", "", "", $unidad_medida, espacios(3)));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td colspan="2" align="center"><br>'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<button name="action" type="submit" value="Reporte"><img src="/sistemaweb/icons/gbuscar.png" align="right" />Buscar</button>'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<button name="action" type="submit" value="pdf"><img src="/sistemaweb/images/icono_pdf.gif" align="right"/> PDF</button>'));

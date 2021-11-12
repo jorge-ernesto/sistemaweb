@@ -19,7 +19,7 @@ else
 
 class VentasDiariasModel extends Model{
 
-    function obtieneVentas($desde, $hasta, $estaciones, $bResumido){
+    function obtieneVentas($desde, $hasta, $estaciones, $unidad_medida, $bResumido){
 		global $sqlca;
 	
 		$propiedad = $this->obtenerPropiedadAlmacenes($estaciones);
@@ -124,10 +124,13 @@ error_log($sql);
 	    $nu_ventagalon -= $fQuantityAfericion;
 	    $nu_ventavalor -= $fAmountAfericion;
 
-	    if ($ch_codigocombustible=='11620307') {
-			// $nu_ventagalon=round($nu_ventagalon/3.785411784,2);
-			$nu_ventagalon=round($nu_ventagalon/1);
-	    }
+	    if ($ch_codigocombustible=='11620307' && $unidad_medida == "-") {
+			$nu_ventagalon=round($nu_ventagalon/1,2);
+		 } else if ($ch_codigocombustible=='11620307' && $unidad_medida == "Litros_a_Galones") {
+			$nu_ventagalon=round($nu_ventagalon/3.785411784,2);
+		 } else if ($ch_codigocombustible=='11620307' && $unidad_medida == "Galones_a_Litros") {
+			$nu_ventagalon=round($nu_ventagalon*3.785411784,2);
+		 }
 	    
 	    /* Si no esta resumido, totalizar venta por dia */
 	    if (!$bResumido) {
