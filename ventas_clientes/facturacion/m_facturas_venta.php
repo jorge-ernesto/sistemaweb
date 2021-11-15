@@ -293,11 +293,13 @@ WHERE
 	    	$arrFecha = explode('-', $arrCond['dFechaEmision']);
 	    	$table_pos_transym = 'pos_trans' . $arrFecha[0] . $arrFecha[1];
 
-			if( $arrFecha[1] != '01' ){
+			if( $arrFecha[1] != '01' ){ //Si no es Enero
 			    $sYearAnt = $arrFecha[0];
-			    $sMonthAnt = $arrFecha[1] - 1;
-			    $sMonthAnt = '0'.$sMonthAnt;
-			} else {
+			    $sMonthAnt = $arrFecha[1] - 1; //En este proceso le quita el 0 por delante con el que viene, por ejemplo si el mes es Septiembre '09', al restarlo resultaria un 8
+				 if($sMonthAnt < 10){ //Solo se agrega el 0 por delante cuando la resta resultante es menor a 10
+					$sMonthAnt = '0'.$sMonthAnt;
+				 }
+			} else { //Si es Enero
 			    $sYearAnt = $arrFecha[0] - 1;
 			    $sMonthAnt = '12';
 			}
@@ -305,6 +307,7 @@ WHERE
 
 			//Verificar si existe tabla pos_transYYYYMM
 			$iStatusTable = $sqlca->query("SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='".$table_pos_transym."'");
+			error_log("SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='".$table_pos_transym."'");
 
 			if ( $iStatusTable == 1 ){ //Existe tabla
     			$iStatus = $sqlca->query("
@@ -321,11 +324,45 @@ WHERE
  " . $cond_cliente_pt
 				);
 
+				error_log("
+SELECT
+ COUNT(*) AS existe_documento_venta_playa
+FROM
+ " . $table_pos_transym . "
+WHERE
+ fecha::DATE = '" . $arrCond['dFechaEmision'] . "'
+ AND td = '" . $iTipoDocumentoPT . "'
+ AND usr = '" . $arrCond['sSerieDocumento'] . "-" . $arrCond['iNumeroDocumento'] ."'
+ AND tm = 'V'
+ AND grupo != 'D'
+ " . $cond_cliente_pt
+				);
+
 				$row = $sqlca->fetchRow();
 				if ((int)$row['existe_documento_venta_playa'] >= 1)//Existe registro en la tabla pos_transYM
-					$arrResponse = array('iStatus' => $iStatus, 'sStatus' => 'success', 'sMessage' => 'Documento de playa encontrado', 'iData' => 1);
+					$arrResponse = array('iStatus' => $iStatus, 'sStatus' => 'success', 'sMessage' => 'Documento de playa encontrado', 'iData' => 1);	
+			}
 
+			//Verificar si existe tabla pos_transYYYYMM
+			$iStatusTableant = $sqlca->query("SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='".$table_pos_transym_ant."'");
+			error_log("SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='".$table_pos_transym_ant."'");
+
+			if ( $iStatusTableant == 1 ){ //Existe tabla
 				$iStatus = $sqlca->query("
+SELECT
+ COUNT(*) AS existe_documento_venta_playa
+FROM
+ " . $table_pos_transym_ant . "
+WHERE
+ fecha::DATE = '" . $arrCond['dFechaEmision'] . "'
+ AND td = '" . $iTipoDocumentoPT . "'
+ AND usr = '" . $arrCond['sSerieDocumento'] . "-" . $arrCond['iNumeroDocumento'] ."'
+ AND tm = 'V'
+ AND grupo != 'D'
+ " . $cond_cliente_pt
+				);
+
+				error_log("
 SELECT
  COUNT(*) AS existe_documento_venta_playa
 FROM
@@ -342,7 +379,7 @@ WHERE
 				$row = $sqlca->fetchRow();
 				if ((int)$row['existe_documento_venta_playa'] >= 1)//Existe registro en la tabla pos_transYM
 					$arrResponse = array('iStatus' => $iStatus, 'sStatus' => 'success', 'sMessage' => 'Documento de playa encontrado', 'iData' => 1);
-      		}
+			}
     	}
     	return $arrResponse;
 	}
