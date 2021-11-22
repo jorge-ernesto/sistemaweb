@@ -90,8 +90,15 @@ class ConsumoValesModel extends Model {
 			";
 			$orderby_hora = ", hora DESC";
 			
-			$column_hora_select = ", (SELECT TO_CHAR(PT.fecha, 'HH12:MI:SS') FROM " . $pos_transYM . " PT WHERE PT.caja||'-'||PT.trans = cab.ch_documento OR PT.trans::VARCHAR = cab.ch_documento LIMIT 1) as hora";
-			$column_hora_select = ", TO_CHAR(cab.fecha_replicacion, 'HH24:MI:SS') as hora";
+			$column_hora_select = ", (	SELECT 
+													TO_CHAR(PT.fecha, 'HH12:MI:SS') 
+												FROM 
+													".$pos_transYM." PT 
+												WHERE 
+													PT.caja||'-'||PT.trans = cab.ch_documento 
+													OR PT.trans::VARCHAR = cab.ch_documento 
+												LIMIT 1 ) as hora";
+			//$column_hora_select = ", TO_CHAR(cab.fecha_replicacion, 'HH24:MI:SS') as hora";
 		}
 
 		$fdesde = $a."-".$m."-".$d;
