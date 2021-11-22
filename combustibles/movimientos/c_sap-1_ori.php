@@ -231,6 +231,11 @@ class c_sap_1 {
 			$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCashDesagregarDocumentosAnuladosTransferenciasGratuitas($req);
 			$data['invoiceHeaderSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;
 			$v_sap_1->tableInvoiceHeaderSaleCashDesagregarDocumentosAnuladosTransferenciasGratuitas($data['invoiceHeaderSaleCash']);			
+		}else if($_SESSION['es_requerimiento_sap_oncap'] == true){
+			$req['tableName'] = 'INTOINVFC'; //El numero de clientes RUC que están en la TABLA INTOINVFC no están en la tabla INTOCRD(SOCIOS DE NEGOCIO)
+			$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCashDesagregarDocumentosAnuladosTransferenciasGratuitas($req);
+			$data['invoiceHeaderSaleCash']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableInvoiceHeaderSaleCashDesagregarDocumentosAnuladosTransferenciasGratuitas($data['invoiceHeaderSaleCash']);			
 		}else{
 			$req['tableName'] = 'INTOINVFC'; //El numero de clientes RUC que están en la TABLA INTOINVFC no están en la tabla INTOCRD(SOCIOS DE NEGOCIO)
 			$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCash($req);
@@ -393,6 +398,11 @@ class c_sap_1 {
 			$v_sap_1->tableDocumentHeadTicket($data['documentHeadTicket']);
 			/* Fin */
 		}else if($_SESSION['es_requerimiento_sap_centauro'] == true){
+			$req['tableName'] = 'INTOBOL';
+			$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicketDesagregarDocumentosAnuladosTransferenciasGratuitas($req);
+			$data['documentHeadTicket']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableDocumentHeadTicketDesagregarDocumentosAnuladosTransferenciasGratuitas($data['documentHeadTicket']);
+		}else if($_SESSION['es_requerimiento_sap_oncap'] == true){
 			$req['tableName'] = 'INTOBOL';
 			$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicketDesagregarDocumentosAnuladosTransferenciasGratuitas($req);
 			$data['documentHeadTicket']['isViewTableName'] = $m_sap_1->isViewTableName;
@@ -560,6 +570,11 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 			$data['headInvoicePurchase'] = $m_sap_1->getHeadInvoicePurchaseWithGuiasRemision($req);
 			$data['headInvoicePurchase']['isViewTableName'] = $m_sap_1->isViewTableName;
 			$v_sap_1->tableHeadInvoicePurchase($data['headInvoicePurchase']);
+		}else if($_SESSION['es_requerimiento_sap_oncap'] == true){
+			$req['tableName'] = 'INTOPCH';
+			$data['headInvoicePurchase'] = $m_sap_1->getHeadInvoicePurchaseWithGuiasRemision($req);
+			$data['headInvoicePurchase']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableHeadInvoicePurchase($data['headInvoicePurchase']);
 		}else{
 			$req['tableName'] = 'INTOPCH';
 			$data['headInvoicePurchase'] = $m_sap_1->getHeadInvoicePurchase($req);
@@ -568,6 +583,11 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 		}
 
 		if($_SESSION['es_requerimiento_sap_centauro'] == true){
+			$req['tableName'] = 'INTPCH1';
+			$data['detailInvoicePurchase'] = $m_sap_1->getDetailInvoicePurchaseWithGuiasRemision($req);
+			$data['detailInvoicePurchase']['isViewTableName'] = $m_sap_1->isViewTableName;
+			$v_sap_1->tableDetailInvoicePurchase($data['detailInvoicePurchase']);
+		}else if($_SESSION['es_requerimiento_sap_oncap'] == true){
 			$req['tableName'] = 'INTPCH1';
 			$data['detailInvoicePurchase'] = $m_sap_1->getDetailInvoicePurchaseWithGuiasRemision($req);
 			$data['detailInvoicePurchase']['isViewTableName'] = $m_sap_1->isViewTableName;
@@ -722,6 +742,11 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 				$this->checkResponseInsert($req, $res); 
 				/* Fin */
 			}else if($_SESSION['es_requerimiento_sap_centauro'] == true){
+				$req['tableName'] = 'INTOINVFC';
+				$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCashDesagregarDocumentosAnuladosTransferenciasGratuitas($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['invoiceHeaderSaleCash'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res); 
+			}else if($_SESSION['es_requerimiento_sap_oncap'] == true){
 				$req['tableName'] = 'INTOINVFC';
 				$data['invoiceHeaderSaleCash'] = $m_sap_1->getInvoiceHeaderSaleCashDesagregarDocumentosAnuladosTransferenciasGratuitas($req);
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['invoiceHeaderSaleCash'], array('isUnique' => true));
@@ -881,6 +906,11 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 				$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicketDesagregarDocumentosAnuladosTransferenciasGratuitas($req);				
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['documentHeadTicket'], array('isUnique' => true));
 				$this->checkResponseInsert($req, $res);
+			}else if($_SESSION['es_requerimiento_sap_oncap'] == true){
+				$req['tableName'] = 'INTOBOL';
+				$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicketDesagregarDocumentosAnuladosTransferenciasGratuitas($req);				
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['documentHeadTicket'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res);
 			}else{
 				$req['tableName'] = 'INTOBOL';
 				$data['documentHeadTicket'] = $m_sap_1->getDocumentHeadTicket($req);
@@ -1016,6 +1046,11 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 				$data['headInvoicePurchase'] = $m_sap_1->getHeadInvoicePurchaseWithGuiasRemision($req);
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['headInvoicePurchase'], array('isUnique' => true));
 				$this->checkResponseInsert($req, $res); 
+			}else if($_SESSION['es_requerimiento_sap_oncap'] == true){
+				$req['tableName'] = 'INTOPCH';
+				$data['headInvoicePurchase'] = $m_sap_1->getHeadInvoicePurchaseWithGuiasRemision($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['headInvoicePurchase'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res); 
 			}else{
 				$req['tableName'] = 'INTOPCH';
 				$data['headInvoicePurchase'] = $m_sap_1->getHeadInvoicePurchase($req);
@@ -1024,6 +1059,11 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 			}
 
 			if($_SESSION['es_requerimiento_sap_centauro'] == true){
+				$req['tableName'] = 'INTPCH1';
+				$data['detailInvoicePurchase'] = $m_sap_1->getDetailInvoicePurchaseWithGuiasRemision($req);
+				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['detailInvoicePurchase'], array('isUnique' => true));
+				$this->checkResponseInsert($req, $res); 
+			}else if($_SESSION['es_requerimiento_sap_oncap'] == true){
 				$req['tableName'] = 'INTPCH1';
 				$data['detailInvoicePurchase'] = $m_sap_1->getDetailInvoicePurchaseWithGuiasRemision($req);
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['detailInvoicePurchase'], array('isUnique' => true));

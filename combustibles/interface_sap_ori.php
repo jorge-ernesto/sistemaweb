@@ -6,6 +6,7 @@ require 'movimientos/c_sap-1.php';
 
 $_SESSION['es_requerimiento_sap_energigas'] = false; 
 $_SESSION['es_requerimiento_sap_centauro'] = false; 
+$_SESSION['es_requerimiento_sap_oncap'] = false;
 
 $sqlca->query("SELECT par_valor FROM int_parametros WHERE par_nombre = 'version_sap';");
 $a = $sqlca->fetchRow(); 
@@ -14,13 +15,16 @@ $a = $sqlca->fetchRow();
  * Versión 1: Original
  * Versión 2: Requerimiento SAP Energigas 
  * Versión 3: Requerimiento SAP Centauro 
+ * Versión 4: Requerimiento SAP Oncap
  */
 if($a[0] == "2"){ 
 	$_SESSION['es_requerimiento_sap_energigas'] = true; 
 }else if($a[0] == "3"){
 	$_SESSION['es_requerimiento_sap_centauro'] = true;
+}else if($a[0] == "4"){
+	$_SESSION['es_requerimiento_sap_oncap'] = true;
 }
-$_SESSION['debug'] = true; 
+$_SESSION['debug'] = false; 
 
 if (!isset($_REQUEST['action'])) {
 	$c_sap_1 = new c_sap_1();
