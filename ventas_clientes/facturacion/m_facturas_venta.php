@@ -1754,7 +1754,8 @@ SELECT
  VC.nu_fac_recargo3 AS nu_estado_documento_sunat,
  TRIM(VCOM.ch_cat_sunat) AS ch_cat_sunat,
  TRIM(VC.nu_tipo_pago) AS nu_tipo_pago,
- (string_to_array(VCOM.nu_fac_complemento_direccion, '*'))[2] AS ss_importe_spot --Aqui esta o bien la Detraccion o Retencion
+ (string_to_array(VCOM.nu_fac_complemento_direccion, '*'))[2] AS ss_importe_spot, --Aqui esta o bien la Detraccion o Retencion
+ CLI.cli_direccion AS txt_linea_direccion_cliente
 FROM
  fac_ta_factura_cabecera AS VC
  LEFT JOIN fac_ta_factura_complemento AS VCOM

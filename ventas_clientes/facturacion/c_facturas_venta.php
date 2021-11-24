@@ -1295,6 +1295,23 @@ EOT;
 				$arrCadenaFESUNAT .= "\n" . $arrLineXCuotaDePago["line"];
 			}
 
+			// OPENSOFT-103: Direccion de clientes en FE Sunat
+			// X|X0046|DIRECCION
+			if( $arrData["arrHeader"]["txt_linea_direccion_cliente"] != NULL ){ //SI LA DIRECCION ESTA DEFINIDA Y NO ES NULL
+				if( TRIM($arrData["arrHeader"]["txt_linea_direccion_cliente"]) != "" ){ //SI LA DIRECCION ES DIFERENTE DE VACIO
+					$arrDireccion = array(
+						'X',
+						'X0046',
+						$arrData["arrHeader"]["txt_linea_direccion_cliente"]
+					);
+
+					$arrLineXDireccion = $this->schemaLine($arrDireccion);
+					if ( !($arrLineXDireccion["valid"]) )
+						return $arrLineXDireccion = array('sStatus' => 'danger', 'sMessage' => 'Problemas al obtener direccion - Linea X', 'sContent' => $arrLineXCuotaDePago["line"]);
+					$arrCadenaFESUNAT .= "\n" . $arrLineXDireccion["line"];
+				}
+			}
+
 			/**
 			* Línea Tipo "E" – Leyenda/Propiedad
 				- Código: Catálogo Número 15.
