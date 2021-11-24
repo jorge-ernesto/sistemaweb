@@ -1307,7 +1307,7 @@ EOT;
 
 					$arrLineXDireccion = $this->schemaLine($arrDireccion);
 					if ( !($arrLineXDireccion["valid"]) )
-						return $arrLineXDireccion = array('sStatus' => 'danger', 'sMessage' => 'Problemas al obtener direccion - Linea X', 'sContent' => $arrLineXCuotaDePago["line"]);
+						return $arrLineXDireccion = array('sStatus' => 'danger', 'sMessage' => 'Problemas al obtener direccion - Linea X', 'sContent' => $arrLineXDireccion["line"]);
 					$arrCadenaFESUNAT .= "\n" . $arrLineXDireccion["line"];
 				}
 			}
