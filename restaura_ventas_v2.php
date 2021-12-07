@@ -507,7 +507,7 @@ pos=NEW.caja;
 
                 -- select into numdoc to_char(NEW.dia,'ymmdd') ||  substring(art.art_linea,5,2)  from int_articulos art where art.art_codigo=NEW.codigo;
 
-                select into numdoc to_char(NEW.dia,'ymmdd') || substring(artlinea,5,2);
+                select into numdoc to_char(NEW.dia,'yyymmdd');
 
                 --RAISE NOTICE 'SE SELECCIONA NUMERO DE DOCUMENTO %',numdoc;
 
