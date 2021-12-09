@@ -38,14 +38,16 @@ class ParteLiquidacionModel extends Model {
 				SUM(MD2.nu_medicion) - (SUM(MD1.nu_medicion) - FIRST(C.ventas)) AS Dia,";
 		if($desde == $hasta)		
 			$sqlA .= "
-				(CASE WHEN FIRST(SAL.cantidad) > 0 THEN  FIRST(M.mes) + FIRST(SAL.cantidad) ELSE FIRST(M.mes) END) AS Mes,";
+				(CASE WHEN FIRST(SAL.cantidad) > 0 THEN  FIRST(M.mes)  ELSE FIRST(M.mes) END) AS Mes,";
 		else
 			$sqlA .= "
 				SUM(MD2.nu_medicion) - (SUM(MD1.nu_medicion) - FIRST(C.ventas)) AS Mes,";
 		$sqlA .= "	
 				(FIRST(C.valval)-FIRST(C.afeafe)) AS importe,
 				FIRST(ENT2.cantidad) as cantidad,
-				FIRST(SAL2.cantidad) as cantidad
+				FIRST(SAL2.cantidad) as cantidad,
+				FIRST(ENT.cantidad) as cantidad_acumulada,
+				FIRST(SAL.cantidad) as cantidad_acumulada
 			FROM 
 				(select nu_medicion,ch_tanque from comb_ta_mediciondiaria where ch_sucursal='" . pg_escape_string($estaciones) . "' and dt_fechamedicion = to_date('" . pg_escape_string($desde) . "', 'DD/MM/YYYY')-1) MD1
 
@@ -203,6 +205,7 @@ class ParteLiquidacionModel extends Model {
 			@$result['propiedades'][$propio]['almacenes'][$ch_sucursal]['partes'][$producto]['inicial'] = $a[2];
 			@$result['propiedades'][$propio]['almacenes'][$ch_sucursal]['partes'][$producto]['compras'] = $a[3];
 			@$result['propiedades'][$propio]['almacenes'][$ch_sucursal]['partes'][$producto]['transfe'] = $a[10] - $a[11];
+			@$result['propiedades'][$propio]['almacenes'][$ch_sucursal]['partes'][$producto]['transfe_acumulada'] = $a[12] - $a[13];
 			@$result['propiedades'][$propio]['almacenes'][$ch_sucursal]['partes'][$producto]['ventas'] = $a[4];
 			@$result['propiedades'][$propio]['almacenes'][$ch_sucursal]['partes'][$producto]['porcentaje'] = $a[4] * 100;
 

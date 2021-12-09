@@ -282,7 +282,7 @@ class ParteLiquidacionTemplate extends Template {
 		$result .= '<td align="right"' .$negrita1. htmlentities(number_format($array['final'] + $array['transfe'], 2, '.', ',')) .$negrita2. '</td>';
 		$result .= '<td align="right"' .$negrita1. htmlentities(number_format($array['medicion'], 2, '.', ',')) .$negrita2. '</td>';
 		$result .= '<td align="right"' .$negrita1. htmlentities(number_format($array['dia'] - $array['transfe'], 2, '.', ',')) .$negrita2. '</td>';
-		$result .= '<td align="right"' .$negrita1. htmlentities(number_format($array['mes'] - $array['transfe'], 2, '.', ',')) .$negrita2. '</td>';
+		$result .= '<td align="right"' .$negrita1. htmlentities(number_format($array['mes'] - $array['transfe_acumulada'], 2, '.', ',')) .$negrita2. '</td>';
 		$result .= '<td align="right" style="font-weight:bold">' . htmlentities(number_format($array['importe'], 2, '.', ',')) . '</td>';
 		$result .= '</tr>';
 
