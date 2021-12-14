@@ -121,6 +121,7 @@ class InterfaceConcarActModel extends Model {
 		global $sqlca;
 
 		$_SESSION['es_requerimiento_concar_nuevomundo'] = false;
+		$_SESSION['es_requerimiento_concar_etissa'] = false;
 
 		$sqlca->query("SELECT par_valor FROM int_parametros WHERE par_nombre = 'version_concar';");
 		$a = $sqlca->fetchRow(); 
@@ -128,9 +129,12 @@ class InterfaceConcarActModel extends Model {
 		/* Versiones Concar
 		 * Concar 1: Original
 		 * Concar 2: Nuevomundo
+		 * Concar 3: Etissa
 		 */
-		if($a[0] == "Nuevo_Mundo"){ 
+		if ($a[0] == "Nuevo_Mundo") { 
 			$_SESSION['es_requerimiento_concar_nuevomundo'] = true;
+		} elseif ($a[0] == "Etissa") {
+			$_SESSION['es_requerimiento_concar_etissa'] = true;
 		}
 	}
 
@@ -6502,7 +6506,7 @@ digvcom, dtpconv, dflgcom, danecom, dtipaco, dmedpag, dtidref, dndoref, dfecref,
 		//Obtenemos parametros para version concar
 		InterfaceConcarActModel::getVersionConcar();
 		$detalle_boletas_nuevomundo = false;
-		if($_SESSION['es_requerimiento_concar_nuevomundo'] == true){
+		if ($_SESSION['es_requerimiento_concar_nuevomundo'] == true) {
 			$detalle_boletas_nuevomundo = true;
 		}
 
@@ -11617,9 +11621,9 @@ WHERE
 
 		//Obtenemos parametros para version concar
 		InterfaceConcarActModel::getVersionConcar();
-		$es_desglose = true;
-		if($_SESSION['es_requerimiento_concar_nuevomundo'] == true){
-			$es_desglose = false;
+		$es_desglose = false;
+		if ($_SESSION['es_requerimiento_concar_etissa'] == true) {
+			$es_desglose = true;
 		}
 
 		if(trim($num_actual)=="")
@@ -11845,24 +11849,28 @@ WHERE
 				$cuenta_bi         = "";
 				$cuenta_inafecto   = "";
 				$cuenta_percepcion = "";
+				$subdiario         = "";
 				if ( TRIM($es_tipo) == "COMBUSTIBLE" ) {
 					$cuenta_total      = $compra_combustible_cuenta_proveedor;
 					$cuenta_impuesto   = $compra_cuenta_impuesto;
 					$cuenta_bi         = $compra_combustible_cuenta_bi;
 					$cuenta_inafecto   = $compra_cuenta_inafecto;
 					$cuenta_percepcion = $compra_cuenta_percepcion;
+					$subdiario         = $vcsubdiario;
 				} else if ( TRIM($es_tipo) == "GLP" ) {
 					$cuenta_total      = $compra_glp_cuenta_proveedor;
 					$cuenta_impuesto   = $compra_cuenta_impuesto;
 					$cuenta_bi         = $compra_glp_cuenta_bi;
 					$cuenta_inafecto   = $compra_cuenta_inafecto;
 					$cuenta_percepcion = $compra_cuenta_percepcion;
+					$subdiario         = $vcsubdiario_glp;
 				} else if ( TRIM($es_tipo) == "MARKET" ) {
 					$cuenta_total      = $compra_market_cuenta_proveedor;
 					$cuenta_impuesto   = $compra_cuenta_impuesto;
 					$cuenta_bi         = $compra_market_cuenta_bi;
 					$cuenta_inafecto   = $compra_cuenta_inafecto;
 					$cuenta_percepcion = $compra_cuenta_percepcion;
+					$subdiario         = $vcsubdiario_market;
 				}
 
 				//CREAMOS LOS ASIENTOS POR CADA REGISTRO DE COMPRA
@@ -11874,11 +11882,11 @@ WHERE
 					3 => $reg['trans'],
 					4 => $reg['tip'],
 					5 => 'H', //ddh
-					6 => round($reg['importe_total'] + $reg['importe_inafecto'] + $reg['importe_percepcion'],2), //importe
+					6 => round($reg['importe_impuesto'] + $reg['importe_bi'] + $reg['importe_inafecto'] + $reg['importe_percepcion'],2), //importe
 					7 => $reg['venta'],
 					8 => $reg['sucursal'],
 					9 => $reg['dnumdoc'],
-					10 => $reg['subdiario'],
+					10 => $subdiario,
 					11 => $reg['dcencos'],
 					12 => $reg['tip2'],
 					13 => $reg['nutd'],
@@ -11901,7 +11909,7 @@ WHERE
 					7 => $reg['venta'],
 					8 => $reg['sucursal'],
 					9 => $reg['dnumdoc'],
-					10 => $reg['subdiario'],
+					10 => $subdiario,
 					11 => $reg['dcencos'],
 					12 => $reg['tip2'],
 					13 => $reg['nutd'],
@@ -11925,7 +11933,7 @@ WHERE
 						7 => $reg['venta'],
 						8 => $reg['sucursal'],
 						9 => $reg['dnumdoc'],
-						10 => $reg['subdiario'],
+						10 => $subdiario,
 						11 => $reg['dcencos'],
 						12 => $reg['tip2'],
 						13 => $reg['nutd'],	
@@ -11950,7 +11958,7 @@ WHERE
 						7 => $reg['venta'],
 						8 => $reg['sucursal'],
 						9 => $reg['dnumdoc'],
-						10 => $reg['subdiario'],
+						10 => $subdiario,
 						11 => $reg['dcencos'],
 						12 => $reg['tip2'],
 						13 => $reg['nutd'],	
@@ -11974,7 +11982,7 @@ WHERE
 					7 => $reg['venta'],
 					8 => $reg['sucursal'],
 					9 => $reg['dnumdoc'],
-					10 => $reg['subdiario'],
+					10 => $subdiario,
 					11 => $reg['dcencos'],
 					12 => $reg['tip2'],
 					13 => $reg['nutd'],
