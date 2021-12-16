@@ -108,12 +108,12 @@ if (!isset($_REQUEST['action'])) {
 					'fImpuesto' => $arrImpuesto['arrData'],
 					'date_ymd_today' => $objHelper->getAllDateFormat('fecha_ymd'),
 				);
-				$controllerSalesInvoice->cancel_or_delete_sales_invoice($_POST, $arrDataHelper);
+				$controllerSalesInvoice->cancel_or_delete_sales_invoice($_POST, $arrDataHelper); //ELIMINAR O ANULAR
 				break;
 
 			case 'delete'://Eliminar
 				//Eliminar documento(s) de ventas manuales
-				$controllerSalesInvoice->cancel_or_delete_sales_invoice($_POST, "");
+				$controllerSalesInvoice->cancel_or_delete_sales_invoice($_POST, ""); //ELIMINAR O ANULAR
 				break;
 
 			case 'search-reference-sales_invoice':

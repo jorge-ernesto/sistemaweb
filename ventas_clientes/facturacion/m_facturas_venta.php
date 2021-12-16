@@ -1480,7 +1480,10 @@ WHERE
     	return $arrResponse;
 	}
 
-	function cancel_or_delete_sales_invoice($arrPost){
+	function cancel_or_delete_sales_invoice($arrPost){ //ELIMINAR O ANULAR
+		error_log('cancel_or_delete_sales_invoice');
+		error_log(json_encode($arrPost));
+
 		global $sqlca;
 
 		$sNombreAccion = ($arrPost['sAction'] == 'anular' ? 'anulado' : 'eliminado');
@@ -1500,7 +1503,7 @@ WHERE
 			// start the transaction
 			$this->begin_transaction();
 
-			if ( $iTipoFormaVales == 2 ) {// 2 = Soltando vales
+			if ( $iTipoFormaVales == 2 ) {// 2 = Soltando vales //ELIMINAR O ANULAR SOLTANDO VALES
 				// upd - credit vouchers - tabla val_ta_cabecera
 				$arrVales = $this->upd_credit_vouchers($arrPost);
 				if ( $arrVales['sStatus'] == 'danger' ) {
@@ -1515,6 +1518,7 @@ WHERE
 					$this->rollback_transaction();
 				}
 			}
+			// die();
 
 			$sStatus = $sqlca->functionDB("ventas_fn_eliminacion_documentos('" . $iTipoDocumento . "', '" . $sSerieDocumento . "', '" . $iNumeroDocumento . "', '" . $iIdCliente . "', '" . $iTipoFormaVales . "', '" . $sTipoAccionFuncionDB . "')");
 			if (empty($sStatus)) {
@@ -1557,7 +1561,7 @@ WHERE
 		return $arrResponse;
 	}
 
-	function upd_credit_vouchers($arrPost){
+	function upd_credit_vouchers($arrPost){ //Actualiza ch_liquidacion a NULL en val_ta_cabecera
 		global $sqlca;
 
 		$sql_vales = "
@@ -1566,9 +1570,9 @@ UPDATE
 SET
  ch_liquidacion = NULL
 WHERE
- ch_documento IN(
+ ch_documento||''||DATE(dt_fecha) IN(
  SELECT
-  ch_numeval
+  ch_numeval||''||DATE(dt_fecha)
  FROM
   val_ta_complemento_documento
  WHERE
@@ -1579,6 +1583,8 @@ WHERE
   AND ch_liquidacion = '" . strip_tags(stripslashes($arrPost['iNumeroLiquidacion'])) . "'
  );
 		";
+		error_log("upd_credit_vouchers");
+		error_log($sql_vales);
 
 		$arrResponse = array('iStatus' => 2, 'sStatus' => 'success', 'sMessage' => 'success SQL - Complementary', 'sNameFunction' => 'upd_credit_vouchers()');
 		$iStatus = $sqlca->query($sql_vales);
@@ -1587,7 +1593,7 @@ WHERE
     	return $arrResponse;
 	}
 
-	function delete_credit_vouchers_with_sales_invoice($arrPost){
+	function delete_credit_vouchers_with_sales_invoice($arrPost){ //Elimina registro de val_ta_complemento_documento
 		global $sqlca;
 
 		$sql_vales_facturas = "
@@ -1600,6 +1606,8 @@ WHERE
   AND ch_cliente = '" . strip_tags(stripslashes($arrPost['iIdCliente'])) . "'
   AND ch_liquidacion = '" . strip_tags(stripslashes($arrPost['iNumeroLiquidacion'])) . "';
 		";
+		error_log("delete_credit_vouchers_with_sales_invoice");
+		error_log($sql_vales_facturas);
 
 		$arrResponse = array('iStatus' => 3, 'sStatus' => 'success', 'sMessage' => 'success SQL - Complementary', 'sNameFunction' => 'delete_credit_vouchers_with_sales_invoice()');
 		$iStatus = $sqlca->query($sql_vales_facturas);
