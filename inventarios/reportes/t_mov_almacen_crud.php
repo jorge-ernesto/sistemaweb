@@ -118,7 +118,7 @@ class MovimientoAlmacenCRUDTemplate extends Template {
 									foreach($estaciones as $value){
 										if (
 												(
-													$value['tipo'] == 1 && ($Nu_Tipo_Movimiento_Inventario == '01' || $Nu_Tipo_Movimiento_Inventario == '21' || $Nu_Tipo_Movimiento_Inventario == '16' || $Nu_Tipo_Movimiento_Inventario == '05' || $Nu_Tipo_Movimiento_Inventario == '08' || $Nu_Tipo_Movimiento_Inventario == '28')
+													$value['tipo'] == 1 && ($Nu_Tipo_Movimiento_Inventario == '01' || $Nu_Tipo_Movimiento_Inventario == '21' || $Nu_Tipo_Movimiento_Inventario == '16' || $Nu_Tipo_Movimiento_Inventario == '05' || $Nu_Tipo_Movimiento_Inventario == '08' || $Nu_Tipo_Movimiento_Inventario == '28' || $Nu_Tipo_Movimiento_Inventario == '55')
 												)
 										){
 											echo "<option value='" . $value['almacen'] . "'>" . $value['almacen'] . " - " . $value['nombre'] . "</option>";

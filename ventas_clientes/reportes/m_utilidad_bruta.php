@@ -57,11 +57,16 @@ class UtilidadBrutaModel extends Model {
 		$sanio 			= substr($desde,6,4);
 		$mes 			= substr($desde,3,2);
 
+		$sColumnFecha_ = '';
+		$sCondFecha_ = '';
 		$sColumnFecha = '';
 		$sCondFecha = '';
 		$cond_obtener_ultimo_costo = "FIRST(sal.stk_costo" . $mes . ") AS ultmcosto,";
+		$cond_obtener_ultimo_costo = "FIRST(COSTOPROMEDIO.costo_promedio_) as ultmcosto,"; //Costo Promedio de Venta Combustible obtenido de inv_movialma, movimientos tipo 25 (Nueva funcionalidad)
 		$left_join_movialma = '';
 		if ( $iDetalladoPorDia == 1 ) {//1 = Si
+			// $sColumnFecha_ = 'inv.mov_fecha,';                                 //Esto no es necesario, pero lo dejamos para saber como seria la agrupacion por fecha
+			// $sCondFecha_ = 'COSTOPROMEDIO.mov_fecha = CTC.dt_fechaparte AND '; //Esto no es necesario, pero lo dejamos para saber como seria la agrupacion por fecha
 			$sColumnFecha = 'CTC.dt_fechaparte,';
 			$sCondFecha = 'COMBPRECIO.dt_fechaparte = CTC.dt_fechaparte AND ';
 			$cond_obtener_ultimo_costo = 'FIRST(MOVI.mov_costopromedio) AS ultmcosto,';
@@ -106,6 +111,24 @@ class UtilidadBrutaModel extends Model {
 			LEFT JOIN int_articulos AS art ON (art.art_codigo=CTC.ch_codigocombustible)
 			LEFT JOIN fac_lista_precios AS pre ON (pre.art_codigo=CTC.ch_codigocombustible)
 			LEFT JOIN inv_saldoalma AS sal ON (sal.art_codigo = art.art_codigo AND sal.stk_periodo = '" . $sanio . "' AND sal.stk_almacen = '" . $almacen . "')
+
+			LEFT JOIN ( --------------Costo Promedio de Venta Combustible obtenido de inv_movialma, movimientos tipo 25 (Nueva funcionalidad)
+			select 
+				inv.mov_almacen,
+				" . $sColumnFecha_ . "
+				ITEM.art_linea,
+				inv.art_codigo,
+				(SUM(inv.mov_costopromedio) / COUNT(*)) AS costo_promedio_
+			from 
+				inv_movialma inv
+				LEFT JOIN int_articulos AS ITEM ON (ITEM.art_codigo=inv.art_codigo)
+			where 
+				inv.mov_almacen = '" . $almacen . "'
+				and DATE(inv.mov_fecha) BETWEEN TO_DATE('" . pg_escape_string($desde) . "', 'DD/MM/YYYY') AND TO_DATE('" . pg_escape_string($hasta) . "', 'DD/MM/YYYY')
+				AND inv.tran_codigo = '25'
+			GROUP BY inv.mov_almacen,".$sColumnFecha_."ITEM.art_linea,inv.art_codigo
+			) AS COSTOPROMEDIO ON(COSTOPROMEDIO.mov_almacen = CTC.ch_sucursal AND " . $sCondFecha_ . " COSTOPROMEDIO.art_linea = art.art_linea AND COSTOPROMEDIO.art_codigo = CTC.ch_codigocombustible)
+
 			LEFT JOIN (
 			SELECT
 			 CTC.ch_sucursal,
@@ -147,9 +170,7 @@ class UtilidadBrutaModel extends Model {
 		";
 
 
-		echo "<pre>";
-		echo "COMBUSTIBLE: " . $sql;
-		echo "</pre>";
+		echo "\n\n COMBUSTIBLE: \n\n".$sql;
 
 
 		$iStatusSQL = $sqlca->query($sql);
@@ -223,7 +244,7 @@ class UtilidadBrutaModel extends Model {
 		$sanio 	= substr($desde,6,4);
 
 		if($tipo == "K"){
-			if($uprecio == "U"){
+			if($uprecio == "U"){ //Ultimo costo
 
 				$sql = "
 				SELECT
@@ -259,24 +280,42 @@ class UtilidadBrutaModel extends Model {
 					linea,
 					codigo;
 				";
-			}else{
+			}else{ //Costo Promedio
+				$sColumnFecha_ = '';
+				$sCondFecha_ = '';
+
 				$sql = "
 				SELECT
 					art.art_codigo as codigo,
 					art.art_descripcion as articulo,
 					max(pre.pre_precio_act1/(1+(util_fn_igv()/100))) as costovta,
+					/*
 					CASE 
-					WHEN sal.stk_costo".$smes." = '0.0000' THEN 
-						COALESCE((SELECT 
-						mov_costounitario 
-						FROM inv_movialma WHERE mov_fecha < '" . ($sanio . "-" . $smes . "-01") . " 00:00:00' AND art_codigo = art.art_codigo
-						GROUP BY
-							mov_costounitario,
-							mov_fecha
-						ORDER BY 
-							mov_fecha DESC 
-						LIMIT 1),0)
-					ELSE sal.stk_costo".$smes."
+						WHEN sal.stk_costo".$smes." = '0.0000' THEN 
+							COALESCE((SELECT 
+							mov_costounitario 
+							FROM inv_movialma WHERE mov_fecha < '" . ($sanio . "-" . $smes . "-01") . " 00:00:00' AND art_codigo = art.art_codigo
+							GROUP BY
+								mov_costounitario,
+								mov_fecha
+							ORDER BY 
+								mov_fecha DESC 
+							LIMIT 1),0)
+						ELSE sal.stk_costo".$smes."
+					END as ultmcosto,
+					*/
+					CASE 
+						WHEN FIRST(COSTOPROMEDIO.costo_promedio_) = '0.0000' OR FIRST(COSTOPROMEDIO.costo_promedio_) = 0 THEN 
+							COALESCE((SELECT 
+							mov_costounitario 
+							FROM inv_movialma WHERE mov_fecha < '" . ($sanio . "-" . $smes . "-01") . " 00:00:00' AND art_codigo = art.art_codigo
+							GROUP BY
+								mov_costounitario,
+								mov_fecha
+							ORDER BY 
+								mov_fecha DESC 
+							LIMIT 1),0)
+						ELSE FIRST(COSTOPROMEDIO.costo_promedio_)
 					END as ultmcosto,
 					max((pre.pre_precio_act1/(1+(util_fn_igv()/100))) - pro.rec_precio) as ganancia,
 					123 as margen,
@@ -292,6 +331,23 @@ class UtilidadBrutaModel extends Model {
 					LEFT JOIN fac_lista_precios pre ON (pre.art_codigo = m.art_codigo)		
 					LEFT JOIN (SELECT art_codigo, max(rec_precio) AS rec_precio FROM com_rec_pre_proveedor GROUP BY art_codigo, rec_fecha_ultima_compra ORDER BY rec_fecha_ultima_compra DESC LIMIT 1) AS pro ON (pro.art_codigo = art.art_codigo)
 					LEFT JOIN inv_saldoalma sal ON (sal.art_codigo = art.art_codigo AND sal.stk_almacen=m.mov_almacen)
+
+					LEFT JOIN ( --------------Costo Promedio de Venta Combustible obtenido de inv_movialma, movimientos tipo 45 (Nueva funcionalidad)
+					select 
+						inv.mov_almacen,
+						" . $sColumnFecha_ . "
+						ITEM.art_linea,
+						inv.art_codigo,
+						(SUM(inv.mov_costopromedio) / COUNT(*)) AS costo_promedio_ --La division entre count(*) siempre es 1, y si es 0 simplemente no hay division ya que no hay registro
+					from 
+						inv_movialma inv
+						LEFT JOIN int_articulos AS ITEM ON (ITEM.art_codigo=inv.art_codigo)
+					where 
+						inv.mov_almacen = '" . $almacen . "'
+						and DATE(inv.mov_fecha) BETWEEN TO_DATE('" . pg_escape_string($desde) . "', 'DD/MM/YYYY') AND TO_DATE('" . pg_escape_string($hasta) . "', 'DD/MM/YYYY')
+						AND inv.tran_codigo = '45'
+					GROUP BY inv.mov_almacen,".$sColumnFecha_."ITEM.art_linea,inv.art_codigo
+					) AS COSTOPROMEDIO ON(COSTOPROMEDIO.mov_almacen = m.mov_almacen AND " . $sCondFecha_ . " COSTOPROMEDIO.art_linea = art.art_linea AND COSTOPROMEDIO.art_codigo = m.art_codigo)
 				WHERE
 					m.mov_fecha::DATE BETWEEN to_date('". pg_escape_string($desde) . "', 'DD/MM/YYYY') AND to_date('" . pg_escape_string($hasta) . "', 'DD/MM/YYYY')
 					AND m.mov_almacen 		= '$almacen'
@@ -351,7 +407,7 @@ class UtilidadBrutaModel extends Model {
 				";
 		}
 
-		//echo "\n\n PRINCIPAL MARKET: \n\n".$sql;
+		echo "\n\n PRINCIPAL MARKET: \n\n".$sql;
 
 		if ($sqlca->query($sql) <= 0) 
 			return 1;
@@ -434,7 +490,7 @@ class UtilidadBrutaModel extends Model {
 				codigo;
 			";}
 
-		//echo "\n\n ULTIMO COSTO COMBUSTIBLE: \n\n".$sql;
+		echo "\n\n COSTO PROMEDIO O ULTIMO COSTO COMBUSTIBLE: \n\n".$sql;
 
 		if ($sqlca->query($sql) < 0) 
 			return false;
@@ -472,7 +528,7 @@ class UtilidadBrutaModel extends Model {
 				codigo;
 		";
 
-		//echo "\n\n COSTO DE VENTA COMBUSTIBLE: \n\n".$sql;
+		echo "\n\n COSTO DE VENTA COMBUSTIBLE: \n\n".$sql;
 
 		if($sqlca->query($sql)<0)
 			return false;

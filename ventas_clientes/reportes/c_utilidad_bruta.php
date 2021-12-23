@@ -31,14 +31,23 @@ class UtilidadBrutaController extends Controller {
 				$anio 	 = substr($desde, 6, 4);
 				$mes 	 = substr($desde, 3, 2);
 
+				//Aqui puede sacar el ultimo costo o el costo promedio de combustibles
 				$ucosto_combu  	= UtilidadBrutaModel::ultimo_costo_combustibles($desde,$hasta,$almacen,$uprecio);
-				$vta_combu   	= UtilidadBrutaModel::costo_vta_combustibles($desde,$hasta);
+				// echo "<script>console.log('Ultimo costo combustibles')</script>";
+				// echo "<script>console.log('" . json_encode($ucosto_combu) . "')</script>";
 
+				//Aqui obtiene el precio de venta de combustibles
+				$vta_combu   	= UtilidadBrutaModel::costo_vta_combustibles($desde,$hasta);
+				// echo "<script>console.log('Costo venta combustibles')</script>";
+				// echo "<script>console.log('" . json_encode($vta_combu) . "')</script>";
+
+				//Ventas Combustible
 				$results  	= UtilidadBrutaModel::obtieneVentas($almacen, $desde, $hasta, $anio, $mes, $iDetalladoPorDia);
 				if($results['sStatus'] != 'success'){
 					?><script>alert("<?php echo $results['sMessage']; ?> ");</script><?php
 				}
 
+				//Ventas Market
 				$market  	= UtilidadBrutaModel::obtieneVentasMarket($almacen, $desde, $hasta, $anio, $mes, $tipo, $hanio, $hmes, $uprecio);
 				
 				if($market == ''){

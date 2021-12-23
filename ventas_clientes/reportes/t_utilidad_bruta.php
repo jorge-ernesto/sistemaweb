@@ -33,7 +33,7 @@ class UtilidadBrutaTemplate extends Template {
 		return $form->getForm();
     }
 
-	function reporte($results,$market,$ucosto_combu,$vta_combu, $iAlmacen, $dHasta, $iTipoCalculoCosto, $iDetalladoPorDia){
+	function reporte($results,$market,$ucosto_combu,$vta_combu, $iAlmacen, $dHasta, $iTipoCalculoCosto, $iDetalladoPorDia){ //FUNCION PARA MOSTRAR HTML DEL REPORTE
 		$limitemar = count($market);
 		$xlinea	= "";
 		$totales = Array();
@@ -183,7 +183,7 @@ class UtilidadBrutaTemplate extends Template {
 		$result .= '</div>';
 		/* FIN DE MARKET */
 
-		$limite	= count($results);
+		$limite	= count($results); //ARRAY DE COMBUSTIBLE
 		$xlinea	= "";
 		$totales = Array();
 		$t = 0;
@@ -207,7 +207,7 @@ class UtilidadBrutaTemplate extends Template {
 
 		$dFechaParte = '';
 
-		for($i = 0; $i < $limite; $i++) {
+		for($i = 0; $i < $limite; $i++) { //RECORREMOS ARRAY DE COMBUSTIBLE
 			$codigo 	= $results[$i]['codigo'];
 			$articulo 	= $results[$i]['articulo'];
 			$costovta 	= $results[$i]['costovta'];
@@ -295,6 +295,7 @@ class UtilidadBrutaTemplate extends Template {
 
 			/* ULTIMO COSTO DE COMBUSTIBLE    */
 			$result .= '<td align="right">'.number_format($ultmcosto,4).'</td>';
+			// $result .= '<td align="right">'.number_format($ultmcosto,4)." | ".number_format($results[$i]['ultmcosto2'],4)." | ".number_format($results[$i]['ultmcosto3'],4).'</td>';
 
 			$result .= '<td align="right">'.number_format($ganancia,2).'</td>';
 			$result .= '<td align="right">'.number_format($margen,2).' %</td>';
