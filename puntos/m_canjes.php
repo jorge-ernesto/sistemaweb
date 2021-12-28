@@ -98,7 +98,7 @@ class CanjesModel
 		    AND (dt_item_fecha_vencimiento>=now() OR dt_item_fecha_vencimiento IS NULL)
 		    AND id_campana = $campana
 		ORDER BY
-		    nu_item_puntos;";
+			ch_item_descripcion;";
 	$sqlca->query($sql);
 
 	$i = 0;
