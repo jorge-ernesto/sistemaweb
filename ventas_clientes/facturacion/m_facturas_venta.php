@@ -828,7 +828,11 @@ SELECT
  VCOM.ch_fac_observacion1 AS txt_observaciones,
  VCOM.ch_fac_observacion2 AS numero_serie_tipo_documento_referencia,
  VCOM.ch_fac_observacion3 AS fe_emision_referencia,
- CASE WHEN VC.ch_liquidacion!='' THEN '' ELSE VCOM.nu_fac_complemento_direccion END AS numcuenta_importe_porcentaje_codigoimpuestoservicio_detraccion,
+ CASE 
+ 	WHEN VCOM.nu_fac_complemento_direccion = '' OR VCOM.nu_fac_complemento_direccion IS NULL OR 
+	     (string_to_array(VCOM.nu_fac_complemento_direccion, '*'))[2] = '' OR (string_to_array(VCOM.nu_fac_complemento_direccion, '*'))[2] IS NULL THEN '' --Aqui valida la Detraccion o Retencion
+	ELSE VCOM.nu_fac_complemento_direccion 
+ END AS numcuenta_importe_porcentaje_codigoimpuestoservicio_detraccion,
  ITEM.art_codigo AS id_item,
  ITEM.art_descripcion AS no_nombre_item,
  ROUND(VD.nu_fac_cantidad, 3) AS qt_cantidad_item,

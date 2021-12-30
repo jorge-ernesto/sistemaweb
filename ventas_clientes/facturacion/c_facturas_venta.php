@@ -1285,7 +1285,7 @@ EOT;
 					'X',
 					'X0038',
 					'001',
-					(float)$arrData['arrHeader']['ss_total'] - (float)$importe_spot,
+					(float)$arrData['arrHeader']['ss_total'] - (float)$importe_spot, //float, si se la pasa un string lo convierte a 0
 					$arrData["arrHeader"]["fe_vencimiento"]
 				);
 
