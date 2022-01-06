@@ -364,6 +364,26 @@ class controllerSalesInvoice {
 					$bStatusFESunat = false;
 				}
 
+				// verifiy f.vencimiento menor o igual a la de f.emisión
+				$fe_emision_verify = $arrData['arrHeader']["fe_emision"];
+				$fe_vencimiento_verify = $arrData['arrHeader']["fe_vencimiento"];				
+				
+				error_log("FECHA EMISION");
+				error_log(json_encode( $fe_emision_verify ));
+				error_log("FECHA VENCIMIENTO");
+				error_log(json_encode( $fe_vencimiento_verify ));
+				error_log("COMPARACION STRCMP");
+				error_log(json_encode( strcmp($fe_vencimiento_verify, $fe_emision_verify) ));				
+				
+				if ( ($bStatusFESunat) ) {
+					if( TRIM($arrData["arrHeader"]["nu_tipo_pago"]) == "06" && TRIM($arrData["arrHeader"]["no_nombre_forma_pago"]) == "CREDITO" ){ //SI ES DOCUMENTO CON FORMA DE PAGO CREDITO
+						if( strcmp($fe_vencimiento_verify, $fe_emision_verify) <= 0 ){ //strcmp: Devuelve < 0 si str1 es menor que str2; > 0 si str1 es mayor que str2 y 0 si son iguales. SI FECHA DE VENCIMIENTO ES MENOR O IGUAL A LA FECHA DE EMISION
+							echo json_encode(array('sStatus' => 'danger', 'sMessage' => 'Problemas F.Vencimiento menor o igual a la de F.Emisión en Factura Crédito', 'fe_vencimiento_verify' => $fe_vencimiento_verify));
+							$bStatusFESunat = false;
+						}
+					}
+				}
+
 				// optype
 				$optype = ($arrData['arrHeader']['no_anulado'] != "S" ? 0 : 1);
 
@@ -510,15 +530,15 @@ EOT;
 			if ( strlen(trim($arrPost['sSerieDocumento'])) == 4 ){//Solo si son series electronicas y contingencia realizar verificación de días
 				$dFechaValida = date_create($arrDataHelper["date_ymd_today"]);
 				if ( isset($arrPost['no_anulado']) && $arrPost['no_anulado'] == 'S' ) {
-					date_add($dFechaValida, date_interval_create_from_date_string('-5 days'));
+					date_add($dFechaValida, date_interval_create_from_date_string('-3 days')); //Fecha para validar
 					$sMessageStatus = 'anular';
 				} else {
-					date_add($dFechaValida, date_interval_create_from_date_string('-5 days'));
+					date_add($dFechaValida, date_interval_create_from_date_string('-3 days')); //Fecha para validar
 					$sMessageStatus = 'registrar';
 				}
 				$dFechaValida = date_format($dFechaValida, 'Y-m-d');
-				$arrResponse = array('sStatus' => 'warning', 'sMessage' => 'Solo se pueden ' . $sMessageStatus . ' documentos electrónicos hasta 5 días');
-				if($arrPost['dFechaEmision'] >= $dFechaValida)
+				$arrResponse = array('sStatus' => 'warning', 'sMessage' => 'Solo se pueden ' . $sMessageStatus . ' documentos electrónicos hasta 3 días');
+				if($arrPost['dFechaEmision'] >= $dFechaValida) //La Fecha de Emision debe ser igual o mayor a la Fecha de Validacion. Si no lo es no permitira completar el documento
 					$arrResponse = array('sStatus' => 'success', 'sMessage' => 'Se puede registrar');
 			}
 		} else if ($arrPost['sNombreValidacion'] == 'tipos_impuesto') {

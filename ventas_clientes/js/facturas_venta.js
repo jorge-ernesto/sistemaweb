@@ -74,7 +74,8 @@ $(document).ready(function() {
 		autoclose : true,
 		maxDate: $("#txt-fe_vencimiento").val(),
 		onClose: function (selectedDate) {
-			$("#txt-fe_vencimiento").datepicker("option", "minDate", selectedDate);
+			var newSelectedDate = calculateFecha(selectedDate, 1); //Obtenemos fecha de datepicker txt-fe_emision y le aumentamos un dia
+			$("#txt-fe_vencimiento").datepicker("option", "minDate", newSelectedDate); //Seteamos el valor de la fecha minima en datepicker txt-fe_vencimiento
 		},
 		todayHighlight: true
 	});
@@ -258,7 +259,7 @@ $(document).ready(function() {
 							} else if(response.sStatus=='warning') {
 								alert(response.sMessage);
 								location.reload();
-							} else {
+							} else { //Mensajes de error
 								alert(response.sMessage);
 							}
 						}, "json");
@@ -1610,12 +1611,47 @@ function calculateDuoDate(){
 
 	$( "#txt-fe_vencimiento" ).val(dDay + '/' + dMonth + '/' + dYear);
 
+	var dfechaEmision = $( '#txt-fe_emision' ).val(); //Obtenemos la fecha de emision
+	var dfechaVencimientoMinDate = calculateFecha(dfechaEmision, 1); //Obtenemos la fecha de emision y le aumentamos un dia
+	// console.log('dfechaVencimientoMinDate', dfechaVencimientoMinDate);
+
     $( "#txt-fe_vencimiento" ).datepicker({
     	changeMonth: true,
     	changeYear: true,
-		minDate: $("#txt-fe_emision").val(),
+		minDate: dfechaVencimientoMinDate,
 		onClose: function (selectedDate) {
-			$("#txt-fe_emision").datepicker("option", "maxDate", selectedDate);
+			var newSelectedDate = calculateFecha(selectedDate, -1); //Obtenemos fecha de datepicker txt-fe_vencimiento y le restamos un dia
+			$("#txt-fe_emision").datepicker("option", "maxDate", newSelectedDate); //Seteamos el valor de la fecha maxima en datepicker txt-fe_emision
 		}
     });
+}
+
+/**
+ * Metodo para aumentar o disminuir cantidad x de dias a una fecha
+ * @param date Fecha en formato DD/MM/YYYY
+ * @param int Dias para aumentar o disminuir fecha en formato entero
+ * @return date Nueva fecha en formato DD/MM/YYYY
+ */
+function calculateFecha(fecha, iDias){	
+	var dFecha = sTypeDate('fecha_dmy', fecha, '/')
+	dFecha = dFecha.split('-');
+	var iMonth = parseInt(dFecha[1]);
+	iMonth--;
+
+	// Castear fecha para aumentar día(s)
+	var dFecha = new Date( dFecha[0], iMonth, dFecha[2]);//(YYYY, MM, DD)
+	dFecha.setDate(dFecha.getDate() + iDias);
+
+	//Obtener formato d/m/Y con javascript
+	dDay = dFecha.getDate();
+	dMonth = dFecha.getMonth() + 1;
+	dYear = dFecha.getFullYear();
+
+	if(dMonth.toString().length < 2)
+		dMonth = "0".concat(dMonth);
+
+	if(dDay.toString().length<2)
+		dDay = "0".concat(dDay);
+
+	return dDay + '/' + dMonth + '/' + dYear;
 }
