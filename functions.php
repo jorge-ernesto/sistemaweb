@@ -880,6 +880,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
                         INNER JOIN comb_ta_tanques tan ON (med.ch_tanque = tan.ch_tanque)
 		WHERE 
 			med.ch_sucursal=trim('$almacen')
+                        AND tan.ch_sucursal=trim('$almacen')
                         AND tan.ch_codigocombustible = '$cod_combustible'
 			AND dt_fechamedicion >= to_date('$fechad','dd-mm-yyyy')
 			AND dt_fechamedicion <= to_date('$fechaa','dd-mm-yyyy')
@@ -936,6 +937,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
                                 INNER JOIN comb_ta_tanques tan ON (med.ch_tanque = tan.ch_tanque)
 			WHERE 
                                 med.ch_sucursal=trim('$almacen')
+                                AND tan.ch_sucursal=trim('$almacen')
 				AND dt_fechamedicion >= to_date('$fec_saldo[0]','dd-mm-yyyy')
 				AND dt_fechamedicion <= to_date('$fechaa','dd-mm-yyyy')
                                 AND tan.ch_codigocombustible = '$cod_combustible'
@@ -1010,6 +1012,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 					LEFT JOIN comb_ta_tanques t ON(t.ch_codigocombustible = a.codigo AND t.ch_sucursal = a.es)
 				WHERE
 					a.es = trim('$almacen')
+                                        t.ch_sucursal = trim('$almacen')
 					AND a.dia BETWEEN to_date('$fechad','dd-mm-yyyy') AND to_date('$fechaa','dd-mm-yyyy')
 					AND t.ch_tanque = '$cod_tanque'
 				GROUP BY
@@ -1178,6 +1181,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
                                         INNER JOIN comb_ta_tanques tan ON (med.ch_tanque = tan.ch_tanque)
 				WHERE 
                                         med.ch_sucursal=trim('$almacen')
+                                        AND tan.ch_sucursal=trim('$almacen')
 					AND dt_fechamedicion >= to_date('$fechad','dd-mm-yyyy')
 					AND dt_fechamedicion <= to_date('$fechaa','dd-mm-yyyy')
                                         AND tan.ch_codigocombustible = '$cod_combustible'
