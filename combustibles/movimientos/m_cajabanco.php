@@ -229,10 +229,30 @@ SELECT
 		END)  AS bcp
 	FROM
 		c_cash_transaction AS c
-		JOIN c_cash_transaction_payment AS i
-			ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
-		JOIN c_cash_transaction_detail AS CD
-			ON(c.c_cash_transaction_id = CD.c_cash_transaction_id)
+		JOIN (			
+			SELECT 								
+				FIRST(c_cash_transaction_id) as c_cash_transaction_id,
+				FIRST(c_bank_id) as c_bank_id,
+				SUM(amount) as amount
+			FROM 
+				c_cash_transaction_payment 
+			WHERE 
+				c_bank_id = '1'				
+			GROUP BY 
+				c_cash_transaction_id, c_bank_id
+		) i ON (i.c_cash_transaction_id = c.c_cash_transaction_id)
+		
+		JOIN (			
+			SELECT 
+				FIRST(c_cash_transaction_id) as c_cash_transaction_id,
+				FIRST(doc_type) as doc_type
+			FROM 
+				c_cash_transaction_detail 
+			WHERE
+				doc_type NOT IN ('10','35')	
+			GROUP BY 
+				c_cash_transaction_id
+		) CD ON (CD.c_cash_transaction_id = c.c_cash_transaction_id)
 	WHERE
 		c.ware_house = '" . $estacion . "'
 		AND c.c_cash_id = 1--Solo se filtra caja principal
@@ -252,10 +272,30 @@ SELECT
 		END)  AS bbva
 	FROM
 		c_cash_transaction as c
-		JOIN c_cash_transaction_payment AS i
-			ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
-		JOIN c_cash_transaction_detail AS CD
-			ON(c.c_cash_transaction_id = CD.c_cash_transaction_id)
+		JOIN (			
+			SELECT 								
+				FIRST(c_cash_transaction_id) as c_cash_transaction_id,
+				FIRST(c_bank_id) as c_bank_id,
+				SUM(amount) as amount
+			FROM 
+				c_cash_transaction_payment 
+			WHERE 
+				c_bank_id = '2'				
+			GROUP BY 
+				c_cash_transaction_id, c_bank_id
+		) i ON (i.c_cash_transaction_id = c.c_cash_transaction_id)
+		
+		JOIN (			
+			SELECT 
+				FIRST(c_cash_transaction_id) as c_cash_transaction_id,
+				FIRST(doc_type) as doc_type
+			FROM 
+				c_cash_transaction_detail 
+			WHERE
+				doc_type NOT IN ('10','35')	
+			GROUP BY 
+				c_cash_transaction_id
+		) CD ON (CD.c_cash_transaction_id = c.c_cash_transaction_id)
 	WHERE
 		c.ware_house = '" . $estacion . "'
 		AND c.c_cash_id = 1--Solo se filtra caja principal
@@ -275,10 +315,30 @@ SELECT
 		END)  AS scotiabank
 	FROM
 		c_cash_transaction AS c
-		JOIN c_cash_transaction_payment AS i
-			ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
-		JOIN c_cash_transaction_detail AS CD
-			ON(c.c_cash_transaction_id = CD.c_cash_transaction_id)
+		JOIN (			
+			SELECT 								
+				FIRST(c_cash_transaction_id) as c_cash_transaction_id,
+				FIRST(c_bank_id) as c_bank_id,
+				SUM(amount) as amount
+			FROM 
+				c_cash_transaction_payment 
+			WHERE 
+				c_bank_id = '3'				
+			GROUP BY 
+				c_cash_transaction_id, c_bank_id
+		) i ON (i.c_cash_transaction_id = c.c_cash_transaction_id)
+		
+		JOIN (			
+			SELECT 
+				FIRST(c_cash_transaction_id) as c_cash_transaction_id,
+				FIRST(doc_type) as doc_type
+			FROM 
+				c_cash_transaction_detail 
+			WHERE
+				doc_type NOT IN ('10','35')	
+			GROUP BY 
+				c_cash_transaction_id
+		) CD ON (CD.c_cash_transaction_id = c.c_cash_transaction_id)
 	WHERE
 		c.ware_house = '" . $estacion . "'
 		AND c.c_cash_id = 1--Solo se filtra caja principal
@@ -297,10 +357,30 @@ SELECT
 		END)  AS interbank
 	FROM
 		c_cash_transaction AS c
-		JOIN c_cash_transaction_payment AS i
-			ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
-		JOIN c_cash_transaction_detail AS CD
-			ON(c.c_cash_transaction_id = CD.c_cash_transaction_id)
+		JOIN (			
+			SELECT 								
+				FIRST(c_cash_transaction_id) as c_cash_transaction_id,
+				FIRST(c_bank_id) as c_bank_id,
+				SUM(amount) as amount
+			FROM 
+				c_cash_transaction_payment 
+			WHERE 
+				c_bank_id = '4'				
+			GROUP BY 
+				c_cash_transaction_id, c_bank_id
+		) i ON (i.c_cash_transaction_id = c.c_cash_transaction_id)
+		
+		JOIN (			
+			SELECT 
+				FIRST(c_cash_transaction_id) as c_cash_transaction_id,
+				FIRST(doc_type) as doc_type
+			FROM 
+				c_cash_transaction_detail 
+			WHERE
+				doc_type NOT IN ('10','35')	
+			GROUP BY 
+				c_cash_transaction_id
+		) CD ON (CD.c_cash_transaction_id = c.c_cash_transaction_id)
 	WHERE
 		c.ware_house = '" . $estacion . "'
 		AND c.c_cash_id = 1--Solo se filtra caja principal
@@ -484,8 +564,16 @@ SELECT
 		END)  AS egresos
 	FROM
 		c_cash_transaction AS c
-		JOIN c_cash_transaction_payment AS i
-			ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
+		JOIN (
+			SELECT
+				FIRST(c_cash_transaction_id) as c_cash_transaction_id,
+				FIRST(c_cash_mpayment_id) as c_cash_mpayment_id,
+				SUM(amount) as amount
+			FROM 
+				c_cash_transaction_payment 
+			GROUP BY
+				c_cash_transaction_id, c_cash_mpayment_id
+		) i ON (i.c_cash_transaction_id = c.c_cash_transaction_id)
 		JOIN c_cash_mpayment AS m
 			ON (m.c_cash_mpayment_id = i.c_cash_mpayment_id)
 	WHERE
@@ -503,10 +591,27 @@ SELECT
 		SUM(CASE WHEN c.c_currency_id=1 THEN i.amount ELSE i.amount*c.rate END) AS otherimp
 	FROM
 		c_cash_transaction AS c
-		JOIN c_cash_transaction_payment AS i
-			ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
-		JOIN c_cash_transaction_detail AS CD
-			ON(c.c_cash_transaction_id = CD.c_cash_transaction_id)
+		JOIN (
+			SELECT
+				FIRST(c_cash_transaction_id) as c_cash_transaction_id,
+				FIRST(c_cash_mpayment_id) as c_cash_mpayment_id,
+				SUM(amount) as amount
+			FROM 
+				c_cash_transaction_payment 
+			WHERE 
+				c_cash_mpayment_id != 1
+			GROUP BY
+				c_cash_transaction_id
+		) i ON (i.c_cash_transaction_id = c.c_cash_transaction_id)
+
+		JOIN (			
+			SELECT 
+				FIRST(c_cash_transaction_id) as c_cash_transaction_id
+			FROM 
+				c_cash_transaction_detail 
+			GROUP BY 
+				c_cash_transaction_id
+		) CD ON (CD.c_cash_transaction_id = c.c_cash_transaction_id)
 	WHERE
 		c.ware_house = '" . $estacion . "'
 		AND c.c_cash_id = 1--Solo se filtra caja principal
@@ -595,6 +700,8 @@ ORDER BY
     }
 
     function getBalance($arrData){
+		error_log("Function getBalance");
+
     	global $sqlca;
 		//Verificar saldo final el último día del mes anterior
     	$dEndPreviousMonth = $arrData['Fe_Validate_Previous_Year'] . '-' . $arrData['Fe_Validate_Previous_Month'];
