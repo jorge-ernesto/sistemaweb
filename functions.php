@@ -1012,7 +1012,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 					LEFT JOIN comb_ta_tanques t ON(t.ch_codigocombustible = a.codigo AND t.ch_sucursal = a.es)
 				WHERE
 					a.es = trim('$almacen')
-                                        t.ch_sucursal = trim('$almacen')
+                                        AND t.ch_sucursal = trim('$almacen')
 					AND a.dia BETWEEN to_date('$fechad','dd-mm-yyyy') AND to_date('$fechaa','dd-mm-yyyy')
 					AND t.ch_tanque = '$cod_tanque'
 				GROUP BY
