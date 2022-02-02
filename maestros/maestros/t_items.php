@@ -168,6 +168,7 @@ class ItemsTemplate extends Template {
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('&nbsp;&nbsp;&nbsp;<button name="action" type="submit" value="Excel"><img src="/sistemaweb/icons/gexcel.png" align="right" />Excel</button>'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('&nbsp;&nbsp;&nbsp;<button name="action" type="submit" value="Importar"><img src="/sistemaweb/icons/gexcel.png" align="right" />Importar Art&iacute;culos</button>'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('&nbsp;&nbsp;&nbsp;<button id="btn-excel-lista_precio" name="action" type="button" value="ExcelListaPrecios"><img src="/sistemaweb/icons/gexcel.png" align="right" /> Excel Lista Precios</button>'));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('&nbsp;&nbsp;&nbsp;<a href="#" id="link" style="display:none"></a>'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</table>'));
 
         return $form;

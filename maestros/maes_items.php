@@ -21,6 +21,8 @@
 
 				$.post( url, params, function( response ) {
 					if ( response.sStatus=='success' ){
+						console.log(response);
+
 						iCountData = response.arrData.length;
 						/*
   						for(let i=0;i<iCountData;i++) {
@@ -60,17 +62,10 @@
 						var ua = window.navigator.userAgent;
 						var msie = ua.indexOf("MSIE "); 
 
-						if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
-						    txtArea1.document.open("txt/html","replace");
-						    txtArea1.document.write(tab_text);
-						    txtArea1.document.close();
-						    txtArea1.focus(); 
-						    sa=txtArea1.document.execCommand("SaveAs",true,"Say Thanks to Sumit.xls");
-						} else {//other browser not tested on IE 11
-							$( "#btn-excel-lista_precio" ).prop('disabled', false);
-							$( "#btn-excel-lista_precio" ).html( '<img src="/sistemaweb/icons/gexcel.png" align="right"> Excel Lista Precio' );
-						    sa = window.open('data:application/vnd.ms-excel,' + encodeURIComponent(tab_text));  
-						}
+						var link = document.getElementById('link');
+						link.href='data:application/vnd.ms-excel,' + encodeURIComponent(tab_text);
+						link.download='archivo_lista_precios.xls';
+						link.click();
 
 						return (sa);
 					} else {
