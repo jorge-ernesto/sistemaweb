@@ -688,9 +688,11 @@ RETURNING
 				}
 			}
 
+			$Fe_Emision_Whitout_Localtime = $Fe_Emision;
 			$Fe_Emision_Locatime = localtime(time(),true); //Since 1900
 			$Fe_Emision = $Fe_Emision . " " . $Fe_Emision_Locatime["tm_hour"] . ":" . $Fe_Emision_Locatime["tm_min"] . ":" . $Fe_Emision_Locatime["tm_sec"];
 
+			//Insertamos movimientos en inv_movialma e insertamos en inv_ta_compras_devoluciones por medio del trigger inv_fn_movialma_ins
 			for ($i = 0; $i < count($arrTableProductos); $i++) {
 				$iSerieOrdenCompra 	= trim($arrTableProductos[$i]['iSerieOrdenCompra']);
 				$iSerieOrdenCompra 	= strip_tags($iSerieOrdenCompra);
@@ -758,7 +760,9 @@ RETURNING
 					" . $Nu_Margen_Real . "
 				);
 				";
-				//error_log('5 $sql_insert_inv_movialma: '.$sql_insert_inv_movialma);
+				
+				error_log("sql_insert_inv_movialma");
+				error_log($sql_insert_inv_movialma);
 
 				if ($sqlca->query($sql_insert_inv_movialma) < 0){
 					$response = array(
@@ -1159,7 +1163,8 @@ RETURNING
 						$Nu_Formulario,
 						$ip,
 						$Nu_Serie_Compra_Referencia,
-						$Nu_Numero_Compra_Referencia
+						$Nu_Numero_Compra_Referencia,
+						$Fe_Emision_Whitout_Localtime
 					);
 
 					if($updComprasDevoluciones == FALSE){
@@ -1565,7 +1570,7 @@ RETURNING
 		return true;
 	}
 
-	function updComprasDevoluciones($Nu_Documento_Identidad, $Nu_Tipo_Compra, $Nu_Serie_Compra, $Nu_Numero_Compra, $Fe_Emision, $Nu_Tipo_Movimiento_Inventario, $Nu_Formulario, $ip, $Nu_Serie_Compra_Referencia, $Nu_Numero_Compra_Referencia){
+	function updComprasDevoluciones($Nu_Documento_Identidad, $Nu_Tipo_Compra, $Nu_Serie_Compra, $Nu_Numero_Compra, $Fe_EmisionRC, $Nu_Tipo_Movimiento_Inventario, $Nu_Formulario, $ip, $Nu_Serie_Compra_Referencia, $Nu_Numero_Compra_Referencia, $Fe_EmisionMOVIALMA){
 		global $sqlca;
 
 		$sql = "
@@ -1581,9 +1586,12 @@ RETURNING
 		WHERE
 			tran_codigo 		= '" . $Nu_Tipo_Movimiento_Inventario . "'
 			AND mov_entidad 	= '" . $Nu_Documento_Identidad . "'
-			AND mov_fecha::DATE = '" . $Fe_Emision . "'
+			AND mov_fecha::DATE = '" . $Fe_EmisionMOVIALMA . "'
 			AND mov_numero 		= '" . $Nu_Formulario . "'
 		";
+
+		error_log("updComprasDevoluciones");
+		error_log($sql);
 
 		//echo "<br />";
 		//echo "UPDATE Compra Devoluciones: " . $sql;
