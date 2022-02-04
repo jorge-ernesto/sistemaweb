@@ -74,7 +74,7 @@ class CuadreVentasTemplate extends Template {
 			foreach ($td['cuadres'] as $cuadre) { //Cuadre por Trabajador
 //				$result .= "<tr><td class=\"celdaContenido\">\n";
 				$result .= "<tr><td class=\"celdaContenido\"><table class=\"tablaContometros\">\n";
-				$result .= "<tr class=\"bg-success\"><td class=\"celdaTrabajador\" colspan=\"14\">Trabajador: {$cuadre['trabajador']} - {$cuadre['nombre']}</td></tr>\n";
+				$result .= "<tr><td class=\"celdaTrabajador\" colspan=\"14\">Trabajador: {$cuadre['trabajador']} - {$cuadre['nombre']}</td></tr>\n";
 				$result .= "</table>\n";
 				$result .= "</td></tr>\n";
 
@@ -526,10 +526,10 @@ class CuadreVentasTemplate extends Template {
 			}
 		}		
 
-		$result .= "<tr>\n";
-		$result .= "<td class=\"celdaResumenEncabezado\">TOTAL</td>\n"; //
-		$result .= "<td class=\"celdaResumenEncabezado\">" . showNumber($cantidad_acumulada) . "</td>\n";
-		$result .= "<td class=\"celdaResumenEncabezado\">" . showNumber($importe_acumulado) . "</td>\n";
+		$result .= "<tr class=\"bg-success\">\n";
+		$result .= "<td class=\"celdaResumenConcepto\">TOTAL</td>\n"; //
+		$result .= "<td class=\"celdaResumenImporte\">" . showNumber($cantidad_acumulada) . "</td>\n";
+		$result .= "<td class=\"celdaResumenImporte\">" . showNumber($importe_acumulado) . "</td>\n";
 		$result .= "</tr>\n";
 
 		$result .= "</table><br/>\n";
@@ -714,11 +714,11 @@ class CuadreVentasTemplate extends Template {
 			$result .= "<td class=\"celdaImporte\">" . showNumber($pos['ticket_venta_sol']) . "</td>\n";
 			$result .= "</tr>\n";
 		}
-		$result .= "<tr>\n";
+		$result .= "<tr class=\"bg-success\">\n";
 		$result .= "<td class=\"celdaEtiquetaAcum\">&nbsp;</td>\n";
 		$result .= "<td class=\"celdaEtiquetaAcum\">TOTAL TIENDA</td>\n";
 		$result .= "<td>&nbsp;</td>\n";
-		$result .= "<td class=\"celdaImporteAcum bg-success\">" . showNumber($cuadre['venta_market']) . "</td>\n";
+		$result .= "<td class=\"celdaImporteAcum\">" . showNumber($cuadre['venta_market']) . "</td>\n";
 		$result .= "</tr>\n";
 
 		$result .= "</table>\n";

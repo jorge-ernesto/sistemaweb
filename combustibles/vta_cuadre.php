@@ -66,6 +66,8 @@
 			border-style: none;
 			font-size: 16px;
 			font-weight: bold;
+			color: white;
+    		background-color: #30767F;
 		}
 
 		table#tablaPrincipalCuadre tr td.celdaContenido {
@@ -96,6 +98,8 @@
 			border-width: 1px 0px 1px 0px;
 			font-size: 14px;
 			font-weight: bold;
+			color: #000000;
+			background-color: #C9F4D4;
 		}
 
 		table.tablaContometros tr td.celdaCabecera {
@@ -745,6 +749,8 @@
 
 		.celdaResumenEncabezado{
 			font-size: 14px;
+			color: white;
+    		background-color: #30767F;
 		}
 		.celdaResumenConcepto{
 			font-size: 14px;
@@ -771,7 +777,8 @@
 			font-weight: normal;
 		}
 		.bg-success{
-			background-color: #28a745!important;
+			color: #000000;
+			background-color: #C9F4D4;
 		}
 	</style>
 <?php include "../menu_princ.php"; ?>
