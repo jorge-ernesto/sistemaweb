@@ -166,6 +166,11 @@
 			border-width: 0px 1px 1px 0px;
 		}
 
+		table tr td.celdaEncabezado {
+			color: #000000;
+			background-color: #C9F4D4;
+		}
+
 		table.tablaND tr td.celdaEncabezado {
 			width: 100%;
 			font-weight: bold;
@@ -713,14 +718,14 @@
 
 		table.tablaResumen tr td.celdaTotal {
 			width: 75%;
-			font-weight: normal;
+			font-weight: bold;
 			text-align: right;
 			margin-right: 5px;
 		}
 
 		table.tablaResumen tr td.celdaImporteTotal {
 			width: 15%;
-			font-weight: normal;
+			font-weight: bold;
 		}
 
 		table tr td.width100 {
@@ -779,6 +784,9 @@
 		.bg-success{
 			color: #000000;
 			background-color: #C9F4D4;
+		}
+		.bg-success td{
+			color: #000000;
 		}
 	</style>
 <?php include "../menu_princ.php"; ?>

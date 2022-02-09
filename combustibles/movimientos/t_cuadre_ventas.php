@@ -123,7 +123,7 @@ class CuadreVentasTemplate extends Template {
 						$result .= "</tr>\n";
 					}
 
-					$result .= "<tr>\n";
+					$result .= "<tr class=\"bg-success\">\n";
 					$result .= "<td class=\"celdaTotal\" colspan=\"3\">Total Notas de Despacho</td>\n";
 					$result .= "<td class=\"celdaImporteTotal\">" . showNumber($cuadre['nd']['total']) . "</td>\n";
 					$result .= "</tr>\n";
@@ -158,7 +158,7 @@ class CuadreVentasTemplate extends Template {
 						$result .= "</tr>\n";
 					}
 
-					$result .= "<tr>\n";
+					$result .= "<tr class=\"bg-success\">\n";
 					$result .= "<td class=\"celdaTotal\" colspan=\"3\">Total Notas de Despacho en Efectivo</td>\n";
 					$result .= "<td class=\"celdaImporteTotal\">" . showNumber($cuadre['nde']['total']) . "</td>\n";
 					$result .= "</tr>\n";
@@ -195,7 +195,7 @@ class CuadreVentasTemplate extends Template {
 						$result .= "</tr>\n";
 					}
 
-					$result .= "<tr>\n";
+					$result .= "<tr class=\"bg-success\">\n";
 					$result .= "<td class=\"celdaTotal\" colspan=\"4\">Total Tarjetas de Cr&eacute;dito</td>\n";
 					$result .= "<td class=\"celdaImporteTotal\">" . showNumber($cuadre['tc']['total']) . "</td>\n";
 					$result .= "</tr>\n";
@@ -232,7 +232,7 @@ class CuadreVentasTemplate extends Template {
 						$result .= "</tr>\n";
 					}
 
-					$result .= "<tr>\n";
+					$result .= "<tr class=\"bg-success\">\n";
 					$result .= "<td class=\"celdaTotal\" colspan=\"3\">Total Descuentos</td>\n";
 					$result .= "<td class=\"celdaImporteTotal\">" . showNumber($cuadre['desc']['total']) . "</td>\n";
 					$result .= "</tr>\n";
@@ -264,11 +264,11 @@ class CuadreVentasTemplate extends Template {
 						$result .= "</tr>\n";
 					}
 
-					$result .= "<tr>\n";
+					$result .= "<tr class=\"bg-success\">\n";
 					$result .= "<td class=\"celdaTotal\" colspan=\"2\">Total Devoluciones</td>\n";
 					$result .= "<td class=\"celdaImporteTotal\">" . showNumber($cuadre['devol']['total']) . "</td>\n";
 					$result .= "</tr>\n";
-					$result .= "<tr>\n";
+					$result .= "<tr class=\"bg-success\">\n";
 					$result .= "<td class=\"celdaTotal\" colspan=\"2\">Total Devoluciones Efectivo</td>\n";
 					$result .= "<td class=\"celdaImporteTotal\">" . showNumber($cuadre['devol']['total_efectivo']) . "</td>\n";
 					$result .= "</tr>\n";
@@ -298,7 +298,7 @@ class CuadreVentasTemplate extends Template {
 						$result .= "</tr>\n";
 					}
 
-					$result .= "<tr>\n";
+					$result .= "<tr class=\"bg-success\">\n";
 					$result .= "<td class=\"celdaTotal\">Total Anulaciones</td>\n";
 					$result .= "<td class=\"celdaImporteTotal\">" . showNumber($cuadre['anul']['total']) . "</td>\n";
 					$result .= "</tr>\n";
@@ -332,7 +332,7 @@ class CuadreVentasTemplate extends Template {
 						$result .= "</tr>\n";
 					}
 
-					$result .= "<tr>\n";
+					$result .= "<tr class=\"bg-success\">\n";
 					$result .= "<td class=\"celdaTotal\" colspan=\"3\">Total Afericiones</td>\n";
 					$result .= "<td class=\"celdaImporteTotal\">" . showNumber($cuadre['afer']['total']) . "</td>\n";
 					$result .= "</tr>\n";
@@ -365,7 +365,7 @@ class CuadreVentasTemplate extends Template {
 						$result .= "</tr>\n";
 					}
 
-					$result .= "<tr>\n";
+					$result .= "<tr class=\"bg-success\">\n";
 					$result .= "<td class=\"celdaTotal\" colspan=\"2\">Total Transferencias Gratuitas</td>\n";
 					$result .= "<td class=\"celdaImporteTotal\">" . showNumber($cuadre['tg']['total']) . "</td>\n";
 					$result .= "</tr>\n";
@@ -405,7 +405,7 @@ class CuadreVentasTemplate extends Template {
 					$result .= "</tr>\n";
 				}
 
-				$result .= "<tr>\n";
+				$result .= "<tr class=\"bg-success\">\n";
 				$result .= "<td class=\"celdaTotal\" colspan=\"5\">Total Dep&oacute;sitos</td>\n";
 				$result .= "<td class=\"celdaImporteTotal\">" . showNumber($cuadre['depositos']['total']) . "</td>\n";
 				$result .= "</tr>\n";
@@ -473,7 +473,7 @@ class CuadreVentasTemplate extends Template {
 				else
 					$word = "Faltante";
 
-				$result .= "<tr>\n";
+				$result .= "<tr class=\"bg-success\">\n";
 				$result .= "<td class=\"celdaTotal\">Diferencia " . $word . "</td>\n";
 				$result .= "<td class=\"celdaImporteTotal\">" . showNumber($cuadre['fs']) . "</td>\n";
 				$result .= "<td class=\"celdaOperacion\">&nbsp;</td>\n";
@@ -595,13 +595,13 @@ class CuadreVentasTemplate extends Template {
 		else
 			$word = "Faltante";
 
-		$result .= "<tr>\n";
+		$result .= "<tr class=\"bg-success\">\n";
 		$result .= "<td class=\"celdaResumenConcepto\">Sumatoria Sobrantes y Faltantes</td>\n";
 		$result .= "<td class=\"celdaResumenImporte\">" . showNumber($fs_acumulada) . "</td>\n";
 		$result .= "<td class=\"celdaResumenOperacion\">&nbsp;</td>\n";
 		$result .= "</tr>\n";
 
-		$result .= "<tr>\n";
+		$result .= "<tr class=\"bg-success\">\n";
 		$result .= "<td class=\"celdaResumenConcepto\">TOTAL EFECTIVO EN BÓVEDA</td>\n";
 		$result .= "<td class=\"celdaResumenImporte\">" . showNumber($depositos_total_acumulada - $fs_acumulada) . "</td>\n";
 		$result .= "<td class=\"celdaResumenOperacion\">&nbsp;</td>\n";
