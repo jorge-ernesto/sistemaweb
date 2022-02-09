@@ -276,6 +276,23 @@ class PosDescuentoRucTemplate extends Template {
 			$radioActivo .= $descripcion . "<input type = 'radio' name = 'activo' $check value = '$i'/>";
 		}
 
+		$array_tipo = array(
+			"1" => "Nota de	Despacho",
+			"2" => "Factura",
+			"3" => "Tarjeta de Descuento (Boleta)",
+			"5" => "Precio Pactado" 
+		);
+		$cmb_tipo = "<select name=\"tipo\">";
+		foreach ($array_tipo as $key => $value) {
+			if ($key == $a['tipo']) {
+				$cmb_tipo .= "<option value='$key' selected>$value</option>";
+			} else {
+				$cmb_tipo .= "<option value='$key'>$value</option>";
+			}
+			
+		}
+		$cmb_tipo .= "</select>";
+
 		$articulos = $model ->buscarArticulosPorCodigo($a["art_codigo"]);
 		$descrip = $articulos[0]["art_codigo"] ." - " .$articulos[0]["art_descripcion"];
 		$html = '
@@ -321,12 +338,7 @@ class PosDescuentoRucTemplate extends Template {
 				</div>
 				<div class="fila">
 					<label class="etiqueta">Tipo: </label>
-					<select name="tipo" >
-						<option value="1">Nota de Despacho</option>
-						<option value="2">Factura</option>
-						<option value="3">Tarjeta de Descuento (Boleta)</option>
-						<option value="5">Precio Pactado</option>
-					</select>
+					' . $cmb_tipo . '
 				</div>
 				<div class="fila">
 					<input type="submit" name = "action" value="Guardar" />

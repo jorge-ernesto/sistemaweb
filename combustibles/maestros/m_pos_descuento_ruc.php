@@ -334,7 +334,7 @@ class PosDescuentoRucModel extends Model {
 
 	function obtenerRegistro($registroid) {
 		global $sqlca;
-		$query = "SELECT pos_descuento_ruc_id,ruc,art_codigo,descuento,activo 
+		$query = "SELECT pos_descuento_ruc_id,ruc,art_codigo,descuento,activo,tipo
 		        FROM pos_descuento_ruc 
 		        WHERE pos_descuento_ruc_id = '$registroid'";
 		$sqlca->query($query);
