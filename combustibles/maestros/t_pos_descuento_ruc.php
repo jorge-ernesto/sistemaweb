@@ -264,7 +264,7 @@ class PosDescuentoRucTemplate extends Template {
 		$radioActivo = "";
 		for ($i = 0; $i <= 1; $i++) {
    		$check = "";
-   		if (!empty($a["activo"]) && $a["activo"] == $i) {
+   			if (isset($a["activo"]) && $a["activo"] == $i) {
 				$check = " checked = 'checked'";
 			}
 			$descripcion = "";
