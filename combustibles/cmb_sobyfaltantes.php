@@ -89,20 +89,18 @@ $anoa = $nuevofechaa[2];
 		
 						UNION
 
-						SELECT DISTINCT 
-							a.ch_tanque,
-							a.ch_tanque  || ' -- ' || b.ch_nombrecombustible 
-						FROM 
-							comb_ta_tanques a,
-							comb_ta_combustibles b,
-							comb_ta_tanques c
-						WHERE 
-							a.ch_codigocombustible=b.ch_codigocombustible
-							AND a.ch_tanque=c.ch_tanque
-							AND c.ch_codigocombustible=b.ch_codigocombustible
-							AND c.ch_sucursal=trim('" . $almacen . "')
+						SELECT
+							MIN(t.ch_tanque),
+							c.ch_codigocombustible || ' -- ' || FIRST(c.ch_nombrecombustible)
+						FROM
+							comb_ta_combustibles c
+							INNER JOIN comb_ta_tanques t ON (c.ch_codigocombustible = t.ch_codigocombustible)
+						WHERE
+							t.ch_sucursal = trim('" . $almacen . "')
+						GROUP BY
+							c.ch_codigocombustible
 						ORDER BY
-							1 ASC");
+							2 ASC");
 
 		$rs2 = pg_exec("	SELECT 
 						ch_almacen ,
@@ -115,30 +113,32 @@ $anoa = $nuevofechaa[2];
 						ch_almacen");
 	
 		$comb = pg_exec("	SELECT 
-						comb.ch_nombrecombustible 
-					FROM 
-						comb_ta_combustibles comb, 
-						comb_ta_tanques tan 
-					WHERE 
-						tan.ch_codigocombustible=comb.ch_codigocombustible 
-						AND tan.ch_tanque='$cod_tanque'
-						AND tan.ch_sucursal=trim('$cod_almacen') ");
+								c.ch_nombrecombustible,
+								c.ch_codigocombustible
+							FROM
+								comb_ta_combustibles c
+								INNER JOIN comb_ta_tanques t ON (c.ch_codigocombustible = t.ch_codigocombustible)
+							WHERE
+								t.ch_tanque = '" . $cod_tanque . "'
+								AND t.ch_sucursal = trim('" . $cod_almacen . "') ");
 
 		$procesar = false;
 		$combustibles = array();
 		
-		if(pg_numrows($comb) > 0) { //Si existe el combustible
+		if(pg_numrows($comb) > 0) { //Si selecciona un combustible especifico
 			$C    = pg_fetch_row($comb,0);
 			$comb = $C[0];
+			$cod_comb = $C[1];
 			$procesar = true;
 			
 			//OBTENEMOS ARRAY COMBUSTIBLES
 			$combustibles[$cod_tanque] = array(
 				"codigo_tanque" => $cod_tanque,
-				"nombre_combustible" => $cod_tanque . " -- " . $comb
+				"nombre_combustible" => $cod_comb . " -- " . $comb
 			);
 		}elseif($cod_tanque == '00'){ //Si se selecciono todos los combustibles
 			$comb = "TODOS";
+			$cod_comb = "00";
 			$procesar = true;
 
 			//OBTENEMOS ARRAY COMBUSTIBLES
@@ -362,7 +362,7 @@ pg_close();
 			<select name="cod_tanque">
 			<?php
 			if($comb != ""){
-				echo "<option value='" . $cod_tanque . "'>" . $cod_tanque . "--" . $comb . "</option>";
+				echo "<option value='" . $cod_tanque . "'>" . $cod_comb . "--" . $comb . "</option>";
 			}
 			for($i = 0; $i < pg_numrows($rs1); $i++) {
 				$A = pg_fetch_row($rs1,$i);

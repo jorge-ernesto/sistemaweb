@@ -1003,13 +1003,14 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 	
 		//MEDICION O AFERICION
 
+                if($buscar_por_tanque){
 		$rs1 = pg_exec("
 				SELECT
 					TO_CHAR(a.dia, 'DD-MM-YYYY') AS fecha,
 					ROUND(SUM(a.cantidad) $operacion '$factor',3) AS medicion
 				FROM
 					pos_ta_afericiones a
-					LEFT JOIN comb_ta_tanques t ON(t.ch_codigocombustible = a.codigo AND t.ch_sucursal = a.es)
+					INNER JOIN comb_ta_tanques t ON(t.ch_codigocombustible = a.codigo AND t.ch_sucursal = a.es)
 				WHERE
 					a.es = trim('$almacen')
                                         AND t.ch_sucursal = trim('$almacen')
@@ -1020,6 +1021,25 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 				ORDER BY
 					a.dia
 				");
+                }else{
+                $rs1 = pg_exec("
+                                SELECT
+                                        TO_CHAR(a.dia, 'DD-MM-YYYY') AS fecha,
+                                        ROUND(SUM(a.cantidad) $operacion '$factor',3) AS medicion
+                                FROM
+                                        pos_ta_afericiones a
+                                        INNER JOIN comb_ta_tanques t ON(t.ch_codigocombustible = a.codigo AND t.ch_sucursal = a.es)
+                                WHERE
+                                        a.es = trim('$almacen')                                        
+                                        AND t.ch_sucursal = trim('$almacen')
+                                        AND a.dia BETWEEN to_date('$fechad','dd-mm-yyyy') AND to_date('$fechaa','dd-mm-yyyy')
+                                        AND t.ch_codigocombustible = '$cod_combustible'
+                                GROUP BY
+                                        a.dia
+                                ORDER BY
+                                        a.dia
+                                ");       
+                }
 
 		for($a=0;$a<pg_numrows($rs1);$a++){
 			$A = pg_fetch_row($rs1,$a);
