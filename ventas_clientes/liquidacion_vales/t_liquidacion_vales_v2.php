@@ -598,6 +598,7 @@ class LiquidacionValesTemplate extends Template {
                 <thead>
                 <th class="th_cabe" align="center">Nº Liquidacion</th>
                 <th class="th_cabe" align="center">Documento</th>
+                <th class="th_cabe" align="center" style="width:5%">Fecha Liquidacion</th>
                 <th class="th_cabe" align="center">Tipo Operacion</th>
                 <th class="th_cabe" align="center">Opcion</th>
                 <th class="th_cabe" align="center">Cliente</th>
@@ -635,6 +636,8 @@ class LiquidacionValesTemplate extends Template {
                             echo "<td align='left'>FACTURA - " . $value['no_documento_referencia'] . "</td>";
                         }
 
+                        echo "<td align='center'>" . $value['fe_liquidacion'] . "</td>";
+
                         echo "<td align='center'>" . $value['opcion'] . "</td>";
                         echo "<td align='center'>" . $value['operacion'] . "</td>";
                         echo "<td align='center'>" . $value['nombre'] . "</td>";
@@ -642,7 +645,7 @@ class LiquidacionValesTemplate extends Template {
                         echo "<td align='rigth' class='td_tabla_selecinar'>" . number_format($value['total'],2) . "</td>";
                         
                         echo "<td style='text-align: center; width: 80px;'><a href='generar_liquidacion_vales_pdf_personalizado.php?forma=" . trim($value['opcion']) . "&parametro_accion=" . trim($value['operacion']) . "&ch_liquidacion=" . trim($value['ch_liquidacion']) . "&ch_cliente=" . trim($value['ch_cliente']) . "&ch_documneto=" . $doc . "' target='_blank'><img src='/sistemaweb/images/icono_pdf.gif' /> </a>";
-                        echo "<a href='excel_liquidacion_vales_personalizados.php?forma=" . trim($value['opcion']) . "&parametro_accion=" . trim($value['operacion']) . "&ch_liquidacion=" . trim($value['ch_liquidacion']) . "&ch_cliente=" . trim($value['ch_cliente']) . "&no_tipo_documento=" . trim($value['desc_tipodocumento']) . "&nu_tipo_documento=" . trim($value['ch_fac_tipodocumento']). "&nu_serie_documento=" . trim($value['ch_fac_seriedocumento']). "&nu_numero_documento=" . trim($value['ch_fac_numerodocumento']). "' href='#' style='text-align:center'><img src='/sistemaweb/icons/gexcel.png' /> </a>";
+                        echo "<a href='excel_liquidacion_vales_personalizados.php?forma=" . trim($value['opcion']) . "&parametro_accion=" . trim($value['operacion']) . "&ch_liquidacion=" . trim($value['ch_liquidacion']) . "&ch_cliente=" . trim($value['ch_cliente']) . "&no_tipo_documento=" . trim($value['desc_tipodocumento']) . "&nu_tipo_documento=" . trim($value['ch_fac_tipodocumento']). "&nu_serie_documento=" . trim($value['ch_fac_seriedocumento']). "&nu_numero_documento=" . trim($value['ch_fac_numerodocumento']). "&no_documento_referencia=" . trim($value['no_documento_referencia']). "' href='#' style='text-align:center'><img src='/sistemaweb/icons/gexcel.png' /> </a>";
 
                         if ( $value['operacion'] != "POR-COBRAR" ) {
                             if(preg_match("/^[a-zA-Z][0-9]{3}+$/", trim($value['ch_fac_seriedocumento'])) == 1) {

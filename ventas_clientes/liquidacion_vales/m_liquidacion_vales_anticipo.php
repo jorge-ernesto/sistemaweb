@@ -210,7 +210,8 @@ class LiquidacionValesModel extends Model {
                 v.fecha_liquidacion AS fe_emision,
                 v.ch_sucursal AS nu_almacen,
                 FIRST(c.ch_almacen) AS nu_almacen_factura,
-                ''::TEXT AS no_documento_referencia
+                ''::TEXT AS no_documento_referencia,
+                v.fecha_liquidacion AS fe_liquidacion
     		FROM
     			val_ta_complemento_documento v
     			LEFT JOIN fac_ta_factura_cabecera c ON (c.ch_fac_tipodocumento = v.ch_fac_tipodocumento AND c.ch_fac_seriedocumento = v.ch_fac_seriedocumento AND c.ch_fac_numerodocumento = v.ch_fac_numerodocumento)
@@ -236,7 +237,8 @@ class LiquidacionValesModel extends Model {
                 v.fecha_liquidacion AS fe_emision,
                 v.ch_sucursal AS nu_almacen,
                 FIRST(c.ch_almacen) AS nu_almacen_factura,
-                ''::TEXT AS no_documento_referencia
+                ''::TEXT AS no_documento_referencia,
+                v.fecha_liquidacion AS fe_liquidacion
            	FROM
         		val_ta_complemento_documento v
         		LEFT JOIN fac_ta_factura_cabecera c ON (c.ch_fac_tipodocumento = v.ch_fac_tipodocumento AND c.ch_fac_seriedocumento = v.ch_fac_seriedocumento AND c.ch_fac_numerodocumento = v.ch_fac_numerodocumento)
@@ -261,7 +263,8 @@ class LiquidacionValesModel extends Model {
                 v.fecha_liquidacion AS fe_emision,
                 v.ch_sucursal AS nu_almacen,
                 FIRST(c.ch_almacen) AS nu_almacen_factura,
-                ''::TEXT AS no_documento_referencia
+                ''::TEXT AS no_documento_referencia,
+                v.fecha_liquidacion AS fe_liquidacion
           	FROM
         		val_ta_complemento_documento v
         		LEFT JOIN fac_ta_factura_cabecera c ON (c.ch_fac_tipodocumento = v.ch_fac_tipodocumento AND c.ch_fac_seriedocumento = v.ch_fac_seriedocumento AND c.ch_fac_numerodocumento = v.ch_fac_numerodocumento)
@@ -285,7 +288,8 @@ class LiquidacionValesModel extends Model {
                 v.fecha_liquidacion AS fe_emision,
                 v.ch_sucursal AS nu_almacen,
                 FIRST(c.ch_almacen) AS nu_almacen_factura,
-                ''::TEXT AS no_documento_referencia
+                ''::TEXT AS no_documento_referencia,
+                v.fecha_liquidacion AS fe_liquidacion
           	FROM
         		val_ta_complemento_documento v
         		LEFT JOIN fac_ta_factura_cabecera c ON (c.ch_fac_tipodocumento = v.ch_fac_tipodocumento AND c.ch_fac_seriedocumento = v.ch_fac_seriedocumento AND c.ch_fac_numerodocumento = v.ch_fac_numerodocumento)
@@ -309,7 +313,8 @@ class LiquidacionValesModel extends Model {
                 v.fecha_liquidacion AS fe_emision,
                 v.ch_sucursal AS nu_almacen,
                 FIRST(c.ch_almacen) AS nu_almacen_factura,
-                v.cod_hermandad AS no_documento_referencia
+                v.cod_hermandad AS no_documento_referencia,
+                v.fecha_liquidacion AS fe_liquidacion
         	FROM
         		val_ta_complemento_documento AS v
         		LEFT JOIN fac_ta_factura_cabecera AS c ON (c.ch_fac_tipodocumento = v.ch_fac_tipodocumento AND c.ch_fac_seriedocumento = v.ch_fac_seriedocumento AND c.ch_fac_numerodocumento = v.ch_fac_numerodocumento)

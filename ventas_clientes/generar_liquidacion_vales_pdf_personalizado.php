@@ -90,7 +90,8 @@
     val_det.nu_precio_unitario as art_precio,
     val_cab.ch_placa as placa,
     pos.nomusu as conductor,
-    val_cab.dt_fecha AS fecha_insercion
+    val_cab.dt_fecha AS fecha_insercion,
+    (SELECT ch_numeval FROM val_ta_complemento WHERE ch_documento = val_cab.ch_documento AND dt_fecha = val_cab.dt_fecha LIMIT 1) AS ch_numeval_manual
     FROM
     val_ta_cabecera AS val_cab,
     val_ta_detalle AS val_det,
@@ -112,6 +113,9 @@
     val_cab.ch_documento;
             ";
 
+            // error_log("GeneraDatosXCOBRAR");
+            // error_log($query);
+
             if ($sqlca->query($query) <= 0)
                 return $sqlca->get_error();
             while ($reg = $sqlca->fetchRow()) {
@@ -120,6 +124,23 @@
                 //  $registrosFinal[$reg[9]]['CLIENTES'][trim($reg[1]) . "  " . trim($reg[2])][] = $reg;
                 $registrosFinal[$liquidacion]['CLIENTES'][trim($reg[1]) . "  " . trim($reg[2])][] = $reg;
             }
+
+            //OBTENEMOS FECHA DE LIQUIDACION
+            $query = "
+    SELECT 
+        fecha_liquidacion 
+    FROM 
+        val_ta_complemento_documento 
+    WHERE 
+        ch_liquidacion = '$liquidacion'";                        
+                    
+            if ($sqlca->query($query) <= 0) {
+                return $sqlca->get_error();
+            }
+            
+            $regLiquidacion = $sqlca->fetchRow();                        
+            $registrosFinal[$liquidacion]['LIQUIDACION']['fecha_liquidacion'] = $regLiquidacion[0];
+
             //print_r($registrosFinal);
             $query = "SELECT " .
                     "ch_fac_tipodocumento, " .
@@ -211,7 +232,8 @@
             val_cab.ch_sucursal,
             val_det.nu_precio_unitario as art_precio,
             val_cab.ch_placa as placa,
-            pos.nomusu as conductor
+            pos.nomusu as conductor,
+            (SELECT ch_numeval FROM val_ta_complemento WHERE ch_documento = val_cab.ch_documento AND dt_fecha = val_cab.dt_fecha LIMIT 1) AS ch_numeval_manual
             FROM
             val_ta_cabecera val_cab,
             val_ta_detalle val_det,
@@ -232,6 +254,9 @@
                     clie.Cli_RazSocial, 
                     val_cab.ch_documento;";
 
+            // error_log("GeneraDatosPRODUCTO");
+            // error_log($query);
+
             if ($sqlca->query($query) <= 0)
                 return $sqlca->get_error();
             while ($reg = $sqlca->fetchRow()) {
@@ -240,6 +265,23 @@
                 //  $registrosFinal[$reg[9]]['CLIENTES'][trim($reg[1]) . "  " . trim($reg[2])][] = $reg;
                 $registrosFinal[$liquidacion]['CLIENTES'][trim($reg[1]) . "  " . trim($reg[2])][] = $reg;
             }
+
+            //OBTENEMOS FECHA DE LIQUIDACION
+            $query = "
+    SELECT 
+        fecha_liquidacion 
+    FROM 
+        val_ta_complemento_documento 
+    WHERE 
+        ch_liquidacion = '$liquidacion'";                        
+                    
+            if ($sqlca->query($query) <= 0) {
+                return $sqlca->get_error();
+            }
+            
+            $regLiquidacion = $sqlca->fetchRow();                        
+            $registrosFinal[$liquidacion]['LIQUIDACION']['fecha_liquidacion'] = $regLiquidacion[0];
+
             //print_r($registrosFinal);
             $query = "SELECT " .
                     "ch_fac_tipodocumento, " .
@@ -315,7 +357,8 @@
             val_cab.ch_sucursal,
             val_det.nu_precio_unitario as art_precio,
             val_cab.ch_placa as placa,
-            pos.nomusu as conductor
+            pos.nomusu as conductor,
+            (SELECT ch_numeval FROM val_ta_complemento WHERE ch_documento = val_cab.ch_documento AND dt_fecha = val_cab.dt_fecha LIMIT 1) AS ch_numeval_manual
             FROM
             val_ta_cabecera val_cab,
             val_ta_detalle val_det,
@@ -336,6 +379,9 @@
                     clie.Cli_RazSocial, 
                     val_cab.ch_documento;";
 
+            // error_log("GeneraDatosPLACA");
+            // error_log($query);
+
             if ($sqlca->query($query) <= 0)
                 return $sqlca->get_error();
             while ($reg = $sqlca->fetchRow()) {
@@ -344,6 +390,23 @@
                 //  $registrosFinal[$reg[9]]['CLIENTES'][trim($reg[1]) . "  " . trim($reg[2])][] = $reg;
                 $registrosFinal[$liquidacion]['CLIENTES'][trim($reg[1]) . "  " . trim($reg[2])][] = $reg;
             }
+
+            //OBTENEMOS FECHA DE LIQUIDACION
+            $query = "
+    SELECT 
+        fecha_liquidacion 
+    FROM 
+        val_ta_complemento_documento 
+    WHERE 
+        ch_liquidacion = '$liquidacion'";                        
+                    
+            if ($sqlca->query($query) <= 0) {
+                return $sqlca->get_error();
+            }
+            
+            $regLiquidacion = $sqlca->fetchRow();                        
+            $registrosFinal[$liquidacion]['LIQUIDACION']['fecha_liquidacion'] = $regLiquidacion[0];
+
             //print_r($registrosFinal);
             $query = "SELECT " .
                     "ch_fac_tipodocumento, " .
@@ -420,7 +483,8 @@
             val_cab.ch_sucursal,
             val_det.nu_precio_unitario as art_precio,
             val_cab.ch_placa as placa,
-            pos.nomusu as conductor
+            pos.nomusu as conductor,
+            (SELECT ch_numeval FROM val_ta_complemento WHERE ch_documento = val_cab.ch_documento AND dt_fecha = val_cab.dt_fecha LIMIT 1) AS ch_numeval_manual
             FROM
             val_ta_cabecera val_cab,
             val_ta_detalle val_det,
@@ -440,6 +504,10 @@
                     val_cab.ch_liquidacion,
                     clie.Cli_RazSocial, 
                     val_cab.ch_documento;";
+
+            // error_log("GeneraDatosND");
+            // error_log($query);
+
     //print_r($query);
             if ($sqlca->query($query) <= 0)
                 return $sqlca->get_error();
@@ -449,6 +517,23 @@
                 //  $registrosFinal[$reg[9]]['CLIENTES'][trim($reg[1]) . "  " . trim($reg[2])][] = $reg;
                 $registrosFinal[$liquidacion]['CLIENTES'][trim($reg[1]) . "  " . trim($reg[2])][] = $reg;
             }
+
+            //OBTENEMOS FECHA DE LIQUIDACION
+            $query = "
+    SELECT 
+        fecha_liquidacion 
+    FROM 
+        val_ta_complemento_documento 
+    WHERE 
+        ch_liquidacion = '$liquidacion'";                        
+                    
+            if ($sqlca->query($query) <= 0) {
+                return $sqlca->get_error();
+            }
+            
+            $regLiquidacion = $sqlca->fetchRow();                        
+            $registrosFinal[$liquidacion]['LIQUIDACION']['fecha_liquidacion'] = $regLiquidacion[0];
+
             //print_r($registrosFinal);
             $query = "SELECT " .
                     "ch_fac_tipodocumento, " .
@@ -513,13 +598,15 @@
     (SELECT numpla FROM pos_fptshe1 WHERE pos_fptshe1.numpla = val_cab.ch_placa LIMIT 1),
     val_liq.dt_fecha AS fecha_insercion,
     pos.nomusu AS conductor,
-    val_cab.fecha_replicacion AS dt_fechaactualizacion
+    val_cab.fecha_replicacion AS dt_fechaactualizacion,
+    val_com.ch_numeval AS ch_numeval_manual
     FROM
     val_ta_complemento_documento AS val_liq
     LEFT JOIN val_ta_cabecera AS val_cab ON(val_cab.ch_cliente = val_liq.ch_cliente AND val_liq.ch_numeval = val_cab.ch_documento AND val_liq.dt_fecha = val_cab.dt_fecha)
     LEFT JOIN val_ta_detalle AS val_det ON(val_liq.ch_numeval = val_det.ch_documento AND val_liq.art_codigo = val_det.ch_articulo AND val_liq.dt_fecha = val_det.dt_fecha)
     --LEFT JOIN val_ta_cabecera val_cab ON (val_cab.ch_cliente = val_liq.ch_cliente AND val_liq.ch_numeval = val_cab.ch_documento AND val_liq.dt_fecha = val_cab.dt_fecha AND val_liq.ch_sucursal = val_cab.ch_sucursal)
     --LEFT JOIN val_ta_detalle val_det ON (val_liq.ch_numeval = val_det.ch_documento AND val_liq.art_codigo = val_det.ch_articulo AND val_liq.dt_fecha = val_det.dt_fecha AND val_liq.ch_sucursal = val_det.ch_sucursal)
+    LEFT JOIN val_ta_complemento AS val_com ON (val_liq.ch_numeval = val_com.ch_documento AND val_liq.dt_fecha = val_com.dt_fecha)
     LEFT JOIN int_clientes AS cli ON(cli.cli_codigo = val_liq.ch_cliente)
     LEFT JOIN int_articulos AS art ON(art.art_codigo = val_liq.art_codigo)
     LEFT JOIN pos_fptshe1 AS pos ON(pos.numpla = val_cab.ch_placa AND pos.numtar = val_cab.ch_tarjeta AND pos.codcli = val_cab.ch_cliente)
@@ -530,7 +617,8 @@
     val_cab.fecha_replicacion;
             ";
 
-            error_log($query);
+            // error_log("GeneraDatosNormal");
+            // error_log($query);
             
             // echo "<pre>";
             // echo $query; 
@@ -544,6 +632,22 @@
                 $registrosFinal[$liquidacion]['CLIENTES'][trim($reg[1]) . "  " . trim($reg[2])][] = $reg;
             }
             // echo "<script>console.log('registrosFinal: " . json_encode($registrosFinal) . "')</script>";
+
+            //OBTENEMOS FECHA DE LIQUIDACION
+            $query = "
+    SELECT 
+        fecha_liquidacion 
+    FROM 
+        val_ta_complemento_documento 
+    WHERE 
+        ch_liquidacion = '$liquidacion'";                        
+                    
+            if ($sqlca->query($query) <= 0) {
+                return $sqlca->get_error();
+            }
+            
+            $regLiquidacion = $sqlca->fetchRow();                        
+            $registrosFinal[$liquidacion]['LIQUIDACION']['fecha_liquidacion'] = $regLiquidacion[0];
 
             $query =
     "SELECT " .
@@ -747,17 +851,21 @@
         function reportePdf($num_liquidacion, $ch_cliente, $Factura, $forma, $parametro_opcional) {
             $reporte_array = array();
 
-            if ($forma == 'normal' && $parametro_opcional != 'POR-COBRAR')
-                $reporte_array = $this->GeneraDatosNormal($num_liquidacion, $ch_cliente);
-            else if ($forma == 'ND')
-                $reporte_array = $this->GeneraDatosND($num_liquidacion, $ch_cliente, $parametro_opcional);
-            else if ($forma == 'PLACA')
-                $reporte_array = $this->GeneraDatosPLACA($num_liquidacion, $ch_cliente, $parametro_opcional);
-            else if ($forma == 'PRODUCTO')
-                $reporte_array = $this->GeneraDatosPRODUCTO($num_liquidacion, $ch_cliente, $parametro_opcional);
-            else if ($forma == 'XCOBRAR' || $parametro_opcional == 'POR-COBRAR')
-                $reporte_array = $this->GeneraDatosXCOBRAR($num_liquidacion, $ch_cliente);
+            error_log('reportePdf');
+            error_log('forma: ' . $forma);
+            error_log('parametro_opcional: ' . $parametro_opcional);
 
+            if ($forma == 'normal' && $parametro_opcional != 'POR-COBRAR') { //Funcion que se ejecuta cuando Tipo Operacion = 'Cliente Normal' y que no es cliente ANTICIPO
+                $reporte_array = $this->GeneraDatosNormal($num_liquidacion, $ch_cliente);
+            } else if ($forma == 'ND') { //Funcion que se ejecuta cuando Tipo Operacion = 'Cliente Nota Despacho'
+                $reporte_array = $this->GeneraDatosND($num_liquidacion, $ch_cliente, $parametro_opcional);
+            } else if ($forma == 'PLACA') { //Funcion que se ejecuta cuando Tipo Operacion = 'Cliente Placa'
+                $reporte_array = $this->GeneraDatosPLACA($num_liquidacion, $ch_cliente, $parametro_opcional);
+            } else if ($forma == 'PRODUCTO') { //Funcion que se ejecuta cuando Tipo Operacion = 'Cliente Producto'
+                $reporte_array = $this->GeneraDatosPRODUCTO($num_liquidacion, $ch_cliente, $parametro_opcional);
+            } else if ($forma == 'XCOBRAR' || $parametro_opcional == 'POR-COBRAR') { //Si es 'XCOBRAR' o 'POR-COBRAR', esto ocurre cuando es liquidacion de cliente ANTICIPO
+                $reporte_array = $this->GeneraDatosXCOBRAR($num_liquidacion, $ch_cliente);
+            }
             // echo "<script>console.log('" . json_encode($reporte_array) . "')</script>";
 
             $liquidacion = $num_liquidacion;
@@ -767,6 +875,7 @@
             $Cabecera = array(
                 "DT_FECHA" => "FECHA",
                 "CH_DOCUMENTO" => "# DESPACHO",
+                "CH_NUMEVAL_MANUAL" => "# MANUAL",
                 "CH_ARTICULO" => "ARTICULO",
                 "CH_PLACA" => "PLACA",
                 "CH_CONDUCTOR" => "CONDUCTOR",
@@ -784,8 +893,9 @@
             $reporte->SetFont("courier", "", $fontsize);
 
             $reporte->definirColumna("CABECERA CLIENTE", $tipo->TIPO_TEXT, 100, "L", "_cabecera");
-            $reporte->definirColumna("DT_FECHA", $reporte->TIPO_TEXTO, 19, "L");
+            $reporte->definirColumna("DT_FECHA", $reporte->TIPO_TEXTO, 11, "L");
             $reporte->definirColumna("CH_DOCUMENTO", $reporte->TIPO_TEXTO, 11, "C");
+            $reporte->definirColumna("CH_NUMEVAL_MANUAL", $reporte->TIPO_TEXTO, 11, "C");
             $reporte->definirColumna("CH_ARTICULO", $reporte->TIPO_TEXTO, 15, "L");
             $reporte->definirColumna("CH_PLACA", $reporte->TIPO_TEXTO, 10, "L");
             $reporte->definirColumna("CH_CONDUCTOR", $reporte->TIPO_TEXTO, 21, "L");
@@ -820,6 +930,7 @@
                     $iAlmacen = trim($reporte_array['DatosReg'][$nro_liq]["CLIENTES"][trim($llave)][0]['ch_sucursal']);
                     $data = $this->datosEmpresa($iAlmacen);
                 }
+                $data['fecha_liquidacion'] = $valoresArray['LIQUIDACION']['fecha_liquidacion'];
             }
 
             foreach ($reporte_array['DatosReg'] as $nro_liq => $valoresArray) {
@@ -836,8 +947,9 @@
                     $reporte->cab_default = Array();
 
                     $reporte->definirColumna("CABECERA CLIENTE", $tipo->TIPO_TEXT, 100, "L", "_cabecera");
-                    $reporte->definirColumna("DT_FECHA", $reporte->TIPO_TEXTO, 19, "L");
+                    $reporte->definirColumna("DT_FECHA", $reporte->TIPO_TEXTO, 11, "L");
                     $reporte->definirColumna("CH_DOCUMENTO", $reporte->TIPO_TEXTO, 11, "C");
+                    $reporte->definirColumna("CH_NUMEVAL_MANUAL", $reporte->TIPO_TEXTO, 11, "C");
                     $reporte->definirColumna("CH_ARTICULO", $reporte->TIPO_TEXTO, 15, "L");
                     $reporte->definirColumna("CH_PLACA", $reporte->TIPO_TEXTO, 10, "L");
                     $reporte->definirColumna("CH_CONDUCTOR", $reporte->TIPO_TEXTO, 21, "L");
@@ -848,7 +960,7 @@
                 // $reporte->definirColumna("NUMVALES", $reporte->TIPO_TEXTO, 100, "L");
 
                     
-                    $reporte->definirColumna("TOTALES", $reporte->TIPO_TEXTO, 115, "R","_totliq");//_totales
+                    $reporte->definirColumna("TOTALES", $reporte->TIPO_TEXTO, 119, "R","_totliq");//_totales
                     $reporte->definirColumna("TOTALES X LIQ", $reporte->TIPO_TEXTO, 23, "R","_totliq");//_totliq
                     $reporte->definirColumna("TOTDESPACHOS", $reporte->TIPO_TEXTO, 91, "L", "_totdespachos");
                     $reporte->definirColumna("TOTNROVALES", $reporte->TIPO_TEXTO, 91, "L", "_totnrovales");
@@ -949,7 +1061,8 @@
                         $reporte->definirCabecera(11, "L", "Nro de Liquidacion: " . $nro_liq . ($TIP == "10" ? "  FAC.: " : "  BOL.: ") . $CODF . "  " . $MsgCodn . " ");
                     }
 
-                    $reporte->definirCabecera(12, "R", " ");
+                    $reporte->definirCabecera(12, "L", "Fecha de Liquidacion: " . trim($data['fecha_liquidacion']));
+                    $reporte->definirCabecera(13, "R", " ");
                     $reporte->definirCabeceraPredeterminada($Cabecera);
                     $reporte->AddPage();
                 }
@@ -982,6 +1095,7 @@
                         */
                         $datos['DT_FECHA'] = $value['fecha_insercion'];
                         $datos['CH_DOCUMENTO'] = $value['ch_documento'];
+                        $datos['CH_NUMEVAL_MANUAL'] = $value['ch_numeval_manual'];
                         $datos['CH_ARTICULO'] = $value['ch_articulo'];
                         $datos['CH_PLACA'] = $value['placa'];
                         $datos['CH_CONDUCTOR'] = $value['conductor'];
