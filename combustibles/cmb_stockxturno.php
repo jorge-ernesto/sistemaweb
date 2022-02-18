@@ -79,6 +79,11 @@
 					changeYear: true,
 				})
 			}
+
+			function changeAlmacen(){
+				console.log('changeAlmacen');
+				$('#cambiarAlmacen').click();
+			}
 		</script>
 	</head>
 <body>

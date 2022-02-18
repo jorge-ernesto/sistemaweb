@@ -166,7 +166,7 @@ class StockTurnoTemplate extends Template {
 		return $result;
     	}
 
-	function formAgregar($almacenes, $fechas_sistema, $tanques) {
+	function formAgregar($almacenes, $fechas_sistema, $tanques, $almacen = "") {
 
 		$form = new Form('','agregar', FORM_METHOD_POST, "control.php", '', 'control');
 		$form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("rqst", "MOVIMIENTOS.STOCKTURNO"));
@@ -180,7 +180,7 @@ class StockTurnoTemplate extends Template {
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("<tr>"));
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("<td style='font-weight:bold'>&nbsp;ESTACION</td>"));
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("<td>"));
-		$form->addElement(FORM_GROUP_MAIN, new f2element_combo("almacen", "ESTACION :", "", $almacenes,espacios(6)));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_combo("almacen", "ESTACION :", $almacen, $almacenes,espacios(6), array("onchange" => "changeAlmacen()")));
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("</td>"));
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("</tr>"));
 
@@ -235,6 +235,7 @@ class StockTurnoTemplate extends Template {
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("</th>"));
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("<th>"));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<button name="action" type="submit" value="Guardar"><img src="/sistemaweb/icons/agregar.gif" align="right" />Guardar</button>'));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<button name="action" type="submit" value="Nuevo Stock" id="cambiarAlmacen" style="display:none;">Cambiar Almacen</button>'));
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("</th>"));
 		$form->addElement(FORM_GROUP_MAIN,new form_element_anytext("</tr>"));
 

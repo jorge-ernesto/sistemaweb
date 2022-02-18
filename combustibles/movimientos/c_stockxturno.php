@@ -25,6 +25,8 @@ class StockTurnoController extends Controller {
 		 	$_REQUEST['pagina'] = 1;
 	      	}
 
+		error_log('action');
+		error_log($this->action);
 
 		switch ($this->action) {
 
@@ -48,10 +50,12 @@ class StockTurnoController extends Controller {
 
 			case "Nuevo Stock":
 
+				$almacen = $_REQUEST['almacen'];
+
 				$almacenes = StockTurnoModel::obtenerEstaciones();
 				$fechas_sistema = StockTurnoModel::obtenerFechas();
-				$tanques = StockTurnoModel::obtenerTanques();
-				$result = StockTurnoTemplate::formAgregar($almacenes,$fechas_sistema,$tanques);
+				$tanques = StockTurnoModel::obtenerTanques($almacen);
+				$result = StockTurnoTemplate::formAgregar($almacenes,$fechas_sistema,$tanques,$almacen);
 				$result_f = " ";
 				break;
 		

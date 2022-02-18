@@ -171,8 +171,13 @@ class StockTurnoModel extends Model {
 		return $result;
     	}
 
-	function obtenerTanques() {
+	function obtenerTanques($almacen = "") {
 		global $sqlca;
+
+		$where_almacen = "";
+		if( !empty($almacen) && isset($almacen) ){
+			$where_almacen = "AND a.ch_sucursal = '$almacen'";
+		}
 
 		$sql = "SELECT DISTINCT
 				a.ch_tanque,
@@ -187,7 +192,8 @@ class StockTurnoModel extends Model {
 				a.ch_codigocombustible=b.ch_codigocombustible
 			    	AND a.ch_tanque=c.ch_tanque
 			    	AND c.ch_codigocombustible=b.ch_codigocombustible
-			    	AND ar.art_codigo = b.ch_codigocombustible			
+			    	AND ar.art_codigo = b.ch_codigocombustible
+					$where_almacen		
 			ORDER BY 
 				a.ch_tanque,a.dt_fechaultimamedida;";
 
