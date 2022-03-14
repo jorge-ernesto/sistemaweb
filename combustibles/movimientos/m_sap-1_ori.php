@@ -1416,7 +1416,7 @@ GROUP BY
 ORDER BY 1;
 		";
 
-		$this->_error_log($param['tableName'].' - getInvoiceDetailSaleCash: '.$sql.' [LINE: '.__LINE__.']');
+		$this->_error_log($param['tableName'].' - getInvoiceDetailSaleCash: '.$sql.' [LINE: '.__LINE__.']'); //
 		$c = 0;
 		if ($sqlca->query($sql) < 0) {
 			return array('error' => true);
@@ -2977,15 +2977,15 @@ SELECT
  FIRST(SAPALMA.sap_codigo) AS whscode,
  SUM(PT.cantidad) AS quantity,
 
- ROUND((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)))) / ".$param['tax'].", 4) AS price,
+ ROUND((SUM( (CASE WHEN PT.grupo='D' AND PT.precio>0 THEN -PT.precio ELSE PT.precio END) ) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)))) / ".$param['tax'].", 4) AS price, --Lo que queremos es conseguir el precio sin descuento o incremento
 
  CASE WHEN SUM(PT.cantidad) > 0 THEN
- 	ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4)
+ 	ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM( (CASE WHEN PT.grupo='D' AND PT.precio>0 THEN -PT.precio ELSE PT.precio END) ) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4)
  ELSE
  	0
  END AS discprcnt,
 
- SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _price,
+ SUM( (CASE WHEN PT.grupo='D' AND PT.precio>0 THEN -PT.precio ELSE PT.precio END) ) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _price,
  FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _discprcnt,
 
  '".$param['sap_tax_code']."' AS taxcode,
@@ -3087,12 +3087,12 @@ ORDER BY 1;
 				'itemcode' => $this->cleanStr($reg['itemcode']),
 				'whscode' => $reg['whscode'],
 				'quantity' => (float)$reg['quantity'],
-				'price' => (float)$reg['price'],
+				'price' => (float)$reg['price'], //
 				'taxcode' => $reg['taxcode'],
 				'discprcnt' => (float)$discprcnt,
 				'ocrcode' => $reg['ocrcode'],
 				'ocrcode2' => $reg['ocrcode2'],
-				'priceafvat' => (float)$reg['priceafvat'],
+				'priceafvat' => (float)$reg['priceafvat'], //
 				'u_exc_dispensador' => $reg['u_exc_dispensador'],
 				'u_exc_caja' => $reg['u_exc_caja'],
 				'u_exc_manguera' => $reg['u_exc_manguera'],
@@ -3215,12 +3215,12 @@ WHERE
 					'itemcode' => $this->cleanStr($reg['itemcode']),
 					'whscode' => $reg['whscode'],
 					'quantity' => (float)$reg['quantity'],
-					'price' => (float)$reg['price'],
+					'price' => (float)$reg['price'], //
 					'taxcode' => $reg['taxcode'],
 					'discprcnt' => (float)$discprcnt,
 					'ocrcode' => $reg['ocrcode'],
 					'ocrcode2' => $reg['ocrcode2'],
-					'priceafvat' => (float)$reg['priceafvat'],
+					'priceafvat' => (float)$reg['priceafvat'], //
 					'u_exc_dispensador' => $reg['u_exc_dispensador'],
 					'u_exc_caja' => $reg['u_exc_caja'],
 					'u_exc_manguera' => $reg['u_exc_manguera'],
@@ -3283,7 +3283,7 @@ FROM
 fac_ta_factura_cabecera ftfc
 JOIN int_tabla_general doctype_s ON(ftfc.ch_fac_tipodocumento = SUBSTRING(TRIM(doctype_s.tab_elemento) for 2 from length(TRIM(doctype_s.tab_elemento))-1) AND doctype_s.tab_tabla ='08' AND doctype_s.tab_elemento != '000000')
 JOIN val_ta_complemento_documento vtcd ON(ftfc.ch_fac_tipodocumento = vtcd.ch_fac_tipodocumento AND ftfc.ch_fac_seriedocumento = vtcd.ch_fac_seriedocumento AND ftfc.ch_fac_numerodocumento = vtcd.ch_fac_numerodocumento)--client valta_complemente
-JOIN val_ta_cabecera vtc ON (vtcd.ch_sucursal = vtc.ch_sucursal AND vtcd.dt_fecha = vtc.dt_fecha AND vtcd.ch_numeval = vtc.ch_documento)
+JOIN val_ta_cabecera vtc ON (/*vtcd.ch_sucursal = vtc.ch_sucursal AND*/ vtcd.dt_fecha = vtc.dt_fecha AND vtcd.ch_numeval = vtc.ch_documento)
 JOIN int_clientes client ON (ftfc.cli_codigo = client.cli_codigo)
 WHERE ftfc.dt_fac_fecha BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
 AND ftfc.nu_fac_recargo3 IN (3, 5)
@@ -8819,8 +8819,13 @@ Cab.ch_fac_numerodocumento;
 			$u_exx_cordocor = $u_exx_docor[0];
 			$u_exx_tipdocor = $u_exx_docor[2];
 
-			$u_exx_fecdocor = explode('/', $reg['u_exx_fecdocor']);
-			$u_exx_fecdocor = $u_exx_fecdocor[2].'-'.$u_exx_fecdocor[1].'-'.$u_exx_fecdocor[0];
+			$pos = strpos($reg['u_exx_fecdocor'], '/');
+			if ($pos !== false) {
+				$u_exx_fecdocor = explode('/', $reg['u_exx_fecdocor']);
+				$u_exx_fecdocor = $u_exx_fecdocor[2].'-'.$u_exx_fecdocor[1].'-'.$u_exx_fecdocor[0];
+			} else {
+				$u_exx_fecdocor = $reg['u_exx_fecdocor'];
+			}
 
 			$let = trim($u_exx_serdocor);
 			$let = substr($let, 0, 1);
