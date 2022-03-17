@@ -10,6 +10,7 @@ class EstadoCuentaController extends Controller{
     }
 
     function Run(){
+	  ini_set("memory_limit", "-1");
 	  ob_start();
       $this->Init();
       $result = '';
@@ -51,13 +52,13 @@ class EstadoCuentaController extends Controller{
 
 				echo "<script>console.log('" . json_encode($_REQUEST) . "')</script>";
 
-				if($todo == '01'){			
+				if($todo == '01'){ //Tipo de Busqueda: Todos		
 					$arrResult  = EstadoCuentaModel::ModelReportePDF($fecha, $Nu_Tipo_Cliente);
 					echo "<script>console.log('" . json_encode($arrResult) . "')</script>";
 					$record  = EstadoCuentaTemplate::formBuscar($fecha);
 					$record .= EstadoCuentaTemplate::gridViewHTML($arrResult);
 					$this->visor->addComponent("ContentB", "content_body", $record);
-				}else{
+				}else{ //Tipo de Busqueda: Por Cliente
 					$arrResult  = EstadoCuentaModel::ModelReportePDFCLIENTE($fecha, $codcliente, $Nu_Tipo_Cliente);
 					$record  = EstadoCuentaTemplate::formBuscar($fecha);
 					$record .= EstadoCuentaTemplate::gridViewHTML($arrResult);

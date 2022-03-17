@@ -28,25 +28,43 @@ class ReporteGeneralController extends Controller{
 				$seriesdocumentos	= $_REQUEST['seriesdocs'];
 				$fecha_hasta		= trim($_REQUEST['c_fecha_hasta']);
 				$dia_vencimiento	= trim($_REQUEST['c_dias_vcmt']);
-				$vale 				= trim($_REQUEST['chk_vales']);
+				$vale 				= trim($_REQUEST['chk_vales']); //MOSTRAR VALES
 				$codcliente 		= trim($_REQUEST['codcliente']);
-				$cliente			= trim($_REQUEST['c_todos_clientes']);
+				$cliente			= trim($_REQUEST['c_todos_clientes']); //TODOS LOS CIENTES
 				$categoria 			= trim($_REQUEST['c_categoria']);
-				$porgrupo 			= trim($_REQUEST['c_grupoemp_cliente']);
+				$porgrupo 			= trim($_REQUEST['c_grupoemp_cliente']); //POR GRUPO EMPRESARIAL O POR CLIENTE:	
 				$precancelado 		= trim($_REQUEST['c_precancelado']);
 				$serie 				= trim($_REQUEST['c_serie']);
 				$tasa_cambio		= trim($_REQUEST['c_tasa_cambio']);
 
-				if($porgrupo == "GRUPOEMP"){
+				echo "<script>console.log('" . json_encode(
+
+					array(
+						"seriedocumentos" => $seriesdocumentos,
+						"fecha_hasta" => $fecha_hasta,
+						"dia_vencimiento" => $dia_vencimiento,
+						"vale" => $vale,
+						"codcliente" => $codcliente,
+						"cliente" => $cliente,
+						"categoria" => $categoria,
+						"porgrupo" => $porgrupo,
+						"precancelado" => $precancelado,
+						"serie" => $serie,
+						"tasa_cambio" => $tasa_cambio
+					)
+
+				) . "')</script>";
+
+				if ($porgrupo == "GRUPOEMP") {
 					$res		= ReporteGeneralModel::busquedaGrupo($fecha_hasta,$seriesdocumentos,$dia_vencimiento,$vale,$codcliente,$cliente,$categoria,$serie);
 					$resta		= ReporteGeneralModel::busquedaClienteVales($fecha_hasta,$cliente,$codcliente);
 					$result_f 	= ReporteGeneralTemplate::mostrar($resta,$res,$vale,$cliente,$porgrupo);
 					$result_f 	.= ReporteGeneralTemplatePDF::ReportePDF($res,$resta,$fecha_hasta,$tasa_cambio,$porgrupo,$vale,"");
-				}else{
+				} else if($porgrupo == "CLIENTE") {
 					$res		= ReporteGeneralModel::busquedaCliente($fecha_hasta,$seriesdocumentos,$dia_vencimiento,$vale,$codcliente,$cliente,$categoria,$serie);
 					if($vale == '1'){
 						$resta		= ReporteGeneralModel::busquedaClienteVales($fecha_hasta,$cliente,$codcliente);
-						$result_f 	= ReporteGeneralTemplate::mostrar($resta,$res,$vale,$cliente);
+						$result_f 	= ReporteGeneralTemplate::mostrar($resta,$res,$vale,$cliente,$porgrupo);
 					}
 					//REPORTE EN PDF
 					$result_f 	.= ReporteGeneralTemplatePDF::ReportePDF($res,$resta,$fecha_hasta,$datos['nu_tipocambio'],$porgrupo,$vale,$cliente);
@@ -70,7 +88,7 @@ class ReporteGeneralController extends Controller{
 					$res		= ReporteGeneralModel::busquedaGrupo($fecha_hasta,$seriesdocumentos,$dia_vencimiento,$vale,$codcliente,$cliente,$categoria,$serie);
 					$resta		= ReporteGeneralModel::busquedaClienteVales($fecha_hasta,$cliente,$codcliente);
 					$result_f 	= ReporteGeneralTemplate::reporteExcel($resta,$res,$vale,$cliente, $porgrupo);
-				} else {
+				} else if($porgrupo == "CLIENTE") {
 					$res		= ReporteGeneralModel::busquedaCliente($fecha_hasta,$seriesdocumentos,$dia_vencimiento,$vale,$codcliente,$cliente,$categoria,$serie);
 					if($vale == '1'){
 						$resta		= ReporteGeneralModel::busquedaClienteVales($fecha_hasta,$cliente,$codcliente);

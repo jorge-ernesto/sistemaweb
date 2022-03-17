@@ -60,7 +60,7 @@ class ReporteGeneralTemplate extends Template {
 		return $form->getForm();
 	}
 	
-	function mostrar($resta,$res,$vale,$cliente,$porgrupo) {
+	function mostrar($resta,$res,$vale,$cliente,$porgrupo) { //HTML
 
 		$grupo_emp =  "";
 		$sumtotGRP = 0;
@@ -347,7 +347,7 @@ class ReporteGeneralTemplate extends Template {
 			//suma de todos los clientes empresariales
 			//$total_todo = $sumtodocliente + $sumtodo;
 
-			if($vale == '1'){
+			if($vale == '1'){ //Mostrar Vales
 				$total_todo = ($suma_todo_clientes + $suma_todoval) - $sumatotnd;
 			}else{
 				if($tipond == '20')

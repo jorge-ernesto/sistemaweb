@@ -282,8 +282,8 @@ class EstadoCuentaTemplate extends Template {
 						$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<td align="right" class="grid_detalle_total">' . htmlentities(number_format($sumTotalPagoSoles, 2, '.' , ',')) . '</td>'));
 						$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<td align="right" class="grid_detalle_total">' . htmlentities(number_format($sumTotalInicialDolares - $sumTotalPagoDolares, 2, '.' , ',')) . '</td>'));
 						$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<td align="right" class="grid_detalle_total">' . htmlentities(number_format($sumTotalInicialSoles - $sumTotalPagoSoles, 2, '.' , ',')) . '</td></tr>'));
-						//$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<td align="right" class="grid_detalle_total">' . htmlentities(number_format($sumTotalSaldoDolares, 2, '.' , ',')) . '</td>'));
-						//$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<td align="right" class="grid_detalle_total">' . htmlentities(number_format($sumTotalSaldoSoles, 2, '.' , ',')) . '</td></tr>'));
+						//$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<td align="right" class="grid_detalle_total">' . htmlentities(number_format($sumTotalSaldoDolares, 2, '.' , ',')) . '</td>')); //COMENTADO POR QUE NO OBTENDRIA EL SALDO REAL
+						//$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<td align="right" class="grid_detalle_total">' . htmlentities(number_format($sumTotalSaldoSoles, 2, '.' , ',')) . '</td></tr>')); //COMENTADO POR QUE NO OBTENDRIA EL SALDO REAL
 						
 						$sumTotalInicialSoles = 0.00;
 						$sumTotalPagoSoles = 0.00;
@@ -305,7 +305,7 @@ class EstadoCuentaTemplate extends Template {
 					$Ss_Saldo_Dolares = $arrResult[$i]["MONEDA"] == 'S/' ? 0 : $arrResult[$i]["SALDO_DOLARES"];
 
 					if($arrResult[$i]["MONEDA"] == 'S/'){
-						if($arrResult[$i]["TIPODOCUMENTO"] == "20"){
+						if($arrResult[$i]["TIPODOCUMENTO"] == "20" || $arrResult[$i]["TIPODOCUMENTO"] == "21"){
 							$sumTotalInicialSoles 	-= $arrResult[$i]["IMPORTEINICIAL_SOLES"];
 							$sumTotalPagoSoles 		-= $arrResult[$i]["PAGO_SOLES"];
 							$sumTotalSaldoSoles 	-= $arrResult[$i]["SALDO_SOLES"];
@@ -315,7 +315,7 @@ class EstadoCuentaTemplate extends Template {
 							$sumTotalSaldoSoles 	+= $arrResult[$i]["SALDO_SOLES"];
 						}
 					} else {
-						if($arrResult[$i]["TIPODOCUMENTO"] == "20"){
+						if($arrResult[$i]["TIPODOCUMENTO"] == "20" || $arrResult[$i]["TIPODOCUMENTO"] == "21"){
 							$sumTotalInicialDolares -= $arrResult[$i]["IMPORTEINICIAL_DOLARES"];
 							$sumTotalPagoDolares 	-= $arrResult[$i]["PAGO_DOLARES"];
 							$sumTotalSaldoDolares 	-= $Ss_Saldo_Dolares;

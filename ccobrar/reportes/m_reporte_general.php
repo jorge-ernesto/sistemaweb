@@ -57,14 +57,14 @@ class ReporteGeneralModel extends Model {
 			cab.ch_tipdocumento AS tipo
 		FROM
 			ccob_ta_cabecera AS cab
-			INNER JOIN
+			JOIN
 				int_clientes AS cli ON(cab.cli_codigo = cli.cli_codigo)
 			LEFT JOIN
-				inv_ta_almacenes AS alma ON(alma.ch_almacen = cab.ch_sucursal)
-			LEFT JOIN
-				int_tabla_general AS gen ON(cab.ch_tipdocumento = substring(TRIM(gen.tab_elemento) for 2 from length(TRIM(gen.tab_elemento))-1) and gen.tab_tabla ='08' AND gen.tab_elemento != '000000')
+				inv_ta_almacenes AS alma ON(cab.ch_sucursal = alma.ch_almacen)
 			LEFT JOIN
 				int_tabla_general AS mone ON(cab.ch_moneda = (substring(trim(mone.tab_elemento) for 2 from length(trim(mone.tab_elemento))-1)) AND mone.tab_tabla='04' AND mone.tab_elemento != '000000')
+			LEFT JOIN
+				int_tabla_general AS gen ON(cab.ch_tipdocumento = substring(TRIM(gen.tab_elemento) for 2 from length(TRIM(gen.tab_elemento))-1) and gen.tab_tabla ='08' AND gen.tab_elemento != '000000')
 		WHERE
 			cab.dt_fechaemision <= TO_DATE('" . $fecha_hasta . "','DD/MM/YYYY')
 			AND cab.nu_importesaldo > 0
@@ -87,7 +87,7 @@ class ReporteGeneralModel extends Model {
 		
 		if ($cliente == "N"){
 		    $query .= "
-				AND cli.cli_grupo = '" . $codcliente . "'";
+				AND cli.cli_grupo = '" . $codcliente . "'"; //Busqueda por grupo
 		}
 
 		if ($categoria != "T") {
@@ -104,8 +104,10 @@ class ReporteGeneralModel extends Model {
 			fechaemision DESC;
 		";
 
-		//echo "GRUPO EMPRESARIAL: \n".$query;
- 	
+		// echo "<pre>";
+		// echo "\nbusquedaGrupo: \n".$query;
+		// echo "</pre>";
+
 		if ($sqlca->query($query)<=0)
 			return $sqlca->get_error();
 	    
@@ -156,14 +158,14 @@ class ReporteGeneralModel extends Model {
 				cab.ch_tipdocumento as tipo
 			FROM
 				ccob_ta_cabecera as cab
-					INNER JOIN
+					JOIN
 						int_clientes as cli ON(cab.cli_codigo = cli.cli_codigo)
 					LEFT JOIN
-						inv_ta_almacenes as alma ON(alma.ch_almacen = cab.ch_sucursal)
-					LEFT JOIN
-						int_tabla_general as gen ON(cab.ch_tipdocumento = substring(TRIM(gen.tab_elemento) for 2 from length(TRIM(gen.tab_elemento))-1) and gen.tab_tabla ='08' AND gen.tab_elemento != '000000')
+						inv_ta_almacenes as alma ON(cab.ch_sucursal = alma.ch_almacen)
 					LEFT JOIN
 						int_tabla_general AS mone ON(cab.ch_moneda = (substring(trim(mone.tab_elemento) for 2 from length(trim(mone.tab_elemento))-1)) AND mone.tab_tabla='04' AND mone.tab_elemento != '000000')
+					LEFT JOIN
+						int_tabla_general as gen ON(cab.ch_tipdocumento = substring(TRIM(gen.tab_elemento) for 2 from length(TRIM(gen.tab_elemento))-1) and gen.tab_tabla ='08' AND gen.tab_elemento != '000000')
 			WHERE
 				cab.dt_fechaemision <= to_date('$fecha_hasta','DD/MM/YYYY')
 				AND cab.nu_importesaldo > 0";
@@ -186,7 +188,7 @@ class ReporteGeneralModel extends Model {
 		
 		if ($cliente == "N"){
 		    $query .= "
-				AND cli.cli_codigo = '$codcliente' ";
+				AND cli.cli_codigo = '$codcliente' "; //Busqueda por RUC
 		}
 
 		/*if ($precancelado == "N") {
@@ -210,7 +212,9 @@ class ReporteGeneralModel extends Model {
 				grupo,
 				fechaemision desc;";
 
-		//echo $query;
+		// echo "<pre>";
+		// echo "\nbusquedaCliente: \n".$query;
+		// echo "</pre>";
  	
 		if ($sqlca->query($query)<=0)
 			return $sqlca->get_error();
@@ -257,14 +261,16 @@ class ReporteGeneralModel extends Model {
 
 		if ($cliente == "N"){
 		    $query.= "
-				AND cli.cli_codigo = '$codcliente' ";
+				AND cli.cli_codigo = '$codcliente' "; //Busqueda por RUC
 		}
 
 		$query.="
 			ORDER BY
 				grupo;";
 
-		//echo $query;
+		// echo "<pre>";
+		// echo "\nbusquedaClienteVales: \n".$query;
+		// echo "</pre>";
  	
 		if ($sqlca->query($query)<=0)
 			return $sqlca->get_error();

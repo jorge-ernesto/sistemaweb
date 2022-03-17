@@ -22,10 +22,10 @@ class EstadoCuentaModel extends Model {
 			cab.ch_numdocumento AS NUMDOCUMENTO,
 			mone.tab_desc_breve AS MONEDA,
 			TO_CHAR(cab.dt_fechaemision, 'DD/MM/YYYY') AS FECHAEMISION,
-			cab.dt_fechavencimiento AS FECHAVENCIMIENTO,
+			TO_CHAR(cab.dt_fechavencimiento, 'DD/MM/YYYY') AS FECHAVENCIMIENTO,
 			gen.tab_desc_breve||' - '||trim(cab.ch_seriedocumento)||' - '||trim(cab.ch_numdocumento) as DOCUMENTO,
-			(CASE WHEN det.ch_tipmovimiento = '1' AND det.ch_moneda = '01' THEN (CASE WHEN cab.ch_tipdocumento = '21' THEN (cab.nu_importetotal * -1) ELSE cab.nu_importetotal END) ELSE 0.00 END) AS IMPORTEINICIAL_SOLES,
-			(CASE WHEN det.ch_tipmovimiento = '1' AND det.ch_moneda = '02' THEN (CASE WHEN cab.ch_tipdocumento = '21' THEN (cab.nu_importetotal * -1) ELSE cab.nu_importetotal END) ELSE 0.00 END) AS IMPORTEINICIAL_DOLARES,
+			(CASE WHEN det.ch_tipmovimiento = '1' AND det.ch_moneda = '01' THEN cab.nu_importetotal ELSE 0.00 END) AS IMPORTEINICIAL_SOLES,
+			(CASE WHEN det.ch_tipmovimiento = '1' AND det.ch_moneda = '02' THEN cab.nu_importetotal ELSE 0.00 END) AS IMPORTEINICIAL_DOLARES,
 			(CASE WHEN det.ch_tipmovimiento = '2' AND det.ch_moneda = '01' THEN nu_importemovimiento ELSE 0.00 END) AS Nu_Importe_Pagos_Soles,
 			(CASE WHEN det.ch_tipmovimiento = '2' AND det.ch_moneda = '02' THEN nu_importemovimiento ELSE 0.00 END) AS Nu_Importe_Pagos_Dolares,
 			(CASE WHEN
@@ -126,7 +126,7 @@ class EstadoCuentaModel extends Model {
 			ccob_ta_cabecera cab
 			JOIN ccob_ta_detalle AS det ON(cab.cli_codigo = det.cli_codigo AND cab.ch_tipdocumento = det.ch_tipdocumento AND cab.ch_seriedocumento = det.ch_seriedocumento AND cab.ch_numdocumento = det.ch_numdocumento)
 			JOIN int_clientes AS cli ON(cab.cli_codigo = cli.cli_codigo)
-			LEFT JOIN int_tabla_general AS mone ON(cab.ch_moneda = (substring(trim(mone.tab_elemento) for 2 from length(trim(mone.tab_elemento))-1)) AND mone.tab_tabla='04' AND mone.tab_elemento != '000000')
+			LEFT JOIN int_tabla_general AS mone ON(det.ch_moneda = (substring(trim(mone.tab_elemento) for 2 from length(trim(mone.tab_elemento))-1)) AND mone.tab_tabla='04' AND mone.tab_elemento != '000000')
 			LEFT JOIN int_tabla_general AS gen ON(cab.ch_tipdocumento = substring(trim(gen.tab_elemento) for 2 from length(trim(gen.tab_elemento))-1) AND gen.tab_tabla ='08' AND gen.tab_elemento != '000000')
 			LEFT JOIN (SELECT
 				ch_tipdocumento,
@@ -152,7 +152,7 @@ class EstadoCuentaModel extends Model {
 			WHERE
 				ch_tipdocumento IN ('10','11','20','21','22')
 				AND dt_fechamovimiento <= to_date('" . $fecha . "','DD/MM/YYYY')
-				AND ch_tipmovimiento = '2'
+				AND ch_tipmovimiento >= '2'
 			GROUP BY
 				1,2,3,4
 			) AS CDCANCELACION ON (cab.ch_tipdocumento = CDCANCELACION.ch_tipdocumento and cab.ch_seriedocumento = CDCANCELACION.ch_seriedocumento and cab.ch_numdocumento = CDCANCELACION.ch_numdocumento AND cab.cli_codigo = CDCANCELACION.cli_codigo)
@@ -163,13 +163,17 @@ class EstadoCuentaModel extends Model {
 			" . $cond_tipo_cliente . "
 	  	ORDER BY
 			1,
-			det.dt_fechamovimiento,
+			6 desc,
 			3,
 			4,
-			5;
+			5,
+			det.ch_tipmovimiento,
+			det.dt_fechamovimiento;
 		";
 
-		//echo "<pre>".$sql."</pre>";
+		// echo "<pre>";
+		// echo "\ModelReportePDF: \n".$sql;
+		// echo "</pre>";
 
 		if ($sqlca->query($sql)<=0)
 			return $sqlca->get_error();
@@ -219,10 +223,10 @@ class EstadoCuentaModel extends Model {
 			det.ch_numdocumento AS NUMDOCUMENTO,               
 			mone.tab_desc_breve AS MONEDA,                                 
 			cab.dt_fechaemision AS FECHAEMISION,                     
-			cab.dt_fechavencimiento AS FECHAVENCIMIENTO,
+			TO_CHAR(cab.dt_fechavencimiento, 'DD/MM/YYYY') AS FECHAVENCIMIENTO,
 			gen.tab_desc_breve||' - '||trim(cab.ch_seriedocumento)||' - '||trim(cab.ch_numdocumento) as DOCUMENTO,			
-			(CASE WHEN det.ch_tipmovimiento = '1' AND det.ch_moneda = '01' THEN (CASE WHEN cab.ch_tipdocumento = '21' THEN (cab.nu_importetotal * -1) ELSE cab.nu_importetotal END) ELSE 0.00 END) AS IMPORTEINICIAL_SOLES,
-			(CASE WHEN det.ch_tipmovimiento = '1' AND det.ch_moneda = '02' THEN (CASE WHEN cab.ch_tipdocumento = '21' THEN (cab.nu_importetotal * -1) ELSE cab.nu_importetotal END) ELSE 0.00 END) AS IMPORTEINICIAL_DOLARES,
+			(CASE WHEN det.ch_tipmovimiento = '1' AND det.ch_moneda = '01' THEN cab.nu_importetotal ELSE 0.00 END) AS IMPORTEINICIAL_SOLES,
+			(CASE WHEN det.ch_tipmovimiento = '1' AND det.ch_moneda = '02' THEN cab.nu_importetotal ELSE 0.00 END) AS IMPORTEINICIAL_DOLARES,
 			(CASE WHEN det.ch_tipmovimiento = '2' AND det.ch_moneda = '01' THEN nu_importemovimiento ELSE 0.00 END) AS Nu_Importe_Pagos_Soles,
 			(CASE WHEN det.ch_tipmovimiento = '2' AND det.ch_moneda = '02' THEN nu_importemovimiento ELSE 0.00 END) AS Nu_Importe_Pagos_Dolares,
 			(CASE WHEN
@@ -321,10 +325,10 @@ class EstadoCuentaModel extends Model {
 			END) as saldo_dolares
 		FROM
 			ccob_ta_cabecera cab
-			INNER JOIN ccob_ta_detalle AS det ON(cab.ch_tipdocumento = det.ch_tipdocumento and cab.ch_seriedocumento = det.ch_seriedocumento and cab.ch_numdocumento = det.ch_numdocumento)
+			INNER JOIN ccob_ta_detalle AS det ON(cab.cli_codigo = det.cli_codigo and cab.ch_tipdocumento = det.ch_tipdocumento and cab.ch_seriedocumento = det.ch_seriedocumento and cab.ch_numdocumento = det.ch_numdocumento)
 			INNER JOIN int_clientes AS cli ON(cab.cli_codigo = cli.cli_codigo)
 			LEFT JOIN int_tabla_general AS mone ON(det.ch_moneda = (substring(trim(mone.tab_elemento) for 2 from length(trim(mone.tab_elemento))-1)) AND mone.tab_tabla='04' AND mone.tab_elemento != '000000')
-			LEFT JOIN int_tabla_general AS gen ON(cab.ch_tipdocumento = substring(trim(gen.tab_elemento) for 2 from length(trim(gen.tab_elemento))-1) AND gen.tab_tabla ='08' AND mone.tab_elemento != '000000')
+			LEFT JOIN int_tabla_general AS gen ON(cab.ch_tipdocumento = substring(trim(gen.tab_elemento) for 2 from length(trim(gen.tab_elemento))-1) AND gen.tab_tabla ='08' AND gen.tab_elemento != '000000')
 			LEFT JOIN (SELECT
 				ch_tipdocumento,
 				ch_seriedocumento,
@@ -349,7 +353,7 @@ class EstadoCuentaModel extends Model {
 			WHERE
 				ch_tipdocumento IN ('10','11','20','21','22')
 				AND dt_fechamovimiento <= to_date('" . $fecha . "','DD/MM/YYYY')
-				AND ch_tipmovimiento = '2'
+				AND ch_tipmovimiento >= '2'
 			GROUP BY
 				1,2,3,4
 			) AS CDCANCELACION ON (cab.ch_tipdocumento = CDCANCELACION.ch_tipdocumento and cab.ch_seriedocumento = CDCANCELACION.ch_seriedocumento and cab.ch_numdocumento = CDCANCELACION.ch_numdocumento AND cab.cli_codigo = CDCANCELACION.cli_codigo)
@@ -366,13 +370,17 @@ class EstadoCuentaModel extends Model {
 		$sql .= "
 			ORDER BY
 				1,
-				det.dt_fechamovimiento,
+				6 desc,
 				3,
 				4,
-				5;
+				5,
+				det.ch_tipmovimiento,
+				det.dt_fechamovimiento;
 		";
 
-		// echo "<pre>".$sql."</pre>";
+		// echo "<pre>";
+		// echo "\ModelReportePDFCLIENTE: \n".$sql;
+		// echo "</pre>";
 
 		if ($sqlca->query($sql)<=0)
 			return $sqlca->get_error();

@@ -1956,7 +1956,275 @@ FROM
 
 		/**
 		 * Para ejecutar en modo prueba:
-		 * http://172.18.8.12/sistemaweb/centralizer_.php?mod=VALES_CLIENTES_CREDITO&from=20200801&to=20200831&warehouse_id=003&desde=01/08/2020&hasta=31/08/2020
+		 * http://172.18.8.12/sistemaweb/centralizer_.php?mod=TOTALS_SALDO_SOCIO&from=20220223&to=20220223&warehouse_id=003&desde=23/02/2022&hasta=23/02/2022&socios=20100167892&vales=0&vista=RES
+		 */
+		case 'TOTALS_SALDO_SOCIO':
+			argRangedCheck();
+			//pg_escape_string
+			$warehouse_id = $_REQUEST['warehouse_id'];
+			$desde = $_REQUEST['desde'];
+			$hasta = $_REQUEST['hasta'];
+
+			/*Datos para query de cuentas por cobrar*/
+			$fecha = $_REQUEST['hasta'];
+			$socios = $_REQUEST['socios'];
+			$vales = $_REQUEST['vales'];
+			$vista = $_REQUEST['vista'];
+			/*Cerrar*/
+
+			/*Condicion de socios*/
+			$where_socios = '';
+			if(!empty($socios)) {
+				$socios = explode("|", $socios);
+									
+				foreach ($socios as $key => $socio){
+					$where_socios .= "'" . $socios[$key] . "',";
+				}
+				$where_socios_cuentas = 'AND cab.cli_codigo IN (' . substr($where_socios, 0, -1) . ')';
+				$where_socios_vales = 'AND cli.cli_codigo IN (' . substr($where_socios, 0, -1) . ')';
+			}			
+			/*Cerrar*/
+
+			error_log("TOTALS_SALDO_SOCIO");
+			error_log( json_encode( $_REQUEST ) );
+			// die();
+
+			$sql_cuentas_por_cobrar = "
+SELECT 
+	CLIENTE,
+	RAZONSOCIAL,
+	TIPODOCUMENTO,
+	SERIEDOCUMENTO,
+	NUMDOCUMENTO,
+	FIRST(MONEDA) AS MONEDA,
+	FIRST(FECHAEMISION) AS FECHAEMISION,
+	FIRST(FECHAVENCIMIENTO) AS FECHAVENCIMIENTO,
+	FIRST(DOCUMENTO) AS DOCUMENTO,
+	SUM(IMPORTEINICIAL_SOLES) AS IMPORTEINICIAL_SOLES,
+	SUM(IMPORTEINICIAL_DOLARES) AS IMPORTEINICIAL_DOLARES,
+	SUM(Nu_Importe_Pagos_Soles) AS PAGO_SOLES,
+	SUM(Nu_Importe_Pagos_Dolares) AS PAGO_DOLARES,
+	--SUM(saldo_soles) AS SALDO_SOLES, --COMENTADO POR QUE NO OBTENDRIA EL SALDO REAL
+	--SUM(saldo_dolares) AS SALDO_DOLARES --COMENTADO POR QUE NO OBTENDRIA EL SALDO REAL
+	SUM(IMPORTEINICIAL_SOLES) - SUM(Nu_Importe_Pagos_Soles) as SALDO_SOLES,	
+	SUM(IMPORTEINICIAL_DOLARES) - SUM(Nu_Importe_Pagos_Dolares) as SALDO_DOLARES,
+	FIRST(TIPOCAMBIO) AS TIPOCAMBIO
+FROM (
+
+	SELECT
+		cab.cli_codigo AS CLIENTE,
+		cli.cli_razsocial AS RAZONSOCIAL,
+		cab.ch_tipdocumento AS TIPODOCUMENTO,
+		cab.ch_seriedocumento AS SERIEDOCUMENTO,
+		cab.ch_numdocumento AS NUMDOCUMENTO,
+		mone.tab_desc_breve AS MONEDA,
+		TO_CHAR(cab.dt_fechaemision, 'DD/MM/YYYY') AS FECHAEMISION,
+		TO_CHAR(cab.dt_fechavencimiento, 'DD/MM/YYYY') AS FECHAVENCIMIENTO,
+		gen.tab_desc_breve||' - '||trim(cab.ch_seriedocumento)||' - '||trim(cab.ch_numdocumento) as DOCUMENTO,
+			
+			(CASE WHEN det.ch_tipmovimiento = '1' AND det.ch_moneda = '01' THEN cab.nu_importetotal ELSE 0.00 END) AS IMPORTEINICIAL_SOLES, --Los anticipos deben ser considerados negativos?
+			
+			(CASE WHEN det.ch_tipmovimiento = '1' AND det.ch_moneda = '02' THEN cab.nu_importetotal ELSE 0.00 END) AS IMPORTEINICIAL_DOLARES, --Los anticipos deben ser considerados negativos?
+			
+			(CASE WHEN det.ch_tipmovimiento = '2' AND det.ch_moneda = '01' THEN nu_importemovimiento ELSE 0.00 END) AS Nu_Importe_Pagos_Soles,
+			
+			(CASE WHEN det.ch_tipmovimiento = '2' AND det.ch_moneda = '02' THEN nu_importemovimiento ELSE 0.00 END) AS Nu_Importe_Pagos_Dolares,
+
+			(CASE WHEN --SI ES CANCELACION Y HAY MAS DE UN MOVIMIENTO EN DETALLE, ES DECIR SI HAY PAGOS
+				det.ch_tipmovimiento = '2' AND (SELECT COUNT(*) FROM ccob_ta_detalle WHERE ch_tipdocumento||ch_seriedocumento||ch_numdocumento = det.ch_tipdocumento||det.ch_seriedocumento||det.ch_numdocumento AND cli_codigo = det.cli_codigo AND dt_fechamovimiento <= to_date('" . $fecha . "','DD/MM/YYYY')) > 1
+			THEN
+				(SELECT --SUMA DE INCLUSION
+					SUM(det2.nu_importemovimiento)
+				FROM
+					ccob_ta_detalle as det2
+				WHERE
+					det2.ch_tipmovimiento 		= '1' --INCLUSION
+					AND det2.ch_tipdocumento	= det.ch_tipdocumento
+					AND det2.ch_seriedocumento	= det.ch_seriedocumento
+					AND det2.ch_numdocumento	= det.ch_numdocumento
+					AND det2.cli_codigo 		= det.cli_codigo
+					AND det2.dt_fechamovimiento <= to_date('" . $fecha . "','DD/MM/YYYY')
+				) - 
+				(CASE WHEN --SI ES CANCELACION DE NUEVO???
+					det.ch_tipmovimiento = '2'
+				THEN
+					(SELECT --SUMA DE CANCELACION
+						SUM(det3.nu_importemovimiento)
+					FROM
+						ccob_ta_detalle as det3
+					WHERE
+						det3.ch_tipmovimiento = '2' --CANCELACION
+						AND (CASE WHEN
+								det3.ch_identidad = '2'
+							THEN
+								det3.ch_identidad = '2'
+							ELSE
+								det3.ch_identidad::INTEGER BETWEEN 2 AND det.ch_identidad::integer
+							END) --NO TIENE SENTIDO
+						AND det3.ch_tipdocumento	= det.ch_tipdocumento
+						AND det3.ch_seriedocumento	= det.ch_seriedocumento
+						AND det3.ch_numdocumento	= det.ch_numdocumento
+						AND det3.cli_codigo 		= det.cli_codigo
+						AND det3.dt_fechamovimiento <= to_date('" . $fecha . "','DD/MM/YYYY')
+					)
+				ELSE
+					0.00
+				END)
+			ELSE --SINO HAY PAGOS
+				CASE WHEN --SI SOLO ESTA LA INCLUSION
+					(SELECT COUNT(*) FROM ccob_ta_detalle WHERE ch_tipdocumento||ch_seriedocumento||ch_numdocumento = det.ch_tipdocumento||det.ch_seriedocumento||det.ch_numdocumento AND cli_codigo = det.cli_codigo AND dt_fechamovimiento <= to_date('" . $fecha . "','DD/MM/YYYY')) = 1
+				THEN
+					det.nu_importemovimiento
+				END
+			END) as saldo_soles,
+
+
+			(CASE WHEN --SI ES CANCELACION Y HAY MAS DE UN MOVIMIENTO EN DETALLE, ES DECIR SI HAY PAGOS
+				det.ch_tipmovimiento = '2' AND (SELECT COUNT(*) FROM ccob_ta_detalle WHERE ch_tipdocumento||ch_seriedocumento||ch_numdocumento = det.ch_tipdocumento||det.ch_seriedocumento||det.ch_numdocumento AND cli_codigo = det.cli_codigo AND dt_fechamovimiento <= to_date('" . $fecha . "','DD/MM/YYYY')) > 1
+			THEN
+				(SELECT --SUMA DE INCLUSION
+					SUM(det2.nu_importemovimiento)
+				FROM
+					ccob_ta_detalle as det2
+				WHERE
+					det2.ch_tipmovimiento 		= '1' --INCLUSION
+					AND det2.ch_tipdocumento	= det.ch_tipdocumento
+					AND det2.ch_seriedocumento	= det.ch_seriedocumento
+					AND det2.ch_numdocumento	= det.ch_numdocumento
+					AND det2.cli_codigo 		= det.cli_codigo
+					AND det2.dt_fechamovimiento <= to_date('" . $fecha . "','DD/MM/YYYY')
+				) -
+				(CASE WHEN --SI ES CANCELACION DE NUEVO???
+					det.ch_tipmovimiento = '2'
+				THEN
+					(SELECT --SUMA DE CANCELACION
+						SUM(det3.nu_importemovimiento)
+					FROM
+						ccob_ta_detalle as det3
+					WHERE
+						det3.ch_tipmovimiento = '2' --CANCELACION
+						AND (CASE WHEN
+								det3.ch_identidad = '2'
+							THEN
+								det3.ch_identidad = '2'
+							ELSE
+								det3.ch_identidad::INTEGER BETWEEN 2 AND det.ch_identidad::integer
+							END) --NO TIENE SENTIDO
+						AND det3.ch_tipdocumento	= det.ch_tipdocumento
+						AND det3.ch_seriedocumento	= det.ch_seriedocumento
+						AND det3.ch_numdocumento	= det.ch_numdocumento
+						AND det3.cli_codigo 		= det.cli_codigo
+						AND det3.dt_fechamovimiento <= to_date('" . $fecha . "','DD/MM/YYYY')
+					)
+				ELSE
+					0.00
+				END)
+			ELSE --SINO HAY PAGOS
+				CASE WHEN --SI SOLO ESTA LA INCLUSION
+					(SELECT COUNT(*) FROM ccob_ta_detalle WHERE ch_tipdocumento||ch_seriedocumento||ch_numdocumento = det.ch_tipdocumento||det.ch_seriedocumento||det.ch_numdocumento AND cli_codigo = det.cli_codigo AND dt_fechamovimiento <= to_date('" . $fecha . "','DD/MM/YYYY')) = 1
+				THEN
+					det.nu_importemovimiento
+				END
+			END) as saldo_dolares,
+
+		cab.nu_tipocambio AS TIPOCAMBIO --Pueden haber muchos tipos de cambio en ccob_ta_detalle, solo mostramos el de ccbo_ta_cabecera
+
+	FROM
+		ccob_ta_cabecera cab
+		JOIN ccob_ta_detalle        AS det  ON(cab.cli_codigo = det.cli_codigo AND cab.ch_tipdocumento = det.ch_tipdocumento AND cab.ch_seriedocumento = det.ch_seriedocumento AND cab.ch_numdocumento = det.ch_numdocumento)
+		JOIN int_clientes           AS cli  ON(cab.cli_codigo = cli.cli_codigo)
+		LEFT JOIN int_tabla_general AS mone ON(det.ch_moneda = (substring(trim(mone.tab_elemento) for 2 from length(trim(mone.tab_elemento))-1)) AND mone.tab_tabla='04' AND mone.tab_elemento != '000000')
+		LEFT JOIN int_tabla_general AS gen  ON(cab.ch_tipdocumento = substring(trim(gen.tab_elemento) for 2 from length(trim(gen.tab_elemento))-1) AND gen.tab_tabla ='08' AND gen.tab_elemento != '000000')
+		LEFT JOIN (SELECT
+						ch_tipdocumento,
+						ch_seriedocumento,
+						ch_numdocumento,
+						cli_codigo,
+						nu_importemovimiento AS Nu_Importe_Movimiento_Detalle_Inclusion
+					FROM
+						ccob_ta_detalle	
+					WHERE
+						ch_tipdocumento IN ('10','11','20','21','22')
+						AND dt_fechamovimiento <= to_date('" . $fecha . "','DD/MM/YYYY')
+						AND ch_tipmovimiento = '1'
+					) AS CDINCLUSION ON (cab.ch_tipdocumento = CDINCLUSION.ch_tipdocumento and cab.ch_seriedocumento = CDINCLUSION.ch_seriedocumento and cab.ch_numdocumento = CDINCLUSION.ch_numdocumento AND cab.cli_codigo = CDINCLUSION.cli_codigo)
+		LEFT JOIN (SELECT
+						ch_tipdocumento,
+						ch_seriedocumento,
+						ch_numdocumento,
+						cli_codigo,
+						SUM(nu_importemovimiento) AS Nu_Importe_Movimiento_Detalle_Cancelacion
+					FROM
+						ccob_ta_detalle	
+					WHERE
+						1 = 1
+						--AND ch_tipdocumento IN ('10','11','20','21','22')
+						AND dt_fechamovimiento <= to_date('" . $fecha . "','DD/MM/YYYY')
+						AND ch_tipmovimiento >= '2'
+					GROUP BY
+						1,2,3,4
+					) AS CDCANCELACION ON (cab.ch_tipdocumento = CDCANCELACION.ch_tipdocumento and cab.ch_seriedocumento = CDCANCELACION.ch_seriedocumento and cab.ch_numdocumento = CDCANCELACION.ch_numdocumento AND cab.cli_codigo = CDCANCELACION.cli_codigo)
+	WHERE
+		cab.ch_tipdocumento IN ('10','11','20','21','22')
+		AND det.dt_fechamovimiento <= to_date('" . $fecha . "','DD/MM/YYYY')
+		AND COALESCE(CDINCLUSION.Nu_Importe_Movimiento_Detalle_Inclusion, 0) > COALESCE(CDCANCELACION.Nu_Importe_Movimiento_Detalle_Cancelacion, 0)
+		
+		$where_socios_cuentas
+	ORDER BY
+		1,
+		6 desc,
+		3,
+		4,
+		5,
+		det.ch_tipmovimiento,
+		det.dt_fechamovimiento
+) CUENTA_CORRIENTE
+
+GROUP BY
+	CLIENTE,
+	RAZONSOCIAL,
+	TIPODOCUMENTO,
+	SERIEDOCUMENTO,
+	NUMDOCUMENTO
+ORDER BY	
+	CLIENTE,
+	MONEDA DESC,
+	TIPODOCUMENTO,
+	SERIEDOCUMENTO,
+	NUMDOCUMENTO;
+			";
+			error_log($sql_cuentas_por_cobrar);
+			$contenido['1_cuentas_por_cobrar'] = SQLImplodeArray($sql_cuentas_por_cobrar);
+
+			$sql_vales ="
+SELECT DISTINCT
+	cli.cli_codigo as CLIENTE,
+	cli.cli_razsocial AS RAZONSOCIAL,
+	cli.cli_codigo||' - '||TRIM(cli.cli_razsocial)||' TIPO: '||COALESCE(cli.cli_tipo,'IN')||' LIMITE: '||COALESCE(cli.cli_creditosol,0) as grupo,	
+	'Vale: '||valc.ch_documento as documentoval,
+	valc.nu_importe as importeval,
+	valc.dt_fecha as fecha
+FROM
+	val_ta_cabecera as valc
+	INNER JOIN
+		int_clientes as cli ON(valc.ch_cliente = cli.cli_codigo)
+WHERE
+	valc.dt_fecha <= TO_DATE('$fecha','DD/MM/YYYY')
+	AND valc.ch_liquidacion IS NULL
+	$where_socios_vales
+ORDER BY
+	CLIENTE;
+			";
+			$contenido['2_vales'] = SQLImplodeArray($sql_vales);
+
+			$data = json_encode($contenido);
+			$comprimido = gzcompress($data);
+			echo $comprimido;
+		break;
+
+		/**
+		 * Para ejecutar en modo prueba:
+		 * http://172.18.8.12/sistemaweb/centralizer_.php?mod=VALES_CLIENTES_CREDITO&from=20200801&to=20200831&warehouse_id=003&desde=01/08/2020&hasta=31/08/2020&clientes=123456787|123456788|123456789
 		 */
 		case 'VALES_CLIENTES_CREDITO':
 			argRangedCheck();
