@@ -98,7 +98,7 @@ class AfericionesTemplate extends Template {
 			$result .= '<td align="center" class="'.$color.'" >&nbsp;'.htmlentities($a['veloc']).'&nbsp;</td>';
 			$result .= '<td align="center" class="'.$color.'" >&nbsp;'.htmlentities($a['lineas']).'&nbsp;</td>';
 			$result .= '<td align="center" class="'.$color.'" >&nbsp;'.htmlentities($a['responsabl']).'&nbsp;</td>';	
-			$result .= '<td  class="'.$color.'" ><A href="javascript:confirmarLink(\'Desea eliminar la afericion Nro. '.htmlentities(trim($a['trans'])).'/'.htmlentities(trim($a['caja'])).'?\',\'control.php?rqst=REPORTES.AFERICIONES&action=Eliminar&trans='.trim($a['trans']).'&dia='.trim($a['dia']).'&caja='.trim($a['caja']).'\', \'control\')"><img src="/sistemaweb/icons/delete.gif" alt="Borrar" align="middle" border="0"/></A></td>';      	 	      	 
+			$result .= '<td  class="'.$color.'" ><A href="javascript:confirmarLink(\'Desea eliminar la afericion Nro. '.htmlentities(trim($a['trans'])).'/'.htmlentities(trim($a['caja'])).'?\',\'control.php?rqst=REPORTES.AFERICIONES&action=Eliminar&trans='.trim($a['trans']).'&dia='.trim($a['dia']).'&caja='.trim($a['caja']).'&codigo='.trim($a['codigo']).'&pump='.trim($a['pump']).'&es='.trim($a['es']).'\', \'control\')"><img src="/sistemaweb/icons/delete.gif" alt="Borrar" align="middle" border="0"/></A></td>';      	 	      	 
 			$result .= '</tr>';
 			$i++;		    	
 		}		

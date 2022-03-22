@@ -42,7 +42,7 @@ class AfericionesController extends Controller {
 				break;
 
 			case "Eliminar":
-				$resultado 	= AfericionesModel::eliminarAfericion($_REQUEST["trans"],$_REQUEST["dia"],$_REQUEST["caja"]);	
+				$resultado 	= AfericionesModel::eliminarAfericion($_REQUEST["trans"],$_REQUEST['es'],$_REQUEST["dia"],$_REQUEST["caja"],$_REQUEST['codigo'],$_REQUEST['pump']); //ELIMINAR AFERICIONES	
 				$busqueda    	= AfericionesModel::Paginacion('', '',$_REQUEST['rxp'],$_REQUEST['pagina']);
 				$result_f 		= AfericionesTemplate::reporte($busqueda['datos'],date(d."/".m."/".Y), date(d."/".m."/".Y));
 				$result     	= AfericionesTemplate::search_form(date(d."/".m."/".Y), date(d."/".m."/".Y),$busqueda['paginacion']);
@@ -60,7 +60,7 @@ class AfericionesController extends Controller {
 					$result = '<script name="accion">alert("Debe ingresar el numero de ticket") </script>';
 					echo $result;
 				} else {
-					$result = AfericionesModel::ingresarAfericion(trim($_REQUEST['fecha']),
+					$result = AfericionesModel::ingresarAfericion(trim($_REQUEST['fecha']), //INGRESAR AFERICIONES
 						trim($_REQUEST['ticket']),
 						trim($_REQUEST['caja']),
 						trim($_SESSION['auth_usuario']));
@@ -74,6 +74,10 @@ class AfericionesController extends Controller {
 						$result = '<script name="accion">alert("El ticket ya esta registrado en afericiones.") </script>';
 					}  else if ($result == 1) {
 						$result = '<script name="accion">alert("Datos guardados correctamente. Importante: Deben de anular el ticket en Ventas -> Anular Ticket") </script>';
+					} else if ($result == -2) {
+						$result = '<script name="accion">alert("Error, no hay surtidor, o hay mas de uno.") </script>';
+					} else if ($result == -3) {
+						$result = '<script name="accion">alert("Error, no hay afericion, o hay mas de uno.") </script>';
 					}
 					echo $result;
 				}
