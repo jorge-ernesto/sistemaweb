@@ -84,6 +84,8 @@ function PaginadorValeCreditos(page){
         Fe_Final	: $('#txt-fe_final').val(),
 	    Nu_Estado 	: $('#cbo-Nu_Estado option:selected').val(),
         Nu_Ticket 	: $('#txt-nu_ticket').val(),
+		sIdCliente : $('#hidden-filtro-cliente-id').val(),
+		sNombreCliente : $('#txt-filtro-cliente-nombre').val(),
 	};
 	$.post('reportes/c_vale_crud.php', {
 		accion 	: 'listAll',
