@@ -10670,7 +10670,7 @@ WHERE
 					LEFT JOIN fac_ta_factura_complemento r ON (r.ch_fac_numerodocumento = t.ch_fac_numerodocumento AND r.ch_fac_seriedocumento = t.ch_fac_seriedocumento AND r.ch_fac_tipodocumento = t.ch_fac_tipodocumento)
 					INNER JOIN int_clientes c ON (c.cli_codigo = t.cli_codigo)
 					LEFT JOIN int_articulos art ON (d.art_codigo = art.art_codigo) 
-   				LEFT JOIN interface_equivalencia_producto q ON (art.art_codigo = q.art_codigo)
+   					LEFT JOIN interface_equivalencia_producto q ON (art.art_codigo = q.art_codigo)
 				WHERE 
 					t.ch_fac_tipodocumento IN ('10','11','20') 
 					AND t.dt_fac_fecha BETWEEN '$FechaIni' AND '$FechaFin' 
@@ -10722,7 +10722,7 @@ WHERE
 				SELECT 
 					to_char(t.dt_fac_fecha,'YYMMDD') as dia, 
 					'$ventaslub'::text as DCUENTA,  
-					CASE WHEN codigo_concar is null THEN '701101C01' ELSE codigo_concar::text END as codigo,
+					'701101C01'::text as codigo,
 					t.ch_fac_numerodocumento::text as trans, 
 					'3'::text as tip,  
 					CASE
@@ -10754,7 +10754,7 @@ WHERE
 					AND t.ch_almacen = '$almacen'
 					--AND q.art_codigo IS NULL
 				GROUP BY 
-					t.dt_fac_fecha, t.ch_almacen,t.ch_fac_seriedocumento, t.ch_fac_numerodocumento, codigo_concar, t.ch_fac_tipodocumento
+					t.dt_fac_fecha, t.ch_almacen,t.ch_fac_seriedocumento, t.ch_fac_numerodocumento,t.nu_fac_valorbruto, t.ch_fac_tipodocumento
 				ORDER BY 
 					t.dt_fac_fecha
 			)UNION(--- EMPIEZA DOCUMENTOS ANULADOS FACTURAS, NOTAS DE DEBITOS Y NOTAS DE CRÉDITOS
@@ -10880,49 +10880,49 @@ WHERE
 		error_log("PASO 1: Creacion de tmp_concar_centimo");
 
 		// creando el vector de diferencia
-		$c = 0;
-		$imp = 0;
-		$flag = 0;
-		$diferencia = "SELECT * FROM tmp_concar_centimo ORDER BY dsubdia, dcompro, dcuenta, dsecue;";
-		if ($sqlca->query($diferencia)>0){
-			while ($reg = $sqlca->fetchRow()){
-				if (substr($reg[4],0,3) == substr($vmcliente,0,3)){
-					if ($flag == 1) {
-						$vec[$c] = $imp;
-						$c = $c + 1;
-					}
-					$imp = trim($reg[9]);
-				} else {
-					$imp = round(($imp-$reg[9]), 2);
-					$flag = 1;
-				}
-			}
-			$vec[$c] = $imp;
-		}
+		// $c = 0;
+		// $imp = 0;
+		// $flag = 0;
+		// $diferencia = "SELECT * FROM tmp_concar_centimo ORDER BY dsubdia, dcompro, dcuenta, dsecue;";
+		// if ($sqlca->query($diferencia)>0){
+		// 	while ($reg = $sqlca->fetchRow()){
+		// 		if (substr($reg[4],0,3) == substr($vmcliente,0,3)){
+		// 			if ($flag == 1) {
+		// 				$vec[$c] = $imp;
+		// 				$c = $c + 1;
+		// 			}
+		// 			$imp = trim($reg[9]);
+		// 		} else {
+		// 			$imp = round(($imp-$reg[9]), 2);
+		// 			$flag = 1;
+		// 		}
+		// 	}
+		// 	$vec[$c] = $imp;
+		// }
 
 		// error_log( json_encode($vec) );
 		// return false;
 
 		// actualizar tabla tmp_concar sumando las diferencias al igv
-		$k = 0;
-		if ($sqlca->query($diferencia)>0){
-			while ($reg = $sqlca->fetchRow()){
-				if (trim($reg[4] == $vmimpuesto)){
-					$dif = $reg[9] + $vec[$k];
-					$k = $k + 1;
-					$sale = $sqlca->query("UPDATE tmp_concar_centimo SET dimport = ".$dif." WHERE dcompro = '".trim($reg[1])."' AND dcuenta='$vmimpuesto' and trim(dcodane)='' AND trim(dsubdia) = '".trim($reg[0])."';", "queryaux2"); // antes: dcodane='99999999999', con ultimo cambio : dcodane=''
-				}
-			}
-		}
-		error_log("PASO 2: Actualizamos tmp_concar_centimo");
+		// $k = 0;
+		// if ($sqlca->query($diferencia)>0){
+		// 	while ($reg = $sqlca->fetchRow()){
+		// 		if (trim($reg[4] == $vmimpuesto)){
+		// 			$dif = $reg[9] + $vec[$k];
+		// 			$k = $k + 1;
+		// 			$sale = $sqlca->query("UPDATE tmp_concar_centimo SET dimport = ".$dif." WHERE dcompro = '".trim($reg[1])."' AND dcuenta='$vmimpuesto' and trim(dcodane)='' AND trim(dsubdia) = '".trim($reg[0])."';", "queryaux2"); // antes: dcodane='99999999999', con ultimo cambio : dcodane=''
+		// 		}
+		// 	}
+		// }
+		// error_log("PASO 2: Actualizamos tmp_concar_centimo");
 
 		// return false;
 
 		// Nueva forma de corrección de centimos
 		// $arrData = array();
-	   //  $sSerieNumeroDocumento = '';
-	   //  $fTotal4070 = 0;
-	   //  $fTotal12 = 0;
+	    // $sSerieNumeroDocumento = '';
+	    // $fTotal4070 = 0;
+	    // $fTotal12 = 0;
 		// if ($sqlca->query($diferencia)>0){
 		// 	while ($reg = $sqlca->fetchRow()){
 		//         if( substr($reg[4],0,2) == '12' && $sSerieNumeroDocumento != $reg[11]){
