@@ -33,7 +33,17 @@ class ActFormaPagoTemplate extends Template {
 					<option value="TODAS">Todas las Cajas</option>
 				</select>
 				<div id="tab_cajas" style="font-size:1.2em; color:red;"></div>
-			</td>'
+			</td>
+		</tr>
+		<tr>
+			<td align="right">Seleccionar Lado: </td>
+			<td id="lados">
+				<select id="id_lados" name="ch_lado">
+					<option value="TODAS">Todos los Lados</option>
+				</select>
+				<div id="tab_lados" style="font-size:1.2em; color:red;"></div>
+			</td>
+		</tr>'
 		));
 
 		$form->addElement(FORM_GROUP_MAIN, new form_element_anytext('</td></tr><tr><td colspan="2" align="center">'));

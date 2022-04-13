@@ -30,19 +30,23 @@
 						$('#tab_turnos').html("No hay turnos en esta fecha");
 						$('#id_cajas').html("");
 						$('#tab_cajas').html("No hay cajas en esta fecha");
+						$('#id_lados').html("");
+						$('#tab_lados').html("No hay lados en esta fecha");
 					} else if(xm == 'Error') {
 						$('#cargardor').css({'display':'none'});
 						$('#opt_final').html("");
 						$('#tab_turnos').html("No hay turnos en esta fecha");
 						$('#id_cajas').html("");
-						$('#tab_cajas').html("No hay cajas en esta fecha");
+						$('#id_lados').html("");
 					} else {
 						var json=eval('('+xm+')');
-						$('#opt_final').html(json.msg);
 						$('#cargardor').css({'display':'none'});
+						$('#opt_final').html(json.msg);
 						$('#id_cajas').html(json.msg2);
+						$('#id_lados').html(json.msg3);
 						$('#tab_turnos').html("");
 						$('#tab_cajas').html("");
+						$('#tab_lados').html("");
 					}
 				}
 			});
@@ -93,19 +97,25 @@
 									$('#tab_turnos').html("No hay turnos en esta fecha");
 									$('#id_cajas').html("");
 									$('#tab_cajas').html("No hay cajas en esta fecha");
+									$('#id_lados').html("");
+									$('#tab_lados').html("No hay lados en esta fecha");
 								} else if ( xm == 'Error' ) {
 									$('#cargardor').css({'display':'none'});
 									$('#opt_final').html("");
 									$('#tab_turnos').html("No hay turnos en esta fecha");
 									$('#id_cajas').html("");
 									$('#tab_cajas').html("No hay cajas en esta fecha");
+									$('#id_lados').html("");
+									$('#tab_lados').html("No hay lados en esta fecha");
 								} else {
 									var json=eval('('+xm+')');
-									$('#opt_final').html(json.msg);
 									$('#cargardor').css({'display':'none'});
+									$('#opt_final').html(json.msg);
 									$('#id_cajas').html(json.msg2);
+									$('#id_lados').html(json.msg3);
 									$('#tab_turnos').html("");
 									$('#tab_cajas').html("");
+									$('#tab_lados').html("");
 								}
 							}
 						});

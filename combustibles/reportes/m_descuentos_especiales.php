@@ -190,6 +190,7 @@ WHERE
 ORDER BY
  pump
 			";
+			error_log($sql);
 
 			if ($sqlca->query($sql) <= 0)
                	throw new Exception("Error get SearchPump");

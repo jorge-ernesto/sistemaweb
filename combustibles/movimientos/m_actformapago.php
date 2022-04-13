@@ -30,7 +30,7 @@ class ActFormaPagoModel extends Model {
         return $result;
     }
 
-	function busqueda($almacen, $fecha, $turno, $caja) {
+	function busqueda($almacen, $fecha, $turno, $caja, $lado) {
         	global $sqlca;
 
 		$fecha_dc = explode('/', $fecha, 3);
@@ -147,6 +147,9 @@ class ActFormaPagoModel extends Model {
 
 			if ($caja != "" && $caja != "TODAS")
 			    $sql .= " AND caja = '" . pg_escape_string($caja) . "' ";
+
+			if ($lado != "" && $lado != "TODAS")
+			    $sql .= " AND pump = '" . pg_escape_string($lado) . "' ";
 
 			$sql .= "
 ORDER BY

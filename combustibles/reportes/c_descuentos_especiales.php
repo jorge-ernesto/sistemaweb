@@ -29,7 +29,7 @@ try {
 		$turnos 	= Descuentos_Especiales_Model::ObtenerFechaDTurno($fecha);
 		// $cajas		= Descuentos_Especiales_Model::ObtenerCajas($almacen);
 		$cajas		= Descuentos_Especiales_Model::ObtenerCajas($almacen, $fecha);
-		$lados		= Descuentos_Especiales_Model::SearchPump($almacen, $fecha);
+		$lados		= Descuentos_Especiales_Model::SearchPump($almacen, $fecha); //SearchPump
 		$turnoa 	= 0;
 
 		$cadena.='<option value="">Todos los turnos</option>';
@@ -51,6 +51,7 @@ try {
 
 		}
 
+		$cadena3.='<option value="">Todos los lados</option>';
 		foreach($lados as $fila) {
 
 			$lado = $fila['pump'];       

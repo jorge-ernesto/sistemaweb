@@ -41,7 +41,7 @@ class ActFormaPagoController extends Controller {
 			$fecha		= date('d/m/Y');
 			$turno 		= '';
 
-			$resultados	= ActFormaPagoModel::busqueda($almacen, $fecha, '', 'TODAS');
+			$resultados	= ActFormaPagoModel::busqueda($almacen, $fecha, '', 'TODAS', 'TODAS');
 		    $result		= ActFormaPagoTemplate::formSearch($fecha);
 
 			$consolidado = 'Fecha: '.$fecha;
@@ -60,7 +60,7 @@ class ActFormaPagoController extends Controller {
 			$fecha = $_REQUEST['ch_fecha'];
 			$turno = $_REQUEST['ch_turno'];
 
-		    	$resultados = ActFormaPagoModel::busqueda($_REQUEST['ch_almacen'], $fecha, $turno, $_REQUEST['ch_caja']);
+		    	$resultados = ActFormaPagoModel::busqueda($_REQUEST['ch_almacen'], $fecha, $turno, $_REQUEST['ch_caja'], $_REQUEST['ch_lado']);
 
 			$consolidado = 'Fecha: '.$fecha.' Turno: '.$turno;
 
