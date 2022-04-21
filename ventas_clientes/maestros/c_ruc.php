@@ -128,7 +128,7 @@ class RucController extends Controller {
 
 				case 'Importar':
 				$busqueda = RucModel::tmListado($_REQUEST['busqueda'],$_REQUEST['desde'],$_REQUEST['hasta'],$_REQUEST['rxp'],$_REQUEST['pagina'],'1');
-				$result  = RucTemplate::formBuscar($listado['paginacion'], '1', '','0','0');
+				$result  = RucTemplate::formBuscar($listado['paginacion'], '1', '','0','0','');
 				$result .= RucTemplate::listado($busqueda['datos'],'1');
 				$this->visor->addComponent("ContentB", "content_body", $result);
 				break;
@@ -184,8 +184,14 @@ class RucController extends Controller {
 						if($tfn != "") {
 							$zf = new SimpleUnzip();
 							$ze = $zf->ReadFile($tfn);
+							// error_log('ze');
+							// error_log(json_encode($ze));
 							foreach ($ze as $de) {
-								$ls = explode("\n",gzinflate($de->Data));
+								// error_log('de');
+								// error_log(json_encode($de));
+								$ls = explode("\n",$de->Data);
+								// error_log('ls');
+								// error_log(json_encode($ls));
 								foreach ($ls as $ln => $ll) {
 									if($ln > 0) {
 										$lx = explode('|', $ll);
@@ -195,7 +201,7 @@ class RucController extends Controller {
 							}
 
 							if (count($ze) == 0) {
-								$result  = RucTemplate::formBuscar('', '1', '', '0','0');
+								$result  = RucTemplate::formBuscar('', '1', '', '0','0','');
 								$result .= RucTemplate::listado($busqueda['datos'],'1');
 								$this->visor->addComponent("ContentB", "content_body", $result);
 								echo "<script>alert('Datos cargados correctamente');</script>\n";
@@ -203,7 +209,7 @@ class RucController extends Controller {
 							}
 						}
 
-						$result  = RucTemplate::formBuscar('', '1', '', '0','0');
+						$result  = RucTemplate::formBuscar('', '1', '', '0','0','');
 						$result .= RucTemplate::listado($busqueda['datos'],'1');
 						$this->visor->addComponent("ContentB", "content_body", $result);
 						echo "<script>alert('Datos cargados correctamente');</script>\n";
