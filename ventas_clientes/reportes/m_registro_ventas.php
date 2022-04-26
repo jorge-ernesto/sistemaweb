@@ -10,12 +10,39 @@ class RegistroVentasModel extends Model {
 	function obtieneRegistros($almacen, $anio, $mes, $desde, $hasta, $tipo, $orden, $seriesdocumentos, $tipo_vista_monto, $serie, $nserie, $BI_incre, $IGV_incre, $TOTAL_incre, $monto_igual, $nd) {
 		global $sqlca;
 
+		//Obtenemos fecha del reporte y fecha de parametro "reportsByRealDate" de "int_parametros" en formato "YYYY-MM"
+		$dataParametro = $this->getFechaParametro($anio, $mes);
+
 		$result 			= Array();
 		$fecha_postrans 	= $anio . "" . $mes;
 		$fecha_serie 		= $anio . "-" . $mes;
 		$fecha_inicial 		= $anio . "-" . $mes . "-" . $desde;
 		$fecha_final 		= $anio . "-" . $mes . "-" . $hasta;
 		$correlativo 		= 0;
+
+		//Obtenemos fecha_postrans del mes anterior y mes despues
+		$anio_ant = $anio;
+		$anio_des = $anio;
+		$mes_ant  = $mes-1;
+		$mes_des  = $mes+1;
+		$mes_ant  = strlen($mes_ant) == 1 ? "0".$mes_ant : $mes_ant;
+		$mes_des  = strlen($mes_des) == 1 ? "0".$mes_des : $mes_des;
+		if($mes == "01"){
+			$mes_ant  = "12";
+			$anio_ant = $anio-1;
+		}
+		if($mes == "12"){
+			$mes_des  = "01";
+			$anio_des = $anio+1;
+		}
+		$fecha_postrans_ant = $anio_ant . "" . $mes_ant;
+		$fecha_postrans_des = $anio_des . "" . $mes_des;
+		error_log(json_encode(array($fecha_postrans, $fecha_postrans_ant, $fecha_postrans_des)));
+		
+		//Validamos que tablas pos_trans del mes anterior y posterior existan
+		$status_table_postrans_ant = $this->validateTableBySchema("pos_trans".$fecha_postrans_ant);
+		$status_table_postrans_des = $this->validateTableBySchema("pos_trans".$fecha_postrans_des);
+		error_log( json_encode(array($status_table_postrans_ant, $status_table_postrans_des)));
 
 		if ($nd == 'S')
 			$tipo_documento_tickes 	= array("'F','N'");
@@ -30,7 +57,54 @@ class RegistroVentasModel extends Model {
 		$aplicar_incremento = FALSE;
 
 		/** CONSULTA PARA LOS EXTORNOS **/
-        $sql_aferciones = "
+		if ( $dataParametro['fecha_parametro'] != 0 ) {
+			if ( $status_table_postrans_ant == true ) {
+
+				//El valor del parametro corresponde a un mes anterior al indicado en el registro de ventas
+				if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) > 0) {
+					$sql_aferciones .= "
+					SELECT
+						last(venta_tickes.tickes_refe),
+						venta_tickes.registro,
+						venta_tickes.trans_ext
+					FROM
+						(SELECT 
+							(p.trans||'-'||p.caja) as tickes_refe,
+							p.trans,
+							extorno.trans as trans_ext,
+							extorno.registro,
+							extorno.trans1,p.fecha
+						FROM
+							pos_trans" . $fecha_postrans_ant . " AS p
+							INNER JOIN (
+							SELECT 
+								(dia|| caja || td ||turno ||codigo ||tipo || pump || fpago ||  abs(cantidad) ||abs(precio)|| abs(igv) || abs(importe) ||ruc) as registro,
+								fecha,
+								trans||'-'||caja as trans,
+								trans as trans1
+							FROM
+								pos_trans" . $fecha_postrans_ant . "
+							WHERE
+								tm = 'A'
+								AND td IN ('B','F')
+							) as extorno ON (p.dia|| p.caja || p.td ||p.turno ||p.codigo ||p.tipo || p.pump || p.fpago || abs(p.cantidad) || abs(p.precio)|| abs(p.igv) || abs(p.importe) ||ruc) = extorno.registro
+							AND td IN ('B','F')
+							AND tm = 'V'
+							AND p.trans < extorno.trans1
+						ORDER BY
+							p.fecha asc
+						) AS venta_tickes
+					GROUP BY
+						venta_tickes.registro,
+						venta_tickes.trans_ext
+					
+					UNION ALL
+					";
+				}
+			}
+		}
+
+        $sql_aferciones .= "
 		SELECT
 			last(venta_tickes.tickes_refe),
 			venta_tickes.registro,
@@ -64,11 +138,59 @@ class RegistroVentasModel extends Model {
 			) AS venta_tickes
 		GROUP BY
 			venta_tickes.registro,
-			venta_tickes.trans_ext;";		
+			venta_tickes.trans_ext";	
+			
+		if ( $dataParametro['fecha_parametro'] != 0 ) {
+			if ( $status_table_postrans_des == true ) {
+			
+				//El valor del parametro corresponde a un mes anterior al indicado en el registro de ventas / El valor del parametro corresponde al mismo mes y año indicado en el registro de ventas. Es decir las fechas son iguales
+				if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) > 0 || strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) == 0) {
+					$sql_aferciones .= "
+					UNION ALL
+					
+					SELECT
+						last(venta_tickes.tickes_refe),
+						venta_tickes.registro,
+						venta_tickes.trans_ext
+					FROM
+						(SELECT 
+							(p.trans||'-'||p.caja) as tickes_refe,
+							p.trans,
+							extorno.trans as trans_ext,
+							extorno.registro,
+							extorno.trans1,p.fecha
+						FROM
+							pos_trans" . $fecha_postrans_des . " AS p
+							INNER JOIN (
+							SELECT 
+								(dia|| caja || td ||turno ||codigo ||tipo || pump || fpago ||  abs(cantidad) ||abs(precio)|| abs(igv) || abs(importe) ||ruc) as registro,
+								fecha,
+								trans||'-'||caja as trans,
+								trans as trans1
+							FROM
+								pos_trans" . $fecha_postrans_des . "
+							WHERE
+								tm = 'A'
+								AND td IN ('B','F')
+							) as extorno ON (p.dia|| p.caja || p.td ||p.turno ||p.codigo ||p.tipo || p.pump || p.fpago || abs(p.cantidad) || abs(p.precio)|| abs(p.igv) || abs(p.importe) ||ruc) = extorno.registro
+							AND td IN ('B','F')
+							AND tm = 'V'
+							AND p.trans < extorno.trans1
+						ORDER BY
+							p.fecha asc
+						) AS venta_tickes
+					GROUP BY
+						venta_tickes.registro,
+						venta_tickes.trans_ext";	
+				}
+			}
+		}
+
 		/*** Agregado 2020-02-04 ***/
-		// echo "<pre>sql_aferciones:";
-		// echo "$sql_aferciones";
-		// echo "</pre>";
+		echo "<pre>sql_aferciones:";
+		echo "$sql_aferciones";
+		echo "</pre>";
+		// die();
 		/***/
 
 		if ($sqlca->query($sql_aferciones) < 0)
@@ -130,7 +252,105 @@ class RegistroVentasModel extends Model {
 		}
 
 		//TICKES FACTURAS
-		$sql_tickes_factura = "
+		$where_tickets = "AND T.dia BETWEEN '" . pg_escape_string($fecha_inicial) . "' AND '" . pg_escape_string($fecha_final) . "'";
+
+		if ( $dataParametro['fecha_parametro'] != 0 ) {
+			//El valor del parametro corresponde al mismo mes y año indicado en el registro de ventas. Es decir las fechas son iguales
+			if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) == 0)
+				$where_tickets = "AND T.dia >= '" . pg_escape_string($fecha_inicial) . "' AND T.fecha <= '" . pg_escape_string($fecha_final) . " 23:59:59'";
+	
+			//El valor del parametro corresponde a un mes anterior al indicado en el registro de ventas
+			if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) > 0)
+				$where_tickets = "AND T.fecha >= '" . pg_escape_string($fecha_inicial) . " 00:00:00' AND T.fecha <= '" . pg_escape_string($fecha_final) . " 23:59:59'";
+		}
+
+		if ( $dataParametro['fecha_parametro'] != 0 ) {
+			if ( $status_table_postrans_ant == true ) {
+
+				//El valor del parametro corresponde a un mes anterior al indicado en el registro de ventas
+				if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) > 0) {
+					$sql_tickes_factura .= "
+					SELECT
+						T.trans as trans,
+						T.caja as caja,
+						T.dia::DATE as emision,
+						T.dia::DATE as vencimiento,
+						(CASE
+							WHEN FIRST(T.td) = 'B' and T.usr = '' THEN '12' 
+							WHEN FIRST(T.td) = 'N' and T.usr = '' THEN '12' 
+							WHEN FIRST(T.td) = 'F' and T.usr = '' THEN '12' 
+							WHEN FIRST(T.td) = 'B' and FIRST(T.tm) = 'V' and T.usr != '' THEN '03' 
+							WHEN FIRST(T.td) = 'B' and FIRST(T.tm) = 'D' and T.usr != '' THEN '07' 
+							WHEN FIRST(T.td) = 'B' and FIRST(T.tm) = 'A' and T.usr != '' THEN '07' 
+							WHEN FIRST(T.td) = 'F' and FIRST(T.tm) = 'V' and T.usr != '' THEN '01' 
+							WHEN FIRST(T.td) = 'F' and FIRST(T.tm) = 'D' and T.usr != '' THEN '07' 
+							WHEN FIRST(T.td) = 'F' and FIRST(T.tm) = 'A' and T.usr != '' THEN '07' 	
+						END) as tipo,
+						(CASE WHEN FIRST(T.usr) = '' THEN to_char(T.trans,'FM999999999999') else SUBSTR(TRIM(T.usr), 6) END) as numero,
+						(CASE
+							WHEN FIRST(T.td) = 'B' AND FIRST(T.ruc) != '' THEN '1'
+							WHEN FIRST(T.td) = 'B' AND FIRST(T.ruc) = '' THEN '0'
+							WHEN FIRST(T.td) = 'B' AND FIRST(T.ruc) IS NULL THEN '0'
+							WHEN FIRST(T.td) = 'N' THEN '0'
+							WHEN FIRST(T.td) = 'F' THEN '6'
+						END) as tipodi,
+						(CASE
+							WHEN FIRST(T.td) = 'N' THEN '00000000000'
+							WHEN FIRST(T.ruc) = '' THEN '99999999'
+							WHEN FIRST(T.ruc) IS NULL THEN '99999999'
+						ELSE
+							FIRST(T.ruc)
+						END) as ruc,
+						(CASE
+							WHEN FIRST(T.td) = 'N' THEN 'COMPROBANTE ANULADO'
+							WHEN FIRST(T.ruc) = '' THEN 'CLIENTE VARIOS'
+							WHEN FIRST(T.ruc) IS NULL THEN 'CLIENTE VARIOS'
+						ELSE
+							substr(FIRST(R.razsocial),0,60)
+						END) as cliente,
+						(CASE WHEN FIRST(T.td) = 'N' THEN '0' ELSE ROUND(SUM(T.importe - T.igv), 2) END) AS imponible,
+						(CASE WHEN FIRST(T.td) = 'N' THEN '0' ELSE ROUND(SUM(T.igv), 2) END) AS igv,
+						(CASE WHEN FIRST(T.td) = 'N' THEN '0' ELSE ROUND(SUM(T.importe), 2) END) AS importe,
+						FIRST(TC.tca_venta_oficial) as tipocambio,
+						(CASE
+							WHEN FIRST(T.tm) IN ('D','A') THEN 'A' ELSE FIRST(T.td)  
+						END) as tipo_pdf,
+						'OK' as estadoventa,
+						FIRST(T.turno) as turno,
+						(SELECT par_valor FROM int_parametros WHERE par_nombre = 'taxoptional') taxoptional,
+						FIRST(T.es) as es,
+						SUBSTR(TRIM(T.usr), 0, 5) nserie,
+						SUBSTR(TRIM(T.usr), 6) numdoc,
+						FIRST(T.td) AS td,
+						FIRST(T.rendi_gln) AS rendi_gln,
+						FIRST(T.ruc) AS ruc_bd_interno,
+						FIRST(t.td) AS td, -- JEL
+						FIRST(t.codigo) AS codigo, -- JEL
+						CASE
+							WHEN FIRST(t.td) = 'B' OR FIRST(t.td) = 'F' THEN COALESCE( SUM(T.balance), 0.00 )
+							ELSE 0.00
+						END AS balance -- JEL --ICBPER
+					FROM
+						pos_trans" . $fecha_postrans_ant . " AS T
+						LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = T.dia)
+						LEFT JOIN ruc AS R ON (R.ruc = T.ruc)
+					WHERE
+						T.td IN (" . implode(',', $tipo_documento_tickes) . ")
+						$where_tickets
+						AND T.es = '$almacen'
+					GROUP BY
+						T.dia,
+						T.trans,
+						T.caja,
+						T.usr
+
+					UNION ALL
+					";
+				}
+			}
+		}
+
+		$sql_tickes_factura .= "
 		SELECT
 			T.trans as trans,
 			T.caja as caja,
@@ -197,23 +417,114 @@ class RegistroVentasModel extends Model {
 			LEFT JOIN ruc AS R ON (R.ruc = T.ruc)
 		WHERE
 			T.td IN (" . implode(',', $tipo_documento_tickes) . ")
-			AND T.dia BETWEEN '" . pg_escape_string($fecha_inicial) . "' AND '" . pg_escape_string($fecha_final) . "'
+			$where_tickets
 			AND T.es = '$almacen'
 		GROUP BY
 			T.dia,
 			T.trans,
         	T.caja,
         	T.usr
+		";
+
+		if ( $dataParametro['fecha_parametro'] != 0 ) {
+			if ( $status_table_postrans_des == true ) {
+			
+				//El valor del parametro corresponde a un mes anterior al indicado en el registro de ventas / El valor del parametro corresponde al mismo mes y año indicado en el registro de ventas. Es decir las fechas son iguales
+				if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) > 0 || strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) == 0) {
+					$sql_tickes_factura .= "
+					UNION ALL
+
+					SELECT
+						T.trans as trans,
+						T.caja as caja,
+						T.dia::DATE as emision,
+						T.dia::DATE as vencimiento,
+						(CASE
+							WHEN FIRST(T.td) = 'B' and T.usr = '' THEN '12' 
+							WHEN FIRST(T.td) = 'N' and T.usr = '' THEN '12' 
+							WHEN FIRST(T.td) = 'F' and T.usr = '' THEN '12' 
+							WHEN FIRST(T.td) = 'B' and FIRST(T.tm) = 'V' and T.usr != '' THEN '03' 
+							WHEN FIRST(T.td) = 'B' and FIRST(T.tm) = 'D' and T.usr != '' THEN '07' 
+							WHEN FIRST(T.td) = 'B' and FIRST(T.tm) = 'A' and T.usr != '' THEN '07' 
+							WHEN FIRST(T.td) = 'F' and FIRST(T.tm) = 'V' and T.usr != '' THEN '01' 
+							WHEN FIRST(T.td) = 'F' and FIRST(T.tm) = 'D' and T.usr != '' THEN '07' 
+							WHEN FIRST(T.td) = 'F' and FIRST(T.tm) = 'A' and T.usr != '' THEN '07' 	
+						END) as tipo,
+						(CASE WHEN FIRST(T.usr) = '' THEN to_char(T.trans,'FM999999999999') else SUBSTR(TRIM(T.usr), 6) END) as numero,
+						(CASE
+							WHEN FIRST(T.td) = 'B' AND FIRST(T.ruc) != '' THEN '1'
+							WHEN FIRST(T.td) = 'B' AND FIRST(T.ruc) = '' THEN '0'
+							WHEN FIRST(T.td) = 'B' AND FIRST(T.ruc) IS NULL THEN '0'
+							WHEN FIRST(T.td) = 'N' THEN '0'
+							WHEN FIRST(T.td) = 'F' THEN '6'
+						END) as tipodi,
+						(CASE
+							WHEN FIRST(T.td) = 'N' THEN '00000000000'
+							WHEN FIRST(T.ruc) = '' THEN '99999999'
+							WHEN FIRST(T.ruc) IS NULL THEN '99999999'
+						ELSE
+							FIRST(T.ruc)
+						END) as ruc,
+						(CASE
+							WHEN FIRST(T.td) = 'N' THEN 'COMPROBANTE ANULADO'
+							WHEN FIRST(T.ruc) = '' THEN 'CLIENTE VARIOS'
+							WHEN FIRST(T.ruc) IS NULL THEN 'CLIENTE VARIOS'
+						ELSE
+							substr(FIRST(R.razsocial),0,60)
+						END) as cliente,
+						(CASE WHEN FIRST(T.td) = 'N' THEN '0' ELSE ROUND(SUM(T.importe - T.igv), 2) END) AS imponible,
+						(CASE WHEN FIRST(T.td) = 'N' THEN '0' ELSE ROUND(SUM(T.igv), 2) END) AS igv,
+						(CASE WHEN FIRST(T.td) = 'N' THEN '0' ELSE ROUND(SUM(T.importe), 2) END) AS importe,
+						FIRST(TC.tca_venta_oficial) as tipocambio,
+						(CASE
+							WHEN FIRST(T.tm) IN ('D','A') THEN 'A' ELSE FIRST(T.td)  
+						END) as tipo_pdf,
+						'OK' as estadoventa,
+						FIRST(T.turno) as turno,
+						(SELECT par_valor FROM int_parametros WHERE par_nombre = 'taxoptional') taxoptional,
+						FIRST(T.es) as es,
+						SUBSTR(TRIM(T.usr), 0, 5) nserie,
+						SUBSTR(TRIM(T.usr), 6) numdoc,
+						FIRST(T.td) AS td,
+						FIRST(T.rendi_gln) AS rendi_gln,
+						FIRST(T.ruc) AS ruc_bd_interno,
+						FIRST(t.td) AS td, -- JEL
+						FIRST(t.codigo) AS codigo, -- JEL
+						CASE
+							WHEN FIRST(t.td) = 'B' OR FIRST(t.td) = 'F' THEN COALESCE( SUM(T.balance), 0.00 )
+							ELSE 0.00
+						END AS balance -- JEL --ICBPER
+					FROM
+						pos_trans" . $fecha_postrans_des . " AS T
+						LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = T.dia)
+						LEFT JOIN ruc AS R ON (R.ruc = T.ruc)
+					WHERE
+						T.td IN (" . implode(',', $tipo_documento_tickes) . ")
+						$where_tickets
+						AND T.es = '$almacen'
+					GROUP BY
+						T.dia,
+						T.trans,
+						T.caja,
+						T.usr
+					";
+				}
+			}
+		}
+
+		$sql_tickes_factura .= "
 		ORDER BY
 			--tipo desc,
 			--nserie,
 			2,
 			1;
 		";
+
 		/*** Agregado 2020-02-04 ***/
-		// echo "<pre>sql_tickes_factura:";
-		// echo "$sql_tickes_factura";
-		// echo "</pre>";
+		echo "<pre>sql_tickes_factura:";
+		echo "$sql_tickes_factura";
+		echo "</pre>";
+		// die();
 		/***/
 
 		if ($sqlca->query($sql_tickes_factura) < 0)
@@ -495,7 +806,7 @@ class RegistroVentasModel extends Model {
 		WHERE
 			Cab.ch_fac_tipodocumento IN ('10', '35', '11', '20')
 			AND cab.ch_almacen = '" . $almacen . "'
-			AND Cab.dt_fac_fecha BETWEEN '" . pg_escape_string($fecha_inicial) . "' AND '" . pg_escape_string($fecha_final) . "'
+			AND Cab.dt_fac_fecha BETWEEN '" . pg_escape_string($fecha_inicial) . "' AND '" . pg_escape_string($fecha_final) . "' --Busqueda por fecha
 		GROUP BY
 			tipo,
 			serie,
@@ -832,6 +1143,55 @@ class RegistroVentasModel extends Model {
 		}
 
 		return $result;
+	}
+
+	function getFechaParametro($anio, $mes) {
+		global $sqlca;
+
+		/** OBTENEMOS FECHA **/
+		$fecha_registro_ventas = $anio . "-" . $mes;
+
+		/** OBTENEMOS PARAMETRO PARA REGISTRO DE VENTAS REAL **/
+		$sql_reports_real_date = "
+		SELECT 
+			TRIM(par_valor) AS par_valor
+		FROM
+			int_parametros
+		WHERE 
+			par_nombre = 'reportsByRealDate';
+		";
+
+		if ($sqlca->query($sql_reports_real_date) < 0)
+			return false;
+
+		$row = $sqlca->fetchRow();
+		$fecha_parametro = isset($row['par_valor']) ? $row['par_valor'] : 0;
+
+		$dataParametro = array("fecha_registro_ventas" => $fecha_registro_ventas, "fecha_parametro" => $fecha_parametro);
+		error_log("dataParametro");
+		error_log(json_encode($dataParametro));
+
+		return $dataParametro;
+
+		/** 
+		 * Si fecha parametro es mayor a fecha registro ventas, entonces el resultado sera negativo //ESTO NO DEBE HACER NADA
+		 * Si fecha parametro y fecha actual son iguales      , entonces el resultado sera 0        //ESTO BUSCAMOS
+		 * Si fecha parametro es menor a fecha registro ventas, entonces el resultado sera positivo //ESTO BUSCAMOS
+		 */
+		// $comparacion_fecha = strcmp($fecha_registro_ventas, $fecha_parametro);	
+
+		// return array(
+		// 	"fecha_registro_ventas" => $fecha_registro_ventas, 
+		// 	"fecha_parametro"       => $fecha_parametro, 
+		// 	"comparacion_fecha"     => $comparacion_fecha
+		// );
+	}
+
+	function validateTableBySchema($table) {
+		global $sqlca;
+		$iStatusTable = $sqlca->query("SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='".$table."'");
+		error_log("SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='".$table."'");
+		return $iStatusTable;
 	}
 
 	function llenar_arreglo_objecto_imprimir($array_tmp_impresion, $a, $tipo_vista_monto) {
