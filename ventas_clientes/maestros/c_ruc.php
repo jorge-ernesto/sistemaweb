@@ -28,6 +28,9 @@ class RucController extends Controller {
 			$tablaNombre = 'RUC';
 			$listado = false;
 
+			$isOpensoftServer2 = RucModel::getOpensoftServer2();
+			error_log(json_encode($isOpensoftServer2));
+
 			switch ($this->action) {
 				case 'Agregar':
 				$result = RucTemplate::formRuc(array());
@@ -62,16 +65,32 @@ class RucController extends Controller {
 
 				case 'Guardar':
 				$listado = false;
+				$address = ($isOpensoftServer2['address']) ? $_REQUEST['ruc']['address'] : NULL;
+				$locid   = ($isOpensoftServer2['locid'])   ? $_REQUEST['ruc']['locid']   : NULL;
 				if($_REQUEST['accion']=='actualizar') {
-					$result = RucModel::actualizarRegistro($_REQUEST['ruc']['ruc'],$_REQUEST['ruc']['razsocial'],$_REQUEST['fecha']);
+					$result = RucModel::actualizarRegistro($_REQUEST['ruc']['ruc'],$_REQUEST['ruc']['razsocial'],$_REQUEST['fecha'],$address,$locid);
 				} else {
-					$result = RucModel::guardarRegistro($_REQUEST['ruc']['ruc'],$_REQUEST['ruc']['razsocial']);
+					$result = RucModel::guardarRegistro($_REQUEST['ruc']['ruc'],$_REQUEST['ruc']['razsocial'],$address,$locid);
 					print_r($_REQUEST['ruc']);
 				}
 
 				if($result!='') {
-					$result = RucTemplate::errorResultado('ERROR: RUC YA EXISTENTE');
-					$this->visor->addComponent("error", "error_body", $result);
+					switch ($result) {
+						case '0':
+							$result = RucTemplate::errorResultado('ERROR: RUC YA EXISTENTE');
+							$this->visor->addComponent("error", "error_body", $result);
+							break;
+						
+						case '1':
+							$result = RucTemplate::errorResultado('ERROR: NO SE PUDO GRABAR/ACTUALIZAR CORRECTAMENTE LOS DATOS');
+							$this->visor->addComponent("error", "error_body", $result);
+							break;
+
+						default:
+							$result = RucTemplate::errorResultado('ERROR: RUC YA EXISTENTE');
+							$this->visor->addComponent("error", "error_body", $result);
+							break;
+					}
 				} else {
 					$result = RucTemplate::formRuc(array());
 					$this->visor->addComponent("ContentB", "content_body", $result);

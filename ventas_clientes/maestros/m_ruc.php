@@ -23,9 +23,22 @@ class RucModel extends Model{
 		return $resultado;
 	}
 
-	function guardarRegistro($registroid,$razsocial) {
+	function guardarRegistro($registroid,$razsocial,$address=NULL,$locid=NULL) {
 		global $sqlca;
-		$query = "Insert into ruc values('".pg_escape_string($registroid)."','".pg_escape_string($razsocial)."')";
+		$isOpensoftServer2 = RucModel::getOpensoftServer2();
+		$columnsOpensoftServer2 .= ($isOpensoftServer2['address']) ? ",address" : "";
+		$columnsOpensoftServer2 .= ($isOpensoftServer2['locid'])   ? ",locid"   : "";
+		$valuesOpensoftServer2  .= ($isOpensoftServer2['address']) ? ",'".pg_escape_string($address)."'" : "";
+		$valuesOpensoftServer2  .= ($isOpensoftServer2['locid'])   ? ",'".pg_escape_string($locid)."'"   : "";
+		
+		//VALIDAMOS QUE CÓDIGO DE UBIGEO SOLO ACEPTE NUMEROS Y QUE NO SEA MAYOR A 6 DIGITOS
+		if ($isOpensoftServer2['locid']) {
+			if (!preg_match('/^[0-9]*$/', $locid) || strlen($locid) > 6) {
+				return '1';
+			}
+		}
+
+		$query = "Insert into ruc (ruc,razsocial $columnsOpensoftServer2) values('".pg_escape_string($registroid)."','".pg_escape_string($razsocial)."' $valuesOpensoftServer2)";
 
 		if ($sqlca->query($query) < 0) {
 			return '0';
@@ -35,9 +48,20 @@ class RucModel extends Model{
 		return '';
 	}
 
-	function actualizarRegistro($registroid,$razsocial,$fecha) {
+	function actualizarRegistro($registroid,$razsocial,$fecha,$address,$locid) {
 		global $sqlca;
-		$query = "Update ruc set razsocial='".pg_escape_string($razsocial)."', fecha = to_date('".pg_escape_string($fecha)."','DD/MM/YYYY') where ruc='".pg_escape_string($registroid)."'";
+		$isOpensoftServer2 = RucModel::getOpensoftServer2();
+		$updateOpensoftServer2 .= ($isOpensoftServer2['address']) ? ",address='".pg_escape_string($address)."'" : "";
+		$updateOpensoftServer2 .= ($isOpensoftServer2['locid'])   ? ",locid='".pg_escape_string($locid)."'" : "";
+
+		//VALIDAMOS QUE CÓDIGO DE UBIGEO SOLO ACEPTE NUMEROS Y QUE NO SEA MAYOR A 6 DIGITOS
+		if ($isOpensoftServer2['locid']) {
+			if (!preg_match('/^[0-9]*$/', $locid) || strlen($locid) > 6) {
+				return '1';
+			}
+		}
+
+		$query = "Update ruc set razsocial='".pg_escape_string($razsocial)."', fecha = to_date('".pg_escape_string($fecha)."','DD/MM/YYYY') $updateOpensoftServer2 where ruc='".pg_escape_string($registroid)."'";
 		$result = $sqlca->query($query);
 		return '';
 	}
@@ -61,8 +85,11 @@ class RucModel extends Model{
 	function recuperarRegistroArray($registroid) {
 		global $sqlca;
 
+		$isOpensoftServer2 = RucModel::getOpensoftServer2();
+		$selectOpensoftServer2 .= ($isOpensoftServer2['address']) ? ",address" : "";
+		$selectOpensoftServer2 .= ($isOpensoftServer2['locid'])   ? ",locid"   : "";
 		$registro = array();
-		$query = "SELECT ruc,razsocial,to_char(fecha,'DD/MM/YYYY') as fecha from RUC where ruc='" . pg_escape_string($registroid) . "'";
+		$query = "SELECT ruc,razsocial,to_char(fecha,'DD/MM/YYYY') as fecha $selectOpensoftServer2 from RUC where ruc='" . pg_escape_string($registroid) . "'";
 
 		$sqlca->query($query);
 
@@ -127,9 +154,13 @@ class RucModel extends Model{
 		global $sqlca;
 		$entro = 0;
 		if($sunat != '2') {
-			$cond = " where ";
+			$cond = " where 1=1 ";
 			if(!empty($filtro["codigo"])) {
-				$cond .= " ruc like trim('".pg_escape_string($filtro["codigo"])."%')";
+				$cond .= " and ruc like trim('%".pg_escape_string($filtro["codigo"])."%')";
+				$entro = 1;
+			}
+			if(!empty($filtro["address"])) {
+				$cond .= " and address like '%".pg_escape_string($filtro["address"])."%'";
 				$entro = 1;
 			}
 /*			if($desde!= '' and $hasta!= '') {
@@ -139,7 +170,11 @@ class RucModel extends Model{
 			}*/
 		}
 
-		$query = "select ruc, razsocial, to_char(date(fecha),'DD/MM/YYYY') from ruc ".$cond. " order by ruc ";
+		$isOpensoftServer2 = RucModel::getOpensoftServer2();
+		$selectOpensoftServer2 .= ($isOpensoftServer2['address']) ? ",address" : "";
+		$selectOpensoftServer2 .= ($isOpensoftServer2['locid'])   ? ",locid"   : "";
+
+		$query = "select ruc, razsocial $selectOpensoftServer2 , to_char(date(fecha),'DD/MM/YYYY') from ruc ".$cond. " order by ruc ";
 
 		if($sunat != '1') {
 			$resultado_1 = $sqlca->query($query);
@@ -308,5 +343,57 @@ GROUP BY
 				'sMessage' => 'Sin datos',
 			);
 		}
+	}
+
+	function getOpensoftServer2(){
+		global $sqlca;        
+        
+        //VALIDAMOS QUE EL CAMPO ADDRESS EXISTA        
+        $iStatus = $sqlca->query("
+            SELECT EXISTS(
+                SELECT column_name
+                FROM   information_schema.columns
+                WHERE  table_schema='public'
+                AND    table_name='ruc'
+                AND    column_name='address'            
+            );
+        ");
+
+        $arrResponse = array('address' => FALSE, 'locid' => FALSE);
+
+        //SE EJECUTO LA FUNCTION EXISTS
+        if ((int)$iStatus > 0) {
+			$row = $sqlca->fetchRow();
+            $exists = $row['exists'];
+
+			//EXISTE
+			if($exists == "t"){
+				$arrResponse['address'] = TRUE;
+			}
+        }
+
+		//VALIDAMOS QUE EL CAMPO LOCID EXISTA        
+        $iStatus = $sqlca->query("
+            SELECT EXISTS(
+                SELECT column_name
+                FROM   information_schema.columns
+                WHERE  table_schema='public'
+                AND    table_name='ruc'
+                AND    column_name='locid'            
+            );
+        ");
+
+		//SE EJECUTO LA FUNCTION EXISTS
+        if ((int)$iStatus > 0) {
+			$row = $sqlca->fetchRow();
+            $exists = $row['exists'];
+
+			//EXISTE
+			if($exists == "t"){
+				$arrResponse['locid'] = TRUE;
+			}            
+        }
+
+        return $arrResponse;
 	}
 }

@@ -44,10 +44,16 @@ class RucTemplate extends Template {
 	
 	function listado($registros, $sunat) {
 	
+		$columnas = array('RUC','RAZON SOCIAL');
+		$isOpensoftServer2 = RucModel::getOpensoftServer2();
+		$isOpensoftServer2['address'] ? array_push($columnas, "DIRECCIÓN")        : "";
+		$isOpensoftServer2['locid']   ? array_push($columnas, "CÓDIGO DE UBIGEO") : "";
+
 		if ($sunat == '0') {
 	    		$titulo_grid = "RUC";
 	    		//formulario de busqueda
-	    		$columnas = array('RUC','RAZON SOCIAL'/*, 'FECHA'*/);
+	    		// $columnas = array('RUC','RAZON SOCIAL'/*, 'FECHA'*/);
+				$columnas = $columnas;
 	    		$listado = '<div id="resultados_grid" class="grid" align="center"><br>
 				      <table>
 				      <caption class="grid_title">'.$titulo_grid.'</caption>
@@ -124,6 +130,8 @@ class RucTemplate extends Template {
   	
   	function formBuscar($paginacion, $importar, $numarchivos, $cant_rucs, $tipo,$archivos_descarga){
   	
+		$isOpensoftServer2 = RucModel::getOpensoftServer2();
+
 		$fecha = date("d/m/Y", time());
 
     		$form = new form2('', 'Buscar', FORM_METHOD_POST, 'control.php', '', 'control','ACCEPT="zip" enctype="multipart/form-data"');
@@ -133,7 +141,10 @@ class RucTemplate extends Template {
     		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<center>'));
 
 		if($importar == '0') {
-			$form->addElement(FORM_GROUP_MAIN, new f2element_text ('busqueda[codigo]','Numero de Ruc :', '', '', 28, 30));
+			$form->addElement(FORM_GROUP_MAIN, new f2element_text ('busqueda[codigo]','Numero de Ruc :', '', '', 13, 13));
+			if ($isOpensoftServer2['address']) {
+				$form->addElement(FORM_GROUP_MAIN, new f2element_text ('busqueda[address]','Dirección :', '', '', 13, 1000));
+			}
 			$form->addElement(FORM_GROUP_HIDDEN, new f2element_hidden('tipobusqueda', '0'));
 			$form->addElement(FORM_GROUP_MAIN, new f2element_submit('action','Buscar',espacios(3)));
 			$form->addElement(FORM_GROUP_MAIN, new f2element_submit('action','Agregar',espacios(3)));
@@ -200,6 +211,8 @@ class RucTemplate extends Template {
   	} 
 
    	function formRuc($ruc) {
+		$isOpensoftServer2 = RucModel::getOpensoftServer2();
+
     		$form = new form2('DATOS DE RUC', 'form_ruc', FORM_METHOD_POST, 'control.php', '', 'control','onSubmit="return validar_registro_ruc();"');
     		$form->addElement(FORM_GROUP_HIDDEN, new f2element_hidden('rqst', 'MAESTROS.RUC'));
     		$form->addElement(FORM_GROUP_HIDDEN, new f2element_hidden('task', 'RUC'));
@@ -221,10 +234,21 @@ class RucTemplate extends Template {
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td>'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_text ('ruc[razsocial]','Razon Social  </td><td>: ', @$ruc["razsocial"],'', 40, 40));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td>'));
-		$form->addElement(FORM_GROUP_MAIN, new f2element_text("fecha", "Fecha  </td><td>:", @$ruc["fecha"], '', 10, 12));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_text("fecha", "Fecha  </td><td>: ", @$ruc["fecha"], '', 10, 12));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<a href="javascript:show_calendar('."'form_ruc.fecha'".');"> <img src="/sistemaweb/images/showcalendar.gif" border="0" align="top"/></a>'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000;"></div>'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td>'));
+
+		if ($isOpensoftServer2['address']) {
+			$form->addElement(FORM_GROUP_MAIN, new f2element_text ('ruc[address]','Dirección  </td><td>: ', @$ruc["address"],'', 40, 1000));
+			$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td>'));
+		}
+
+		if ($isOpensoftServer2['locid']) {
+			$form->addElement(FORM_GROUP_MAIN, new f2element_text ('ruc[locid]','Código de Ubigeo  </td><td>: ', @$ruc["locid"],'', 13, 6, array(), array('onKeypress="if (event.keyCode < 45 || event.keyCode > 57) event.returnValue = false;"')));
+			$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td>'));
+		}
+
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr></table>'));
     		
 		// Fin Contenido TD 1
