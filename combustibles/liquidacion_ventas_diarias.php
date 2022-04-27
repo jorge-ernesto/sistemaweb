@@ -487,7 +487,7 @@ $sql ="
 $x_caja_ingresos_contado_dia = pg_query($conector_id, $sql);
 if($debug){
 	echo "<pre>";
-	echo "<b>Query 8.1 Ingresos al contado del dia</b><br>";
+	echo "<b>Query 8.1 Ingresos en efectivo del dia</b><br>";
 	echo $sql;
 	echo "</pre>";
 }
@@ -1168,7 +1168,7 @@ function listadoCajaBanco($resultados, $iAlmacen, $dYear, $dMonth, $dDay = "31")
 	$total_venta_creditos_otros = number_format($TVCO,2);
 	
 	$TVContado = $TV - $TVCO;
-	$a1=$TVContado; //TVContado: Total Venta Contado
+	$a1=$TVContado; //TVContado: Total Venta Efectivo
 	$total_venta_contado = number_format($TVContado,2);
 	
 	$TDP = $depositos_pos[0]['depositospos']; //TDP: Total Depositos POS
@@ -1321,10 +1321,10 @@ function listadoCajaBanco($resultados, $iAlmacen, $dYear, $dMonth, $dDay = "31")
 	</tr>
 	<tr>
 		<td style="font-size:1.2em">
-			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Venta Creditos y Otros No al Contado</b>			
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Venta Creditos y Otros No en Efectivo</b>			
 			<br><br>
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b style="font-size:0.6em; color:red">(3+4+5+6)<b>
-		</td> <!-- Total Venta Creditos y Otros No al Contado -->
+		</td> <!-- Total Venta Creditos y Otros No en Efectivo -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php echo htmlentities($total_venta_creditos_otros); ?></b></p></td>
 	</tr>
@@ -1343,10 +1343,10 @@ function listadoCajaBanco($resultados, $iAlmacen, $dYear, $dMonth, $dDay = "31")
 	</tr>
 	<tr>
 		<td style="font-size:1.2em">
-			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Venta Contado</b>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Total Venta Efectivo</b>
 			<br><br>
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b style="font-size:0.6em; color:red">(Total Venta - Total Venta Creditos)<b>
-		</td> <!-- Total Venta Contado -->
+		</td> <!-- Total Venta Efectivo -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php echo htmlentities($total_venta_contado);?></b></p></td>
 	</tr>
@@ -1420,7 +1420,7 @@ function listadoCajaBanco($resultados, $iAlmacen, $dYear, $dMonth, $dDay = "31")
 		<td style="font-size:1.2em">
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Diferencia Diaria</b>
 			<br><br>
-			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b style="font-size:0.6em; color:red">(Total Efectivo en Boveda - Sobrantes y Faltantes - Total Venta Contado)<b>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b style="font-size:0.6em; color:red">(Total Efectivo en Boveda - Sobrantes y Faltantes - Total Venta Efectivo)<b>
 		</td> <!-- Diferencia Diaria -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php echo htmlentities($diferencia_diaria); ?></b></p></td>
@@ -1433,7 +1433,7 @@ function listadoCajaBanco($resultados, $iAlmacen, $dYear, $dMonth, $dDay = "31")
 	</tr>
 
 	<tr>
-		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;8.1&nbsp;Ingresos al contado del dia</b></td> <!-- 8.1 Ingresos al contado del dia -->
+		<td style="font-size:1.2em">&nbsp;&nbsp;&nbsp;&nbsp;8.1&nbsp;Ingresos en efectivo del dia</b></td> <!-- 8.1 Ingresos en efectivo del dia -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b><?php
 
@@ -1579,7 +1579,7 @@ function listadoCajaBanco($resultados, $iAlmacen, $dYear, $dMonth, $dDay = "31")
 		<td style="font-size:1.2em"> <!-- title="((Venta contado + Faltantes)) + (Ingresos + Ingresos otros)) - Egresos" -->
 			11. Saldo Neto a Depositar
 			<br><br>
-			<b style="font-size:0.6em; color:red">(Total Venta Contado + Sobrantes y Faltantes - Ingresos al contado del dia - Egresos)<b>
+			<b style="font-size:0.6em; color:red">(Total Venta Efectivo + Sobrantes y Faltantes - Ingresos en efectivo del dia - Egresos)<b>
 		</td> <!-- 11. Saldo Neto a Depositar -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b>
