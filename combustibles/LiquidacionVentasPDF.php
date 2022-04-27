@@ -797,8 +797,8 @@ function listadoCajaBanco($resultados, $iAlmacen, $dYear, $dMonth, $dDay = "31")
 	$TVCO = $vales_credito[0]['valescredito']+$tarjetas_credito_total[0]['tarjetascredito']+abs($descuentos[0]['descuentos'])+$difprecio[0]['difprecio']+$redefectivo[0]['total']+$afericiones[0]['afericiones']; //TVCO: Total Venta Creditos y Otros
 	$total_venta_creditos_otros = number_format($TVCO,2);
 	
-	$TVContado = $TV - $TVCO; //TVContado: Total Venta Contado
-	$a1=$TVContado; //TVContado: Total Venta Contado
+	$TVContado = $TV - $TVCO; //TVContado: Total Venta Efectivo
+	$a1=$TVContado; //TVContado: Total Venta Efectivo
 	$total_venta_contado = number_format($TVContado,2);
 	
 	$TDP = $depositos_pos[0]['depositospos']; //TDP: Total Depositos POS
@@ -947,13 +947,13 @@ function listadoCajaBanco($resultados, $iAlmacen, $dYear, $dMonth, $dDay = "31")
 	$reporte->nuevaFila(array("field"=>"     6. Afericiones","value"=>$afericiones_total		));
 	$reporte->Ln();	
 
-	$reporte->nuevaFila(array("field"=>"                TOTAL VENTA CREDITOS Y OTROS NO AL CONTADO",		"value"=>$total_venta_creditos_otros));
+	$reporte->nuevaFila(array("field"=>"                TOTAL VENTA CREDITOS Y OTROS NO EN EFECTIVO",		"value"=>$total_venta_creditos_otros));
 	$reporte->Ln();	
 
-	$reporte->nuevaFila(array("field"=>"                TOTAL DEPOSITOS POS","value"=>$total_depositos_pos		));
+	$reporte->nuevaFila(array("field"=>"                TOTAL EFECTIVO EN BOVEDA (TOTAL DEPOSITOS POS)","value"=>$total_depositos_pos		));
 	$reporte->Ln();	
 
-	$reporte->nuevaFila(array("field"=>"                TOTAL VENTA CONTADO","value"=>$total_venta_contado		));
+	$reporte->nuevaFila(array("field"=>"                TOTAL VENTA EFECTIVO","value"=>$total_venta_contado		));
 	$reporte->Ln();	
 	$reporte->lineaH();
 
@@ -998,7 +998,7 @@ function listadoCajaBanco($resultados, $iAlmacen, $dYear, $dMonth, $dDay = "31")
 	foreach($caja_ingresos_contado_dia as $igre) {
 		$val_igre = $val_igre + $igre['ingresos'];
 	}
-	$reporte->nuevaFila(array("field"=>"        8.1 Ingresos al contado del dia", "value"=>$val_igre		));
+	$reporte->nuevaFila(array("field"=>"        8.1 Ingresos en efectivo del dia", "value"=>$val_igre		));
 	$reporte->Ln();	
 
 	foreach($caja_ingresos_contado_dia as $m){
