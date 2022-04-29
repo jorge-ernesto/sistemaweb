@@ -61,6 +61,10 @@ class ItemsController extends Controller {
 		$Impuestos	= $objModelItem->ObtieneItemImpuestos();
 		$blockearexcael = false;
 
+        error_log("Acciones");
+        error_log(json_encode($this->task));
+        error_log(json_encode($this->action));
+
 		switch ($this->task) {
             		case 'ValTipoLi':
                 		$resultLin = ItemsModel::ObtieneTablaGeneral('20', $_REQUEST['cod']);
@@ -412,6 +416,8 @@ class ItemsController extends Controller {
                 }
 
             case "Agregar":
+                error_log("Agregar");
+                error_log(json_encode($_REQUEST));
                 echo "entro agregar2 -> ";
                 $lineas = ItemsModel::ObtieneTablaGeneral('20', $_REQUEST['cod']);
                 $tipos = ItemsModel::ObtieneTablaGeneral('21');
@@ -423,16 +429,20 @@ class ItemsController extends Controller {
                 break;
 
             case "AgregarCod":
+                error_log("AgregarCod");
+                error_log(json_encode($_REQUEST));
                 $CodManual = ItemsModel::ObtieneCodManual('select', '10');
                 $lineas = ItemsModel::ObtieneTablaGeneral('20', $_REQUEST['cod']);
                 $tipos = ItemsModel::ObtieneTablaGeneral('21');
                 $plus = ItemsModel::ObtieneTablaGeneral('TPLU');
                 $unidades = ItemsModel::ObtieneTablaGeneral('34');
                 $ubicaciones = ItemsModel::ObtieneUbicaciones();
-                $result = ItemsTemplate::formAgregar($tipos, $lineas, $plus, $unidades, $ubicaciones, $Impuestos, $CodManual);
+                $result = ItemsTemplate::formAgregar($tipos, $lineas, $plus, $unidades, $ubicaciones, $Impuestos, $CodManual, array());
                 break;
 
             case "Agregar.Action":
+                error_log("Agregar.Action");
+                error_log(json_encode($_REQUEST));                
                 $result = ItemsModel::agregarItem($usuario);
                 if ($result == true) {
                     if ($_REQUEST['manual'] == 'si') {

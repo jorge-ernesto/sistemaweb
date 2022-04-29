@@ -825,9 +825,9 @@ class ItemsTemplate extends Template {
         return '<script language="JavaScript">parent.document.getElementsByName(\'margen_linea\')[0].value=' . (1 + ($margen / 100)) . ';</script>';
     }
 
-    function formAgregar($tipos, $lineas, $plus, $unidades, $ubicaciones, $Impuestos, $CodManual, $listas) {
+    function formAgregar($tipos, $lineas, $plus, $unidades, $ubicaciones, $Impuestos, $CodManual, $listas) { //formAgregar
         $sino = Array("S" => "Si", "N" => "No");
-        $codigo = str_pad($_REQUEST['codigo'], 13, "0", STR_PAD_LEFT);
+        $codigo = str_pad($_REQUEST['codigo'], 13, "0", STR_PAD_LEFT); //Completa con 0 a la izquierda con un largo de 13 digitos
 
         $MarcasCB = VariosModel::MarcasItemsCBArray();
         $ItemsSKU = ItemsModel::ObtieneItemSKU();
@@ -853,10 +853,10 @@ class ItemsTemplate extends Template {
         $form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("rqst", "MAESTROS.ITEMS"));
         $form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("margen_linea", "0"));
 
-        if ($codigo != "0000000000000") {
+        if ($codigo != "0000000000000") { //Si no hay codigo
             $form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("action", "Agregar.Action"));
             $form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("codigo", htmlentities($codigo)));
-            if ($_REQUEST['manual'] == '1' || $CodManual == 'Si') {
+            if ($_REQUEST['manual'] == '1' || $CodManual == 'si') {
                 $form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("manual", "si"));
             } else {
                 $form->addElement(FORM_GROUP_HIDDEN, new form_element_hidden("manual", "no"));
@@ -869,7 +869,7 @@ class ItemsTemplate extends Template {
 
         $form->addGroup("GRUPO_CODIGO", $codigo == "0000000000000" ? "INGRESE NUEVO CODIGO" : "AGREGAR ITEM");
 
-        if ($codigo != "0000000000000") {
+        if ($codigo != "0000000000000") { //Si no hay codigo
             $form->addElement("GRUPO_CODIGO", new form_element_freeTags('<table border="0" cellspacing="2" cellpadding="2"> <tr><td>'));
             $form->addElement("GRUPO_CODIGO", new form_element_freeTags('<span class="form_label">Codigo ' . espacios(2) . ': <b>' . trim($codigo) . '</b></span>'));
             $form->addElement("GRUPO_CODIGO", new form_element_freeTags('</td></tr></table>'));
@@ -882,7 +882,7 @@ class ItemsTemplate extends Template {
             $form->addElement("GRUPO_CODIGO", new form_element_freeTags('</td></tr></table>'));
         }
 
-        if ($codigo != "0000000000000") {
+        if ($codigo != "0000000000000") { //Si no hay codigo
             $form->addGroup("GRUPO_DATOS", "CONFIGURACION DEL ITEM");
             $form->addElement("GRUPO_DATOS", new form_element_freeTags('<table border="0" cellspacing="2" cellpadding="2"> <tr><td>'));
             $form->addElement("GRUPO_DATOS", new form_element_text("Descripci&oacute;n" . espacios(15) . "</td><td>:", "descripcion",
@@ -988,7 +988,7 @@ class ItemsTemplate extends Template {
 
         $form->addGroup("GRUPO_BOTONES", "");
 
-        if ($codigo != "0000000000000")
+        if ($codigo != "0000000000000") //Si no hay codigo
             $form->addElement("GRUPO_BOTONES", new form_element_submit("go", "Guardar", '', '', 20));
 
         $form->addElement("GRUPO_BOTONES", new form_element_button("btRegresar", "Regresar", espacios(2), '', 20, 'onclick="regresarMaesItems()" ' . $disabled . '', false));

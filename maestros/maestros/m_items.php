@@ -96,7 +96,7 @@ class ItemsModel extends Model {
     	function ObtieneCodManual($ejec, $long) {
 		global $sqlca;
 
-		$CodManual = $sqlca->functionDB("util_fn_corre_docs_long('IT','001','" . $ejec . "',$long)");
+		$CodManual = $sqlca->functionDB("util_fn_corre_docs_long('IT','001','" . $ejec . "',$long)"); //Obtiene correlativo para codigo manual
 
 		return $CodManual;
     	}
