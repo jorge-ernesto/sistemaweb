@@ -402,7 +402,7 @@ if ($_POST["action"] == "Excel") {
 			
 					<?php	}
 
-				$pdf->Cell(30,4,"Turno ".$turno,1,0,L);
+				$pdf->Cell(30,4,"Turno ".$turno,1,0,"L");
 					?>
 	              
 					<td align="right" bgcolor="#3385D6" style="color:#FFFFFF">Turno <?php echo $turno; ?></td>
@@ -460,8 +460,8 @@ if ($_POST["action"] == "Excel") {
 				$total_importe_turno=$total_importe_turno+$valor3["importe"];
 				$gasolina["M"]["importe"]=$gasolina["M"]["importe"]+$valor3["importe"];
 				$gasolina["total"]["importe"]=$gasolina["total"]["importe"]+$total_importe_turno;
-				$pdf->Cell(20,4,f($valor3["importe"]),1,0,L);
-				$pdf->Cell(20,4,f($total_importe_turno),1,0,L);
+				$pdf->Cell(20,4,f($valor3["importe"]),1,0,"L");
+				$pdf->Cell(20,4,f($total_importe_turno),1,0,"L");
                 ?>
                 
                  <td align="right" bgcolor="#E8F0EA"><?php echo f($valor3["importe"]); ?></td>
@@ -494,8 +494,8 @@ if ($_POST["action"] == "Excel") {
 							$pdf->Cell(15,4,f($gasolina["total_liquido"]["importe"]),1,0);
 							$pdf->Cell(15,4,f($gasolina["GLP"]["cantidad"]),1,0);
 							$pdf->Cell(15,4,f($gasolina["GLP"]["importe"]),1,0);
-							$pdf->Cell(20,4,f($gasolina["M"]["importe"]),1,0,L);
-							$pdf->Cell(20,4,f($gasolina["total"]["importe"]),1,0,L);
+							$pdf->Cell(20,4,f($gasolina["M"]["importe"]),1,0,"L");
+							$pdf->Cell(20,4,f($gasolina["total"]["importe"]),1,0,"L");
                  ?>
                  <tr>
                 <td bgcolor="#3366CC" style="color:#FFFFFF">Total Turnos</td>
@@ -547,8 +547,8 @@ if ($_POST["action"] == "Excel") {
 				$pdf->Cell(15,4,f($total["total_liquido"]["importe"]),1,0);
 				$pdf->Cell(15,4,f($total["GLP"]["cantidad"]),1,0);
 				$pdf->Cell(15,4,f($total["GLP"]["importe"]),1,0);
-				$pdf->Cell(20,4,f($total["M"]["importe"]),1,0,L);
-				$pdf->Cell(20,4,f($total["total"]["importe"]),1,0,L);
+				$pdf->Cell(20,4,f($total["M"]["importe"]),1,0,"L");
+				$pdf->Cell(20,4,f($total["total"]["importe"]),1,0,"L");
                  ?>
                 <tr><td colspan="17"></td></tr>
                 <tr><td colspan="17"></td></tr>

@@ -15,8 +15,8 @@ class ReporteTurnoController extends Controller {
 
 		foreach($header as $col)
 			$pdf->Cell(30,4,$col,1,0);
-			$pdf->Cell(20,4,"Market",1,0,L);
-			$pdf->Cell(20,4,"Total",1,0,L);  
+			$pdf->Cell(20,4,"Market",1,0,"L");
+			$pdf->Cell(20,4,"Total",1,0,"L");  
 			$pdf->Ln(); 
 			$pdf->Cell(30,4,"",1,0);
 
@@ -27,8 +27,8 @@ class ReporteTurnoController extends Controller {
 			$pdf->Cell(15,4,"Litros",1,0);
 			$pdf->Cell(15,4,"Importe",1,0);  
 
-			$pdf->Cell(20,4,"Importe",1,0,L);
-			$pdf->Cell(20,4,"Importe",1,0,L);     
+			$pdf->Cell(20,4,"Importe",1,0,"L");
+			$pdf->Cell(20,4,"Importe",1,0,"L");     
 	}
 
 	function run() {
