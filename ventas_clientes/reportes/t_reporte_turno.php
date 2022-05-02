@@ -4,8 +4,7 @@ function reporte_excel($arreglo, $worksheet1, $formato6) {
 	$total["90"] = array("cantidad" => 0, "importe" => 0);
 	$total["95"] = array("cantidad" => 0, "importe" => 0);
 	$total["97"] = array("cantidad" => 0, "importe" => 0);
-	$total["DB5 UV"] = array("cantidad" => 0, "importe" => 0);
-	$total["DB5 S50"] = array("cantidad" => 0, "importe" => 0);
+	$total["DB5"] = array("cantidad" => 0, "importe" => 0);
 	$total["GLP"] = array("cantidad" => 0, "importe" => 0);
 	$total["total_liquido"] = array("cantidad" => 0, "importe" => 0);
 	$total["total"] = array("importe" => 0);
@@ -21,12 +20,11 @@ function reporte_excel($arreglo, $worksheet1, $formato6) {
 		$worksheet1 -> write_string($i, 3, "               90", $formato6);
 		$worksheet1 -> write_string($i, 5, "               95", $formato6);
 		$worksheet1 -> write_string($i, 7, "               97", $formato6);
-		$worksheet1 -> write_string($i, 9, "              DB5 UV", $formato6);
-		$worksheet1 -> write_string($i, 11, "        DB5 S50", $formato6);
-		$worksheet1 -> write_string($i, 13, "        Total Liquido", $formato6);
-		$worksheet1 -> write_string($i, 15, "           GLP", $formato6);
-		$worksheet1 -> write_string($i, 17, "Market", $formato6);
-		$worksheet1 -> write_string($i, 18, "Total", $formato6);
+		$worksheet1 -> write_string($i, 9, "              DB5", $formato6);
+		$worksheet1 -> write_string($i, 11, "        Total Liquido", $formato6);
+		$worksheet1 -> write_string($i, 13, "           GLP", $formato6);
+		$worksheet1 -> write_string($i, 15, "Market", $formato6);
+		$worksheet1 -> write_string($i, 16, "Total", $formato6);
 
 		$i++;
 		$worksheet1 -> write_string($i, 1, "Galones", $formato6);
@@ -43,18 +41,15 @@ function reporte_excel($arreglo, $worksheet1, $formato6) {
 		$worksheet1 -> write_string($i, 12, "Importe", $formato6);
 		$worksheet1 -> write_string($i, 13, "Galones", $formato6);
 		$worksheet1 -> write_string($i, 14, "Importe", $formato6);
-		$worksheet1 -> write_string($i, 15, "Galones", $formato6);
+		$worksheet1 -> write_string($i, 15, "Importe", $formato6);
 		$worksheet1 -> write_string($i, 16, "Importe", $formato6);
-		$worksheet1 -> write_string($i, 17, "Importe", $formato6);
-		$worksheet1 -> write_string($i, 18, "Importe", $formato6);
 		$i++;
 
 		$gasolina["84"] = array("cantidad" => 0, "importe" => 0);
 		$gasolina["90"] = array("cantidad" => 0, "importe" => 0);
 		$gasolina["95"] = array("cantidad" => 0, "importe" => 0);
 		$gasolina["97"] = array("cantidad" => 0, "importe" => 0);
-		$gasolina["DB5 UV"] = array("cantidad" => 0, "importe" => 0);
-		$gasolina["DB5 S50"] = array("cantidad" => 0, "importe" => 0);
+		$gasolina["DB5"] = array("cantidad" => 0, "importe" => 0);
 		$gasolina["GLP"] = array("cantidad" => 0, "importe" => 0);
 		$gasolina["total_liquido"] = array("cantidad" => 0, "importe" => 0);
 		$gasolina["total"] = array("importe" => 0);
@@ -117,24 +112,21 @@ function reporte_excel($arreglo, $worksheet1, $formato6) {
 		$worksheet1 -> write_string($i, 6, f($gasolina["95"]["importe"]), $formato5);
 		$worksheet1 -> write_string($i, 7, f($gasolina["97"]["cantidad"]), $formato5);
 		$worksheet1 -> write_string($i, 8, f($gasolina["97"]["importe"]), $formato5);
-		$worksheet1 -> write_string($i, 9, f($gasolina["DB5 UV"]["cantidad"]), $formato5);
-		$worksheet1 -> write_string($i, 10, f($gasolina["DB5 UV"]["importe"]), $formato5);
-		$worksheet1 -> write_string($i, 11, f($gasolina["DB5 S50"]["cantidad"]), $formato5);
-		$worksheet1 -> write_string($i, 12, f($gasolina["DB5 S50"]["importe"]), $formato5);
-		$worksheet1 -> write_string($i, 13, f($gasolina["total_liquido"]["cantidad"]), $formato5);
-		$worksheet1 -> write_string($i, 14, f($gasolina["total_liquido"]["importe"]), $formato5);
-		$worksheet1 -> write_string($i, 15, f($gasolina["GLP"]["cantidad"]), $formato5);
-		$worksheet1 -> write_string($i, 16, f($gasolina["GLP"]["importe"]), $formato5);
-		$worksheet1 -> write_string($i, 17, f($gasolina["M"]["importe"]), $formato5);
-		$worksheet1 -> write_string($i, 18, f($gasolina["total"]["importe"]), $formato5);
+		$worksheet1 -> write_string($i, 9, f($gasolina["DB5"]["cantidad"]), $formato5);
+		$worksheet1 -> write_string($i, 10, f($gasolina["DB5"]["importe"]), $formato5);
+		$worksheet1 -> write_string($i, 11, f($gasolina["total_liquido"]["cantidad"]), $formato5);
+		$worksheet1 -> write_string($i, 12, f($gasolina["total_liquido"]["importe"]), $formato5);
+		$worksheet1 -> write_string($i, 13, f($gasolina["GLP"]["cantidad"]), $formato5);
+		$worksheet1 -> write_string($i, 14, f($gasolina["GLP"]["importe"]), $formato5);
+		$worksheet1 -> write_string($i, 15, f($gasolina["M"]["importe"]), $formato5);
+		$worksheet1 -> write_string($i, 16, f($gasolina["total"]["importe"]), $formato5);
 		$i++;
 
 		$total["84"] = array("cantidad" => $total["84"]["cantidad"] + $gasolina["84"]["cantidad"], "importe" => $total["84"]["importe"] + $gasolina["84"]["importe"]);
 		$total["90"] = array("cantidad" => $total["90"]["cantidad"] + $gasolina["90"]["cantidad"], "importe" => $total["90"]["importe"] + $gasolina["90"]["importe"]);
 		$total["95"] = array("cantidad" => $total["95"]["cantidad"] + $gasolina["95"]["cantidad"], "importe" => $total["95"]["importe"] + $gasolina["95"]["importe"]);
 		$total["97"] = array("cantidad" => $total["97"]["cantidad"] + $gasolina["97"]["cantidad"], "importe" => $total["97"]["importe"] + $gasolina["97"]["importe"]);
-		$total["DB5 UV"] = array("cantidad" => $total["DB5 UV"]["cantidad"] + $gasolina["DB5 UV"]["cantidad"], "importe" => $total["DB5 UV"]["importe"] + $gasolina["DB5 UV"]["importe"]);
-		$total["DB5 S50"] = array("cantidad" => $total["DB5 S50"]["cantidad"] + $gasolina["DB5 S50"]["cantidad"], "importe" => $total["DB5 S50"]["importe"] + $gasolina["DB5 S50"]["importe"]);
+		$total["DB5"] = array("cantidad" => $total["DB5"]["cantidad"] + $gasolina["DB5"]["cantidad"], "importe" => $total["DB5"]["importe"] + $gasolina["DB5"]["importe"]);
 		$total["total_liquido"] = array("cantidad" => $total["total_liquido"]["cantidad"] + $gasolina["total_liquido"]["cantidad"], "importe" => $total["total_liquido"]["importe"] + $gasolina["total_liquido"]["importe"]);
 		$total["GLP"] = array("cantidad" => $total["GLP"]["cantidad"] + $gasolina["GLP"]["cantidad"], "importe" => $total["GLP"]["importe"] + $gasolina["GLP"]["importe"]);
 		$total["M"] = array("importe" => $total["M"]["importe"] + $gasolina["M"]["importe"]);
@@ -151,16 +143,14 @@ function reporte_excel($arreglo, $worksheet1, $formato6) {
 	$worksheet1 -> write_string($i, 6, f($total["95"]["importe"]), $formato5);
 	$worksheet1 -> write_string($i, 7, f($total["97"]["cantidad"]), $formato5);
 	$worksheet1 -> write_string($i, 8, f($total["97"]["importe"]), $formato5);
-	$worksheet1 -> write_string($i, 9, f($total["DB5 UV"]["cantidad"]), $formato5);
-	$worksheet1 -> write_string($i, 10, f($total["DB5 UV"]["importe"]), $formato5);
-	$worksheet1 -> write_string($i, 11, f($total["DB5 S50"]["cantidad"]), $formato5);
-	$worksheet1 -> write_string($i, 12, f($total["DB5 S50"]["importe"]), $formato5);
-	$worksheet1 -> write_string($i, 13, f($total["total_liquido"]["cantidad"]), $formato5);
-	$worksheet1 -> write_string($i, 14, f($total["total_liquido"]["importe"]), $formato5);
-	$worksheet1 -> write_string($i, 15, f($total["GLP"]["cantidad"]), $formato5);
-	$worksheet1 -> write_string($i, 16, f($total["GLP"]["importe"]), $formato5);
-	$worksheet1 -> write_string($i, 17, f($total["M"]["importe"]), $formato5);
-	$worksheet1 -> write_string($i, 18, f($total["total"]["importe"]), $formato5);
+	$worksheet1 -> write_string($i, 9, f($total["DB5"]["cantidad"]), $formato5);
+	$worksheet1 -> write_string($i, 10, f($total["DB5"]["importe"]), $formato5);
+	$worksheet1 -> write_string($i, 11, f($total["total_liquido"]["cantidad"]), $formato5);
+	$worksheet1 -> write_string($i, 12, f($total["total_liquido"]["importe"]), $formato5);
+	$worksheet1 -> write_string($i, 13, f($total["GLP"]["cantidad"]), $formato5);
+	$worksheet1 -> write_string($i, 14, f($total["GLP"]["importe"]), $formato5);
+	$worksheet1 -> write_string($i, 15, f($total["M"]["importe"]), $formato5);
+	$worksheet1 -> write_string($i, 16, f($total["total"]["importe"]), $formato5);
 
 }
 
@@ -210,7 +200,7 @@ function tipo_gasolina($dato) {
 	$fecha = $dato["fecha"];
 	$turno = $dato["turno"];
 	$tmp = array();
-	$gasolina_tipo = array('84', '90', '95', '97', 'DB5 UV', 'DB5 S50', 'GLP', "M");
+	$gasolina_tipo = array('84', '90', '95', '97', 'DB5', 'GLP', "M");
 
 	for ($i = 0; $i < count($gasolina_tipo); $i++) {
 
@@ -231,12 +221,6 @@ function tipo_gasolina($dato) {
 /* PDF */
 
 $arreglo = dia($this -> reporte);
-
-// echo "<pre>";
-// print_r($this->reporte);
-// print_r($arreglo);
-// echo "</pre>";
-
 list($ch_almacen, $nombre_almacen) = explode("___", $_POST["ch_almacen"]);
 $pdf -> almacen = $nombre_almacen;
 $pdf -> fecha = $_POST["perido"] . "/" . $_POST["mes"] . "/" . $_POST["desde"] . " Al " . $_POST["periodo"] . "/" . $_POST["mes"] . "/" . $_POST["hasta"];
@@ -351,8 +335,7 @@ if ($_POST["action"] == "Excel") {
 		$total["90"]		=array("cantidad"=>0,"importe"=>0);
 		$total["95"]		=array("cantidad"=>0,"importe"=>0);
 		$total["97"]		=array("cantidad"=>0,"importe"=>0);
-		$total["DB5 UV"]		=array("cantidad"=>0,"importe"=>0);
-		$total["DB5 S50"]		=array("cantidad"=>0,"importe"=>0);
+		$total["DB5"]		=array("cantidad"=>0,"importe"=>0);
 		$total["GLP"]		=array("cantidad"=>0,"importe"=>0);
 		$total["total_liquido"]	=array("cantidad"=>0,"importe"=>0);
 		$total["total"]		=array("importe"=>0);
@@ -368,8 +351,7 @@ if ($_POST["action"] == "Excel") {
 				<td align="center" colspan="2" bgcolor="#336699" style="color:#FFFFFF">90</td>
 				<td align="center" colspan="2" bgcolor="#336699" style="color:#FFFFFF">95</td>
 				<td align="center" colspan="2" bgcolor="#336699" style="color:#FFFFFF">97</td>
-				<td align="center" colspan="2" bgcolor="#336699" style="color:#FFFFFF">DB5 UV</td>
-				<td align="center" colspan="2" bgcolor="#336699" style="color:#FFFFFF">DB5 S50</td>
+				<td align="center" colspan="2" bgcolor="#336699" style="color:#FFFFFF">DB5</td>
 				<td align="center" colspan="2" bgcolor="#336699" style="color:#FFFFFF">Total Liquido</td>
 				<td align="center" colspan="2" bgcolor="#336699" style="color:#FFFFFF">GLP</td>
 				<td align="center" bgcolor="#336699" style="color:#FFFFFF">Market</td>
@@ -379,8 +361,6 @@ if ($_POST["action"] == "Excel") {
 			<tr>
 				<td align="right"></td>
 				<td bgcolor="#66A3E0" style="color:#FFFFFF;">Galones</td>
-				<td bgcolor="#66A3E0" style="color:#FFFFFF">Importe</td>
-				<td bgcolor="#66A3E0" style="color:#FFFFFF">Galones</td>
 				<td bgcolor="#66A3E0" style="color:#FFFFFF">Importe</td>
 				<td bgcolor="#66A3E0" style="color:#FFFFFF">Galones</td>
 				<td bgcolor="#66A3E0" style="color:#FFFFFF">Importe</td>
@@ -407,8 +387,7 @@ if ($_POST["action"] == "Excel") {
 			    	$gasolina["90"]			= array("cantidad"=>0,"importe"=>0);
 			    	$gasolina["95"]			= array("cantidad"=>0,"importe"=>0);
 			    	$gasolina["97"]			= array("cantidad"=>0,"importe"=>0);
-			    	$gasolina["DB5 UV"]		= array("cantidad"=>0,"importe"=>0);
-					$gasolina["DB5 S50"]		= array("cantidad"=>0,"importe"=>0);
+			    	$gasolina["DB5"]		= array("cantidad"=>0,"importe"=>0);
 			    	$gasolina["GLP"]		= array("cantidad"=>0,"importe"=>0);
 			    	$gasolina["total_liquido"]	= array("cantidad"=>0,"importe"=>0);
 				$gasolina["total"]		= array("importe"=>0);
@@ -509,10 +488,8 @@ if ($_POST["action"] == "Excel") {
 							$pdf->Cell(15,4,f($gasolina["95"]["importe"]),1,0);
 							$pdf->Cell(15,4,f($gasolina["97"]["cantidad"]),1,0);
 							$pdf->Cell(15,4,f($gasolina["97"]["importe"]),1,0);
-							$pdf->Cell(15,4,f($gasolina["DB5 UV"]["cantidad"]),1,0);
-							$pdf->Cell(15,4,f($gasolina["DB5 UV"]["importe"]),1,0);
-							$pdf->Cell(15,4,f($gasolina["DB5 S50"]["cantidad"]),1,0);
-							$pdf->Cell(15,4,f($gasolina["DB5 S50"]["importe"]),1,0);
+							$pdf->Cell(15,4,f($gasolina["DB5"]["cantidad"]),1,0);
+							$pdf->Cell(15,4,f($gasolina["DB5"]["importe"]),1,0);
 							$pdf->Cell(15,4,f($gasolina["total_liquido"]["cantidad"]),1,0);
 							$pdf->Cell(15,4,f($gasolina["total_liquido"]["importe"]),1,0);
 							$pdf->Cell(15,4,f($gasolina["GLP"]["cantidad"]),1,0);
@@ -530,10 +507,8 @@ if ($_POST["action"] == "Excel") {
                 <td align="right"  bgcolor="#3366CC" style="color:#FFFFFF"><?php echo f($gasolina["95"]["importe"]); ?></td>
                 <td align="right"  bgcolor="#3366CC" style="color:#FFFFFF"><?php echo f($gasolina["97"]["cantidad"]); ?></td>
                 <td align="right"  bgcolor="#3366CC" style="color:#FFFFFF"><?php echo f($gasolina["97"]["importe"]); ?></td>
-                <td align="right"  bgcolor="#3366CC" style="color:#FFFFFF"><?php echo f($gasolina["DB5 UV"]["cantidad"]); ?></td>
-                <td align="right"  bgcolor="#3366CC" style="color:#FFFFFF"><?php echo f($gasolina["DB5 UV"]["importe"]); ?></td>
-				<td align="right"  bgcolor="#3366CC" style="color:#FFFFFF"><?php echo f($gasolina["DB5 S50"]["cantidad"]); ?></td>
-                <td align="right"  bgcolor="#3366CC" style="color:#FFFFFF"><?php echo f($gasolina["DB5 S50"]["importe"]); ?></td>
+                <td align="right"  bgcolor="#3366CC" style="color:#FFFFFF"><?php echo f($gasolina["DB5"]["cantidad"]); ?></td>
+                <td align="right"  bgcolor="#3366CC" style="color:#FFFFFF"><?php echo f($gasolina["DB5"]["importe"]); ?></td>
                 <td align="right"  bgcolor="#3366CC" style="color:#FFFFFF"><?php echo f($gasolina["total_liquido"]["cantidad"]); ?></td>
                 <td align="right"  bgcolor="#3366CC" style="color:#FFFFFF"><?php echo f($gasolina["total_liquido"]["importe"]); ?></td>
                 <td align="right"  bgcolor="#3366CC" style="color:#FFFFFF"><?php echo f($gasolina["GLP"]["cantidad"]); ?></td>
@@ -547,8 +522,7 @@ if ($_POST["action"] == "Excel") {
 				$total["90"] = array("cantidad" => $total["90"]["cantidad"] + $gasolina["90"]["cantidad"], "importe" => $total["90"]["importe"] + $gasolina["90"]["importe"]);
 				$total["95"] = array("cantidad" => $total["95"]["cantidad"] + $gasolina["95"]["cantidad"], "importe" => $total["95"]["importe"] + $gasolina["95"]["importe"]);
 				$total["97"] = array("cantidad" => $total["97"]["cantidad"] + $gasolina["97"]["cantidad"], "importe" => $total["97"]["importe"] + $gasolina["97"]["importe"]);
-				$total["DB5 UV"] = array("cantidad" => $total["DB5 UV"]["cantidad"] + $gasolina["DB5 UV"]["cantidad"], "importe" => $total["DB5 UV"]["importe"] + $gasolina["DB5 UV"]["importe"]);
-				$total["DB5 S50"] = array("cantidad" => $total["DB5 S50"]["cantidad"] + $gasolina["DB5 S50"]["cantidad"], "importe" => $total["DB5 S50"]["importe"] + $gasolina["DB5 S50"]["importe"]);
+				$total["DB5"] = array("cantidad" => $total["DB5"]["cantidad"] + $gasolina["DB5"]["cantidad"], "importe" => $total["DB5"]["importe"] + $gasolina["DB5"]["importe"]);
 				$total["total_liquido"] = array("cantidad" => $total["total_liquido"]["cantidad"] + $gasolina["total_liquido"]["cantidad"], "importe" => $total["total_liquido"]["importe"] + $gasolina["total_liquido"]["importe"]);
 				$total["GLP"] = array("cantidad" => $total["GLP"]["cantidad"] + $gasolina["GLP"]["cantidad"], "importe" => $total["GLP"]["importe"] + $gasolina["GLP"]["importe"]);
 				$total["M"] = array("importe" => $total["M"]["importe"] + $gasolina["M"]["importe"]);
@@ -567,10 +541,8 @@ if ($_POST["action"] == "Excel") {
 				$pdf->Cell(15,4,f($total["95"]["importe"]),1,0);
 				$pdf->Cell(15,4,f($total["97"]["cantidad"]),1,0);
 				$pdf->Cell(15,4,f($total["97"]["importe"]),1,0);
-				$pdf->Cell(15,4,f($total["DB5 UV"]["cantidad"]),1,0);
-				$pdf->Cell(15,4,f($total["DB5 UV"]["importe"]),1,0);
-				$pdf->Cell(15,4,f($total["DB5 S50"]["cantidad"]),1,0);
-				$pdf->Cell(15,4,f($total["DB5 S50"]["importe"]),1,0);
+				$pdf->Cell(15,4,f($total["DB5"]["cantidad"]),1,0);
+				$pdf->Cell(15,4,f($total["DB5"]["importe"]),1,0);
 				$pdf->Cell(15,4,f($total["total_liquido"]["cantidad"]),1,0);
 				$pdf->Cell(15,4,f($total["total_liquido"]["importe"]),1,0);
 				$pdf->Cell(15,4,f($total["GLP"]["cantidad"]),1,0);
@@ -592,10 +564,8 @@ if ($_POST["action"] == "Excel") {
                 <td align="right"  bgcolor="#003366" style="color:#FFFFFF"><?php echo f($total["95"]["importe"]); ?></td>
                 <td align="right"  bgcolor="#003366" style="color:#FFFFFF"><?php echo f($total["97"]["cantidad"]); ?></td>
                 <td align="right"  bgcolor="#003366" style="color:#FFFFFF"><?php echo f($total["97"]["importe"]); ?></td>
-                <td align="right"  bgcolor="#003366" style="color:#FFFFFF"><?php echo f($total["DB5 UV"]["cantidad"]); ?></td>
-                <td align="right"  bgcolor="#003366" style="color:#FFFFFF"><?php echo f($total["DB5 UV"]["importe"]); ?></td>
-				<td align="right"  bgcolor="#003366" style="color:#FFFFFF"><?php echo f($total["DB5 S50"]["cantidad"]); ?></td>
-                <td align="right"  bgcolor="#003366" style="color:#FFFFFF"><?php echo f($total["DB5 S50"]["importe"]); ?></td>
+                <td align="right"  bgcolor="#003366" style="color:#FFFFFF"><?php echo f($total["DB5"]["cantidad"]); ?></td>
+                <td align="right"  bgcolor="#003366" style="color:#FFFFFF"><?php echo f($total["DB5"]["importe"]); ?></td>
                 <td align="right"  bgcolor="#003366" style="color:#FFFFFF"><?php echo f($total["total_liquido"]["cantidad"]); ?></td>
                 <td align="right"  bgcolor="#003366" style="color:#FFFFFF"><?php echo f($total["total_liquido"]["importe"]); ?></td>
                 <td align="right"  bgcolor="#003366" style="color:#FFFFFF"><?php echo f($total["GLP"]["cantidad"]); ?></td>

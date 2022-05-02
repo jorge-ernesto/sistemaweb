@@ -32,9 +32,8 @@ class ReporteTurnoModel extends Model {
 						WHEN t.codigo='11620301' THEN '84' 
 						WHEN t.codigo='11620302' THEN '90' 
 						WHEN t.codigo='11620303' THEN '97' 
-						WHEN t.codigo='11620304' THEN 'DB5 UV' 
+						WHEN t.codigo='11620304' THEN 'DB5' 
 						WHEN t.codigo='11620305' THEN '95' 
-						WHEN t.codigo='11620306' THEN 'DB5 S50'
 						WHEN t.codigo='11620307' THEN 'GLP' 
 						END AS codigo_gasolina           
 					FROM 
@@ -90,11 +89,7 @@ class ReporteTurnoModel extends Model {
 						turno,
 						tipo,
 						codigo;
-				";
-	
-		// echo "<pre>";
-		// echo $sql;
-		// echo "</pre>";
+				";		
        
 		if ($sqlca->query($sql) < 0) 
 			return null;
