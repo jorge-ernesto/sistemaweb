@@ -450,6 +450,7 @@ $sql ="
 	WHERE
 		c.ware_house = '" . pg_escape_string($almacen) . "'
 		AND c.d_system BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
+		AND c.c_cash_id = 1 --Solo se filtra caja principal
 		AND c.type = '0'
 	ORDER BY
 		documento desc ";
@@ -479,8 +480,9 @@ $sql ="
 	WHERE
 		c.ware_house = '" . pg_escape_string($almacen) . "'
 		AND c.d_system BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
+		AND c.c_cash_id = 1 --Solo se filtra caja principal
 		AND c.type = '0'
-		AND c_op.c_cash_operation_id = '2' --VENTAS TICKETS
+		AND c_mp.c_cash_mpayment_id = '7' --MEDIO DE PAGO: EFECTIVO
 	ORDER BY
 		documento desc ";
 
@@ -506,8 +508,9 @@ $sql ="
 	WHERE
 		c.ware_house = '" . pg_escape_string($almacen) . "'
 		AND c.d_system BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
+		AND c.c_cash_id = 1 --Solo se filtra caja principal
 		AND c.type = '0'
-		AND c_op.c_cash_operation_id != '2' --VENTAS TICKETS
+		AND c_op.c_cash_operation_id != '2' --TIPO DE OPERACION: DIFERENTE DE VENTAS TICKETS
 	ORDER BY
 		documento desc ";
 
@@ -527,6 +530,7 @@ $sql =" SELECT
 	WHERE
 		c.ware_house = '" . pg_escape_string($almacen) . "'
 		AND c.d_system BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
+		AND c.c_cash_id = 1 --Solo se filtra caja principal
 		AND c.type = '0' ";
 
 $x_caja_totingresos = pg_query($conector_id, $sql);
@@ -543,8 +547,9 @@ $sql =" SELECT
 		WHERE
 			c.ware_house = '" . pg_escape_string($almacen) . "'
 			AND c.d_system BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
+			AND c.c_cash_id = 1 --Solo se filtra caja principal
 			AND c.type = '0'
-			AND c_op.c_cash_operation_id = '2' --VENTAS TICKETS"; 
+			AND c_mp.c_cash_mpayment_id = '7' --MEDIO DE PAGO: EFECTIVO"; 
 
 $x_caja_totingresos_contado_dia = pg_query($conector_id, $sql);
 
@@ -560,8 +565,9 @@ $sql =" SELECT
 		WHERE
 			c.ware_house = '" . pg_escape_string($almacen) . "'
 			AND c.d_system BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
+			AND c.c_cash_id = 1 --Solo se filtra caja principal
 			AND c.type = '0'
-			AND c_op.c_cash_operation_id != '2' --VENTAS TICKETS";
+			AND c_op.c_cash_operation_id != '2' --TIPO DE OPERACION: DIFERENTE DE VENTAS TICKETS";
 
 $x_caja_totingresos_cobranzas = pg_query($conector_id, $sql);
 
@@ -575,11 +581,14 @@ $sql ="
 		c_cash_transaction c
 		INNER JOIN c_cash_transaction_payment i ON(c.c_cash_transaction_id = i.c_cash_transaction_id)
 		LEFT JOIN int_proveedores pro ON (pro.pro_codigo = c.bpartner)
+		LEFT JOIN c_cash_mpayment c_mp ON (i.c_cash_mpayment_id = c_mp.c_cash_mpayment_id)
 	WHERE
 		c.ware_house = '" . pg_escape_string($almacen) . "'
 		AND c.d_system BETWEEN '" . pg_escape_string($fecha_del) . "' AND '" . pg_escape_string($fecha_al) . "'
 		AND i.c_bank_id = 0
+		AND c.c_cash_id = 1 --Solo se filtra caja principal
 		AND c.type = '1'
+		AND c_mp.c_cash_mpayment_id = '7' --MEDIO DE PAGO: EFECTIVO
 	ORDER BY
 		documento desc";
 
@@ -1579,7 +1588,7 @@ function listadoCajaBanco($resultados, $iAlmacen, $dYear, $dMonth, $dDay = "31")
 		<td style="font-size:1.2em"> <!-- title="((Venta contado + Faltantes)) + (Ingresos + Ingresos otros)) - Egresos" -->
 			11. Saldo Neto a Depositar
 			<br><br>
-			<b style="font-size:0.6em; color:red">(Total Venta Efectivo + Sobrantes y Faltantes - Ingresos en efectivo del dia - Egresos)<b>
+			<b style="font-size:0.6em; color:red">(Total Venta Efectivo + Sobrantes y Faltantes + Ingresos en efectivo del dia - Egresos en efectivo del dia)<b>
 		</td> <!-- 11. Saldo Neto a Depositar -->
 		<td>&nbsp;</td>
 		<td><p align="right" style="font-size:1.5em"><b>
@@ -1589,7 +1598,7 @@ function listadoCajaBanco($resultados, $iAlmacen, $dYear, $dMonth, $dDay = "31")
 		//$calculo=( ($a1+abs($a2)) + ($a3+$a4) ) - $a5;		
 
 		//$a1 venta contado $a2 faltantes $a3 ingresos $a3_1 ingresos_contado_dia $a3_2 ingreso_cobranzas $a4 ingresos otros $a6 documentos manuales $a5 egresos
-		$calculo=( ($a1+$a2) - ($a3_1) ) - $a5; //ESTO QUEDA
+		$calculo=( ($a1+$a2) + ($a3_1) ) - $a5; //ESTO QUEDA
 		$calculo = htmlentities(number_format($calculo,2));
 		echo $calculo;
 		?>
