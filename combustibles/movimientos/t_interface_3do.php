@@ -58,7 +58,7 @@ class Interface3DOTemplate extends Template {
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td valign="top">'));
 
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td valign="top">'));
-		$form->addElement(FORM_GROUP_MAIN, new f2element_text ('par_3doserver','Servidor</td><td>: ', @$Parametros[0], '', 12, 21));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_text ('par_3doserver','Servidor</td><td>: ', @$Parametros[0], '', 12, 42));
 
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td valign="top">'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_text ('par_3douser','Usuario</td><td>: ', @$Parametros[1], '', 12, 24));
