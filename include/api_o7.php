@@ -676,7 +676,7 @@ GENERAR MOVIMIENTO DE INVENTARIO
         	$this->managerTransaction("BEGIN");
 
         	$arrDataSQL = array(
-        		'sql' => "SELECT tran_codigo FROM inv_movialma WHERE tran_codigo='" . pg_escape_string($arrData->id_tipo_movimiento) . "' AND mov_entidad='" . pg_escape_string($arrData->id_entidad) . "' AND mov_tipdocuref='" . pg_escape_string($arrData->id_item) . "' AND mov_docurefe='" . pg_escape_string($arrData->serie) . pg_escape_string($arrData->numero) . "' LIMIT 1",
+        		'sql' => "SELECT tran_codigo FROM inv_movialma WHERE tran_codigo='" . pg_escape_string($arrData->id_tipo_movimiento) . "' AND mov_entidad='" . pg_escape_string($arrData->id_entidad) . "' AND mov_tipdocuref='" . pg_escape_string($arrData->tipo_comprobante) . "' AND mov_docurefe='" . pg_escape_string($arrData->serie) . pg_escape_string($arrData->numero) . "' AND art_codigo='" . pg_escape_string($arrData->id_item) . "' AND DATE(mov_fecha)='" . pg_escape_string($arrData->fecha_emision) . "' LIMIT 1",
         		'sMessageDanger' => 'Problemas al Verificar movimiento de inventario',
         		'sMessageWarning' => 'El registro ya fue existe',
         	);
