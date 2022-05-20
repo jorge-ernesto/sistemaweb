@@ -65,8 +65,9 @@ class PosDescuentoRucController extends Controller {
 				$tipo  	= trim($_REQUEST['tipo_doc']);
 				$rxp  	= pg_escape_string($_REQUEST['rxp']);
 				$pagina = pg_escape_string($_REQUEST['pagina']);
+				$reporte = "Excel";
 
-				$arrDescuentos = $modelo->buscarPorTipo($_REQUEST['cliente'], $tipo, $rxp, $pagina);
+				$arrDescuentos = $modelo->buscarPorTipo($_REQUEST['cliente'], $tipo, $rxp, $pagina, $reporte);
 						
 				$view_excel_template = $template->gridViewEXCEL($arrDescuentos["datos"]);
 				break;
@@ -181,8 +182,9 @@ class PosDescuentoRucController extends Controller {
 				$tipo  	= trim($_REQUEST['tipo_doc']);
 				$rxp  	= pg_escape_string($_REQUEST['rxp']);
 				$pagina = pg_escape_string($_REQUEST['pagina']);
+				$reporte = "HTML";
 
-				$listado = $modelo->buscarPorTipo($_REQUEST['cliente'], $tipo, $rxp, $pagina);
+				$listado = $modelo->buscarPorTipo($_REQUEST['cliente'], $tipo, $rxp, $pagina, $reporte);
 				$result .= $template->formBuscar($listado["paginacion"]);
 				$result = $template->listado($listado["datos"],$tipo);
 

@@ -462,7 +462,7 @@ class PosDescuentoRucModel extends Model {
 		}
 	}
 
-	function buscarPorTipo($cliente, $tipo, $pp, $pagina) {
+	function buscarPorTipo($cliente, $tipo, $pp, $pagina, $reporte) {
 		global $sqlca;
 
 		if(!empty($cliente) AND $tipo == "1"){//NOTA DESPACHO
@@ -547,19 +547,32 @@ class PosDescuentoRucModel extends Model {
 		$listado2['primera_pagina'] = $paginador->primera_pagina();
 		$listado2['ultima_pagina'] = $paginador->ultima_pagina();
 
-		if ($pp > 0) {
-		    $query .= "LIMIT $pp";
+		if($reporte == "HTML"){
+			if ($pp > 0) {
+				$query .= "LIMIT $pp";
+			}
+			if ($pagina > 0) {
+				$query .= "OFFSET " . $paginador->partir();
+			}
 		}
-		if ($pagina > 0) {
-		    $query .= "OFFSET " . $paginador->partir();
-		}
-	  
+
+		// echo "<pre>";
+		// print_r($query);
+		// echo "</pre>";
+		// die();
+
 		$sqlca->query($query);
 		$datos = $sqlca->fetchAll();
 
 		$listado[] = array();
 		$listado["datos"] = $datos;
 		$listado['paginacion'] = $listado2;
+
+		// echo "<pre>";
+		// print_r($listado);
+		// echo "</pre>";
+		// die();
+
 		return $listado;
 	
 	}
