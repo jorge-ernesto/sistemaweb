@@ -10,9 +10,7 @@ class RegistroVentasModel extends Model {
 	function obtieneRegistros($almacen, $anio, $mes, $desde, $hasta, $tipo, $orden, $seriesdocumentos, $tipo_vista_monto, $serie, $nserie, $BI_incre, $IGV_incre, $TOTAL_incre, $monto_igual, $nd) {
 		global $sqlca;
 
-		//Obtenemos fecha del reporte y fecha de parametro "reportsByRealDate" de "int_parametros" en formato "YYYY-MM"
-		$dataParametro = $this->getFechaParametro($anio, $mes);
-
+		/* Obtenemos fechas para usar en queries */
 		$result 			= Array();
 		$fecha_postrans 	= $anio . "" . $mes;
 		$fecha_serie 		= $anio . "-" . $mes;
@@ -20,7 +18,10 @@ class RegistroVentasModel extends Model {
 		$fecha_final 		= $anio . "-" . $mes . "-" . $hasta;
 		$correlativo 		= 0;
 
-		//Obtenemos fecha_postrans del mes anterior y mes despues
+		/* Obtenemos fecha de parametro "reportsByRealDate" de "int_parametros" en formato "YYYY-MM" y fecha del reporte en formato "YYYY-MM" */
+ 		$dataParametro = $this->getFechaParametro($anio, $mes);
+
+		/* Obtenemos fecha_postrans del mes anterior y mes posterior */
 		$anio_ant = $anio;
 		$anio_des = $anio;
 		$mes_ant  = $mes-1;
@@ -37,12 +38,12 @@ class RegistroVentasModel extends Model {
 		}
 		$fecha_postrans_ant = $anio_ant . "" . $mes_ant;
 		$fecha_postrans_des = $anio_des . "" . $mes_des;
-		error_log(json_encode(array($fecha_postrans, $fecha_postrans_ant, $fecha_postrans_des)));
+		// echo "<script>console.log('" . json_encode( array($fecha_postrans, $fecha_postrans_ant, $fecha_postrans_des) ) . "')</script>";
 		
-		//Validamos que tablas pos_trans del mes anterior y posterior existan
+		/* Validamos que tablas pos_trans del mes anterior y posterior existan */
 		$status_table_postrans_ant = $this->validateTableBySchema("pos_trans".$fecha_postrans_ant);
 		$status_table_postrans_des = $this->validateTableBySchema("pos_trans".$fecha_postrans_des);
-		error_log( json_encode(array($status_table_postrans_ant, $status_table_postrans_des)));
+		// echo "<script>console.log('" . json_encode( array($status_table_postrans_ant, $status_table_postrans_des) ) . "')</script>";
 
 		if ($nd == 'S')
 			$tipo_documento_tickes 	= array("'F','N'");
@@ -205,6 +206,9 @@ class RegistroVentasModel extends Model {
 		    $num_afe++;
 		}
 
+		// echo "<script>console.log('array_aferciones_cod')</script>";
+		// echo "<script>console.log('" . json_encode( array($array_aferciones_cod) ) . "')</script>";
+
     	/** Obtener series de maquinas registradoras **/
 
     	$sql_series = "
@@ -228,6 +232,7 @@ class RegistroVentasModel extends Model {
 			nu_posz_z_serie,
 			nu_posturno;
 		";
+
 		/*** Agregado 2020-02-04 ***/
 		// echo "<pre>sql_series:";
 		// echo "$sql_series";
