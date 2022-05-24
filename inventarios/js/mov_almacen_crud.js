@@ -696,7 +696,7 @@ $( function() {
 
     var Nu_IGV_RC = 0.00;
     
-    $("#btn-addProducto").click(function(){
+    $("#btn-addProducto").click(function(){ //Click en Agregar Item
 		$( '.div-msg_PrecioVentaMargen' ).hide();
     	//Mostrar tabla temporal Del ingreso de producto
     	var No_Proveedor 			= $("#txt-No_Proveedor").val();
@@ -733,57 +733,58 @@ $( function() {
             	accion: "getCalculoMargen",
 				id_producto: $.trim(Nu_Id_Producto),
 			}, function(response){
+				console.log("getCalculoMargen");
 				console.log(response);
 
 				if (response.status == 'success'){
 				
-				var xprecio = (response.data["precio"]);
-				var xmargen = parseFloat(response.data["margen"]);
-				ymargen = 0;
-				
-				if(art_costo_uni != '0' || art_costo_uni != '0.00' || art_costo_uni > 0){	
-				//if(xmargen != '0' || xmargen != '0.00' || xmargen > 0 ){	ya no quieren verificar margen en 0
-				if($TipoFormulario == '01' || $TipoFormulario == '07' || $TipoFormulario == '08' || $TipoFormulario == '05'){
+					var xprecio = (response.data["precio"]);
+					var xmargen = parseFloat(response.data["margen"]);
+					ymargen = 0;
+					
+					if(art_costo_uni != '0' || art_costo_uni != '0.00' || art_costo_uni > 0){	
+					//if(xmargen != '0' || xmargen != '0.00' || xmargen > 0 ){	ya no quieren verificar margen en 0
+					if($TipoFormulario == '01' || $TipoFormulario == '07' || $TipoFormulario == '08' || $TipoFormulario == '05'){
 
-				ymargen = parseFloat(((((xprecio/1.18)-art_costo_uni))/art_costo_uni)*100); 
+					ymargen = parseFloat(((((xprecio/1.18)-art_costo_uni))/art_costo_uni)*100); 
 
-				var wmargen  = Math.ceil(Math.log10(ymargen + 1)); 
+					var wmargen  = Math.ceil(Math.log10(ymargen + 1)); 
 
-				if (wmargen > 6){
-					ymargen = 999999;
-					//al registrar transferencias gratuitas por ingreso de compras generarn un margen mayor al soportado por la columnda de la BD.
-				}
+					if (wmargen > 6){
+						ymargen = 999999;
+						//al registrar transferencias gratuitas por ingreso de compras generarn un margen mayor al soportado por la columnda de la BD.
+					}
 
-				if(xmargen > ymargen){
-						$( '.help' ).show();
-					    $( '.help' ).html("");
-				        $( '#txt-Nu_Costo_Unitario' ).closest('.column').find('.help').html('Verificar Costo');
-						$( '#txt-Nu_Costo_Unitario' ).closest('.column').find('.help').addClass('is-danger');
+					if(xmargen > ymargen){
+							$( '.help' ).show();
+							$( '.help' ).html("");
+							$( '#txt-Nu_Costo_Unitario' ).closest('.column').find('.help').html('Verificar Costo');
+							$( '#txt-Nu_Costo_Unitario' ).closest('.column').find('.help').addClass('is-danger');
 
-						$( '#table-MargenGanancia >tbody' ).empty();
+							$( '#table-MargenGanancia >tbody' ).empty();
 
-						$( '.modal-MargenGanancia' ).show();
-						$( '.message' ).addClass('is-primary');
-						$( '.message' ).removeClass('is-danger');
-						var tr_body =
-						"<tr>"
-				        	+"<td colspan='6' style='font-size: 9px'><strong>El costo unitario ingresado genera un margen menor al establecido por la linea, verificar precio de venta.</strong></td>"
-				        +"</tr>"
-				        +"<tr>"
-				        	+"<td><strong>Precio de venta actual:</strong></td>"
-				        	+"<td class='text-left' align='left'>" + xprecio + "</td>"
-				        	+"<td><strong>Margen actual de la linea:</strong></td>"
-				            +"<td class='text-left' align='left'>" + xmargen + "</td>"
-				            +"<td><strong>Margen en base al costo ingresado:</strong></td>"
-				            +"<td class='text-left' align='left'>" + ymargen.toFixed(4) + "</td>"
-				        +"</tr>"
-		        		$( '#table-MargenGanancia >tbody' ).append(tr_body);
-		  					
-						return false;
+							$( '.modal-MargenGanancia' ).show();
+							$( '.message' ).addClass('is-primary');
+							$( '.message' ).removeClass('is-danger');
+							var tr_body =
+							"<tr>"
+								+"<td colspan='6' style='font-size: 9px'><strong>El costo unitario ingresado genera un margen menor al establecido por la linea, verificar precio de venta.</strong></td>"
+							+"</tr>"
+							+"<tr>"
+								+"<td><strong>Precio de venta actual:</strong></td>"
+								+"<td class='text-left' align='left'>" + xprecio + "</td>"
+								+"<td><strong>Margen actual de la linea:</strong></td>"
+								+"<td class='text-left' align='left'>" + xmargen + "</td>"
+								+"<td><strong>Margen en base al costo ingresado:</strong></td>"
+								+"<td class='text-left' align='left'>" + ymargen.toFixed(4) + "</td>"
+							+"</tr>"
+							$( '#table-MargenGanancia >tbody' ).append(tr_body);
+								
+							return false;
+							}
 						}
 					}
-				}
-			} 
+				} 
 
     	if (
     		No_Proveedor.length === 0
@@ -930,13 +931,26 @@ $( function() {
 					ss_costo_sigv: parseFloat(Nu_Costo_Unitario).toFixed(6),
 					qt_cantidad: parseFloat(Nu_Cantidad).toFixed(4),
 				}, function(data){
+					console.log("getNewPrice");
+					console.log(data);
+
 					$( '#table-PrecioVentaMargen >tbody' ).empty();
 
 					if(data.status == 'success'){
-						$( '.modal-PreciVentaMargen' ).show();
+						$( '.modal-PreciVentaMargen' ).show(); //Muestra el modal modal-PreciVentaMarge
 						$( '.message' ).addClass('is-primary');
 						$( '.message' ).removeClass('is-danger');
-						var ss_precio_venta_sugerido = parseFloat(data.reponseData.ss_costo_sigv) * parseFloat($('#txt-Nu_IGV').val()) * (1 + (parseFloat(data.reponseData.ss_porcentaje_margen) / 100));
+
+						/**
+						 * Validamos Código de Impuesto	del Articulo
+						 * Campo art_impuesto1 de int_articulos: Si es null entonces es INAFECTO / Si tiene otros valores diferente de null se considera IMPUESTO IGV 18
+						 */
+						if( data.reponseData.art_impuesto1 === null ) { //INAFECTO
+							var ss_precio_venta_sugerido = parseFloat(data.reponseData.ss_costo_sigv) * (1 + (parseFloat(data.reponseData.ss_porcentaje_margen) / 100));
+						} else { //OTROS
+							var ss_precio_venta_sugerido = parseFloat(data.reponseData.ss_costo_sigv) * parseFloat($('#txt-Nu_IGV').val()) * (1 + (parseFloat(data.reponseData.ss_porcentaje_margen) / 100));
+						}
+												
 						var tr_body =
 						"<tr>"
 							+"<td><input type='hidden' class='input' id='txt-Nu_Tipo_Lista_Precio' value='" + data.reponseData.nu_tipo_lista_precio + "' /></td>"
@@ -982,7 +996,7 @@ $( function() {
 				        	+"<td style='font-size: 9px'><strong>Precio Sugerido</strong></td>"
 				        	+"<td class='text-left' align='left'><input type='tel' class='input input-decimal' id='txt-Ss_Precio_Sugerido' value='" + ss_precio_venta_sugerido.toFixed(2) + "' autocomplete='off' size='10' maxlength='10' /></td>"
 				        +"</tr>";
-		        		$( '#table-PrecioVentaMargen >tbody' ).append(tr_body);
+		        		$( '#table-PrecioVentaMargen >tbody' ).append(tr_body); //Agrega contenido al body del modal modal-PreciVentaMargen
 
 						$( '.input-decimal' ).on('input', function () {
 							numero = parseFloat(this.value);

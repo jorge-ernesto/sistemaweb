@@ -716,7 +716,7 @@ class MovimientoAlmacenCRUDTemplate extends Template {
 			    </div>
 	        </article>
 
-	        <!--Modal Actualizar P.V según Margen -->
+	        <!-- Modal Actualizar P.V según Margen -->
 			<div class="modal modal-PreciVentaMargen">
 	  			<div class="modal-background"></div>
 				<div class="modal-content">

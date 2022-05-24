@@ -629,7 +629,7 @@ ORDER BY
 		)));
 	}
 
-} else if($accion == 'getNewPrice'){
+} else if($accion == 'getNewPrice'){ //getNewPrice
 
 	$sql = "SELECT par_valor FROM int_parametros WHERE par_nombre='actualiza_precio' LIMIT 1;";
 	$valor = $sqlca->query($sql);
@@ -670,7 +670,8 @@ ORDER BY
 			ROUND(((" . $ss_costo_sigv . " * ROUND(1 + (util_fn_igv() / 100), 2)) * " . $qt_cantidad . "), 2) AS ss_subtotal,
 			FLP.pre_precio_act1 AS ss_precio_venta,
 			LINEA.tab_num_01 AS ss_porcentaje_margen,
-			'" . $sTipoListaPrecio . "' AS nu_tipo_lista_precio
+			'" . $sTipoListaPrecio . "' AS nu_tipo_lista_precio,
+			PRO.art_impuesto1
 		FROM
 			int_articulos AS PRO
 			LEFT JOIN int_tabla_general AS LINEA ON(PRO.art_linea = LINEA.tab_elemento AND LINEA.tab_tabla = '20' AND tab_elemento != '000000')
@@ -721,7 +722,7 @@ ORDER BY
 			'message' => 'Registro actualizado',
 		)));
 	}
-}else if($accion == 'getCalculoMargen') {
+}else if($accion == 'getCalculoMargen') { //getCalculoMargen
 	//el calculo de margen se activa con el parametro margincheck y tiene que estar descativado actualiza_precio
 	$sql = "SELECT par_valor FROM int_parametros WHERE par_nombre='actualiza_precio' LIMIT 1;";
 	$valor = $sqlca->query($sql);
