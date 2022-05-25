@@ -910,25 +910,29 @@ El orden que se esta llevando de los estados es (abecedario), en caso de que se 
 	      strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sExonerado'])) == "N" &&
 	      strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sTransferenciaGratuita'])) == "S" &&
 	      $sEstadoInafecto == "N"
-	    )
+	    ) {
 	      $sCodigoImpuestoOCS = "T";//Gratuita
+		  error_log("Gratuita");
+		}
 
 	    if (
 	      strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sExonerado'])) == "S" &&
 	      strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sTransferenciaGratuita'])) == "N" &&
-	      $sEstadoInafecto == "N"
+	      ($sEstadoInafecto == "N" || $sEstadoInafecto == "S")
 	    ) {
 	      $sCodigoImpuestoOCS = "S";//Exonerada
 	      $fImpuesto = 0.00;
+		  error_log("Exonerada");
 	    }
 
 	    if (
 	      strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sExonerado'])) == "S" &&
 	      strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sTransferenciaGratuita'])) == "S" &&
-	      $sEstadoInafecto == "N"
+	      ($sEstadoInafecto == "N" || $sEstadoInafecto == "S")
 	    ) {
 	      $sCodigoImpuestoOCS = "U";//Gratuita + Exonerada
 	      $fImpuesto = 0.00;
+		  error_log("Gratuita + Exonerada");
 	    }
 
 	    if (
@@ -938,6 +942,7 @@ El orden que se esta llevando de los estados es (abecedario), en caso de que se 
 	    ) {
 	      $sCodigoImpuestoOCS = "V";//Inafecta
 	      $fImpuesto = 0.00;
+		  error_log("Inafecta");
 	    }
 
 	    if (
@@ -947,6 +952,7 @@ El orden que se esta llevando de los estados es (abecedario), en caso de que se 
 	    ) {
 	      $sCodigoImpuestoOCS = "W";//Gratuita + Inafecta
 	      $fImpuesto = 0.00;
+		  error_log("Gratuita + Inafecta");
 	    }
 
 	    // Verificar si existe días de vencimiento
@@ -1037,37 +1043,47 @@ INSERT INTO fac_ta_factura_cabecera (
 	    if (
 	      strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sExonerado'])) == "S" &&
 	      strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sTransferenciaGratuita'])) == "N" &&
-	      $sEstadoInafecto == "N"
-	    )
-	      $sCodigoImpuestoOCS = "S";//Exonerada
+	      ($sEstadoInafecto == "N" || $sEstadoInafecto == "S")
+	    ) {
+		  $sCodigoImpuestoOCS = "S";//Exonerada
+		  error_log("Exonerada");
+		}
 
 	    if (
 	      strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sExonerado'])) == "N" &&
 	      strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sTransferenciaGratuita'])) == "S" &&
 	      $sEstadoInafecto == "N"
-	    )
+	    ) {		
 	      $sCodigoImpuestoOCS = "T";//Gratuita
+		  error_log("Gratuita");
+		}
 
 	    if (
 	      strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sExonerado'])) == "S" &&
 	      strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sTransferenciaGratuita'])) == "S" &&
-	      $sEstadoInafecto == "N"
-	    )
+	      ($sEstadoInafecto == "N" || $sEstadoInafecto == "S")
+	    ) {		
 	      $sCodigoImpuestoOCS = "U";//Gratuita + Exonerada
+		  error_log("Gratuita + Exonerada");
+		}
 
 	    if (
 			strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sExonerado'])) == "N" &&
 			strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sTransferenciaGratuita'])) == "N" &&
 	    	$sEstadoInafecto == "S"
-	    )
+	    ) {
 	      $sCodigoImpuestoOCS = "V";//Inafecta
+		  error_log("Inafecta");
+		}
 
 	    if (
 			strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sExonerado'])) == "N" &&
 			strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sTransferenciaGratuita'])) == "S" &&
 	    	$sEstadoInafecto == "S"
-	    )
+	    ) {
 	      $sCodigoImpuestoOCS = "W";//Gratuita + Inafecta
+		  error_log("Gratuita + Inafecta");
+		}
 
 		$arrSQLDetail = array();
 		foreach ($arrPost['arrDetailSaleInvoice'] as $row) {

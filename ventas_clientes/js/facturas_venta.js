@@ -461,7 +461,7 @@ $(document).ready(function() {
 		}
 	})
 
-	$( '#btn-add-product_detail' ).click(function() {
+	$( '#btn-add-product_detail' ).click(function() { //Agregar Item
 		$( '.help' ).empty();
 
 		var $iIdItem = $( '#hidden-add-item-id' );
@@ -513,11 +513,11 @@ $(document).ready(function() {
 				bEstadoValidacion = false;
 
 				scrollToError($fTotal);
-			} else if ( $( "#cbo-add-exonerado" ).val() == 'S' && $iCodigoImpuestoItem.val().length == 0 ){// Exo = Si e Inafecta = Si
-				$( $( "#cbo-add-exonerado" ) ).closest('.form-group').find('.help').html('Si el <b>item</b> es <b>INAFECTO</b>, <b>EXONERADA</b> debe ser NO');
-				bEstadoValidacion = false;
+			// } else if ( $( "#cbo-add-exonerado" ).val() == 'S' && $iCodigoImpuestoItem.val().length == 0 ){// Exo = Si e Inafecta = Si
+				// $( $( "#cbo-add-exonerado" ) ).closest('.form-group').find('.help').html('Si el <b>item</b> es <b>INAFECTO</b>, <b>EXONERADA</b> debe ser NO');
+				// bEstadoValidacion = false;
 
-				scrollToError( $( "#cbo-add-exonerado" ) );
+				// scrollToError( $( "#cbo-add-exonerado" ) );
 			} else if (bEstadoValidacion) {
 				//Bloquear tipos de afectación tributaria
 				$( '#cbo-add-exonerado' ).prop( "disabled", true );
@@ -527,36 +527,41 @@ $(document).ready(function() {
 				$fImpuestoItem = $fImpuesto.val();
 				$fSubTotalItem = $fSubtotal.val();
 				$sEstadoInafecto = "N";
-				if ($iCodigoImpuestoItem.val().length == 0)
+				if ($iCodigoImpuestoItem.val().length == 0) {
 					$sEstadoInafecto = "S";
+				}
 
 				if ( 
 					$( '#cbo-add-exonerado' ).val() == 'N' &&
 					$( '#cbo-add-transferencia_gratuita' ).val() == 'N' &&
 					$sEstadoInafecto == "N"
-				) {// Gravadas
+				) {// Gravadas					
 					$fImpuestoItem = $fImpuesto.val();
 					$fSubTotalItem = $fSubtotal.val();
+					console.log("Gravadas");
 				} else if (
 					$( '#cbo-add-exonerado' ).val() == 'S' &&
 					$( '#cbo-add-transferencia_gratuita' ).val() == 'N' &&
-					$sEstadoInafecto == "N"
+					($sEstadoInafecto == "N" || $sEstadoInafecto == "S") 
 				) {// exonerada
 					$fImpuestoItem = 0.00;
 					$fSubTotalItem = $fTotal.val();
+					console.log("exonerada");
 				} else if (
 					$( '#cbo-add-exonerado' ).val() == 'N' &&
 					$( '#cbo-add-transferencia_gratuita' ).val() == 'S' &&
 					$sEstadoInafecto == "N"
 				) {//gratuita
 					$fSubTotalItem = 0.00;
+					console.log("gratuita");
 				} else if (
 					$( '#cbo-add-exonerado' ).val() == 'S' &&
 					$( '#cbo-add-transferencia_gratuita' ).val() == 'S' &&
-					$sEstadoInafecto == "N"
+					($sEstadoInafecto == "N" || $sEstadoInafecto == "S") 
 				) {// exonerada + gratuita
 					$fImpuestoItem = 0.00;
 					$fSubTotalItem = 0.00;
+					console.log("exonerada + gratuita");
 				} else if (
 					$( '#cbo-add-exonerado' ).val() == 'N' &&
 					$( '#cbo-add-transferencia_gratuita' ).val() == 'N' &&
@@ -564,6 +569,7 @@ $(document).ready(function() {
 				) { // Inafectas
 					$fImpuestoItem = 0.00;
 					$fSubTotalItem = $fTotal.val();
+					console.log("Inafectas");
 				}  else if (
 					$( '#cbo-add-exonerado' ).val() == 'N' &&
 					$( '#cbo-add-transferencia_gratuita' ).val() == 'S' &&
@@ -571,6 +577,7 @@ $(document).ready(function() {
 				) { // Inafectas + gratuita
 					$fImpuestoItem = 0.00;
 					$fSubTotalItem = $fTotal.val();
+					console.log("Inafectas + gratuita");
 				}
 				// /. Verificar tipo de impuesto
 
@@ -742,10 +749,11 @@ function calcAmountsSalesInvoice(){
     	$( '#label-totales-gratuita' ).text( '0' );
     	$( '#label-totales-descuento' ).text( $fSumDescuento );
     	$( '#label-totales-total' ).text( $fSumTotal );
+		console.log("Gravadas");
 	} else if (
 		$( '#cbo-add-exonerado' ).val() == 'S' &&
 		$( '#cbo-add-transferencia_gratuita' ).val() == 'N' &&
-		$sEstadoInafecto == "N"
+		($sEstadoInafecto == "N" || $sEstadoInafecto == "S")
 	) {// exonerada
     	$( '#hidden-totales-exonerada' ).val( $fSumTotal );
     	$( '#hidden-totales-inafecta' ).val( 0 );
@@ -762,6 +770,7 @@ function calcAmountsSalesInvoice(){
     	$( '#label-totales-gratuita' ).text( '0' );
     	$( '#label-totales-descuento' ).text( $fSumDescuento );
     	$( '#label-totales-total' ).text( $fSumTotal );
+		console.log("exonerada");
 	} else if (
 		$( '#cbo-add-exonerado' ).val() == 'N' &&
 		$( '#cbo-add-transferencia_gratuita' ).val() == 'S' &&
@@ -782,10 +791,11 @@ function calcAmountsSalesInvoice(){
     	$( '#label-totales-gratuita' ).text( $fSumTotal );
     	$( '#label-totales-descuento' ).text( '0' );
     	$( '#label-totales-total' ).text( '0' );
+		console.log("gratuita");
 	} else if (
 		$( '#cbo-add-exonerado' ).val() == 'S' &&
 		$( '#cbo-add-transferencia_gratuita' ).val() == 'S' &&
-		$sEstadoInafecto == "N"
+		($sEstadoInafecto == "N" || $sEstadoInafecto == "S")
 	) {// exonerada + gratuita
     	$( '#hidden-totales-exonerada' ).val( 0 );
     	$( '#hidden-totales-inafecta' ).val( 0 );
@@ -802,6 +812,7 @@ function calcAmountsSalesInvoice(){
     	$( '#label-totales-gratuita' ).text( $fSumTotal );
     	$( '#label-totales-descuento' ).text( '0' );
     	$( '#label-totales-total' ).text( '0' );
+		console.log("exonerada + gratuita");
 	} else if (
 		$( '#cbo-add-exonerado' ).val() == 'N' &&
 		$( '#cbo-add-transferencia_gratuita' ).val() == 'N' &&
@@ -822,6 +833,7 @@ function calcAmountsSalesInvoice(){
     	$( '#label-totales-gratuita' ).text( '0' );
     	$( '#label-totales-descuento' ).text( '0' );
     	$( '#label-totales-total' ).text( $fSumTotal );
+		console.log("Inafectas");
 	}  else if (
 		$( '#cbo-add-exonerado' ).val() == 'N' &&
 		$( '#cbo-add-transferencia_gratuita' ).val() == 'S' &&
@@ -842,6 +854,7 @@ function calcAmountsSalesInvoice(){
     	$( '#label-totales-gratuita' ).text( $fSumTotal );
     	$( '#label-totales-descuento' ).text( '0' );
     	$( '#label-totales-total' ).text( '0' );
+		console.log("Inafectas + gratuita");
 	}
 }
 
