@@ -554,15 +554,15 @@ class RegistroVentasController extends Controller {
 		$PLETXT[14] 	= "0.00";//Descuento del base imponible =15
 		$PLETXT[15] 	= ($bandera_monto['flag'] == "N") ? $datos_igv['valor'] + $IGV : "0.00";//Impuesto General a las Ventas y/o Impuesto de Promoción Municipal  =16
 		$PLETXT[16] 	= "0.00";
-		$PLETXT[17] 	= "0.00";
-		$PLETXT[18] 	= "0.00";
+		$PLETXT[17] 	= ($bandera_monto['flag'] == "V_NG") ? $datos_exonerada['valor'] : "0.00";
+		$PLETXT[18] 	= ($bandera_monto['flag'] == "V_NG") ? $datos_inafecto['valor']  : "0.00";
 		$PLETXT[19] 	= "0.00";
 		$PLETXT[20] 	= "0.00";
 		$PLETXT[21] 	= "0.00";
 
 		$PLETXT[22]     = number_format( round($linea['balance'],2), 2, '.', '' );
 
-		$PLETXT[23] 	= ($bandera_monto['flag'] == "V_NG") ? $datos_inafecto['valor'] + $datos_exonerada['valor'] : "0.00";//Otros conceptos, tributos y cargos que no forman parte de la base imponible
+		$PLETXT[23] 	= "0.00";//Otros conceptos, tributos y cargos que no forman parte de la base imponible
 		$PLETXT[24] 	= $datos_total['valor']+$BT;
 		$PLETXT[25] 	= "PEN";//Codigo de moneda
 		$PLETXT[26] 	= $this->validarTipoCambio($linea['tipocambio']);
