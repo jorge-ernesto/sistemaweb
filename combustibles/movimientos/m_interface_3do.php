@@ -5,6 +5,7 @@ function os_mssql_escape($str) {
 }
 
 function onError_AIExit($mssql,$msg) {
+	error_log("onError_AIExit");
 	global $sqlca;
 	mssql_query("ROLLBACK TRANSACTION;",$mssql);
 	$sqlca->query("ROLLBACK;");
@@ -360,7 +361,39 @@ if ($agrupado == 'S') {
 				min(t.dia) AS fechadoc,
 				max(t.dia) AS Vencimiento,
 				max(t.caja) AS Sucursal,
-				cfp.nu_posz_z_serie as serie
+				cfp.nu_posz_z_serie as serie,
+				'CONTADO' AS forma_pago_origen,
+				
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT 
+																						CASE 
+																							WHEN FIRST(td) = 'B' AND FIRST(tm) = 'V' THEN '03'
+																							WHEN FIRST(td) = 'F' AND FIRST(tm) = 'V' THEN '01'
+																							ELSE '10' 
+																						END
+																					 FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1) 
+					ELSE NULL
+				END AS ref_tipodoc,
+
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT SUBSTR(TRIM(usr), 0, 5) FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1) 
+					ELSE NULL
+				END AS ref_serie,
+
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT SUBSTR(TRIM(usr), 6)    FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1)
+					ELSE NULL
+				END AS ref_numero,
+
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT dia                     FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1)
+					ELSE NULL
+				END AS ref_fecha_doc,
+				
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN '01'
+					ELSE NULL
+				END AS ref_tiponota
 			FROM
 				{$postrans} t
 				LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
@@ -418,7 +451,13 @@ if ($agrupado == 'S') {
 					DocCierre,
 					Sucursal,
 					Direccion,
-					Descuento
+					Descuento,
+					forma_pago_origen,
+					ref_tipodoc,
+					ref_serie,
+					ref_numero,
+					ref_fecha_doc,
+					ref_tiponota
 				) VALUES (
 					'{$reg[0]}',
 					'{$reg[1]}',
@@ -448,7 +487,13 @@ if ($agrupado == 'S') {
 					'{$reg[10]}',
 					'{$reg[9]}',
 					'',
-					0
+					0,
+					'{$reg[11]}',
+					'{$reg[12]}',
+					'{$reg[13]}',
+					'{$reg[14]}',
+					'{$reg[15]}',
+					'{$reg[16]}'
 				);";
 
 			//echo $sql."\n";
@@ -618,7 +663,39 @@ if ($agrupado == 'S') {
 				substring(FIRST(a.art_unidad) from 4) AS Unidad,
 				sum(t.precio) AS Precio,
 				FIRST(a.art_descripcion) AS Descripcion,
-				(sum(t.cantidad) * (avg(t.precio) / 1.18)) parcial
+				(sum(t.cantidad) * (avg(t.precio) / 1.18)) parcial,
+				'CONTADO' AS forma_pago_origen,
+
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT 
+																							CASE 
+																								WHEN FIRST(td) = 'B' AND FIRST(tm) = 'V' THEN '03'
+																								WHEN FIRST(td) = 'F' AND FIRST(tm) = 'V' THEN '01'
+																								ELSE '10' 
+																							END
+																					 FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1) 
+					ELSE NULL
+				END AS ref_tipodoc,
+
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT SUBSTR(TRIM(usr), 0, 5) FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1) 
+					ELSE NULL
+				END AS ref_serie,
+
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT SUBSTR(TRIM(usr), 6)    FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1)
+					ELSE NULL
+				END AS ref_numero,
+
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT dia                    FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1)
+					ELSE NULL
+				END AS ref_fecha_doc,
+				
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN '01'
+					ELSE NULL
+				END AS ref_tiponota
 			FROM
 				{$postrans} t
 				LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
@@ -676,7 +753,13 @@ if ($agrupado == 'S') {
 					DocCierre,
 					Sucursal,
 					Direccion,
-					Descuento
+					Descuento,
+					forma_pago_origen,
+					ref_tipodoc,
+					ref_serie,
+					ref_numero,
+					ref_fecha_doc,
+					ref_tiponota
 				) VALUES (
 					'{$reg[0]}',
 					'{$reg[1]}',
@@ -706,7 +789,13 @@ if ($agrupado == 'S') {
 					'{$reg[10]}',
 					'{$reg[9]}',
 					'',
-					0
+					0,
+					'{$reg[18]}',
+					'{$reg[19]}',
+					'{$reg[20]}',
+					'{$reg[21]}',
+					'{$reg[22]}',
+					'{$reg[23]}'
 				);";
 
 			echo "\n INSERT Ticket - Boleta Cabecera: ".$sql."\n";
@@ -812,7 +901,39 @@ if ($agrupado == 'S') {
 				max(t.dia) AS Vencimiento,
 				max(t.caja) AS Sucursal,
 				t.trans AS TransactionID,
-				cfp.nu_posz_z_serie as serie
+				cfp.nu_posz_z_serie as serie,
+				'CONTADO' AS forma_pago_origen,
+
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT 
+																						CASE 
+																							WHEN FIRST(td) = 'B' AND FIRST(tm) = 'V' THEN '03'
+																							WHEN FIRST(td) = 'F' AND FIRST(tm) = 'V' THEN '01'
+																							ELSE '10' 
+																						END
+																					FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1) 
+					ELSE NULL
+				END AS ref_tipodoc,
+
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT SUBSTR(TRIM(usr), 0, 5) FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1) 
+					ELSE NULL
+				END AS ref_serie,
+
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT SUBSTR(TRIM(usr), 6)    FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1)
+					ELSE NULL
+				END AS ref_numero,
+
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT dia                     FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1)
+					ELSE NULL
+				END AS ref_fecha_doc,
+				
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN '01'
+					ELSE NULL
+				END AS ref_tiponota
 			FROM
 				{$postrans} t
 				LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
@@ -868,7 +989,13 @@ if ($agrupado == 'S') {
 					DocCierre,
 					Sucursal,
 					Direccion,
-					Descuento
+					Descuento,
+					forma_pago_origen,
+					ref_tipodoc,
+					ref_serie,
+					ref_numero,
+					ref_fecha_doc,
+					ref_tiponota
 				) VALUES (
 					'{$reg[0]}',
 					'" . (isset($Clientes[$reg[1]])?$Clientes[$reg[1]]:substr($reg[1],0,10)) . "',
@@ -898,7 +1025,13 @@ if ($agrupado == 'S') {
 					'{$reg[11]}',
 					'{$reg[9]}',
 					'',
-					0
+					0,
+					'{$reg[12]}',
+					'{$reg[13]}',
+					'{$reg[14]}',
+					'{$reg[15]}',
+					'{$reg[16]}',
+					'{$reg[17]}'
 				);";
 
 			//echo $sql;
@@ -942,7 +1075,13 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 					DocCierre,
 					Sucursal,
 					Direccion,
-					Descuento
+					Descuento,
+					forma_pago_origen,
+					ref_tipodoc,
+					ref_serie,
+					ref_numero,
+					ref_fecha_doc,
+					ref_tiponota
 				) VALUES (
 					'{$reg[0]}',
 					'" . (isset($Clientes[$reg[1]])?$Clientes[$reg[1]]:substr($reg[1],0,10)) . "',
@@ -972,7 +1111,13 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 					'{$reg[11]}',
 					'{$reg[9]}',
 					'',
-					0
+					0,
+					'{$reg[12]}',
+					'{$reg[13]}',
+					'{$reg[14]}',
+					'{$reg[15]}',
+					'{$reg[16]}',
+					'{$reg[17]}'
 				);";
 
 			//echo $sql;
@@ -1131,13 +1276,45 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 				min(t.dia) AS fechadoc,
 				max(t.dia) AS Vencimiento,
 				max(t.caja) AS Sucursal,
-				t.trans AS TransactionID
+				t.trans AS TransactionID,
+				'CONTADO' AS forma_pago_origen,
+				
+				CASE 
+			        WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT 
+																							CASE 
+																								WHEN FIRST(td) = 'B' AND FIRST(tm) = 'V' THEN '03'
+																								WHEN FIRST(td) = 'F' AND FIRST(tm) = 'V' THEN '01'
+																								ELSE '10' 
+																							END
+																						FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1) 
+					ELSE NULL
+				END AS ref_tipodoc,
+				
+				CASE 
+			        WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT SUBSTR(TRIM(usr), 0, 5) FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1) 
+					ELSE NULL
+				END AS ref_serie,
+
+				CASE 
+			        WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT SUBSTR(TRIM(usr), 6)    FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1)
+					ELSE NULL
+				END AS ref_numero,
+
+				CASE 
+			        WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT dia                     FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1)
+					ELSE NULL
+				END AS ref_fecha_doc,
+				
+				CASE 
+					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN '01'
+					ELSE NULL
+				END AS ref_tiponota
 			FROM
 				{$postrans} t
 			WHERE
 				t.dia BETWEEN '{$FechaIni}' AND '{$FechaFin} 23:59:59'
 				AND t.es = '{$CodAlmacen}'
-				AND t.usr IS NOT NULL AND t.usr != ''
+				AND t.usr IS NOT NULL AND t.usr != '' --DOCUMENTOS ELECTRONICOS
 			GROUP BY
 				t.trans,
 				t.caja,
@@ -1192,7 +1369,13 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 					DocCierre,
 					Sucursal,
 					Direccion,
-					Descuento
+					Descuento,
+					forma_pago_origen,
+					ref_tipodoc,
+					ref_serie,
+					ref_numero,
+					ref_fecha_doc,
+					ref_tiponota
 				) VALUES (
 					'{$reg[0]}',
 					'{$docid}',
@@ -1222,7 +1405,13 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 					'{$reg[0]}',
 					'{$reg[9]}',
 					'',
-					0
+					0,
+					'{$reg[11]}',
+					'{$reg[12]}',
+					'{$reg[13]}',
+					'{$reg[14]}',
+					'{$reg[15]}',
+					'{$reg[16]}'
 				);";
 
 			//echo $sql;
@@ -1473,14 +1662,39 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 					WHEN fc.ch_fac_credito = 'S' AND fc.ch_fac_forma_pago = '09' THEN '86'
 					WHEN fc.ch_fac_credito = 'S' AND fc.ch_fac_forma_pago = '21' THEN '78'
 					ELSE '78'
-				END AS ch_fac_forma_pago
+				END AS ch_fac_forma_pago,
+				CASE 
+					WHEN fc.nu_tipo_pago = '06' THEN 'CREDITO' --SI ES DOCUMENTO CON FORMA DE PAGO CREDITO
+					ELSE 'CONTADO'
+				END AS forma_pago_origen,
+
+				CASE
+					WHEN (string_to_array(fcc.ch_fac_observacion2, '*'))[3] = '10' THEN '01'::text--factura
+					WHEN (string_to_array(fcc.ch_fac_observacion2, '*'))[3] = '35' THEN '03'::text--boleta
+					WHEN (string_to_array(fcc.ch_fac_observacion2, '*'))[3] = '11' THEN '04'::text--liquidación de compra
+					WHEN (string_to_array(fcc.ch_fac_observacion2, '*'))[3] = '20' THEN '10'::text--nota de credito
+					ELSE NULL
+				END AS ref_tipodoc,
+
+				(string_to_array(fcc.ch_fac_observacion2, '*'))[2] AS ref_serie,
+				
+				(string_to_array(fcc.ch_fac_observacion2, '*'))[1] AS ref_numero,
+				
+				ch_fac_observacion3 AS ref_fecha_doc,
+				
+				ch_cat_sunat AS ref_tiponota
 			FROM
 				fac_ta_factura_cabecera fc
 				JOIN int_clientes c ON fc.cli_codigo = c.cli_codigo
+				LEFT JOIN fac_ta_factura_complemento fcc ON (fc.ch_fac_tipodocumento = fcc.ch_fac_tipodocumento AND fc.ch_fac_seriedocumento = fcc.ch_fac_seriedocumento AND fc.ch_fac_numerodocumento = fcc.ch_fac_numerodocumento AND fc.dt_fac_fecha = fcc.dt_fac_fecha)
 			WHERE
 				fc.ch_fac_tipodocumento IN ('10','11','20','35')
 				AND fc.dt_fac_fecha BETWEEN '$FechaIni' AND '$FechaFin'
 				AND fc.ch_almacen = '$CodAlmacen'";
+
+		// echo "<pre> Cabeceras de documentos manuales:";
+		// print_r($sql);
+		// echo "</pre>";
 
 		if ($sqlca->query($sql)<0)
 			return onError_AIExit($mssql,"Error al obtener cabeceras de documentos manuales a trasladas");
@@ -1519,7 +1733,13 @@ echo "========== SINCRONIZANDO CABECERAS DE DOCUMENTOS MANUALES ==========\n";
 					DocCierre,
 					Sucursal,
 					Direccion,
-					Descuento
+					Descuento,
+					forma_pago_origen,
+					ref_tipodoc,
+					ref_serie,
+					ref_numero,
+					ref_fecha_doc,
+					ref_tiponota
 				) VALUES (
 					'{$reg[0]}',
 					'" . (isset($Clientes[$reg[1]])?$Clientes[$reg[1]]:substr($reg[1],0,10)) . "',
@@ -1549,7 +1769,13 @@ echo "========== SINCRONIZANDO CABECERAS DE DOCUMENTOS MANUALES ==========\n";
 					null,
 					'{$reg[9]}',
 					'',
-					0
+					0,
+					'{$reg[12]}',
+					'{$reg[13]}',
+					'{$reg[14]}',
+					'{$reg[15]}',
+					'{$reg[16]}',
+					'{$reg[17]}'
 				);";
 			//echo "$sql\n";
 			if (mssql_query($sql,$mssql)===FALSE) {
@@ -1746,9 +1972,9 @@ echo "========== SINCRONIZANDO KARDEX ==========\n";
 
 		$sqlca->query("INSERT INTO \"3do_migraciones\" (ch_almacen,fecha_inicio,fecha_fin,ch_usuario) VALUES ('$CodAlmacen','$FechaIni','$FechaFin','{$_SESSION['auth_usuario']}');");
 		$sqlca->query("COMMIT;");
-//		$sqlca->query("ROLLBACK;");
-//		mssql_query("ROLLBACK TRANSACTION;",$mssql);
 		mssql_query("COMMIT TRANSACTION;",$mssql);
+		// $sqlca->query("ROLLBACK;");
+		// mssql_query("ROLLBACK TRANSACTION;",$mssql);
 		mssql_close($mssql);
 
 		return TRUE;
