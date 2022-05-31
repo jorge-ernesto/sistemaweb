@@ -5283,7 +5283,10 @@ SELECT
  SUM(PT.cantidad) AS quantity,
 
  ROUND((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)))) / ".$param['tax'].", 2) AS price,
- ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) AS discprcnt,
+ CASE 
+    WHEN (SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) = 0 THEN 0
+  	ELSE ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) 
+ END AS discprcnt,
 
  SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _price,--ROUND
  FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _discprcnt,
