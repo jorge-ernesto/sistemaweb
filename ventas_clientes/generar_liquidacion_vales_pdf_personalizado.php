@@ -1198,5 +1198,6 @@
 
     error_log( json_encode( array( $ch_liquidacion, $ch_cliente, $Factura, $forma, $parametro_opcinal ) ) );
 
+    ob_end_clean();
     $ReportePdf = new LiquidacionPDFTemplate();
     print_r($ReportePdf->reportePdf($ch_liquidacion, $ch_cliente, $Factura, $forma, $parametro_opcinal));
