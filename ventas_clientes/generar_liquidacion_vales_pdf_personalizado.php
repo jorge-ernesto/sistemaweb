@@ -358,7 +358,8 @@
             val_det.nu_precio_unitario as art_precio,
             val_cab.ch_placa as placa,
             pos.nomusu as conductor,
-            (SELECT ch_numeval FROM val_ta_complemento WHERE ch_documento = val_cab.ch_documento AND dt_fecha = val_cab.dt_fecha LIMIT 1) AS ch_numeval_manual
+            (SELECT ch_numeval FROM val_ta_complemento WHERE ch_documento = val_cab.ch_documento AND dt_fecha = val_cab.dt_fecha LIMIT 1) AS ch_numeval_manual,
+            val_cab.dt_fecha AS fecha_insercion
             FROM
             val_ta_cabecera val_cab,
             val_ta_detalle val_det,
