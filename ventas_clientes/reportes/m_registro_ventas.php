@@ -1,5 +1,5 @@
 <?php
-ini_set("memory_limit", '3G');
+ini_set("memory_limit", '-1');
 ini_set("upload_max_filesize", "15M");
 ini_set("post_max_size", "15M");
 ini_set('max_execution_time', '700');
@@ -7,7 +7,7 @@ ini_set('max_input_time', '700');
 
 class RegistroVentasModel extends Model {
 
-	function obtieneRegistros($almacen, $anio, $mes, $desde, $hasta, $tipo, $orden, $seriesdocumentos, $tipo_vista_monto, $serie, $nserie, $BI_incre, $IGV_incre, $TOTAL_incre, $monto_igual, $nd) {
+	function obtieneRegistros($almacen, $anio, $mes, $desde, $hasta, $tipo, $orden, $seriesdocumentos, $tipo_vista_monto, $serie, $nserie, $BI_incre, $IGV_incre, $TOTAL_incre, $monto_igual, $nd) { //Obtiene Registros
 		global $sqlca;
 
 		/* Obtenemos fechas para usar en queries */
@@ -248,10 +248,10 @@ class RegistroVentasModel extends Model {
 	    	$correlativo_serie++;
     	}
 
-    	if (strcmp($tipo, "N") == 0) {//SI EL REPORTE ES TIPO DETALLADO
+    	if (strcmp($tipo, "N") == 0) { //Tipo Vista: Detallado
 			array_push($tipo_documento_tickes, "'B'");
 			$key_array = "ticket";
-		} else {//TIPO SUNAT
+		} else { //Tipo Vista: SUNAT
 			array_push($tipo_documento_tickes, "'B'");
 			$key_array = "ticket_tmp";
 		}
@@ -332,8 +332,8 @@ class RegistroVentasModel extends Model {
 						FIRST(t.td) AS td, -- JEL
 						FIRST(t.codigo) AS codigo, -- JEL
 						CASE
-							WHEN FIRST(t.td) = 'B' OR FIRST(t.td) = 'F' THEN COALESCE( SUM(T.balance), 0.00 )
-							ELSE 0.00
+							WHEN FIRST(t.td) = 'B' OR FIRST(t.td) = 'F' THEN COALESCE( ROUND(SUM(T.balance), 2), 0 )
+							ELSE 0
 						END AS balance -- JEL --ICBPER
 					FROM
 						pos_trans" . $fecha_postrans_ant . " AS T
@@ -413,8 +413,8 @@ class RegistroVentasModel extends Model {
 			FIRST(t.td) AS td, -- JEL
 			FIRST(t.codigo) AS codigo, -- JEL
 			CASE
-				WHEN FIRST(t.td) = 'B' OR FIRST(t.td) = 'F' THEN COALESCE( SUM(T.balance), 0.00 )
-				ELSE 0.00
+				WHEN FIRST(t.td) = 'B' OR FIRST(t.td) = 'F' THEN COALESCE( ROUND(SUM(T.balance), 2), 0 )
+				ELSE 0
 			END AS balance -- JEL --ICBPER
 		FROM
 			pos_trans" . $fecha_postrans . " AS T
@@ -496,8 +496,8 @@ class RegistroVentasModel extends Model {
 						FIRST(t.td) AS td, -- JEL
 						FIRST(t.codigo) AS codigo, -- JEL
 						CASE
-							WHEN FIRST(t.td) = 'B' OR FIRST(t.td) = 'F' THEN COALESCE( SUM(T.balance), 0.00 )
-							ELSE 0.00
+							WHEN FIRST(t.td) = 'B' OR FIRST(t.td) = 'F' THEN COALESCE( ROUND(SUM(T.balance), 2), 0 )
+							ELSE 0
 						END AS balance -- JEL --ICBPER
 					FROM
 						pos_trans" . $fecha_postrans_des . " AS T
@@ -532,6 +532,7 @@ class RegistroVentasModel extends Model {
 		// die();
 		/***/
 
+		/* Recorremos informacion de Comprobantes de Playa */
 		if ($sqlca->query($sql_tickes_factura) < 0)
 			return false;
 
@@ -573,12 +574,14 @@ class RegistroVentasModel extends Model {
 			if($a['igv'] == 0.00){
 				$imponible	= 0.00;
     			$igv		= 0.00;
+				$balance    = 0.00;
     			$exonerada	= $a['importe'];
     			$inafecto	= 0.00;
     			$importe	= $a['importe'];
 			}else{
 				$imponible	= $a['imponible'];
     			$igv		= $a['igv'];
+				$balance    = $a['balance'];
     			$exonerada	= 0.00;
 				$inafecto 	= 0.00;
     			$importe	= $a['importe'];
@@ -587,6 +590,7 @@ class RegistroVentasModel extends Model {
 			if (in_array($trans_caja, $array_aferciones_cod) && $a['numdoc']=='') {//PONEMOS LOS MONTOS EN CEROS PARA LOS TICKES DE EXTORNOS
 				$imponible	= 0;
         		$igv		= 0;
+				$balance    = 0;
         		$exonerada	= 0;
         		$inafecto	= 0;
         		$importe	= 0;
@@ -594,23 +598,27 @@ class RegistroVentasModel extends Model {
 				if($a['igv'] == 0.00){
 					$imponible	= 0.00;
 	    			$igv		= 0.00;
+					$balance    = 0.00;
 	    			$exonerada	= $a['importe'];
 	    			$inafecto	= 0.00;
 	    			$importe	= $a['importe'];
 				}else{
 					$imponible	= $a['imponible'];
 	    			$igv		= $a['igv'];
+					$balance    = $a['balance'];
 	    			$exonerada	= 0.00;
 					$inafecto 	= 0.00;
 	    			$importe	= $a['importe'];
 				}
 			}
 			
+			$a['tipo_pdf'] = TRIM($a['tipo_pdf']);
 		    $result[$key_array][$correlativo]['imponible'] 		= $imponible;
 	    	$result[$key_array][$correlativo]['exonerada'] 		= $exonerada;
 	    	$result[$key_array][$correlativo]['inafecto'] 		= $inafecto;
 	    	$result[$key_array][$correlativo]['isc']			= 0;
 	    	$result[$key_array][$correlativo]['igv'] 			= $igv;
+			$result[$key_array][$correlativo]['balance']    	= $balance; //JEL //ICBPER
 	    	$result[$key_array][$correlativo]['otros'] 			= 0;
 	    	$result[$key_array][$correlativo]['importe'] 		= $importe;
 	    	$result[$key_array][$correlativo]['tipocambio'] 	= $a['tipocambio'];
@@ -624,9 +632,6 @@ class RegistroVentasModel extends Model {
 	    	$result[$key_array][$correlativo]['es']				= $a['es'];
 			$result[$key_array][$correlativo]['nserie']			= $a['nserie'];
 
-			//($a['balance'] == null) ? $a['balance'] = "0.00" : $a['balance'] = $a['balance']; 
-			$result[$key_array][$correlativo]['balance']    	= $a['balance']; //JEL //ICBPER
-
 	    	$result[$key_array][$correlativo]['reffec'] = "";
 		    $result[$key_array][$correlativo]['reftip'] = "";
 		    $result[$key_array][$correlativo]['refser'] = "";
@@ -637,11 +642,20 @@ class RegistroVentasModel extends Model {
 			}else{
 				$result[$key_array][$correlativo]['serie'] = $a['nserie'];
 			}
-			
+
+			//VARIABLES PARA LA SUMA TOTAL TICKETS POR BOLETAS, FACTURAS Y NOTAS DE CREDITO
+			$tipo_pdf = $a['tipo_pdf'];
+			$result['ticket']['tipo'][$tipo_pdf]['total_imponible']	+= $imponible;
+			$result['ticket']['tipo'][$tipo_pdf]['total_igv']		+= $igv;			
+			$result['ticket']['tipo'][$tipo_pdf]['total_balance']	+= $balance; //JEL //ICBPER
+			$result['ticket']['tipo'][$tipo_pdf]['total_exonerada'] += $exonerada;
+			$result['ticket']['tipo'][$tipo_pdf]['total_inafecto'] 	+= $inafecto;
+			$result['ticket']['tipo'][$tipo_pdf]['total_importe'] 	+= $importe;
+
 			//VARIABLES PARA LA SUMA TOTAL TICKETS GUARDO 2
 	    	$result['ticket']['total_imponible']	+= $imponible;
 			$result['ticket']['total_igv']			+= $igv;			
-			$result['ticket']['total_balance']		+= $a['balance']; 
+			$result['ticket']['total_balance']		+= $balance; //JEL //ICBPER
 	    	$result['ticket']['total_exonerada'] 	+= $exonerada;
 	    	$result['ticket']['total_inafecto'] 	+= $inafecto;
 	    	$result['ticket']['total_importe'] 		+= $importe;
@@ -649,7 +663,7 @@ class RegistroVentasModel extends Model {
 	    	//TOTALES
 	    	$result['totales_imponible'] 		+= $imponible;
 			$result['totales_igv'] 				+= $igv;
-			$result['totales_balance']		    += $a['balance']; //JEL //ICBPER
+			$result['totales_balance']		    += $balance; //JEL //ICBPER
 	    	$result['totales_exonerada'] 		+= $exonerada;
 	    	$result['totales_inafecto'] 		+= $inafecto;
 	    	$result['totales_importe'] 			+= $importe;
@@ -657,8 +671,9 @@ class RegistroVentasModel extends Model {
 			$correlativo++;
 		}
 
-		echo "<script>console.log('" . json_encode(strcmp($tipo, "SU")) . "')</script>";
-        if (strcmp($tipo, "SU") == 0) {//ES CUANDO ES FORMATO SUNAT 
+		// echo "<script>console.log('tipo')</script>";
+		// echo "<script>console.log('" . json_encode(strcmp($tipo, "SU")) . "')</script>";
+        if (strcmp($tipo, "SU") == 0) { //Tipo Vista: SUNAT
 	    	$correlativo			= 0;
 	    	$inicio_boleta 			= "0";
 	    	$fin_boleta 			= "0";
@@ -670,6 +685,8 @@ class RegistroVentasModel extends Model {
 	    	$cantidad_factura 		= 0;
 	    	$array_boletas 			= array();
 
+			// echo "<script>console.log('result')</script>";
+			// echo "<script>console.log('" . json_encode( array($result) ) . "')</script>";
         	for ($i = 0; $i < count($result['ticket_tmp']); $i++) {
 				$a = $result['ticket_tmp'][$i];
 
@@ -696,12 +713,10 @@ class RegistroVentasModel extends Model {
 
 			    	$result['ticket'][$correlativo]['imponible']	= $array_tmp_impresion['imponible'];
 			    	$result['ticket'][$correlativo]['igv']		= $array_tmp_impresion['igv'];
+					$result['ticket'][$correlativo]['balance'] = $array_tmp_impresion['balance']; 
 			    	$result['ticket'][$correlativo]['exonerada']	= $array_tmp_impresion['exonerada'];
 			    	$result['ticket'][$correlativo]['inafecto']	= $array_tmp_impresion['inafecto'];
 					$result['ticket'][$correlativo]['importe']	= $array_tmp_impresion['importe'];
-
-					//($array_tmp_impresion['balance'] == null) ? $array_tmp_impresion['balance'] = "0.00" : $array_tmp_impresion['balance'] = $array_tmp_impresion['balance']; 
-					$result['ticket'][$correlativo]['balance'] = $array_tmp_impresion['balance']; 
 
                 	if ($result['ticket'][$correlativo]['tipodi'] == 1) {
 						$array_boletas[] = $correlativo;
@@ -741,17 +756,15 @@ class RegistroVentasModel extends Model {
 
 	    	$result['ticket'][$correlativo]['imponible'] 	= $array_tmp_impresion['imponible'];
 	    	$result['ticket'][$correlativo]['igv'] 		= $array_tmp_impresion['igv'];
+			$result['ticket'][$correlativo]['balance'] = $array_tmp_impresion['balance'];
 	    	$result['ticket'][$correlativo]['exonerada']	= $array_tmp_impresion['exonerada'];
-	    	$result['ticket'][$correlativo]['inafecto']	= $array_tmp_impresion['inafecto'];;
+	    	$result['ticket'][$correlativo]['inafecto']	= $array_tmp_impresion['inafecto'];
 	    	$result['ticket'][$correlativo]['importe'] 	= $array_tmp_impresion['importe'];
 
 	    	$result['ticket'][$correlativo]['reffec'] 	= $array_tmp_impresion['reffec'];
 	    	$result['ticket'][$correlativo]['reftip'] 	= $array_tmp_impresion['reftip'];
 	    	$result['ticket'][$correlativo]['refser'] 	= $array_tmp_impresion['refser'];
 			$result['ticket'][$correlativo]['refnum'] 	= $array_tmp_impresion['refnum'];
-
-			//($array_tmp_impresion['balance'] == null) ? $array_tmp_impresion['balance'] = "0.00" : $array_tmp_impresion['balance'] = $a['balance']; 
-			$result['ticket'][$correlativo]['balance'] = $array_tmp_impresion['balance']; 
 
 	    	//SUMA DE MONTOS
 	    	$sumatotal_formato_sunat_bi 		+= $array_tmp_impresion['imponible'];
@@ -799,7 +812,17 @@ class RegistroVentasModel extends Model {
 			--CASE WHEN Cab.ch_fac_tipodocumento='20' OR Cab.ch_fac_tipodocumento='11' THEN CASE WHEN substring(com.ch_fac_observacion2, length(com.ch_fac_observacion2)-1, length(com.ch_fac_observacion2))='10' THEN substring(com.ch_fac_observacion2, 0, length(com.ch_fac_observacion2)-1)||'01'  ELSE substring(com.ch_fac_observacion2, 0, length(com.ch_fac_observacion2)-1)||'03' END END AS refdata,
 			(string_to_array(com.ch_fac_observacion2, '*'))[1]||'*'||(string_to_array(com.ch_fac_observacion2, '*'))[2]||'*'||FIRST(TDOCUREFE.tab_car_03)||'*' AS refdata,
 			com.ch_fac_observacion3 as reffecha,
-			cab.ch_fac_moneda as moneda
+			cab.ch_fac_moneda as moneda,
+			FIRST(Cab.nu_fac_recargo3) as status,
+			CASE
+				WHEN FIRST(Cab.nu_fac_recargo3) IS NULL OR FIRST(Cab.nu_fac_recargo3) = 0 THEN 'Registrado'
+				WHEN FIRST(Cab.nu_fac_recargo3) = 1 THEN 'Completado'
+				WHEN FIRST(Cab.nu_fac_recargo3) = 2 THEN 'Anulado'
+				WHEN FIRST(Cab.nu_fac_recargo3) = 3 THEN 'Completado - Enviado'
+				WHEN FIRST(Cab.nu_fac_recargo3) = 4 THEN 'Completado - Error'
+				WHEN FIRST(Cab.nu_fac_recargo3) = 5 THEN 'Anulado - Enviado'
+				WHEN FIRST(Cab.nu_fac_recargo3) = 6 THEN 'Anulado - Error'
+			END as statusname
 		FROM
 			fac_ta_factura_cabecera AS Cab
 			LEFT JOIN fac_ta_factura_detalle AS FD USING (ch_fac_tipodocumento, ch_fac_seriedocumento, ch_fac_numerodocumento, cli_codigo)
@@ -831,6 +854,7 @@ class RegistroVentasModel extends Model {
     		Cab.ch_fac_numerodocumento;
 		";
 
+		/* Recorremos informacion de Comprobantes de Oficina */
 		if ($sqlca->query($sql_facturas_manuales) < 0)
 			return false;
 
@@ -842,24 +866,31 @@ class RegistroVentasModel extends Model {
 
 		    $a = $sqlca->fetchRow();
 
-		    $result['manual'][$i]['trans'] 			= $a['trans'];
-		   	$result['manual'][$i]['caja'] 			= $a['caja'];
-	    	$result['manual'][$i]['emision'] 		= $a['emision'];
-	    	$result['manual'][$i]['vencimiento'] 	= $a['vencimiento'];
-	    	$result['manual'][$i]['tipo'] 			= $a['tipo'];
+			if ($a['statusname'] == 'Completado - Enviado' || $a['statusname'] == 'Anulado - Enviado') { //TODO: Importante
+				$keyStatus = "manual_completado";
+			} else {
+				$keyStatus = "manual_registrado";
+			}
+
+			$a['tipo'] = TRIM($a['tipo']);			
+			$result[$keyStatus][$i]['trans'] 		= $a['trans'];
+			$result[$keyStatus][$i]['caja'] 		= $a['caja'];
+			$result[$keyStatus][$i]['emision'] 		= $a['emision'];
+			$result[$keyStatus][$i]['vencimiento'] 	= $a['vencimiento'];
+			$result[$keyStatus][$i]['tipo'] 		= $a['tipo'];
 
 	    	if (empty($serie[0]) || empty($nserie[0])) {
-	        	$result['manual'][$i]['serie'] = $a['serie'];
+	        	$result[$keyStatus][$i]['serie'] = $a['serie'];
 	    	} else {
 	        	for ($s = 0; $s < count($serie); $s++) {
             		if (trim($serie[$s]) == trim($a['serie']))
-                		$result['manual'][$i]['serie'] = $nserie[$s];
+                		$result[$keyStatus][$i]['serie'] = $nserie[$s];
 	        	}
 	    	}
 
 			if ($a['tipo']=='07'){//7=N/Crédito
-				if ($a['moneda']=='02'){
-					if (trim($a['istranfer']) == 'T'){
+				if ($a['moneda']=='02'){ //02 = DOLARES
+					if (trim($a['istranfer']) == 'T'){ //Transferencia gratuita
 					    $imponible	= 0.00;
 		    			$igv		= -$a['igv']*$a['tipocambio'];
 		    			$exonerada	= 0.00;
@@ -890,8 +921,8 @@ class RegistroVentasModel extends Model {
 		    			$inafecto	= 0.00;
 		    			$importe	= -$a['importe']*$a['tipocambio'];
 					}
-				}else{//01 = Soles
-	    			if (trim($a['istranfer']) == 'T'){
+				}else{//01 = SOLES
+	    			if (trim($a['istranfer']) == 'T'){ //Transferencia gratuita
 					    $imponible	= 0.00;
 		    			$igv		= -$a['igv'];
 		    			$exonerada	= 0.00;
@@ -924,8 +955,8 @@ class RegistroVentasModel extends Model {
 	    			}	
 				}
 			}else{
-				if ($a['moneda']=='02'){
-					if (trim($a['istranfer']) == 'T'){
+				if ($a['moneda']=='02'){ //02 = DOLARES
+					if (trim($a['istranfer']) == 'T'){ //Transferencia gratuita
 					    $imponible	= 0.00;
 		    			$igv		= $a['igv']*$a['tipocambio'];
 		    			$exonerada	= 0.00;
@@ -956,8 +987,8 @@ class RegistroVentasModel extends Model {
 		    			$inafecto	= 0.00;
 		    			$importe	= $a['importe']*$a['tipocambio'];
 					}
-				}else{//01 = Soles
-	    			if (trim($a['istranfer']) == 'T'){
+				}else{//01 = SOLES
+	    			if (trim($a['istranfer']) == 'T'){ //Transferencia gratuita
 					    $imponible	= 0.00;
 		    			$igv		= $a['igv'];
 		    			$exonerada	= 0.00;
@@ -991,65 +1022,82 @@ class RegistroVentasModel extends Model {
 				}
 			}
 
-	    	$result['manual'][$i]['numero'] 	= $a['numero'];
-	    	$result['manual'][$i]['tipodi'] 	= $a['tipodi'];
-	    	$result['manual'][$i]['ruc'] 		= $a['ruc'];
-	    	$result['manual'][$i]['cliente'] 	= str_pad(utf8_encode($a['cliente']),60," ",STR_PAD_RIGHT);
+	    	$result[$keyStatus][$i]['numero'] 	= $a['numero'];
+	    	$result[$keyStatus][$i]['tipodi'] 	= $a['tipodi'];
+	    	$result[$keyStatus][$i]['ruc'] 		= $a['ruc'];
+	    	$result[$keyStatus][$i]['cliente'] 	= str_pad(utf8_encode($a['cliente']),60," ",STR_PAD_RIGHT);
 
-	    	$result['manual'][$i]['vfexp'] 		= 0;
-	    	$result['manual'][$i]['isc'] 		= 0;
-	   		$result['manual'][$i]['otros'] 		= 0;
-	    	$result['manual'][$i]['imponible'] 	= (empty($imponible) ? 0.00 : $imponible);
-	    	$result['manual'][$i]['igv'] 		= (empty($igv) ? 0.00 : $igv);
-	    	$result['manual'][$i]['exonerada'] 	= $exonerada;
-	    	$result['manual'][$i]['inafecto'] 	= $inafecto;
-	    	$result['manual'][$i]['importe'] 	= $importe;
-	    	$result['manual'][$i]['tipocambio'] = $a['tipocambio'];
-	    	$result['manual'][$i]['fecha2'] 	= "";
-	    	$result['manual'][$i]['tipo2'] 		= "";
-	    	$result['manual'][$i]['serie2'] 	= "";
-	    	$result['manual'][$i]['numero2']	= "";
-	    	$result['manual'][$i]['istranfer'] 	= trim($a['istranfer']);
-			$result['manual'][$i]['estado'] 	= $a['estadoventa'];
-			$result['manual'][$i]['balance']    = "0.00"; //JEL //ICBPER
+	    	$result[$keyStatus][$i]['vfexp'] 	  = 0;
+	    	$result[$keyStatus][$i]['isc'] 		  = 0;
+	   		$result[$keyStatus][$i]['otros'] 	  = 0;
+	    	$result[$keyStatus][$i]['imponible']  = (empty($imponible) ? 0.00 : $imponible);
+	    	$result[$keyStatus][$i]['igv'] 		  = (empty($igv) ? 0.00 : $igv);
+	    	$result[$keyStatus][$i]['exonerada']  = $exonerada;
+	    	$result[$keyStatus][$i]['inafecto']   = $inafecto;
+	    	$result[$keyStatus][$i]['importe'] 	  = $importe;
+	    	$result[$keyStatus][$i]['tipocambio'] = $a['tipocambio'];
+	    	$result[$keyStatus][$i]['fecha2'] 	  = "";
+	    	$result[$keyStatus][$i]['tipo2'] 	  = "";
+	    	$result[$keyStatus][$i]['serie2'] 	  = "";
+	    	$result[$keyStatus][$i]['numero2']	  = "";
+	    	$result[$keyStatus][$i]['istranfer']  = trim($a['istranfer']);
+			$result[$keyStatus][$i]['estado'] 	  = $a['estadoventa'];
+			$result[$keyStatus][$i]['balance']    = "0.00"; //JEL //ICBPER
+			$result[$keyStatus][$i]['status']     = $a['status'];
+			$result[$keyStatus][$i]['statusname'] = $a['statusname'];
 
-/*Para la nueva versión en BD guarda el valor YYYY-MM-DD, en la anterior graba DD/MM/YYYY por ello es que se casteaba
+			/*Para la nueva versión en BD guarda el valor YYYY-MM-DD, en la anterior graba DD/MM/YYYY por ello es que se casteaba
 	    	$nuevofechad= split('/',$a['reffecha']);
 			$v_diad=$nuevofechad[0];
 			$v_mesd=$nuevofechad[1];
 			$v_anod=$nuevofechad[2];
 			$nuevofechaa = $v_anod . "-" . $v_mesd . "-" . $v_diad;
-*/
+			*/
 
 			$nuevodata= explode('*',$a['refdata']);
 			$dataref1=$nuevodata[0];//numero
 			$dataref2=$nuevodata[1];//serie
 			$dataref3=$nuevodata[2];//tipo
 
-//			$result['manual'][$i]['reffec'] 		= $nuevofechaa;
-			$result['manual'][$i]['reffec'] 		= $a['reffecha'];
-			$result['manual'][$i]['reftip'] 		= $dataref3;
-			$result['manual'][$i]['refser'] 		= $dataref2;
-			$result['manual'][$i]['refnum'] 		= $dataref1;
+			// $result[$keyStatus][$i]['reffec'] 		= $nuevofechaa;
+			$result[$keyStatus][$i]['reffec'] 		= $a['reffecha'];
+			$result[$keyStatus][$i]['reftip'] 		= $dataref3;
+			$result[$keyStatus][$i]['refser'] 		= $dataref2;
+			$result[$keyStatus][$i]['refnum'] 		= $dataref1;
+
+			//VARIABLES PARA LA SUMA TOTAL DE DOCUMENTOS DE VENTAS MANUALES POR BOLETA, FACTURA, NOTA DE CREDITO, NOTA DE DEBITO
+			$tipo = $a['tipo'];
+			$result[$keyStatus]['tipo'][$tipo]['total_imponible'] += $imponible;
+			$result[$keyStatus]['tipo'][$tipo]['total_igv'] 	  += $igv;
+			$result[$keyStatus]['tipo'][$tipo]['total_balance']	  += "0.00"; //JEL //ICBPER
+			$result[$keyStatus]['tipo'][$tipo]['total_exonerada'] += $exonerada;
+			$result[$keyStatus]['tipo'][$tipo]['total_inafecto']  += $inafecto;
+			$result[$keyStatus]['tipo'][$tipo]['total_importe']   += $importe;
+
+			if ($a['statusname'] == 'Anulado - Enviado') { //TODO: Importante
+				$result['manual_anulado']['tipo'][$tipo]['cantidad'] += 1;
+				$result['manual_anulado']['tipo']['cantidad'] += 1;
+			}
 
 			//VARIABLES PARA LA SUMA TOTAL DE DOCUMENTOS VENTAS MANUALES
 		    if ($a['tipo'] != '07') {
-				$result['manual']['total_imponible'] 	+= $imponible;
-				$result['manual']['total_igv'] 			+= $igv;
-				$result['manual']['total_balance']		+= "0.00"; //JEL //ICBPER
-				$result['manual']['total_exonerada'] 	+= $exonerada;
-				$result['manual']['total_inafecto'] 	+= $inafecto;
-				$result['manual']['total_importe'] 		+= $importe;
+				$result[$keyStatus]['total_imponible'] 	+= $imponible;
+				$result[$keyStatus]['total_igv'] 		+= $igv;
+				$result[$keyStatus]['total_balance']	+= "0.00"; //JEL //ICBPER
+				$result[$keyStatus]['total_exonerada'] 	+= $exonerada;
+				$result[$keyStatus]['total_inafecto'] 	+= $inafecto;
+				$result[$keyStatus]['total_importe'] 	+= $importe;
 		    }
 
+			//VARIABLES PARA LA SUMA TOTAL DE DOCUMENTOS DE VENTAS MANUALES (NOTAS DE CREDITO) //TODO: Importante
 			if ($a['tipo'] == '07') {
-				$result['totales_imponible_credito'] += $imponible;
-				$result['totales_igv_credito'] += $igv;
-				$result['totales_balance_credito'] += "0.00"; 
-				$result['totales_importe_credito'] += $importe;
-				$result['totales_exonerada_nc']	+= abs($exonerada);
-				$result['totales_inafecto_nc'] += abs($inafecto);
-			}			   			
+				$result[$keyStatus]['nota_credito']['totales_imponible_credito'] += $imponible;
+				$result[$keyStatus]['nota_credito']['totales_igv_credito'] += $igv;
+				$result[$keyStatus]['nota_credito']['totales_balance_credito'] += "0.00"; //JEL //ICBPER
+				$result[$keyStatus]['nota_credito']['totales_importe_credito'] += $importe;
+				$result[$keyStatus]['nota_credito']['totales_exonerada_nc']	+= abs($exonerada);
+				$result[$keyStatus]['nota_credito']['totales_inafecto_nc'] += abs($inafecto);
+			}
 		}// /. FOR
 
 		/*** Agregado 2020-02-04 ***/
@@ -1075,7 +1123,13 @@ class RegistroVentasModel extends Model {
 			                trim(substring(c.documentno from position(' ' in c.documentno)::INTEGER +1 for 25))::TEXT as numero,
 					(CASE WHEN c.c_doctype_id = '10' THEN '6' ELSE '1' END) tipodi,
 					c.c_bpartner_id ruc,
-					'' cliente,
+					(CASE
+						WHEN FIRST(c.c_bpartner_id) IS NULL THEN 'CLIENTE VARIOS'
+						WHEN FIRST(c.c_bpartner_id) = '99999999' THEN 'CLIENTE VARIOS'
+					ELSE
+						substr(FIRST(r.razsocial),0,60)
+					END) as cliente,
+					--'' cliente,
 					ROUND(SUM(d.linetotal/1.18),2) imponible,
 					ROUND(SUM(d.linetotal)-SUM(d.linetotal/1.18),2) igv,
 					ROUND(SUM(d.linetotal),2) importe,
@@ -1084,6 +1138,7 @@ class RegistroVentasModel extends Model {
 					c_invoiceheader c
 					JOIN c_invoicedetail d ON(c.c_invoiceheader_id = d.c_invoiceheader_id)
 					LEFT JOIN int_tipo_cambio TC ON (to_char(TC.tca_fecha,'YYYY-MM-DD') = to_char(c.created,'YYYY-MM-DD'))
+					LEFT JOIN ruc AS r ON (r.ruc = c.c_bpartner_id::VARCHAR)
 				WHERE
 					c.created::date BETWEEN '$anio-$mes-$desde' AND '$anio-$mes-$hasta'
 				GROUP BY
@@ -1099,7 +1154,9 @@ class RegistroVentasModel extends Model {
                     emision;
 				";
 
-		//echo $sql;
+		echo "<pre>sql_registros_gnv";
+		echo $sql;
+		echo "</pre>";
 
 		if ($sqlca->query($sql) < 0)
 		    return false;
@@ -1199,7 +1256,7 @@ class RegistroVentasModel extends Model {
 		return $iStatusTable;
 	}
 
-	function llenar_arreglo_objecto_imprimir($array_tmp_impresion, $a, $tipo_vista_monto) {
+	function llenar_arreglo_objecto_imprimir($array_tmp_impresion, $a, $tipo_vista_monto) { //llenar_arreglo_objecto_imprimir
 		$array_tmp_impresion['caja'] 		= $a['caja'];
 		$array_tmp_impresion['emision'] 	= $a['emision'];
 		$array_tmp_impresion['vencimiento'] 	= $a['vencimiento'];
@@ -1230,36 +1287,40 @@ class RegistroVentasModel extends Model {
 
 			$imponible	= 0.00;
 			$igv		= 0.00;
+			$balance    = 0.00;
 			$exonerada	= $a['exonerada'];
 			$inafecto	= 0.00;
 			$importe	= $a['importe'];
 
 			//VARIABLES PARA LA SUMA TOTAL TICKETS 1
 			$imponibleTOT	= 0.00;
-			$igvTOT		= 0.00;
+			$igvTOT		    = 0.00;
+			$balanceTOT     = 0.00;
 			$exoneradaTOT	= $a['exonerada'];
 			$inafectoTOT	= 0.00;
-			$importeTOT	= $a['importe'];
+			$importeTOT	    = $a['importe'];
 
 		}else{
 
 			$imponible	= $a['imponible'];
 			$igv		= $a['igv'];
+			$balance    = $a['balance'];
 			$inafecto 	= 0.00;
 			$exonerada 	= 0.00;
 			$importe	= $a['importe'];
 
 			//VARIABLES PARA LA SUMA TOTAL TICKETS 1
 			$imponibleTOT	= $a['imponible'];
-			$igvTOT		= $a['igv'];
+			$igvTOT		    = $a['igv'];
+			$balanceTOT     = $a['balance'];
 			$inafectoTOT 	= 0.00;
 			$exoneradaTOT	= 0.00;
-			$importeTOT	= $a['importe'];
+			$importeTOT	    = $a['importe'];
 		}
 
     	$array_tmp_impresion['imponible']	+= $imponible;
 		$array_tmp_impresion['igv']			+= $igv;
-		$array_tmp_impresion['balance']		+= $a['balance'];
+		$array_tmp_impresion['balance']		+= $balance;
     	$array_tmp_impresion['exonerada']	+= $exonerada;
     	$array_tmp_impresion['inafecto']	+= $inafecto;
 		$array_tmp_impresion['importe']		+= $importe;

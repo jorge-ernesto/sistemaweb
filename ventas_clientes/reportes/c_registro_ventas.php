@@ -1,5 +1,5 @@
 <?php
-ini_set("memory_limit", '3G');
+ini_set("memory_limit", '-1');
 ini_set("upload_max_filesize", "15M");
 ini_set("post_max_size", "15M");
 ini_set('max_execution_time', '700');
@@ -29,6 +29,9 @@ class RegistroVentasController extends Controller {
 
         switch ($this->action) {
             case "Reporte":
+				echo "<script>console.log('REQUEST')</script>";
+				echo "<script>console.log('" . json_encode( array($_REQUEST) ) . "')</script>";
+			
 		        $almacen		= $_REQUEST['almacen'];
 		        $anio 			= trim($_REQUEST['anio']);
 		        $mes 			= trim($_REQUEST['mes']);
@@ -43,39 +46,40 @@ class RegistroVentasController extends Controller {
 		        $serie 			= $_REQUEST['serie'];
 		        $nserie 		= $_REQUEST['nserie'];
 
-		        $BI_incre 		= $_REQUEST['bi'];
-		        $IGV_incre 		= $_REQUEST['igv'];
-		        $TOTAL_incre 		= $_REQUEST['valor_venta'];
-				$monto_sistema 		= $_REQUEST['sistema'];// ya no se usa esta varibale
-		        $monto_igual 		= 0;//ya no se usa este variable
+		        $BI_incre 		= $_REQUEST['bi'];          //ya no se usa este variable
+		        $IGV_incre 		= $_REQUEST['igv'];         //ya no se usa este variable
+		        $TOTAL_incre 	= $_REQUEST['valor_venta']; //ya no se usa este variable
+				$monto_sistema 	= $_REQUEST['sistema'];     //ya no se usa esta varibale
+		        $monto_igual 	= 0;                        //ya no se usa este variable
 
 		        $results = $modelRegistroVentas->obtieneRegistros($almacen, $anio, $mes, $desde, $hasta, $tipo, $orden, $seriesdocumentos, $monto_sistema='S', $serie, $nserie, $BI_incre, $IGV_incre, $TOTAL_incre,$monto_igual='S', $nd);
 		        if ($gnv == 'S') {
 		            $resultgnv = $modelRegistroVentas->obtieneRegistrosGNV($anio, $mes, $desde, $hasta);
-				}
+				}		
 				/*** Agregado 2020-02-04 ****/
-				echo "<pre>";
-				print_r( array($almacen, $anio, $mes, $desde, $hasta, $tipo, $orden, $seriesdocumentos, $monto_sistema='S', $serie, $nserie, $BI_incre, $IGV_incre, $TOTAL_incre,$monto_igual='S', $nd) );
-				echo "</pre>";
+				echo "<script>console.log('params obtieneRegistros')</script>";
+				echo "<script>console.log('" . json_encode( array($almacen, $anio, $mes, $desde, $hasta, $tipo, $orden, $seriesdocumentos, $monto_sistema='S', $serie, $nserie, $BI_incre, $IGV_incre, $TOTAL_incre,$monto_igual='S', $nd) ) . "')</script>";
 
-				echo "<pre>";
-				print_r($results);
-				echo "</pre>";
+				echo "<script>console.log('results')</script>";
+				echo "<script>console.log('" . json_encode( array($results) ) . "')</script>";
 
-				echo "<pre>";
-				print_r($resultgnv);
-				echo "</pre>";
+				echo "<script>console.log('resultgnv')</script>";
+				echo "<script>console.log('" . json_encode( array($resultgnv) ) . "')</script>";
+				// die();
 				/***/
 
 		        $arrParamsPOST = array(
 		        	"sTablePostransYM" => 'pos_trans'.$anio.$mes,
 		        	"sCodigoAlmacen" => $almacen,
 		        );
-		        $result_f = $templateRegistroVentas->reporte($results, $resultgnv, $BI_incre, $IGV_incre, $TOTAL_incre, $arrParamsPOST);
+
+		        $result_f = $templateRegistroVentas->reporte($results, $resultgnv, $BI_incre, $IGV_incre, $TOTAL_incre, $arrParamsPOST, $tipo);
 
                 break;
 
             case "PDF":
+				echo "<script>console.log('REQUEST')</script>";
+				echo "<script>console.log('" . json_encode( array($_REQUEST) ) . "')</script>";
 
 		        $almacen 		= $_REQUEST['almacen'];
 		        $anio 			= trim($_REQUEST['anio']);
@@ -99,9 +103,26 @@ class RegistroVentasController extends Controller {
 		        	"sTablePostransYM" => 'pos_trans'.$anio.$mes,
 		        	"sCodigoAlmacen" => $almacen,
 		        );
+				$dataPDF['desde'] = $anio."-".$mes."-".$desde;
+				$dataPDF['hasta'] = $anio."-".$mes."-".$hasta;
 		        $results = $modelRegistroVentas->obtieneRegistros($almacen, $anio, $mes, $desde, $hasta, $tipo, $orden, $seriesdocumentos, $monto_sistema, $serie, $nserie, $BI_incre, $IGV_incre, $TOTAL_incre,$monto_igual, $nd);
-		        echo $templateRegistroVentas->reportePDF($results, $almacen, $anio, $mes, $tipo, $BI_incre, $IGV_incre, $TOTAL_incre, $modelRegistroVentas, $arrParamsPOST);
+		        
+				/*** Agregado 2020-02-04 ****/
+				echo "<script>console.log('params obtieneRegistros')</script>";
+				echo "<script>console.log('" . json_encode( array($almacen, $anio, $mes, $desde, $hasta, $tipo, $orden, $seriesdocumentos, $monto_sistema='S', $serie, $nserie, $BI_incre, $IGV_incre, $TOTAL_incre,$monto_igual='S', $nd) ) . "')</script>";
 
+				echo "<script>console.log('results')</script>";
+				echo "<script>console.log('" . json_encode( array($results) ) . "')</script>";
+
+				echo "<script>console.log('resultgnv')</script>";
+				echo "<script>console.log('" . json_encode( array($resultgnv) ) . "')</script>";
+				// die();
+				/***/
+				
+
+				$result_f = '-';
+				echo $templateRegistroVentas->reportePDF($results, $almacen, $anio, $mes, $tipo, $BI_incre, $IGV_incre, $TOTAL_incre, $modelRegistroVentas, $arrParamsPOST, $dataPDF);
+				
                 break;
 
             case "Excel":
@@ -143,13 +164,20 @@ class RegistroVentasController extends Controller {
 		        	"sTablePostransYM" => 'pos_trans'.$anio.$mes,
 		        	"sCodigoAlmacen" => $almacen,
 				);
-				$_SESSION['arrParamsPOST_excel'] = $arrParamsPOST;				
+				$_SESSION['arrParamsPOST_excel'] = $arrParamsPOST;	
+				$_SESSION['desde'] = $anio."-".$mes."-".$desde;
+				$_SESSION['hasta'] = $anio."-".$mes."-".$hasta;
 
-		        header("Location: /sistemaweb/ventas_clientes/reporte_ventas_detalla.php");
+
+				$result_f = '-';
+				include_once('/sistemaweb/ventas_clientes/reporte_ventas_detalla.php');						        				
+				
 
                 break;
 
             case "Libros-Electronico":
+				echo "<script>console.log('REQUEST')</script>";
+				echo "<script>console.log('" . json_encode( array($_REQUEST) ) . "')</script>";
 
 		        $almacen		= $_REQUEST['almacen'];
 		        $anio 			= trim($_REQUEST['anio']);
@@ -181,34 +209,29 @@ class RegistroVentasController extends Controller {
 		        $arrResponseModel = $modelRegistroVentas->obtenerAlma($almacen);
 
 				/*** Agregado 2020-02-04 ****/
-				// echo "PLE";
-				
-				// echo "<pre>";
-				// print_r($results);
-				// echo "</pre>";
+				echo "<script>console.log('params obtieneRegistros')</script>";
+				echo "<script>console.log('" . json_encode( array($almacen, $anio, $mes, $desde, $hasta, $tipo, $orden, $seriesdocumentos, $monto_sistema='S', $serie, $nserie, $BI_incre, $IGV_incre, $TOTAL_incre,$monto_igual='S', $nd) ) . "')</script>";
 
-				// echo "<pre>";
-				// print_r( array( 
-				// 	"arrData" => $arrResponseModel["arrData"], 
-				// 	"anio" => $anio, 
-				// 	"mes" => $mes, 
-				// 	"resultgnv" => $resultgnv, 
-				// 	"correlativo" => $correlativo, 
-				// 	"almacen" => $almacen, 
-				// 	"tipo_ple" => $tipo_ple,
-				// 	"BI_incre" => $BI_incre,
-				// 	"TOTAL_incre" => $TOTAL_incre,
-				// 	"IGV_incre" => $IGV_incre ) );
-				// echo "</pre>";
+				echo "<script>console.log('results')</script>";
+				echo "<script>console.log('" . json_encode( array($results) ) . "')</script>";
+
+				echo "<script>console.log('resultgnv')</script>";
+				echo "<script>console.log('" . json_encode( array($resultgnv) ) . "')</script>";
 				// die();
 				/***/
 
 		        if ($arrResponseModel["sStatus"] != "success" ) {
 					echo '<script type="text/javascript">alert("' . $arrResponseModel['sMessage'] . '");window.close();</script>';
 		        } else {
+					//GUARDAMOS EN HISTORICO EL RESULTADO DE RESUMEN DE REGISTRO DE VENTAS
+					// $dataLog = array("action" => "PLE", "desde" => $anio."-".$mes."-".$desde, "hasta" => $anio."-".$mes."-".$hasta);
+					// $this->LogRegistroVentas($results, $dataLog);
+					//CERRAR 
+
 		        	$this->GenerarLibrosElectronicos($results, $arrResponseModel["arrData"], $anio, $mes, $resultgnv, $correlativo, $almacen, $tipo_ple,$BI_incre,$TOTAL_incre,$IGV_incre);
 		        }
 
+				$result_f = '-';
                 break;
 
             case "SerieDocumento":
@@ -226,18 +249,26 @@ class RegistroVentasController extends Controller {
         }
 
         if ($result != '')
-            $this->visor->addComponent("ContentB", "content_body", $result);
+			$this->visor->addComponent("ContentB", "content_body", $result);
 
         if ($result_f != '')
-            $this->visor->addComponent("ContentF", "content_footer", $result_f);
+			$this->visor->addComponent("ContentF", "content_footer", $result_f);
     }
 
 	//$this->GenerarLibrosElectronicos($results, $arrResponseModel["arrData"], $anio, $mes, $resultgnv, $correlativo, $almacen, $tipo_ple,$BI_incre,$TOTAL_incre,$IGV_incre);
     function GenerarLibrosElectronicos($resultado, $v, $anio, $mes, $resultgnv, $correlativo, $almacen, $version,$BI,$BT,$IGV) {
 
+		//Eliminamos archivos del PLE
+		$files = glob('/sistemaweb/ventas_clientes/reportes/excel/LE*.txt'); //obtenemos todos los nombres de los ficheros que comienzan con "LE"
+		foreach($files as $file){
+			if(is_file($file))
+			unlink($file); //elimino el fichero
+		}
+		//Cerrar Eliminamos archivos del PLE
+
 		ob_clean();
 		
-		// echo "<script>console.log('" . json_encode( array( count($resultado['ticket']), count($resultado['manual']), count($resultgnv['gnv']) ) ) . "')</script>";
+		// echo "<script>console.log('" . json_encode( array( count($resultado['ticket']), count($resultado['manual_completado']), count($resultgnv['gnv']) ) ) . "')</script>";
 		// echo "<script>console.log('" . json_encode( array($resultado, $resultgnv) ) . "')</script>";
 		// die();
 
@@ -253,7 +284,7 @@ class RegistroVentasController extends Controller {
             $estado_corretivo = TRUE;
         }
 
-        for ($i = 0; $i < $ntickets - 6; $i++) { //TICKETS
+        for ($i = 0; $i < $ntickets - 7; $i++) { //TICKETS 
             $linea = $resultado['ticket'][$i];
 
             if ($contador_incremento == 0 ) {//&& $linea['imponible']>$BI
@@ -311,30 +342,36 @@ class RegistroVentasController extends Controller {
 
         }
 
-        	//APARTIR DE AQUI VIENE LO DE FACTURAS Y BOLETAS MANUALES
+		//APARTIR DE AQUI VIENE LO DE FACTURAS Y BOLETAS MANUALES
+		$nmanuales = count($resultado['manual_completado']);
 
-		$nmanuales = count($resultado['manual']);
+		// for ($i = 0; $i < $nmanuales - 7; $i++) {		
+		// 	$linea = $resultado['manual_completado'][$i];
+		// }
 
-		for ($i = 0; $i < $nmanuales - 6; $i++) {
+		foreach ($resultado['manual_completado'] as $key => $manual_completado) { //MANUAL
+			if (is_int($key)) {
+				$i = $key;	
+				
+				$linea = $resultado['manual_completado'][$i];
 
-			$linea = $resultado['manual'][$i];
+				if ($version == "3"){
+							$PLEDATA = $this->ImprimirLiniaPLE($linea, $anio, $mes, $almacen, "no", $correlativo,0,0,0);
+						} else {
+							$PLEDATA = $this->ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen, 0,0,0, $correlativo);
+				}
 
-			if ($version == "3"){
-                		$PLEDATA = $this->ImprimirLiniaPLE($linea, $anio, $mes, $almacen, "no", $correlativo,0,0,0);
-            		} else {
-                		$PLEDATA = $this->ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen, 0,0,0, $correlativo);
-			}
+				$PLETXTLINI = $PLEDATA['registro'];
+				echo implode("|", $PLETXTLINI) . "|" . PHP_EOL;
 
-			$PLETXTLINI = $PLEDATA['registro'];
-			echo implode("|", $PLETXTLINI) . "|" . PHP_EOL;
-
-			if ($estado_corretivo == TRUE) {
-				$correlativo++;
+				if ($estado_corretivo == TRUE) {
+					$correlativo++;
+				}
 			}
 		}
 
-        	//APARTIR DE AQUI VIENE LO DE GNV
-        	$ngnv = count($resultgnv['gnv']); //siempre -3 x que por los importe
+		//APARTIR DE AQUI VIENE LO DE GNV
+		$ngnv = count($resultgnv['gnv']); //siempre -3 x que por los importe
 
 		for ($i = 0; $i < $ngnv - 4; $i++) {
 
@@ -360,21 +397,32 @@ class RegistroVentasController extends Controller {
 
 	        //JALAR INFORMACION DE las tres estaciones
 	        if ($version == "3")
-                	$nombre_archivo = "LE" . $ruc . "" . $anio . "" . $mes . "00140100001" . $estado_info . "11.txt";  
-		else
-                	$nombre_archivo = "LE" . $ruc . "" . $anio . "" . $mes . "00140200001" . $estado_info . "11.txt";
+				$nombre_archivo = "LE" . $ruc . "" . $anio . "" . $mes . "00140100001" . $estado_info . "11.txt";  
+			else
+				$nombre_archivo = "LE" . $ruc . "" . $anio . "" . $mes . "00140200001" . $estado_info . "11.txt";
 
-		header("Content-type: text/plain");
-		header("Content-Disposition: attachment; filename=\"$nombre_archivo\"");
-		header("Cache-Control: no-cache, must-revalidate");
-		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
+		// header("Content-type: text/plain");
+		// header("Content-Disposition: attachment; filename=\"$nombre_archivo\"");
+		// header("Cache-Control: no-cache, must-revalidate");
+		// header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");		
+		// $result = trim($result);
+		// die($result);
 
+		$bufer = ob_get_clean();
+		
+		//Creamos archivo TXT
+		$archivo = fopen("/sistemaweb/ventas_clientes/reportes/excel/$nombre_archivo", "w") or die("error creando fichero!");
+				
+		//Reescribimos archivo TXT
+		fwrite($archivo, $bufer);
+		fclose($archivo);
 
-
-        	$result = trim($result);
-
-        	die($result);
-
+		echo "<script>
+				var link = document.createElement('a');
+				link.href = '/sistemaweb/ventas_clientes/reportes/excel/".$nombre_archivo."';
+				link.download = '".$nombre_archivo."';
+				link.dispatchEvent(new MouseEvent('click'));		
+			</script>";		
 	}
 
 	function ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen, $difBi, $valor_venta, $difIgv, $accion_ejecutar, $correlativo = "") { //PROBLEMA CON CANTIDAD DE PARAMETROS PHP7
@@ -530,11 +578,11 @@ class RegistroVentasController extends Controller {
 				$numero_unico_registro = $almacen . "-" .trim($linea['caja']) . "-" . trim($linea['trans']);
 		}
 
-		$bandera_monto 		= $this->establecer_monto_otro_tipo($linea['igv']);
+		$bandera_monto 		= $this->establecer_monto_otro_tipo($linea['igv']); //
 		$datos_importe 		= $this->formato_moneda($linea['tipo'], $linea['imponible'], $accion_ejecutar, $informacion_cliente['tipo_documento_identidad']);
 		$datos_igv 		= $this->formato_moneda($linea['tipo'], $linea['igv'], $accion_ejecutar, $informacion_cliente['tipo_documento_identidad']);
-		$datos_exonerada 	= $this->formato_moneda($linea['tipo'], $linea['exonerada'], $accion_ejecutar, $informacion_cliente['tipo_documento_identidad']);
-		$datos_inafecto 	= $this->formato_moneda($linea['tipo'], $linea['inafecto'], $accion_ejecutar, $informacion_cliente['tipo_documento_identidad']);
+		$datos_exonerada 	= $this->formato_moneda($linea['tipo'], $linea['exonerada'], $accion_ejecutar, $informacion_cliente['tipo_documento_identidad']); //
+		$datos_inafecto 	= $this->formato_moneda($linea['tipo'], $linea['inafecto'], $accion_ejecutar, $informacion_cliente['tipo_documento_identidad']); //
 		$datos_total 		= $this->formato_moneda($linea['tipo'], $linea['importe'], $accion_ejecutar, $informacion_cliente['tipo_documento_identidad']);
 
 		$PLETXT[0] 	= $anio . "" . $mes . "00";
@@ -554,15 +602,15 @@ class RegistroVentasController extends Controller {
 		$PLETXT[14] 	= "0.00";//Descuento del base imponible =15
 		$PLETXT[15] 	= ($bandera_monto['flag'] == "N") ? $datos_igv['valor'] + $IGV : "0.00";//Impuesto General a las Ventas y/o Impuesto de Promoción Municipal  =16
 		$PLETXT[16] 	= "0.00";
-		$PLETXT[17] 	= ($bandera_monto['flag'] == "V_NG") ? $datos_exonerada['valor'] : "0.00";
-		$PLETXT[18] 	= ($bandera_monto['flag'] == "V_NG") ? $datos_inafecto['valor']  : "0.00";
+		$PLETXT[17] 	= ($bandera_monto['flag'] == "V_NG") ? $datos_exonerada['valor'] : "0.00"; //
+		$PLETXT[18] 	= ($bandera_monto['flag'] == "V_NG") ? $datos_inafecto['valor']  : "0.00"; //
 		$PLETXT[19] 	= "0.00";
 		$PLETXT[20] 	= "0.00";
 		$PLETXT[21] 	= "0.00";
 
 		$PLETXT[22]     = number_format( round($linea['balance'],2), 2, '.', '' );
 
-		$PLETXT[23] 	= "0.00";//Otros conceptos, tributos y cargos que no forman parte de la base imponible
+		$PLETXT[23] 	= "0.00";//Otros conceptos, tributos y cargos que no forman parte de la base imponible //
 		$PLETXT[24] 	= $datos_total['valor']+$BT;
 		$PLETXT[25] 	= "PEN";//Codigo de moneda
 		$PLETXT[26] 	= $this->validarTipoCambio($linea['tipocambio']);
@@ -742,6 +790,34 @@ class RegistroVentasController extends Controller {
         $date = explode("-", $fecha);
         return $date[2] . "/" . $date[1] . "/" . $date[0];
     }
+
+	function LogRegistroVentas($results, $dataLog){
+		//Creamos directorio rv_log y le damos permisos
+		shell_exec("mkdir /sistemaweb/ventas_clientes/rv_log");
+		shell_exec("chmod 777 /sistemaweb/ventas_clientes/rv_log");
+
+		//Creamos archivo index.php y le damos permisos
+		shell_exec("touch /sistemaweb/ventas_clientes/rv_log/index.php");
+		shell_exec("chmod 777 /sistemaweb/ventas_clientes/rv_log/index.php");
+
+		$templateRegistroVentas = new RegistroVentasTemplate();
+		
+		//Variables para le nombre del archivo HTML que se creara
+		$hoy = date("Y-m-d_H:i:s");
+		$action = $dataLog['action'];
+		$nombre_archivo = "RV_".$hoy."_".$action;		
+
+		//Creamos archivo HTML
+		$archivo = fopen("/sistemaweb/ventas_clientes/rv_log/$nombre_archivo.html", "w") or die("error creando fichero!");
+		
+		//Obtenemos contenido del archivo HTML
+		$log = TRUE;
+		$result_resumen = $templateRegistroVentas->cuadroResumenVentas($results, $log, $dataLog);
+
+		//Reescribimos archivo HTML
+		fwrite($archivo, $result_resumen);
+		fclose($archivo);
+	}
 
 }
 

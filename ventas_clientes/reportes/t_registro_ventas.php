@@ -18,8 +18,9 @@ class RegistroVentasTemplate extends Template {
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td align="center">'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_text("desde", "Desde:", date(d), '&nbsp&nbsp', 02, 02));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_text("hasta", "Hasta:", date(d), '&nbsp&nbsp', 02, 02));
-		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td colspan="4" align="center">Tipo Vista: <select name="tipo" id="tipo" class="form_combo">'));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td colspan="4" align="center">Tipo Vista: <select name="tipo" id="tipo" class="form_combo">'));		
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<option value="SU">Sunat</option>'));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<option value="R">Resumido</option>'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<option value="N">Detallado</option>'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</select>'));
 
@@ -43,10 +44,10 @@ class RegistroVentasTemplate extends Template {
 
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td colspan="6"><div id="space" align="center" />&nbsp;</td></tr>'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<tr><td colspan="4" align="center">'));
-		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('&nbsp<button name="action" type="submit" value="Reporte"><img src="/sistemaweb/icons/gbuscar.png" align="right" />Buscar</button>'));
-		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('&nbsp<button name="action" type="submit" value="PDF"><img src="/sistemaweb/images/icono_pdf.gif" align="right" />PDF</button>'));
-		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('&nbsp<button name="action" type="submit" value="Excel"><img src="/sistemaweb/icons/gexcel.png" align="right" />Excel</button>'));
-		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('&nbsp<button name="action" type="submit" value="Libros-Electronico"><img src="/sistemaweb/icons/gbook.png" align="right" />Libros Electronicos</button>'));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('&nbsp<button name="action" type="submit" value="Reporte" onclick="preloader(true);"><img src="/sistemaweb/icons/gbuscar.png" align="right" />Buscar</button>'));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('&nbsp<button name="action" type="submit" value="PDF" onclick="preloader(true);"><img src="/sistemaweb/images/icono_pdf.gif" align="right" />PDF</button>'));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('&nbsp<button name="action" type="submit" value="Excel" onclick="preloader(true);"><img src="/sistemaweb/icons/gexcel.png" align="right" />Excel</button>'));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('&nbsp<button name="action" type="submit" value="Libros-Electronico" onclick="preloader(true);"><img src="/sistemaweb/icons/gbook.png" align="right" />Libros Electronicos</button>'));
 
 
 /*		$form->addElement(FORM_GROUP_MAIN, new f2element_submit("action", "Reporte"));
@@ -66,143 +67,571 @@ class RegistroVentasTemplate extends Template {
 
 	}
 
-	function reporte($results, $resultsgnv, $BI_incre, $IGV_incre, $TOTAL_incre, $arrParamsPOST) {
+	function reporte($results, $resultsgnv, $BI_incre, $IGV_incre, $TOTAL_incre, $arrParamsPOST, $tipo) { //reporte
 		$result = '<table align="center" border="0">';
-		$result .= '<tr><td colspan="15">---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</td></tr>';
-		$result .= '<tr>';
-		$result .= '<th align="center" rowspan="2">NUMERO DE<br>REGISTRO</th>';
-		$result .= '<th align="center" rowspan="2">FECHA DE<br>EMISION</th>';
-		$result .= '<th align="center" rowspan="2">FECHA DE<br>VENCIMIENTO</th>';
-		$result .= '<th align="center" colspan="3">COMPROBANTE DE PAGO</th>';
-		$result .= '<th align="center" colspan="3">INFORMACION DEL CLIENTE</th>';
-		$result .= '<th align="center" rowspan="2">BASE<br>IMPONIBLE</th>';
-		$result .= '<th align="center" rowspan="2">&nbsp&nbspIGV&nbsp&nbsp</th>'; //IGV
-		$result .= '<th align="center" rowspan="2">&nbsp&nbspICBPER&nbsp&nbsp</th>'; //JEL
-		$result .= '<th align="center" rowspan="2">&nbspEXONERADA&nbsp</th>';
-		$result .= '<th align="center" rowspan="2">&nbspINAFECTO&nbsp</th>';
-		$result .= '<th align="center" rowspan="2">IMPORTE<br>TOTAL</th>';
-		$result .= '<th align="center" rowspan="2">TIPO DE<br>CAMBIO</th>';
-		$result .= '<th align="center" rowspan="2">DATOS<br>REFERENCIA</th>';
-		$result .= '</tr>';
-		$result .= '<tr><td align="center">TIPO</td><td align="center">NRO. SERIE</td><td align="center">NUMERO</td>';
-		$result .= '<td align="center">TIPO DI</td><td align="center">NUMERO</td><td align="center">RAZON SOCIAL</td></tr>';
-		$result .= '<tr><td colspan="15">---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</td></tr>';
+		
+		if($tipo != "R"){
+			$result .= '<tr><td colspan="15">---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</td></tr>';
+			$result .= '<tr>';
+			$result .= '<th align="center" rowspan="2">NUMERO DE<br>REGISTRO</th>';
+			$result .= '<th align="center" rowspan="2">FECHA DE<br>EMISION</th>';
+			$result .= '<th align="center" rowspan="2">FECHA DE<br>VENCIMIENTO</th>';
+			$result .= '<th align="center" colspan="3">COMPROBANTE DE PAGO</th>';
+			$result .= '<th align="center" colspan="3">INFORMACION DEL CLIENTE</th>';
+			$result .= '<th align="center" rowspan="2">BASE<br>IMPONIBLE</th>';
+			$result .= '<th align="center" rowspan="2">&nbsp&nbspIGV&nbsp&nbsp</th>'; //IGV
+			$result .= '<th align="center" rowspan="2">&nbsp&nbspICBPER&nbsp&nbsp</th>'; //JEL
+			$result .= '<th align="center" rowspan="2">&nbspEXONERADA&nbsp</th>';
+			$result .= '<th align="center" rowspan="2">&nbspINAFECTO&nbsp</th>';
+			$result .= '<th align="center" rowspan="2">IMPORTE<br>TOTAL</th>';
+			$result .= '<th align="center" rowspan="2">TIPO DE<br>CAMBIO</th>';
+			$result .= '<th align="center" rowspan="2">DATOS<br>REFERENCIA</th>';
+			$result .= '</tr>';
+			$result .= '<tr><td align="center">TIPO</td><td align="center">NRO. SERIE</td><td align="center">NUMERO</td>';
+			$result .= '<td align="center">TIPO DI</td><td align="center">NUMERO</td><td align="center">RAZON SOCIAL</td></tr>';
+			$result .= '<tr><td colspan="15">---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</td></tr>';
 
-		$ntickets		= count($results['ticket']);
+			$ntickets		= count($results['ticket']);
 
-		$base_imponible_tickes	= 0;
-		$igv_total_ticket	= 0;
-		$exonerada_total_ticket	= 0;
-		$inafecto_total_ticket= 0;
-		$totalimporte_ticket= 0;
+			$base_imponible_tickes	= 0;
+			$igv_total_ticket	= 0;
+			$exonerada_total_ticket	= 0;
+			$inafecto_total_ticket= 0;
+			$totalimporte_ticket= 0;
 
-		$validar = null;
+			$validar = null;
 
-        $modelRegistroVentas = new RegistroVentasModel();
-    	for ($i = 0; $i < $ntickets - 5; $i++) {
-	    	$result .= RegistroVentasTemplate::imprimirLinea($results['ticket'][$i], $BI_incre, $IGV_incre, $TOTAL_incre, $i, 'trans', $modelRegistroVentas, $arrParamsPOST);
-    	}
+			$modelRegistroVentas = new RegistroVentasModel();
+			for ($i = 0; $i < $ntickets - 7; $i++) {
+				$result .= RegistroVentasTemplate::imprimirLinea($results['ticket'][$i], $BI_incre, $IGV_incre, $TOTAL_incre, $i, 'trans', $modelRegistroVentas, $arrParamsPOST); //imprimirLinea
+			}
 
-        if ($ntickets > 0) {
-	    	$base_imponible_ticket	= $results['ticket']["total_imponible"];
-			$igv_total_ticket	= $results['ticket']["total_igv"];
-			$balance_total_ticket	= $results['ticket']["total_balance"]; //JEL
-	    	$exonerada_total_ticket	= $results['ticket']["total_exonerada"];
-	    	$inafecto_total_ticket	= $results['ticket']["total_inafecto"];
-	    	$totalimporte_ticket	= $results['ticket']["total_importe"];
+			if ($ntickets > 0) {
+				$base_imponible_ticket	= $results['ticket']["total_imponible"];
+				$igv_total_ticket	= $results['ticket']["total_igv"];
+				$balance_total_ticket	= $results['ticket']["total_balance"]; //JEL
+				$exonerada_total_ticket	= $results['ticket']["total_exonerada"];
+				$inafecto_total_ticket	= $results['ticket']["total_inafecto"];
+				$totalimporte_ticket	= $results['ticket']["total_importe"];
 
-	    	$result .= '<tr>';
-	    	$result .= '<td align="right" colspan="9" style="font-weight:bold; color:blue">TOTAL PLAYA: </td>';
-	    	$result .= '<td align="right" style="font-weight:bold; color:blue">' . number_format($base_imponible_ticket, 2, '.', ',') . '</td>';
-			$result .= '<td align="right" style="font-weight:bold; color:blue">' . number_format($igv_total_ticket, 2, '.', ',') . '</td>';
-			$result .= '<td align="right" style="font-weight:bold; color:blue">' . number_format($balance_total_ticket, 2, '.', ',') . '</td>'; //JEL
-	    	$result .= '<td align="right" style="font-weight:bold; color:blue">' . number_format($exonerada_total_ticket, 2, '.', ',') . '</td>';
-	    	$result .= '<td align="right" style="font-weight:bold; color:blue">' . number_format($inafecto_total_ticket, 2, '.', ',') . '</td>';
-	    	$result .= '<td align="right" style="font-weight:bold; color:blue">' . number_format($totalimporte_ticket, 2, '.', ',') . '</td>';
-	    	$result .= '</tr>';
-        }
+				$result .= '<tr>';
+				$result .= '<td align="right" colspan="9" style="font-weight:bold; color:blue">TOTAL PLAYA: </td>';
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . number_format($base_imponible_ticket, 2, '.', ',') . '</td>';
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . number_format($igv_total_ticket, 2, '.', ',') . '</td>';
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . number_format($balance_total_ticket, 2, '.', ',') . '</td>'; //JEL
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . number_format($exonerada_total_ticket, 2, '.', ',') . '</td>';
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . number_format($inafecto_total_ticket, 2, '.', ',') . '</td>';
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . number_format($totalimporte_ticket, 2, '.', ',') . '</td>';
+				$result .= '</tr>';
+			}
+			
+			$nmanuales = count($results['manual_completado']);
+			// for ($i = 0; $i < $nmanuales - 7; $i++) {
+			// 	$result .= RegistroVentasTemplate::imprimirLinea($results['manual_completado'][$i], "", "", "", "", "", "", "");
+			// }
 
-    	$nmanuales = count($results['manual']);
+			foreach ($results['manual_completado'] as $key => $manual_completado) { //TODO: IMPORTANTE
+				if (is_int($key)) {
+					$i = $key;
+					$result .= RegistroVentasTemplate::imprimirLinea($results['manual_completado'][$i], "", "", "", "", "", "", "");
+				}
+			}
+			
+			$base_imponible_manual_completado  = 0;
+			$igv_total_manual_completado	   = 0;
+			$balance_total_manual_completado   = 0;
+			$exonerada_total_manual_completado = 0;
+			$inafecto_total_manual_completado  = 0;
+			$totalimporte_manual_completado	   = 0;			
 
-    	//for ($i = 0; $i < $nmanuales - 5; $i++) { cai
-    	for ($i = 0; $i < $nmanuales - 5; $i++) {
-        	$result .= RegistroVentasTemplate::imprimirLinea($results['manual'][$i], "", "", "", "", "", "", "");
-    	}
+			if ($nmanuales > 0) { //TODO: IMPORTANTE
+				$base_imponible_manual_completado  = $results['manual_completado']['total_imponible'] - abs($results['manual_completado']['nota_credito']['totales_imponible_credito']);
+				$igv_total_manual_completado       = $results['manual_completado']['total_igv']       - abs($results['manual_completado']['nota_credito']['totales_igv_credito']);
+				$balance_total_manual_completado   = $results['manual_completado']['total_balance'];
+				$exonerada_total_manual_completado = $results['manual_completado']['total_exonerada'] - abs($results['manual_completado']['nota_credito']['totales_exonerada_nc']);
+				$inafecto_total_manual_completado  = $results['manual_completado']['total_inafecto']  - abs($results['manual_completado']['nota_credito']['totales_inafecto_nc']);
+				$totalimporte_manual_completado    = $results['manual_completado']['total_importe']   - abs($results['manual_completado']['nota_credito']['totales_importe_credito']);
 
-		$totalimporte_manual	= 0;
-		$igv_total_manual	= 0;
-		$igv_total_manual	= 0;
-		$igv_total_manual	= 0;
-		$base_imponible_manual	= 0;
+				$result .= '<tr>';
+				$result .= '<td align="right" colspan="9" style="font-weight:bold; color:blue">TOTAL DOCUMENTOS MANUALES: </td>';
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($base_imponible_manual_completado), 2, '.', ',')) . '</td>';
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($igv_total_manual_completado), 2, '.', ',')) . '</td>';
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($balance_total_manual_completado), 2, '.', ',')) . '</td>'; //JEL
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($exonerada_total_manual_completado), 2, '.', ',')) . '</td>';
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($inafecto_total_manual_completado), 2, '.', ',')) . '</td>';
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($totalimporte_manual_completado), 2, '.', ',')) . '</td>';
+				$result .= '</tr>';
+			}
 
-    	if ($nmanuales > 0) {
-	    	$base_imponible_manual = $results['manual']['total_imponible'] - abs($results['totales_imponible_credito']);
-			$igv_total_manual = $results['manual']['total_igv'] - abs($results['totales_igv_credito']);
-			$balance_total_manual = "0.00"; //JEL
-	    	$exonerada_total_manual	= $results['manual']['total_exonerada'] - abs($results['totales_exonerada_nc']) - abs($results['totales_inafecto_nc']);
-	    	$inafecto_total_manual = $results['manual']['total_inafecto'];
-	    	$totalimporte_manual = $results['manual']['total_importe'] - abs($results['totales_importe_credito']);
+			$ngnv = count($resultsgnv['gnv']);
 
-	    	$result .= '<tr>';
-	    	$result .= '<td align="right" colspan="9" style="font-weight:bold; color:blue">TOTAL DOCUMENTOS MANUALES: </td>';
-	    	$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($base_imponible_manual), 2, '.', ',')) . '</td>';
-			$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($igv_total_manual), 2, '.', ',')) . '</td>';
-			$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($balance_total_manual), 2, '.', ',')) . '</td>'; //JEL
-	    	$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($exonerada_total_manual), 2, '.', ',')) . '</td>';
-	    	$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($inafecto_total_manual), 2, '.', ',')) . '</td>';
-	    	$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($totalimporte_manual), 2, '.', ',')) . '</td>';
-	    	$result .= '</tr>';
+			for ($i = 0; $i < $ngnv - 3; $i++) {
+				$result .= RegistroVentasTemplate::imprimirLinea($resultsgnv['gnv'][$i], "", "", "", "", "", "", "");
+			}
+
+			if ($ngnv > 0) {
+				$totalimporte_gnv	= $resultsgnv['gnv']['total_importe'];
+				$igv_total_gnv		= (($totalimporte_gnv * 0.18) / 1.18);
+				$balance_total_gnv = "0.00"; //JEL
+				$base_imponible_gnv	= $totalimporte_gnv - $igv_total_gnv;
+
+				$result .= '<tr>';
+				$result .= '<td align="right" colspan="9" style="font-weight:bold; color:blue">TOTAL TICKETS GNV: </td>';
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($base_imponible_gnv), 2, '.', ',')) . '</td>';
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($igv_total_gnv), 2, '.', ',')) . '</td>';
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($balance_total_gnv), 2, '.', ',')) . '</td>'; //JEL
+				$result .= '<td align="right" style="font-weight:bold; color:blue">0.00</td>';
+				$result .= '<td align="right" style="font-weight:bold; color:blue">0.00</td>';
+				$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($totalimporte_gnv), 2, '.', ',')) . '</td>';
+				$result .= '</tr>';
+			}
+
+			$result .= '<tr><td colspan="15">---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</td></tr>';
+			$result .= '<tr>';
+			$result .= '<td align="right" colspan="9" style="font-weight:bold; color:blue">TOTAL GENERAL: </td>';
+
+			$base_imponible 	= ($base_imponible_ticket  + $base_imponible_manual_completado + $BI_incre    + $base_imponible_gnv);
+			$igv_total 			= ($igv_total_ticket       + $igv_total_manual_completado      + $IGV_incre   + $igv_total_gnv);
+			$balance_total 		= ($balance_total_ticket   + $balance_total_manual_completado  + $balance_total_gnv);
+			$exonerada_total 	= ($exonerada_total_ticket + $exonerada_total_manual_completado);
+			$inafecto_total 	= ($inafecto_total_ticket  + $inafecto_total_manual_completado );
+			$totalimporte 		= ($totalimporte_ticket    + $totalimporte_manual_completado   + $TOTAL_incre + $totalimporte_gnv);
+
+			$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($base_imponible), 2, '.', ',')) . '</td>';
+			$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($igv_total), 2, '.', ',')) . '</td>';
+			$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($balance_total), 2, '.', ',')) . '</td>';
+			$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($exonerada_total), 2, '.', ',')) . '</td>';
+			$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($inafecto_total), 2, '.', ',')) . '</td>';
+			$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($totalimporte), 2, '.', ',')) . '</td>';
+			$result .= '</tr>';
+
+			$result .= '<tr><td colspan="15">---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</td></tr>';
 		}
-
-    	$ngnv = count($resultsgnv['gnv']);
-
-    	for ($i = 0; $i < $ngnv - 3; $i++) {
-        	$result .= RegistroVentasTemplate::imprimirLinea($resultsgnv['gnv'][$i], "", "", "", "", "", "", "");
-    	}
-
-    	if ($ngnv > 0) {
-	    	$totalimporte_gnv	= $resultsgnv['gnv']['total_importe'];
-			$igv_total_gnv		= (($totalimporte_gnv * 0.18) / 1.18);
-			$balance_total_gnv = "0.00"; //JEL
-	    	$base_imponible_gnv	= $totalimporte_gnv - $igv_total_gnv;
-
-	    	$result .= '<tr>';
-	    	$result .= '<td align="right" colspan="9" style="font-weight:bold; color:blue">TOTAL TICKETS GNV: </td>';
-	    	$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($base_imponible_gnv), 2, '.', ',')) . '</td>';
-			$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($igv_total_gnv), 2, '.', ',')) . '</td>';
-			$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($balance_total_gnv), 2, '.', ',')) . '</td>'; //JEL
-	    	$result .= '<td align="right" style="font-weight:bold; color:blue">0.00</td>';
-	    	$result .= '<td align="right" style="font-weight:bold; color:blue">0.00</td>';
-	    	$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($totalimporte_gnv), 2, '.', ',')) . '</td>';
-	   		$result .= '</tr>';
-    	}
-
-		$result .= '<tr><td colspan="15">---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</td></tr>';
-		$result .= '<tr>';
-		$result .= '<td align="right" colspan="9" style="font-weight:bold; color:blue">TOTAL GENERAL: </td>';
-
-		$base_imponible 	= ($base_imponible_ticket + $base_imponible_manual + $BI_incre+$base_imponible_gnv);
-		$igv_total 			= ($igv_total_ticket + $igv_total_manual + $IGV_incre + $igv_total_gnv);
-		$balance_total 		= ($balance_total_ticket + $balance_total_manual + $balance_total_gnv);
-		$exonerada_total 	= ($exonerada_total_ticket + $exonerada_total_manual);
-		$inafecto_total 	= ($inafecto_total_ticket + $inafecto_total_manual);
-		$totalimporte 		= ($totalimporte_ticket + $totalimporte_manual + $TOTAL_incre + $totalimporte_gnv);
-
-		$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($base_imponible), 2, '.', ',')) . '</td>';
-		$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($igv_total), 2, '.', ',')) . '</td>';
-		$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($balance_total), 2, '.', ',')) . '</td>';
-		$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($exonerada_total), 2, '.', ',')) . '</td>';
-		$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($inafecto_total), 2, '.', ',')) . '</td>';
-		$result .= '<td align="right" style="font-weight:bold; color:blue">' . htmlentities(number_format(($totalimporte), 2, '.', ',')) . '</td>';
-		$result .= '</tr>';
-
-		$result .= '<tr><td colspan="15">---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</td></tr>';
 		$result .= '</table>';
 
+		$result_resumen = $this->cuadroResumenVentas($results);
+		
+		$result .= $result_resumen;
         return $result;
     }
 
-    function imprimirLinea($linea, $BI_incre, $IGV_incre, $TOTAL_incre, $validar, $tipo_data, $modelRegistroVentas, $arrParamsPOST) {
+	function cuadroResumenVentas($results, $log = FALSE, $dataLog = array()) {
+		/* Cuadro Resumen */
+		//TOTAL TICKETS
+		$ntickets = count($results['ticket']);
+		if ($ntickets > 0) {						
+			//TOTAL TICKETS POR BOLETAS
+			$total_ticket_boleta = $results['ticket']['tipo']['B'];
+
+			//TOTAL TICKETS POR FACTURAS
+			$total_ticket_factura = $results['ticket']['tipo']['F'];
+
+			//TOTAL TICKETS POR NOTA DE CREDITO
+			$total_ticket_nc = $results['ticket']['tipo']['A'];
+
+			//TOTAL TICKETS
+			$total_ticket = $results['ticket'];
+		}
+
+		//TOTAL MANUALES COMPLETADOS
+		$nmanuales = count($results['manual_completado']);
+		if ($nmanuales > 0) {
+			//TOTAL MANUALES POR BOLETA
+			$total_manual_completado_boleta = $results['manual_completado']['tipo']['03'];
+			
+			//TOTAL MANUALES POR FACTURA
+			$total_manual_completado_factura = $results['manual_completado']['tipo']['01'];
+			
+			//TOTAL MANUALES POR NOTA DE CREDITO
+			$total_manual_completado_nc = $results['manual_completado']['tipo']['07'];
+			
+			//TOTAL MANUALES POR NOTA DE DEBITO
+			$total_manual_completado_nd = $results['manual_completado']['tipo']['08'];
+
+			//TOTAL MANUALES
+			$total_manual_completado['total_imponible'] = $results['manual_completado']['total_imponible'] - abs($results['manual_completado']['nota_credito']['totales_imponible_credito']);
+			$total_manual_completado['total_igv']       = $results['manual_completado']['total_igv']       - abs($results['manual_completado']['nota_credito']['totales_igv_credito']);
+			$total_manual_completado['total_balance']   = $results['manual_completado']['total_balance'];
+			$total_manual_completado['total_exonerada']	= $results['manual_completado']['total_exonerada'] - abs($results['manual_completado']['nota_credito']['totales_exonerada_nc']);
+			$total_manual_completado['total_inafecto']  = $results['manual_completado']['total_inafecto']  - abs($results['manual_completado']['nota_credito']['totales_inafecto_nc']);
+			$total_manual_completado['total_importe']   = $results['manual_completado']['total_importe']   - abs($results['manual_completado']['nota_credito']['totales_importe_credito']);
+		}		
+
+		//TOTAL MANUALES REGISTRADO
+		$nmanuales = count($results['manual_registrado']);
+		if ($nmanuales > 0) {
+			//TOTAL MANUALES POR BOLETA
+			$total_manual_registrado_boleta = $results['manual_registrado']['tipo']['03'];
+			
+			//TOTAL MANUALES POR FACTURA
+			$total_manual_registrado_factura = $results['manual_registrado']['tipo']['01'];
+			
+			//TOTAL MANUALES POR NOTA DE CREDITO
+			$total_manual_registrado_nc = $results['manual_registrado']['tipo']['07'];
+			
+			//TOTAL MANUALES POR NOTA DE DEBITO
+			$total_manual_registrado_nd = $results['manual_registrado']['tipo']['08'];
+
+			//TOTAL MANUALES
+			$total_manual_registrado['total_imponible'] = $results['manual_registrado']['total_imponible'] - abs($results['manual_registrado']['nota_credito']['totales_imponible_credito']);
+			$total_manual_registrado['total_igv']       = $results['manual_registrado']['total_igv']       - abs($results['manual_registrado']['nota_credito']['totales_igv_credito']);
+			$total_manual_registrado['total_balance']   = $results['manual_registrado']['total_balance'];
+			$total_manual_registrado['total_exonerada']	= $results['manual_registrado']['total_exonerada'] - abs($results['manual_registrado']['nota_credito']['totales_exonerada_nc']);
+			$total_manual_registrado['total_inafecto']  = $results['manual_registrado']['total_inafecto']  - abs($results['manual_registrado']['nota_credito']['totales_inafecto_nc']);
+			$total_manual_registrado['total_importe']   = $results['manual_registrado']['total_importe']   - abs($results['manual_registrado']['nota_credito']['totales_importe_credito']);
+		}
+
+		//TOTAL MANUALES ANULADO
+		$nmanuales = count($results['manual_anulado']);
+		if ($nmanuales > 0) {
+			//TOTAL MANUALES POR BOLETA
+			$total_manual_anulado_boleta = $results['manual_anulado']['tipo']['03'];
+			
+			//TOTAL MANUALES POR FACTURA
+			$total_manual_anulado_factura = $results['manual_anulado']['tipo']['01'];
+			
+			//TOTAL MANUALES POR NOTA DE CREDITO
+			$total_manual_anulado_nc = $results['manual_anulado']['tipo']['07'];
+			
+			//TOTAL MANUALES POR NOTA DE DEBITO
+			$total_manual_anulado_nd = $results['manual_anulado']['tipo']['08'];			
+			
+			//TOTAL MANUALES
+			$total_manual_anulado = $results['manual_anulado']['tipo'];
+		}
+
+		//LOG ACTIVADO PARA GUARDAR CUADRO RESUMEN
+		if ($log == TRUE) {
+			$result_resumen .= '
+			<!DOCTYPE html>
+				<html>
+					<head>
+						<title>Sistema de Ventas - Registro de Ventas e Ingresos</title>
+						<style type="text/css">
+						table#tablaResumen {
+							width: 50%;
+						}
+						table#tablaResumen th {
+							height: 30px;
+							width: 100%;
+							border-width: 1px -32px 1px 0px;
+							font-size: 13px;
+							font-weight: bold;
+							color: #000000;
+							background-color: #C9F4D4;
+						}
+						table#tablaResumen td {
+							text-align: right;
+							font-size: 11px;
+						}
+						table#tablaResumen .text-center {
+							text-align: center;
+						}
+						table#tablaResumen .text-right {
+							text-align: right;
+						}
+						</style>
+					</head>
+					<body>';
+		}
+		//CERRAR LOG ACTIVADO PARA GUARDAR CUADRO RESUMEN
+
+		$result_resumen .= '</br></br>';
+		$result_resumen .= '<table id="tablaResumen" align="center" border="1">';
+
+		if ($log == TRUE) {
+			$fecha_consulta = date("Y-m-d H:i:s");
+			$periodo        = $dataLog["desde"] ." al ". $dataLog["hasta"];
+			$usuario        = $_SESSION['auth_usuario'];
+
+			$result_resumen .= '
+							<thead>
+								<th colspan="7" align="left">
+									FECHA DE CONSULTA: '. $fecha_consulta .'<br><br>
+									PERIODO: '. $periodo .'<br><br>
+									USUARIO: '. $usuario .'<br>
+								</th>
+							</thead>';
+		}
+
+		$result_resumen .= '<thead>
+								<tr>
+									<th colspan="7">RESUMEN REGISTRO DE VENTAS</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr height="20"></tr>
+								<tr>
+									<th scope="row">Comprobantes Playa</th>
+									<th scope="col">Imponible</th>
+									<th scope="col">IGV</th>
+									<th scope="col">ICBPER</th>
+									<th scope="col">Exonerada</th>
+									<th scope="col">Inafecto</th>
+									<th scope="col">Total</th>
+								</tr>
+								<tr>
+									<td class="text-center">BOLETAS</td>
+									<td>'. htmlentities(number_format(( $total_ticket_boleta['total_imponible'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_boleta['total_igv']       ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_boleta['total_balance']   ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_boleta['total_exonerada'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_boleta['total_inafecto']  ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_boleta['total_importe']   ), 2, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<td class="text-center">FACTURAS</td>
+									<td>'. htmlentities(number_format(( $total_ticket_factura['total_imponible'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_factura['total_igv']       ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_factura['total_balance']   ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_factura['total_exonerada'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_factura['total_inafecto']  ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_factura['total_importe']   ), 2, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<td class="text-center">NOTAS DE CREDITO</td>
+									<td>'. htmlentities(number_format(( $total_ticket_nc['total_imponible'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_nc['total_igv']       ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_nc['total_balance']   ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_nc['total_exonerada'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_nc['total_inafecto']  ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_nc['total_importe']   ), 2, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<th scope="row">TOTAL PLAYA</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_ticket['total_imponible'] ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_ticket['total_igv']       ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_ticket['total_balance']   ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_ticket['total_exonerada'] ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_ticket['total_inafecto']  ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_ticket['total_importe']   ), 2, '.', ',')) .'</th>
+								</tr>
+								<tr>
+									<th colspan=7></th>
+								</tr>
+								<tr>
+									<th scope="row" title="ESTADOS: COMPLETADO-ENVIADO / ANULADO-ENVIADO">Comprobantes Oficina Completados</th>
+									<th scope="col">Imponible</th>
+									<th scope="col">IGV</th>
+									<th scope="col">ICBPER</th>
+									<th scope="col">Exonerada</th>
+									<th scope="col">Inafecto</th>
+									<th scope="col">Total</th>
+								</tr>								
+								<tr>
+									<td class="text-center">BOLETAS</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_boleta['total_imponible'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_boleta['total_igv']       ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_boleta['total_balance']   ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_boleta['total_exonerada'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_boleta['total_inafecto']  ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_boleta['total_importe']   ), 2, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<td class="text-center">FACTURAS</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_factura['total_imponible'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_factura['total_igv']       ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_factura['total_balance']   ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_factura['total_exonerada'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_factura['total_inafecto']  ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_factura['total_importe']   ), 2, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<td class="text-center">NOTAS DE CREDITO</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nc['total_imponible'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nc['total_igv']       ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nc['total_balance']   ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nc['total_exonerada'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nc['total_inafecto']  ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nc['total_importe']   ), 2, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<td class="text-center">NOTAS DE DEBITO</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nd['total_imponible'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nd['total_igv']       ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nd['total_balance']   ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nd['total_exonerada'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nd['total_inafecto']  ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nd['total_importe']   ), 2, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<th scope="row">TOTAL OFICINA</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_manual_completado['total_imponible'] ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_manual_completado['total_igv']       ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_manual_completado['total_balance']   ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_manual_completado['total_exonerada'] ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_manual_completado['total_inafecto']  ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_manual_completado['total_importe']   ), 2, '.', ',')) .'</th>
+								</tr>
+								<tr>
+									<th colspan=7></th>
+								</tr>
+								<tr>
+									<th scope="row">RESUMEN TOTAL</th>
+									<th scope="col">Imponible</th>
+									<th scope="col">IGV</th>
+									<th scope="col">ICBPER</th>
+									<th scope="col">Exonerada</th>
+									<th scope="col">Inafecto</th>
+									<th scope="col">Total</th>
+								</tr>								
+								<tr>
+									<td class="text-center">BOLETAS</td>
+									<td>'. htmlentities(number_format(( $total_ticket_boleta['total_imponible'] + $total_manual_completado_boleta['total_imponible'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_boleta['total_igv']       + $total_manual_completado_boleta['total_igv']       ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_boleta['total_balance']   + $total_manual_completado_boleta['total_balance']   ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_boleta['total_exonerada'] + $total_manual_completado_boleta['total_exonerada'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_boleta['total_inafecto']  + $total_manual_completado_boleta['total_inafecto']  ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_boleta['total_importe']   + $total_manual_completado_boleta['total_importe']   ), 2, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<td class="text-center">FACTURAS</td>
+									<td>'. htmlentities(number_format(( $total_ticket_factura['total_imponible'] + $total_manual_completado_factura['total_imponible'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_factura['total_igv']       + $total_manual_completado_factura['total_igv']       ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_factura['total_balance']   + $total_manual_completado_factura['total_balance']   ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_factura['total_exonerada'] + $total_manual_completado_factura['total_exonerada'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_factura['total_inafecto']  + $total_manual_completado_factura['total_inafecto']  ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_factura['total_importe']   + $total_manual_completado_factura['total_importe']   ), 2, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<td class="text-center">NOTAS DE CREDITO</td>
+									<td>'. htmlentities(number_format(( $total_ticket_nc['total_imponible'] + $total_manual_completado_nc['total_imponible'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_nc['total_igv']       + $total_manual_completado_nc['total_igv']       ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_nc['total_balance']   + $total_manual_completado_nc['total_balance']   ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_nc['total_exonerada'] + $total_manual_completado_nc['total_exonerada'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_nc['total_inafecto']  + $total_manual_completado_nc['total_inafecto']  ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_ticket_nc['total_importe']   + $total_manual_completado_nc['total_importe']   ), 2, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<td class="text-center">NOTAS DE DEBITO</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nd['total_imponible'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nd['total_igv']       ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nd['total_balance']   ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nd['total_exonerada'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nd['total_inafecto']  ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_completado_nd['total_importe']   ), 2, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<th scope="row">TOTAL GENERAL</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_ticket['total_imponible'] + $total_manual_completado['total_imponible'] ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_ticket['total_igv']       + $total_manual_completado['total_igv']       ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_ticket['total_balance']   + $total_manual_completado['total_balance']   ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_ticket['total_exonerada'] + $total_manual_completado['total_exonerada'] ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_ticket['total_inafecto']  + $total_manual_completado['total_inafecto']  ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_ticket['total_importe']   + $total_manual_completado['total_importe']   ), 2, '.', ',')) .'</th>
+								</tr>
+								<tr height="50"></tr>
+								<tr>
+									<th scope="row" title="ESTADOS DIFERENTES A: COMPLETADO-ENVIADO / ANULADO-ENVIADO">Documentos Registrados y no enviados</th>
+									<th scope="col">Imponible</th>
+									<th scope="col">IGV</th>
+									<th scope="col">ICBPER</th>
+									<th scope="col">Exonerada</th>
+									<th scope="col">Inafecto</th>
+									<th scope="col">Total</th>
+								</tr>
+								<tr>
+									<td class="text-center">BOLETAS</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_boleta['total_imponible'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_boleta['total_igv']       ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_boleta['total_balance']   ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_boleta['total_exonerada'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_boleta['total_inafecto']  ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_boleta['total_importe']   ), 2, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<td class="text-center">FACTURAS</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_factura['total_imponible'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_factura['total_igv']       ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_factura['total_balance']   ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_factura['total_exonerada'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_factura['total_inafecto']  ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_factura['total_importe']   ), 2, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<td class="text-center">NOTAS DE CREDITO</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_nc['total_imponible'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_nc['total_igv']       ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_nc['total_balance']   ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_nc['total_exonerada'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_nc['total_inafecto']  ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_nc['total_importe']   ), 2, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<td class="text-center">NOTAS DE DEBITO</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_nd['total_imponible'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_nd['total_igv']       ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_nd['total_balance']   ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_nd['total_exonerada'] ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_nd['total_inafecto']  ), 2, '.', ',')) .'</td>
+									<td>'. htmlentities(number_format(( $total_manual_registrado_nd['total_importe']   ), 2, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<th scope="row">TOTAL</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_manual_registrado['total_imponible'] ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_manual_registrado['total_igv']       ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_manual_registrado['total_balance']   ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_manual_registrado['total_exonerada'] ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_manual_registrado['total_inafecto']  ), 2, '.', ',')) .'</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_manual_registrado['total_importe']   ), 2, '.', ',')) .'</th>
+								</tr>
+								<tr>
+									<th scope="row" title="ESTADOS DIFERENTES A: COMPLETADO-ENVIADO / ANULADO-ENVIADO">Detalle Documentos Registrados y no enviados</th>
+									<th>Serie - Numero</th>
+									<th>Estado</th> 
+								</tr>';
+								
+								foreach ($results['manual_registrado'] as $key => $value) {
+									if ( is_int($key) ) {
+										$result_resumen .= '
+										<tr>
+											<td class="text-center">DOCUMENTO</td>
+											<td>'. $value['serie'] . '-' . $value['numero'] .'</td>						
+											<td>'. $value['statusname'] .'</td>
+										</tr>';
+									}		
+								}
+
+								$result_resumen .= '
+								<tr height="50"></tr>
+								<tr>
+									<th scope="row" title="ESTADOS: ANULADO-ENVIADO">Documentos Anulados</th>
+									<th>Cantidad</th>
+								</tr>
+								<tr>
+									<td class="text-center">BOLETAS</td>
+									<td>'. htmlentities(number_format(( $total_manual_anulado_boleta['cantidad'] ), 0, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<td class="text-center">FACTURAS</td>
+									<td>'. htmlentities(number_format(( $total_manual_anulado_factura['cantidad'] ), 0, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<td class="text-center">NOTAS DE CREDITO</td>
+									<td>'. htmlentities(number_format(( $total_manual_anulado_nc['cantidad'] ), 0, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<td class="text-center">NOTAS DE DEBITO</td>
+									<td>'. htmlentities(number_format(( $total_manual_anulado_nd['cantidad'] ), 0, '.', ',')) .'</td>
+								</tr>
+								<tr>
+									<th scope="row">TOTAL</th>
+									<th class="text-right">'. htmlentities(number_format(( $total_manual_anulado['cantidad'] ), 0, '.', ',')) .'</th>
+								</tr>';
+																	
+								$result_resumen .= '</tbody>';		
+		/* Cerrar Cuadro Resumen */
+
+		//LOG ACTIVADO PARA GUARDAR CUADRO RESUMEN
+		if ($log == TRUE) {
+			$result_resumen .= '</body></html>';
+		}
+		//CERRAR LOG ACTIVADO PARA GUARDAR CUADRO RESUMEN
+
+		return $result_resumen;
+	}
+
+    function imprimirLinea($linea, $BI_incre, $IGV_incre, $TOTAL_incre, $validar, $tipo_data, $modelRegistroVentas, $arrParamsPOST) { //imprimirLinea
     	if( $linea['rendi_gln'] != "" ) {
 	        $arrData = array(
 	            //Datos para buscar registros
@@ -258,7 +687,7 @@ class RegistroVentasTemplate extends Template {
 				if($linea['istranfer'] == 'S')
 					$result .= '<td align="right">' . $linea['exonerada'] . '</td>';
 				else
-					$result .= '<td align="right">0.00</td>';
+					$result .= '<td align="right">' . $linea['exonerada'] . '</td>';
 				$result .= '<td align="right">' . $linea['inafecto'] . '</td>';
 				$result .= '<td align="right">' . $linea['importe'] . '</td>';
 			}
@@ -269,7 +698,7 @@ class RegistroVentasTemplate extends Template {
 		return $result;
 	}
 
-    function reportePDF($results, $almacen, $anio, $mes, $tipo_reporte, $BI_incre, $IGV_incre, $TOTAL_incre, $modelRegistroVentas, $arrParamsPOST) {
+    function reportePDF($results, $almacen, $anio, $mes, $tipo_reporte, $BI_incre, $IGV_incre, $TOTAL_incre, $modelRegistroVentas, $arrParamsPOST, $dataPDF) { //reportePDF
 		$estaciones	= RegistroVentasModel::obtieneListaEstaciones();
 		$v		= RegistroVentasModel::obtenerAlma($almacen);
 		$razsoc 	= $v[0];
@@ -311,10 +740,12 @@ class RegistroVentasTemplate extends Template {
 		$reporte->definirCabecera(1, "C", "Registro de Ventas e Ingresos");
 		$reporte->definirCabecera(1, "L", "Centro de Costo: " . $estaciones[$almacen]);
 
-		$reporte->definirCabecera(2, "L", "Periodo: " . $anio . " - " . $mes);
-		$reporte->definirCabecera(3, "L", "Ruc: " . $ruc);
-		$reporte->definirCabecera(4, "L", "Razon Social: " . $razsoc);
-		$reporte->definirCabecera(5, "C", "Pag %p");
+		$reporte->definirCabecera(2, "L", "Fecha de Consulta: " . date("Y-m-d H:i:s"));
+		$reporte->definirCabecera(3, "L", "Periodo: " . $dataPDF["desde"] ." al ". $dataPDF["hasta"]);
+		$reporte->definirCabecera(4, "L", "Usuario: " . $_SESSION['auth_usuario']);
+		$reporte->definirCabecera(5, "L", "Ruc: " . $ruc);
+		$reporte->definirCabecera(6, "L", "Razon Social: " . $razsoc);
+		$reporte->definirCabecera(7, "C", "Pag %p");
 
 		$reporte->definirColumna("trans", $reporte->TIPO_TEXTO, 13, "L", "_tickets");
 		$reporte->definirColumna("emision", $reporte->TIPO_TEXTO, 10, "C", "_tickets");
@@ -389,7 +820,7 @@ class RegistroVentasTemplate extends Template {
 
 		$impreso = TRUE;
 
-		for ($h = 0; $h < $tickes - 5; $h++) {//SIGNIFICA QUE VA DESCONTAR LOS SUBTOTALES
+		for ($h = 0; $h < $tickes - 7; $h++) {//SIGNIFICA QUE VA DESCONTAR LOS SUBTOTALES
 
 			/*if ($results['ticket'][$h]['tipo_pdf'] == 'B') {
 
@@ -550,7 +981,7 @@ class RegistroVentasTemplate extends Template {
 	    	// $reporte->AddPage();
 		}
 
-		$cantitotal = count($results['manual']); // manuales
+		$cantitotal = count($results['manual_completado']); // manuales
 
 		if ($cantitotal > 0) {
 		    //BOLETAS MANUALES
@@ -560,50 +991,59 @@ class RegistroVentasTemplate extends Template {
 			$reporte->AddPage();
 
 		    	$z = 1;
-		    	$nmanuales = count($results['manual']);
+		    	$nmanuales = count($results['manual_completado']);
 
-		    	for ($j = 0; $j < $nmanuales - 5; $j++) {
+				// for ($j = 0; $j < $nmanuales - 7; $j++) {
+				// 	if ($results['manual_completado'][$j]['tipo'] == '03') {
+				// 	}
+				// }
 
-		        	if ($results['manual'][$j]['tipo'] == '03') {
+				foreach ($results['manual_completado'] as $key => $manual_completado) {					
+					if (is_int($key)) {
+						$j = $key;
 
-				    	$total_manual_boleta_imp 	+= round($results['manual'][$j]['imponible'], 2);
-				    	$total_manual_boleta_igv 	+= round($results['manual'][$j]['igv'], 2);
-				    	$total_manual_boleta_exonerada 	+= round($results['manual'][$j]['exonerada'], 2);
-				    	$total_manual_boleta_inafecto 	+= round($results['manual'][$j]['inafecto'], 2);
-				    	$total_manual_boleta_tot 	+= round($results['manual'][$j]['importe'], 2);
+						if ($results['manual_completado'][$j]['tipo'] == '03') {
 
-				    	if ($z <= 90) {
+							$total_manual_boleta_imp 	+= round($results['manual_completado'][$j]['imponible'], 2);
+							$total_manual_boleta_igv 	+= round($results['manual_completado'][$j]['igv'], 2);
+							$total_manual_boleta_exonerada 	+= round($results['manual_completado'][$j]['exonerada'], 2);
+							$total_manual_boleta_inafecto 	+= round($results['manual_completado'][$j]['inafecto'], 2);
+							$total_manual_boleta_tot 	+= round($results['manual_completado'][$j]['importe'], 2);
 
-						$ValorNeto3	+= $results['manual'][$j]['imponible'];
-						$Impuestos3	+= $results['manual'][$j]['igv'];
-						$exonerada3	+= $results['manual'][$j]['exonerada'];
-						$inafecto3	+= $results['manual'][$j]['inafecto'];
-						$TotalVentas3	+= $results['manual'][$j]['importe'];
+							if ($z <= 90) {
 
-				    	}
+								$ValorNeto3	+= $results['manual_completado'][$j]['imponible'];
+								$Impuestos3	+= $results['manual_completado'][$j]['igv'];
+								$exonerada3	+= $results['manual_completado'][$j]['exonerada'];
+								$inafecto3	+= $results['manual_completado'][$j]['inafecto'];
+								$TotalVentas3	+= $results['manual_completado'][$j]['importe'];
 
-				    	if ($z == 90) {
+							}
 
-						$reporte->lineaH();
-						$arr = array("motivo" => "Valor por Pagina ", "neto" => $ValorNeto3, "impuestos" => $Impuestos3, "exonerada" => $exonerada3, "inafecto" => $inafecto3, "total" => $TotalVentas3, "tcambio" => " ");
-						$reporte->nuevaFila($arr, "_sub");
+							if ($z == 90) {
 
-						$z = 1;
+								$reporte->lineaH();
+								$arr = array("motivo" => "Valor por Pagina ", "neto" => $ValorNeto3, "impuestos" => $Impuestos3, "exonerada" => $exonerada3, "inafecto" => $inafecto3, "total" => $TotalVentas3, "tcambio" => " ");
+								$reporte->nuevaFila($arr, "_sub");
 
-						$ValorNeto3 	= 0;
-						$Impuestos3 	= 0;
-						$exonerada3 	= 0;
-						$inafecto3 	= 0;
-						$TotalVentas3 	= 0;
+								$z = 1;
+
+								$ValorNeto3 	= 0;
+								$Impuestos3 	= 0;
+								$exonerada3 	= 0;
+								$inafecto3 	= 0;
+								$TotalVentas3 	= 0;
+								
+							}						
+
+							$reporte->nuevaFila($results['manual_completado'][$j], "_tickets");
+							$z++;
+
+						}
 
 					}
 
-				    	$reporte->nuevaFila($results['manual'][$j], "_tickets");
-				    	$z++;
-
 				}
-
-			}
 
 		    	$reporte->lineaH();
 		    	$arr = array("motivo" => "Valor por Pagina ", "neto" => $ValorNeto3, "exonerada" => $exonerada3, "inafecto" => $inafecto3, "impuestos" => $Impuestos3, "total" => $TotalVentas3, "tcambio" => " ");
@@ -624,42 +1064,50 @@ class RegistroVentasTemplate extends Template {
 
 		    	$w = 1;
 
-			$nmanuales = count($results['manual']);
+			$nmanuales = count($results['manual_completado']);
+				
+			// for ($j = 0; $j < $nmanuales - 7; $j++) {
+			// 	if ($results['manual_completado'][$i]['tipo'] == '01') {
+			// 	}
+			// }
 
-			for ($i = 0; $i < $nmanuales - 5; $i++) {
+			foreach ($results['manual_completado'] as $key => $manual_completado) {					
+				if (is_int($key)) {
+					$i = $key;
 
-		        	if ($results['manual'][$i]['tipo'] == '01') {
+					if ($results['manual_completado'][$i]['tipo'] == '01') {
 
-					$total_manual_factura_imp 	+= round($results['manual'][$i]['imponible'], 2);
-					$total_manual_factura_igv 	+= round($results['manual'][$i]['igv'], 2);
-					$total_manual_factura_exonerada	+= round($results['manual'][$i]['exonerada'], 2);
-					$total_manual_factura_inafecto	+= round($results['manual'][$i]['inafecto'], 2);
-					$total_manual_factura_tot	+= round($results['manual'][$i]['importe'], 2);
+						$total_manual_factura_imp 	+= round($results['manual_completado'][$i]['imponible'], 2);
+						$total_manual_factura_igv 	+= round($results['manual_completado'][$i]['igv'], 2);
+						$total_manual_factura_exonerada	+= round($results['manual_completado'][$i]['exonerada'], 2);
+						$total_manual_factura_inafecto	+= round($results['manual_completado'][$i]['inafecto'], 2);
+						$total_manual_factura_tot	+= round($results['manual_completado'][$i]['importe'], 2);
 
-					if ($w <= 90) {
-						$ValorNeto4 	+= $results['manual'][$i]['imponible'];
-						$Impuestos4 	+= $results['manual'][$i]['igv'];
-						$exonerada4 	+= $results['manual'][$i]['exonerada'];
-						$inafecto4 	+= $results['manual'][$i]['inafecto'];
-						$TotalVentas4 	+= $results['manual'][$i]['importe'];
+						if ($w <= 90) {
+							$ValorNeto4 	+= $results['manual_completado'][$i]['imponible'];
+							$Impuestos4 	+= $results['manual_completado'][$i]['igv'];
+							$exonerada4 	+= $results['manual_completado'][$i]['exonerada'];
+							$inafecto4 	+= $results['manual_completado'][$i]['inafecto'];
+							$TotalVentas4 	+= $results['manual_completado'][$i]['importe'];
 
+						}
+
+						if ($w == 90) {
+							$reporte->lineaH();
+							$arr = array("motivo" => "Valor por Pagina: ", "neto" => $ValorNeto4, "exonerada" => $exonerada4, "inafecto" => $inafecto4, "impuestos" => $Impuestos4, "total" => $TotalVentas4, "tcambio" => " ");
+							$reporte->nuevaFila($arr, "_sub");
+							$w = 1;
+							$ValorNeto4 	= 0;
+							$Impuestos4 	= 0;
+							$exonerada4 	= 0;
+							$inafecto4 	= 0;
+							$TotalVentas4 	= 0;
+						}
+
+						$reporte->nuevaFila($results['manual_completado'][$i], "_tickets");
+
+						$w++;
 					}
-
-					if ($w == 90) {
-						$reporte->lineaH();
-						$arr = array("motivo" => "Valor por Pagina: ", "neto" => $ValorNeto4, "exonerada" => $exonerada4, "inafecto" => $inafecto4, "impuestos" => $Impuestos4, "total" => $TotalVentas4, "tcambio" => " ");
-						$reporte->nuevaFila($arr, "_sub");
-						$w = 1;
-						$ValorNeto4 	= 0;
-						$Impuestos4 	= 0;
-						$exonerada4 	= 0;
-						$inafecto4 	= 0;
-						$TotalVentas4 	= 0;
-					}
-
-					$reporte->nuevaFila($results['manual'][$i], "_tickets");
-
-					$w++;
 
 				}
 
@@ -683,38 +1131,46 @@ class RegistroVentasTemplate extends Template {
 		   	$reporte->AddPage();
 
 		    	$a = 1;
-		    	$nmanuales = count($results['manual']);
+		    	$nmanuales = count($results['manual_completado']);
 
-		    	for ($i = 0; $i < $nmanuales - 5; $i++) {
+				// for ($j = 0; $j < $nmanuales - 7; $j++) {
+				// 	if ($results['manual_completado'][$i]['tipo'] == '07') {
+				// 	}
+				// }
 
-		        	if ($results['manual'][$i]['tipo'] == '07') {
+		    	foreach ($results['manual_completado'] as $key => $manual_completado) {					
+					if (is_int($key)) {
+						$i = $key;
+	
+						if ($results['manual_completado'][$i]['tipo'] == '07') {
 
-				    	$total_manual_credito_imp += round($results['manual'][$i]['imponible'], 2);
-				    	$total_manual_credito_igv += round($results['manual'][$i]['igv'], 2);
-				   	$total_manual_credito_tot += round($results['manual'][$i]['importe'], 2);
+							$total_manual_credito_imp += round($results['manual_completado'][$i]['imponible'], 2);
+							$total_manual_credito_igv += round($results['manual_completado'][$i]['igv'], 2);
+							$total_manual_credito_tot += round($results['manual_completado'][$i]['importe'], 2);
 
-				    	if ($a <= 90) {
+							if ($a <= 90) {
 
-				        	$ValorNeto5 += $results['manual'][$i]['imponible'];
-				        	$Impuestos5 += $results['manual'][$i]['igv'];
-				        	$TotalVentas5 += $results['manual'][$i]['importe'];
+								$ValorNeto5 += $results['manual_completado'][$i]['imponible'];
+								$Impuestos5 += $results['manual_completado'][$i]['igv'];
+								$TotalVentas5 += $results['manual_completado'][$i]['importe'];
 
-				    	}
+							}
 
-				    	if ($a == 90) {
+							if ($a == 90) {
 
-						$reporte->lineaH();
-						$arr = array("motivo" => "Valor por Pagina ", "neto" => $ValorNeto5, "impuestos" => $Impuestos5, "total" => $TotalVentas5, "tcambio" => " ");
-						$reporte->nuevaFila($arr, "_sub");
-						$a = 1;
-						$ValorNeto5 = 0;
-						$Impuestos5 = 0;
-				        	$TotalVentas5 = 0;
+								$reporte->lineaH();
+								$arr = array("motivo" => "Valor por Pagina ", "neto" => $ValorNeto5, "impuestos" => $Impuestos5, "total" => $TotalVentas5, "tcambio" => " ");
+								$reporte->nuevaFila($arr, "_sub");
+								$a = 1;
+								$ValorNeto5 = 0;
+								$Impuestos5 = 0;
+								$TotalVentas5 = 0;
 
-				    	}
+							}
 
-				    	$reporte->nuevaFila($results['manual'][$i], "_tickets");
-				    	$a++;
+							$reporte->nuevaFila($results['manual_completado'][$i], "_tickets");
+							$a++;
+						}
 
 		        	}
 
@@ -736,33 +1192,41 @@ class RegistroVentasTemplate extends Template {
 		    	$reporte->AddPage();
 
 		    	$b = 1;
-		    	$nmanuales = count($results['manual']);
+		    	$nmanuales = count($results['manual_completado']);
 
-		    	for ($i = 0; $i < $nmanuales - 5; $i++) {
+				// for ($j = 0; $j < $nmanuales - 7; $j++) {
+				// 	if ($results['manual_completado'][$i]['tipo'] == '08') {
+				// 	}
+				// }
 
-		        	if ($results['manual'][$i]['tipo'] == '08') {
-				    	$total_manual_debito_imp += round($results['manual'][$i]['imponible'], 2);
-				    	$total_manual_debito_igv += round($results['manual'][$i]['igv'], 2);
-				   	$total_manual_debito_tot += round($results['manual'][$i]['importe'], 2);
+		    	foreach ($results['manual_completado'] as $key => $manual_completado) {					
+					if (is_int($key)) {
+						$i = $key;
+	
+						if ($results['manual_completado'][$i]['tipo'] == '08') {
+							$total_manual_debito_imp += round($results['manual_completado'][$i]['imponible'], 2);
+							$total_manual_debito_igv += round($results['manual_completado'][$i]['igv'], 2);
+							$total_manual_debito_tot += round($results['manual_completado'][$i]['importe'], 2);
 
-				    	if ($b <= 90) {
-					       	$ValorNeto6 += $results['manual'][$i]['imponible'];
-						$Impuestos6 += $results['manual'][$i]['igv'];
-						$TotalVentas6 += $results['manual'][$i]['importe'];
-				    	}
+							if ($b <= 90) {
+								$ValorNeto6 += $results['manual_completado'][$i]['imponible'];
+								$Impuestos6 += $results['manual_completado'][$i]['igv'];
+								$TotalVentas6 += $results['manual_completado'][$i]['importe'];
+							}
 
-				    	if ($b == 90) {
-						$reporte->lineaH();
-						$arr = array("motivo" => "Valor por Pagina ", "neto" => $ValorNeto6, "impuestos" => $Impuestos6, "total" => $TotalVentas6, "tcambio" => " ");
-						$reporte->nuevaFila($arr, "_sub");
-						$b = 1;
-						$ValorNeto6 = 0;
-						$Impuestos6 = 0;
-						$TotalVentas6 = 0;
-				    	}
+							if ($b == 90) {
+								$reporte->lineaH();
+								$arr = array("motivo" => "Valor por Pagina ", "neto" => $ValorNeto6, "impuestos" => $Impuestos6, "total" => $TotalVentas6, "tcambio" => " ");
+								$reporte->nuevaFila($arr, "_sub");
+								$b = 1;
+								$ValorNeto6 = 0;
+								$Impuestos6 = 0;
+								$TotalVentas6 = 0;
+							}
 
-				    	$reporte->nuevaFila($results['manual'][$i], "_tickets");
-				   	$b++;
+							$reporte->nuevaFila($results['manual_completado'][$i], "_tickets");
+				   			$b++;
+						}
 
 		        	}
 
@@ -779,6 +1243,7 @@ class RegistroVentasTemplate extends Template {
 		}
 
 		// RESUMEN TOTALES
+		/*
 		$reporte->definirCabecera(3, "R", " ");
 		$reporte->borrarCabeceraPredeterminada();
 		$reporte->AddPage();
@@ -797,13 +1262,12 @@ class RegistroVentasTemplate extends Template {
 		$reporte->nuevaFila($arr, "_res");
 		$reporte->Ln();
 
-/*		$arr = array("nombre" => "Total Tickets Boletas ", "imponible" => $total_ticket_boleta_imp, "igv" => ($total_ticket_boleta_imp * 0.18), "exonerada" => $total_ticket_boleta_exonerada, "inafecto" => $total_ticket_boleta_inafecto, "importe" => $total_ticket_boleta_tot);
-		$reporte->nuevaFila($arr, "_res");
+		// $arr = array("nombre" => "Total Tickets Boletas ", "imponible" => $total_ticket_boleta_imp, "igv" => ($total_ticket_boleta_imp * 0.18), "exonerada" => $total_ticket_boleta_exonerada, "inafecto" => $total_ticket_boleta_inafecto, "importe" => $total_ticket_boleta_tot);
+		// $reporte->nuevaFila($arr, "_res");
 
-		$arr = array("nombre" => "Total Tickets Facturas ", "imponible" => $total_ticket_factura_imp, "igv" => ($total_ticket_factura_imp * 0.18), "exonerada" => $total_ticket_factura_exonerada, "inafecto" => $total_ticket_factura_inafecto, "importe" => (($total_ticket_factura_imp * 0.18) + $total_ticket_factura_tot));
-		$reporte->nuevaFila($arr, "_res");
-		$reporte->Ln();
-*/
+		// $arr = array("nombre" => "Total Tickets Facturas ", "imponible" => $total_ticket_factura_imp, "igv" => ($total_ticket_factura_imp * 0.18), "exonerada" => $total_ticket_factura_exonerada, "inafecto" => $total_ticket_factura_inafecto, "importe" => (($total_ticket_factura_imp * 0.18) + $total_ticket_factura_tot));
+		// $reporte->nuevaFila($arr, "_res");
+		// $reporte->Ln();
 
 		$arr = array("nombre" => "Total Manual Boletas", "imponible" => $total_manual_boleta_imp, "igv" => $total_manual_boleta_igv, "exonerada" => $total_manual_boleta_exonerada, "inafecto" => $total_manual_boleta_inafecto, "importe" => $total_manual_boleta_tot);
 		$reporte->nuevaFila($arr, "_res");
@@ -825,8 +1289,8 @@ class RegistroVentasTemplate extends Template {
 		$total_inafecto		= 0;
 		$total_general		= 0;
 
-//		$total_imp		= $total_ticket_boleta_imp + $total_ticket_factura_imp + $total_manual_boleta_imp + $total_manual_factura_imp - $total_manual_credito_imp - $total_manual_debito_imp;
-//		$total_igv		= $total_ticket_boleta_igv + $total_ticket_factura_igv + $total_manual_boleta_igv + $total_manual_factura_igv - $total_manual_credito_igv - $total_manual_debito_igv;
+		// $total_imp		= $total_ticket_boleta_imp + $total_ticket_factura_imp + $total_manual_boleta_imp + $total_manual_factura_imp - $total_manual_credito_imp - $total_manual_debito_imp;
+		// $total_igv		= $total_ticket_boleta_igv + $total_ticket_factura_igv + $total_manual_boleta_igv + $total_manual_factura_igv - $total_manual_credito_igv - $total_manual_debito_igv;
 		$total_imp		= $ValorNeto1 + $total_manual_boleta_imp + $total_manual_factura_imp - abs($total_manual_credito_imp) - $total_manual_debito_imp;
 		$total_igv		= $Impuestos1 + $total_manual_boleta_igv + $total_manual_factura_igv - abs($total_manual_credito_igv) - $total_manual_debito_igv;
 		$total_balance  = $Balance1;
@@ -842,6 +1306,240 @@ class RegistroVentasTemplate extends Template {
 		$reporte->nuevaFila($arr, "_res");
 		$reporte->Ln();
 		$reporte->lineaH();
+		*/
+		$reporte->AddPage();
+
+		/* Cuadro Resumen */
+		//TOTAL TICKETS
+		$ntickets = count($results['ticket']);
+		if ($ntickets > 0) {						
+			//TOTAL TICKETS POR BOLETAS
+			$total_ticket_boleta = $results['ticket']['tipo']['B'];
+
+			//TOTAL TICKETS POR FACTURAS
+			$total_ticket_factura = $results['ticket']['tipo']['F'];
+
+			//TOTAL TICKETS POR NOTA DE CREDITO
+			$total_ticket_nc = $results['ticket']['tipo']['A'];
+
+			//TOTAL TICKETS
+			$total_ticket = $results['ticket'];
+		}
+
+		//TOTAL MANUALES COMPLETADOS
+		$nmanuales = count($results['manual_completado']);
+		if ($nmanuales > 0) {
+			//TOTAL MANUALES POR BOLETA
+			$total_manual_completado_boleta = $results['manual_completado']['tipo']['03'];
+			
+			//TOTAL MANUALES POR FACTURA
+			$total_manual_completado_factura = $results['manual_completado']['tipo']['01'];
+			
+			//TOTAL MANUALES POR NOTA DE CREDITO
+			$total_manual_completado_nc = $results['manual_completado']['tipo']['07'];
+			
+			//TOTAL MANUALES POR NOTA DE DEBITO
+			$total_manual_completado_nd = $results['manual_completado']['tipo']['08'];
+
+			//TOTAL MANUALES
+			$total_manual_completado['total_imponible'] = $results['manual_completado']['total_imponible'] - abs($results['manual_completado']['nota_credito']['totales_imponible_credito']);
+			$total_manual_completado['total_igv']       = $results['manual_completado']['total_igv']       - abs($results['manual_completado']['nota_credito']['totales_igv_credito']);
+			$total_manual_completado['total_balance']   = $results['manual_completado']['total_balance'];
+			$total_manual_completado['total_exonerada']	= $results['manual_completado']['total_exonerada'] - abs($results['manual_completado']['nota_credito']['totales_exonerada_nc']);
+			$total_manual_completado['total_inafecto']  = $results['manual_completado']['total_inafecto']  - abs($results['manual_completado']['nota_credito']['totales_inafecto_nc']);
+			$total_manual_completado['total_importe']   = $results['manual_completado']['total_importe']   - abs($results['manual_completado']['nota_credito']['totales_importe_credito']);
+		}		
+
+		//TOTAL MANUALES REGISTRADO
+		$nmanuales = count($results['manual_registrado']);
+		if ($nmanuales > 0) {
+			//TOTAL MANUALES POR BOLETA
+			$total_manual_registrado_boleta = $results['manual_registrado']['tipo']['03'];
+			
+			//TOTAL MANUALES POR FACTURA
+			$total_manual_registrado_factura = $results['manual_registrado']['tipo']['01'];
+			
+			//TOTAL MANUALES POR NOTA DE CREDITO
+			$total_manual_registrado_nc = $results['manual_registrado']['tipo']['07'];
+			
+			//TOTAL MANUALES POR NOTA DE DEBITO
+			$total_manual_registrado_nd = $results['manual_registrado']['tipo']['08'];
+
+			//TOTAL MANUALES
+			$total_manual_registrado['total_imponible'] = $results['manual_registrado']['total_imponible'] - abs($results['manual_registrado']['nota_credito']['totales_imponible_credito']);
+			$total_manual_registrado['total_igv']       = $results['manual_registrado']['total_igv']       - abs($results['manual_registrado']['nota_credito']['totales_igv_credito']);
+			$total_manual_registrado['total_balance']   = $results['manual_registrado']['total_balance'];
+			$total_manual_registrado['total_exonerada']	= $results['manual_registrado']['total_exonerada'] - abs($results['manual_registrado']['nota_credito']['totales_exonerada_nc']);
+			$total_manual_registrado['total_inafecto']  = $results['manual_registrado']['total_inafecto']  - abs($results['manual_registrado']['nota_credito']['totales_inafecto_nc']);
+			$total_manual_registrado['total_importe']   = $results['manual_registrado']['total_importe']   - abs($results['manual_registrado']['nota_credito']['totales_importe_credito']);
+		}
+
+		//TOTAL MANUALES ANULADO
+		$nmanuales = count($results['manual_anulado']);
+		if ($nmanuales > 0) {
+			//TOTAL MANUALES POR BOLETA
+			$total_manual_anulado_boleta = $results['manual_anulado']['tipo']['03'];
+			
+			//TOTAL MANUALES POR FACTURA
+			$total_manual_anulado_factura = $results['manual_anulado']['tipo']['01'];
+			
+			//TOTAL MANUALES POR NOTA DE CREDITO
+			$total_manual_anulado_nc = $results['manual_anulado']['tipo']['07'];
+			
+			//TOTAL MANUALES POR NOTA DE DEBITO
+			$total_manual_anulado_nd = $results['manual_anulado']['tipo']['08'];			
+			
+			//TOTAL MANUALES
+			$total_manual_anulado = $results['manual_anulado']['tipo'];
+		}
+
+		$reporte->AddPage();		
+		$arr = array("nombre" => "RESUMEN REGISTRO DE VENTAS");
+		$reporte->nuevaFila($arr, "_restitu");
+		$reporte->lineaH();
+		$reporte->Ln();
+
+		$arr = array("nada" => "", "imp" => "Imponible", "igv" => "Igv", "balance" => "ICBPER", "exo" => "Exonerada", "inf" => "Inafecto", "tot" => "Total");
+		$reporte->nuevaFila($arr, "_sr");
+		$reporte->Ln();
+
+		//TOTAL TICKETS
+		$arr = array("nombre" => "Comprobantes de Playa", "imponible" => "-", "igv" => "-", "balance" => "-", "exonerada" => "-", "inafecto" => "-", "importe" => "-");
+		$reporte->nuevaFila($arr, "_res");
+
+		$arr = array("nombre" => "BOLETAS", "imponible" => $total_ticket_boleta['total_imponible'], "igv" => $total_ticket_boleta['total_igv'], "balance" => $total_ticket_boleta['total_balance'], "exonerada" => $total_ticket_boleta['total_exonerada'], "inafecto" => $total_ticket_boleta['total_inafecto'], "importe" => $total_ticket_boleta['total_importe']);
+		$reporte->nuevaFila($arr, "_res");		
+
+		$arr = array("nombre" => "BOLETAS", "imponible" => $total_ticket_factura['total_imponible'], "igv" => $total_ticket_factura['total_igv'], "balance" => $total_ticket_factura['total_balance'], "exonerada" => $total_ticket_factura['total_exonerada'], "inafecto" => $total_ticket_factura['total_inafecto'], "importe" => $total_ticket_factura['total_importe']);
+		$reporte->nuevaFila($arr, "_res");
+
+		$arr = array("nombre" => "BOLETAS", "imponible" => $total_ticket_nc['total_imponible'], "igv" => $total_ticket_nc['total_igv'], "balance" => $total_ticket_nc['total_balance'], "exonerada" => $total_ticket_nc['total_exonerada'], "inafecto" => $total_ticket_nc['total_inafecto'], "importe" => $total_ticket_nc['total_importe']);
+		$reporte->nuevaFila($arr, "_res");
+
+		$arr = array("nombre" => "TOTAL PLAYA", "imponible" => $total_ticket['total_imponible'], "igv" => $total_ticket['total_igv'], "balance" => $total_ticket['total_balance'], "exonerada" => $total_ticket['total_exonerada'], "inafecto" => $total_ticket['total_inafecto'], "importe" => $total_ticket['total_importe']);
+		$reporte->nuevaFila($arr, "_res");
+		$reporte->Ln();
+
+		//TOTAL MANUALES COMPLETADOS
+		$arr = array("nombre" => "Comprobantes Oficina Completados", "imponible" => "-", "igv" => "-", "balance" => "-", "exonerada" => "-", "inafecto" => "-", "importe" => "-");
+		$reporte->nuevaFila($arr, "_res");
+
+		$arr = array("nombre" => "BOLETAS", "imponible" => $total_manual_completado_boleta['total_imponible'], "igv" => $total_manual_completado_boleta['total_igv'], "balance" => $total_manual_completado_boleta['total_balance'], "exonerada" => $total_manual_completado_boleta['total_exonerada'], "inafecto" => $total_manual_completado_boleta['total_inafecto'], "importe" => $total_manual_completado_boleta['total_importe']);
+		$reporte->nuevaFila($arr, "_res");		
+
+		$arr = array("nombre" => "FACTURAS", "imponible" => $total_manual_completado_factura['total_imponible'], "igv" => $total_manual_completado_factura['total_igv'], "balance" => $total_manual_completado_factura['total_balance'], "exonerada" => $total_manual_completado_factura['total_exonerada'], "inafecto" => $total_manual_completado_factura['total_inafecto'], "importe" => $total_manual_completado_factura['total_importe']);
+		$reporte->nuevaFila($arr, "_res");
+
+		$arr = array("nombre" => "NOTAS DE CREDITO", "imponible" => $total_manual_completado_nc['total_imponible'], "igv" => $total_manual_completado_nc['total_igv'], "balance" => $total_manual_completado_nc['total_balance'], "exonerada" => $total_manual_completado_nc['total_exonerada'], "inafecto" => $total_manual_completado_nc['total_inafecto'], "importe" => $total_manual_completado_nc['total_importe']);
+		$reporte->nuevaFila($arr, "_res");
+
+		$arr = array("nombre" => "NOTAS DE DEBITO", "imponible" => $total_manual_completado_nd['total_imponible'], "igv" => $total_manual_completado_nd['total_igv'], "balance" => $total_manual_completado_nd['total_balance'], "exonerada" => $total_manual_completado_nd['total_exonerada'], "inafecto" => $total_manual_completado_nd['total_inafecto'], "importe" => $total_manual_completado_nd['total_importe']);
+		$reporte->nuevaFila($arr, "_res");
+
+		$arr = array("nombre" => "TOTAL OFICINA", "imponible" => $total_manual_completado['total_imponible'], "igv" => $total_manual_completado['total_igv'], "balance" => $total_manual_completado['total_balance'], "exonerada" => $total_manual_completado['total_exonerada'], "inafecto" => $total_manual_completado['total_inafecto'], "importe" => $total_manual_completado['total_importe']);
+		$reporte->nuevaFila($arr, "_res");
+		$reporte->Ln();
+
+		//RESUMEN TOTAL
+		$arr = array("nombre" => "RESUMEN TOTAL", "imponible" => "-", "igv" => "-", "balance" => "-", "exonerada" => "-", "inafecto" => "-", "importe" => "-");
+		$reporte->nuevaFila($arr, "_res");
+
+		$arr = array("nombre" => "BOLETAS", "imponible"   => $total_ticket_boleta['total_imponible'] + $total_manual_completado_boleta['total_imponible'], 
+											 "igv"        => $total_ticket_boleta['total_igv']       + $total_manual_completado_boleta['total_igv'], 
+											 "balance"    => $total_ticket_boleta['total_balance']   + $total_manual_completado_boleta['total_balance'], 
+											 "exonerada"  => $total_ticket_boleta['total_exonerada'] + $total_manual_completado_boleta['total_exonerada'], 
+											 "inafecto"   => $total_ticket_boleta['total_inafecto']  + $total_manual_completado_boleta['total_inafecto'], 
+											 "importe"    => $total_ticket_boleta['total_importe']   + $total_manual_completado_boleta['total_importe']);
+		$reporte->nuevaFila($arr, "_res");		
+
+		$arr = array("nombre" => "FACTURAS", "imponible"  => $total_ticket_factura['total_imponible'] + $total_manual_completado_factura['total_imponible'], 
+											 "igv"        => $total_ticket_factura['total_igv']       + $total_manual_completado_factura['total_igv'], 
+											 "balance"    => $total_ticket_factura['total_balance']   + $total_manual_completado_factura['total_balance'], 
+											 "exonerada"  => $total_ticket_factura['total_exonerada'] + $total_manual_completado_factura['total_exonerada'], 
+											 "inafecto"   => $total_ticket_factura['total_inafecto']  + $total_manual_completado_factura['total_inafecto'], 
+											 "importe"    => $total_ticket_factura['total_importe']   + $total_manual_completado_factura['total_importe']);
+		$reporte->nuevaFila($arr, "_res");
+
+		$arr = array("nombre" => "NOTAS DE CREDITO", "imponible"  => $total_ticket_nc['total_imponible'] + $total_manual_completado_nc['total_imponible'], 
+													 "igv"        => $total_ticket_nc['total_igv']       + $total_manual_completado_nc['total_igv'], 
+													 "balance"    => $total_ticket_nc['total_balance']   + $total_manual_completado_nc['total_balance'], 
+													 "exonerada"  => $total_ticket_nc['total_exonerada'] + $total_manual_completado_nc['total_exonerada'], 
+													 "inafecto"   => $total_ticket_nc['total_inafecto']  + $total_manual_completado_nc['total_inafecto'], 
+													 "importe"    => $total_ticket_nc['total_importe']   + $total_manual_completado_nc['total_importe']);
+		$reporte->nuevaFila($arr, "_res");
+
+		$arr = array("nombre" => "NOTAS DE DEBITO", "imponible"  => $total_manual_completado_nd['total_imponible'], 
+											 		"igv"        => $total_manual_completado_nd['total_igv'], 
+											 		"balance"    => $total_manual_completado_nd['total_balance'], 
+											 		"exonerada"  => $total_manual_completado_nd['total_exonerada'], 
+											 		"inafecto"   => $total_manual_completado_nd['total_inafecto'], 
+											 		"importe"    => $total_manual_completado_nd['total_importe']);
+		$reporte->nuevaFila($arr, "_res");
+
+		$reporte->lineaH();
+		$arr = array("nombre" => "TOTAL GENERAL", "imponible"  => $total_ticket['total_imponible'] + $total_manual_completado['total_imponible'], 
+												  "igv"        => $total_ticket['total_igv']       + $total_manual_completado['total_igv'], 
+												  "balance"    => $total_ticket['total_balance']   + $total_manual_completado['total_balance'], 
+												  "exonerada"  => $total_ticket['total_exonerada'] + $total_manual_completado['total_exonerada'], 
+												  "inafecto"   => $total_ticket['total_inafecto']  + $total_manual_completado['total_inafecto'], 
+												  "importe"    => $total_ticket['total_importe']   + $total_manual_completado['total_importe']);
+		$reporte->nuevaFila($arr, "_res");
+		$reporte->lineaH();
+		$reporte->Ln();
+
+		//TOTAL MANUALES REGISTRADO
+		$arr = array("nombre" => "Documentos Registrados y no enviados", "imponible" => "-", "igv" => "-", "balance" => "-", "exonerada" => "-", "inafecto" => "-", "importe" => "-");
+		$reporte->nuevaFila($arr, "_res");
+
+		$arr = array("nombre" => "BOLETAS", "imponible" => $total_manual_registrado_boleta['total_imponible'], "igv" => $total_manual_registrado_boleta['total_igv'], "balance" => $total_manual_registrado_boleta['total_balance'], "exonerada" => $total_manual_registrado_boleta['total_exonerada'], "inafecto" => $total_manual_registrado_boleta['total_inafecto'], "importe" => $total_manual_registrado_boleta['total_importe']);
+		$reporte->nuevaFila($arr, "_res");		
+
+		$arr = array("nombre" => "FACTURAS", "imponible" => $total_manual_registrado_factura['total_imponible'], "igv" => $total_manual_registrado_factura['total_igv'], "balance" => $total_manual_registrado_factura['total_balance'], "exonerada" => $total_manual_registrado_factura['total_exonerada'], "inafecto" => $total_manual_registrado_factura['total_inafecto'], "importe" => $total_manual_registrado_factura['total_importe']);
+		$reporte->nuevaFila($arr, "_res");
+
+		$arr = array("nombre" => "NOTAS DE CREDITO", "imponible" => $total_manual_registrado_nc['total_imponible'], "igv" => $total_manual_registrado_nc['total_igv'], "balance" => $total_manual_registrado_nc['total_balance'], "exonerada" => $total_manual_registrado_nc['total_exonerada'], "inafecto" => $total_manual_registrado_nc['total_inafecto'], "importe" => $total_manual_registrado_nc['total_importe']);
+		$reporte->nuevaFila($arr, "_res");
+
+		$arr = array("nombre" => "NOTAS DE DEBITO", "imponible" => $total_manual_registrado_nd['total_imponible'], "igv" => $total_manual_registrado_nd['total_igv'], "balance" => $total_manual_registrado_nd['total_balance'], "exonerada" => $total_manual_registrado_nd['total_exonerada'], "inafecto" => $total_manual_registrado_nd['total_inafecto'], "importe" => $total_manual_registrado_nd['total_importe']);
+		$reporte->nuevaFila($arr, "_res");
+
+		$arr = array("nombre" => "TOTAL OFICINA", "imponible" => $total_manual_registrado['total_imponible'], "igv" => $total_manual_registrado['total_igv'], "balance" => $total_manual_registrado['total_balance'], "exonerada" => $total_manual_registrado['total_exonerada'], "inafecto" => $total_manual_registrado['total_inafecto'], "importe" => $total_manual_registrado['total_importe']);
+		$reporte->nuevaFila($arr, "_res");
+		$reporte->Ln();
+
+		//TOTAL MANUALES REGISTRADOS - DETALLE
+		$arr = array("nombre" => "Detalle Documentos Registrados y no enviados", "imponible" => "-", "igv" => "-", "balance" => "-", "exonerada" => "-", "inafecto" => "-", "importe" => "-");
+		$reporte->nuevaFila($arr, "_res");
+
+		foreach ($results['manual_registrado'] as $key => $value) {
+			if ( is_int($key) ) {
+				$arr = array("libre" => "DOCUMENTO", "imp" =>  $value['serie'] . '-' . $value['numero'], "igv" => "ESTADO", "balance" => $value['statusname'], "exo" => "", "inf" => "", "tot" => "");
+				$reporte->nuevaFila($arr, "_sr");
+			}
+		}
+		$reporte->Ln();
+
+		//TOTAL MANUALES ANULADO
+		$arr = array("nombre" => "Cantidad de Documentos Anulados", "imponible" => "-", "igv" => "-", "balance" => "-", "exonerada" => "-", "inafecto" => "-", "importe" => "-");
+		$reporte->nuevaFila($arr, "_res");
+
+		$arr = array("nombre" => "BOLETAS", "imponible" => $total_manual_anulado_boleta['cantidad'], "igv" => "-", "balance" => "-", "exonerada" => "-", "inafecto" => "-", "importe" => "-");
+		$reporte->nuevaFila($arr, "_res");		
+
+		$arr = array("nombre" => "FACTURAS", "imponible" => $total_manual_anulado_factura['cantidad'], "igv" => "-", "balance" => "-", "exonerada" => "-", "inafecto" => "-", "importe" => "-");
+		$reporte->nuevaFila($arr, "_res");		
+
+		$arr = array("nombre" => "NOTAS DE CREDITO", "imponible" => $total_manual_anulado_nc['cantidad'], "igv" => "-", "balance" => "-", "exonerada" => "-", "inafecto" => "-", "importe" => "-");
+		$reporte->nuevaFila($arr, "_res");		
+		
+		$arr = array("nombre" => "NOTAS DE DEBITO", "imponible" => $total_manual_anulado_nd['cantidad'], "igv" => "-", "balance" => "-", "exonerada" => "-", "inafecto" => "-", "importe" => "-");
+		$reporte->nuevaFila($arr, "_res");		
+
+		$arr = array("nombre" => "TOTAL", "imponible" => $total_manual_anulado_anulado['cantidad'], "igv" => "-", "balance" => "-", "exonerada" => "-", "inafecto" => "-", "importe" => "-");
+		$reporte->nuevaFila($arr, "_res");		
+
+		$reporte->Ln();
+		/* Cerrar Cuadro Resumen */
 
 		$reporte->Output("/sistemaweb/ventas_clientes/reportes/pdf/registros_ventas_ingresos.pdf", "F");
 
