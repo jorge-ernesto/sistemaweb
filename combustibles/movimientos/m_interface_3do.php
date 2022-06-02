@@ -492,7 +492,7 @@ if ($agrupado == 'S') {
 					'{$reg[12]}',
 					'{$reg[13]}',
 					'{$reg[14]}',
-					'{$reg[15]}',
+					convert(datetime, '".substr($reg[15],0,19)."', 120),
 					'{$reg[16]}'
 				);";
 
@@ -794,7 +794,7 @@ if ($agrupado == 'S') {
 					'{$reg[19]}',
 					'{$reg[20]}',
 					'{$reg[21]}',
-					'{$reg[22]}',
+					convert(datetime, '".substr($reg[22],0,19)."', 120),
 					'{$reg[23]}'
 				);";
 
@@ -1030,14 +1030,14 @@ if ($agrupado == 'S') {
 					'{$reg[13]}',
 					'{$reg[14]}',
 					'{$reg[15]}',
-					'{$reg[16]}',
+					convert(datetime, '".substr($reg[16],0,19)."', 120),
 					'{$reg[17]}'
 				);";
 
 			//echo $sql;
 
 			if (mssql_query($sql,$mssql)===FALSE)
-				return onError_AIExit($mssql,"Error al trasladar cabecera de ticket factura {$reg[0]} al 3DO");
+				return onError_AIExit($mssql,"Error al trasladar cabecera de ticket factura {$reg[0]} al 3DO");									
 		}
 
 
@@ -1116,7 +1116,7 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 					'{$reg[13]}',
 					'{$reg[14]}',
 					'{$reg[15]}',
-					'{$reg[16]}',
+					convert(datetime, '".substr($reg[16],0,19)."', 120),
 					'{$reg[17]}'
 				);";
 
@@ -1410,7 +1410,7 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 					'{$reg[12]}',
 					'{$reg[13]}',
 					'{$reg[14]}',
-					'{$reg[15]}',
+					convert(datetime, '".substr($reg[15],0,19)."', 120),
 					'{$reg[16]}'
 				);";
 
@@ -1774,7 +1774,7 @@ echo "========== SINCRONIZANDO CABECERAS DE DOCUMENTOS MANUALES ==========\n";
 					'{$reg[13]}',
 					'{$reg[14]}',
 					'{$reg[15]}',
-					'{$reg[16]}',
+					convert(datetime, '".substr($reg[16],0,19)."', 120),
 					'{$reg[17]}'
 				);";
 			//echo "$sql\n";
