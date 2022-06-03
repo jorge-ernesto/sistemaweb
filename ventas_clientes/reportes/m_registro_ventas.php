@@ -258,15 +258,26 @@ class RegistroVentasModel extends Model {
 
 		//TICKES FACTURAS
 		$where_tickets = "AND T.dia BETWEEN '" . pg_escape_string($fecha_inicial) . "' AND '" . pg_escape_string($fecha_final) . "'";
+		$fecha_emision_tickets     = "T.dia::DATE as emision,";
+		$fecha_vencimiento_tickets = "T.dia::DATE as vencimiento,";
+		$group_by_fecha_tickets    = "T.dia,";
 
 		if ( $dataParametro['fecha_parametro'] != 0 ) {
 			//El valor del parametro corresponde al mismo mes y año indicado en el registro de ventas. Es decir las fechas son iguales
-			if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) == 0)
+			if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) == 0) {
 				$where_tickets = "AND T.dia >= '" . pg_escape_string($fecha_inicial) . "' AND T.fecha <= '" . pg_escape_string($fecha_final) . " 23:59:59'";
-	
+				$fecha_emision_tickets     = "T.fecha::DATE as emision,";
+				$fecha_vencimiento_tickets = "T.fecha::DATE as vencimiento,";
+				$group_by_fecha_tickets    = "T.fecha,";
+			}
+
 			//El valor del parametro corresponde a un mes anterior al indicado en el registro de ventas
-			if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) > 0)
+			if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) > 0) {
 				$where_tickets = "AND T.fecha >= '" . pg_escape_string($fecha_inicial) . " 00:00:00' AND T.fecha <= '" . pg_escape_string($fecha_final) . " 23:59:59'";
+				$fecha_emision_tickets     = "T.fecha::DATE as emision,";
+				$fecha_vencimiento_tickets = "T.fecha::DATE as vencimiento,";
+				$group_by_fecha_tickets    = "T.fecha,";
+			}
 		}
 
 		if ( $dataParametro['fecha_parametro'] != 0 ) {
@@ -278,8 +289,8 @@ class RegistroVentasModel extends Model {
 					SELECT
 						T.trans as trans,
 						T.caja as caja,
-						T.dia::DATE as emision,
-						T.dia::DATE as vencimiento,
+						$fecha_emision_tickets
+						$fecha_vencimiento_tickets
 						(CASE
 							WHEN FIRST(T.td) = 'B' and T.usr = '' THEN '12' 
 							WHEN FIRST(T.td) = 'N' and T.usr = '' THEN '12' 
@@ -344,7 +355,7 @@ class RegistroVentasModel extends Model {
 						$where_tickets
 						AND T.es = '$almacen'
 					GROUP BY
-						T.dia,
+						$group_by_fecha_tickets
 						T.trans,
 						T.caja,
 						T.usr
@@ -359,8 +370,8 @@ class RegistroVentasModel extends Model {
 		SELECT
 			T.trans as trans,
 			T.caja as caja,
-			T.dia::DATE as emision,
-			T.dia::DATE as vencimiento,
+			$fecha_emision_tickets
+			$fecha_vencimiento_tickets
 			(CASE
 				WHEN FIRST(T.td) = 'B' and T.usr = '' THEN '12' 
 				WHEN FIRST(T.td) = 'N' and T.usr = '' THEN '12' 
@@ -425,7 +436,7 @@ class RegistroVentasModel extends Model {
 			$where_tickets
 			AND T.es = '$almacen'
 		GROUP BY
-			T.dia,
+			$group_by_fecha_tickets
 			T.trans,
         	T.caja,
         	T.usr
@@ -442,8 +453,8 @@ class RegistroVentasModel extends Model {
 					SELECT
 						T.trans as trans,
 						T.caja as caja,
-						T.dia::DATE as emision,
-						T.dia::DATE as vencimiento,
+						$fecha_emision_tickets
+						$fecha_vencimiento_tickets
 						(CASE
 							WHEN FIRST(T.td) = 'B' and T.usr = '' THEN '12' 
 							WHEN FIRST(T.td) = 'N' and T.usr = '' THEN '12' 
@@ -508,7 +519,7 @@ class RegistroVentasModel extends Model {
 						$where_tickets
 						AND T.es = '$almacen'
 					GROUP BY
-						T.dia,
+						$group_by_fecha_tickets
 						T.trans,
 						T.caja,
 						T.usr
