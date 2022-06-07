@@ -385,7 +385,7 @@ CREATE OR REPLACE FUNCTION public.post_fn_inserta_ventas()
 AS ".'$BODY$DECLARE'."
         tipodoc char(2);
         seriedoc char(4);
-        numdoc  char(20);
+        numdoc  char(10);
         numeval char(10);
         cli_cod char(12);
         fila record;
@@ -442,7 +442,7 @@ pos=NEW.caja;
 
         IF NEW.tm IN ('V','A') AND NEW.trans IS NOT NULL AND NEW.td='N' THEN --if1
 
-                select into numdoc trim(NEW.caja) || '-' || trim(to_char(NEW.trans,'9999999999'));
+                select into numdoc trim(to_char(NEW.trans,'9999999999'));
                 SELECT INTO numeval trim(to_char(COALESCE(NEW.inicial,NEW.trans),'9999999999'));
                 RAISE NOTICE 'INSERTA_VENTAS NUMDOC %',numdoc;
 
