@@ -367,9 +367,9 @@ if ($agrupado == 'S') {
 				CASE 
 					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT 
 																						CASE 
-																							WHEN FIRST(td) = 'B' AND FIRST(tm) = 'V' THEN '03'
-																							WHEN FIRST(td) = 'F' AND FIRST(tm) = 'V' THEN '01'
-																							ELSE '10' 
+																							WHEN FIRST(td) = 'B' AND FIRST(tm) = 'V' THEN '03'::text
+																							WHEN FIRST(td) = 'F' AND FIRST(tm) = 'V' THEN '01'::text
+																							ELSE '10'::text
 																						END
 																					 FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1) 
 					ELSE NULL
@@ -669,9 +669,9 @@ if ($agrupado == 'S') {
 				CASE 
 					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT 
 																							CASE 
-																								WHEN FIRST(td) = 'B' AND FIRST(tm) = 'V' THEN '03'
-																								WHEN FIRST(td) = 'F' AND FIRST(tm) = 'V' THEN '01'
-																								ELSE '10' 
+																								WHEN FIRST(td) = 'B' AND FIRST(tm) = 'V' THEN '03'::text
+																								WHEN FIRST(td) = 'F' AND FIRST(tm) = 'V' THEN '01'::text
+																								ELSE '10'::text
 																							END
 																					 FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1) 
 					ELSE NULL
@@ -907,8 +907,8 @@ if ($agrupado == 'S') {
 				CASE 
 					WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT 
 																						CASE 
-																							WHEN FIRST(td) = 'B' AND FIRST(tm) = 'V' THEN '03'
-																							WHEN FIRST(td) = 'F' AND FIRST(tm) = 'V' THEN '01'
+																							WHEN FIRST(td) = 'B' AND FIRST(tm) = 'V' THEN '03'::text
+																							WHEN FIRST(td) = 'F' AND FIRST(tm) = 'V' THEN '01'::text
 																							ELSE '10' 
 																						END
 																					FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1) 
@@ -1269,9 +1269,9 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 				--sum(t.importe) AS Total,
 
 				CASE
-					WHEN FIRST(t.td) = 'B' AND FIRST(t.tm) = 'V' THEN '03'
-					WHEN FIRST(t.td) = 'F' AND FIRST(t.tm) = 'V' THEN '01'
-					ELSE '10'
+					WHEN FIRST(t.td) = 'B' AND FIRST(t.tm) = 'V' THEN '03'::text
+					WHEN FIRST(t.td) = 'F' AND FIRST(t.tm) = 'V' THEN '01'::text
+					ELSE '10'::text
 				END AS TipoDoc,
 				min(t.dia) AS fechadoc,
 				max(t.dia) AS Vencimiento,
@@ -1282,9 +1282,9 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 				CASE 
 			        WHEN (FIRST(t.tm = 'A') AND FIRST(t.rendi_gln)::CHAR != '') THEN (SELECT 
 																							CASE 
-																								WHEN FIRST(td) = 'B' AND FIRST(tm) = 'V' THEN '03'
-																								WHEN FIRST(td) = 'F' AND FIRST(tm) = 'V' THEN '01'
-																								ELSE '10' 
+																								WHEN FIRST(td) = 'B' AND FIRST(tm) = 'V' THEN '03'::text
+																								WHEN FIRST(td) = 'F' AND FIRST(tm) = 'V' THEN '01'::text
+																								ELSE '10'::text 
 																							END
 																						FROM {$postrans} WHERE es = FIRST(t.es) AND caja = FIRST(t.caja) AND td = FIRST(t.td) AND trans = FIRST(t.rendi_gln) AND tm = 'V' AND grupo != 'D' LIMIT 1) 
 					ELSE NULL
