@@ -225,17 +225,30 @@ Imprimir Resumen
 <!-- {Tabla}-->
 <?php
 	$cod_almacen = trim($cod_almacen);
-	$q = "select to_char(dt_fac_fecha,'dd/mm/yyyy'),trim(ch_fac_seriedocumento) as serie,
-		ch_fac_numerodocumento, ch_fac_tipodocumento, cli_codigo
-		from fac_ta_factura_cabecera
-		where dt_fac_fecha
-		between	'".$funcion->date_format($v_fecha_desde,'YYYY-MM-DD')."'
-		and '".$funcion->date_format($v_fecha_hasta,'YYYY-MM-DD')."'
-		and trim(ch_fac_seriedocumento) = '$cod_almacen'
-		and ch_fac_tipodocumento = '45'
-		order by dt_fac_fecha,ch_fac_tipodocumento,ch_fac_numerodocumento";
+	$q = "select 
+			to_char(FIRST(c.dt_fac_fecha),'dd/mm/yyyy') as dt_fac_fecha,
+			FIRST(trim(c.ch_fac_seriedocumento))        as serie,
+			FIRST(c.ch_fac_numerodocumento)             as ch_fac_numerodocumento, 
+			FIRST(c.ch_fac_tipodocumento)               as ch_fac_tipodocumento, 
+			FIRST(c.cli_codigo)                         as cli_codigo,
+			art.art_linea								art_linea
+		from fac_ta_factura_cabecera c
+			left join fac_ta_factura_detalle d on (c.ch_fac_tipodocumento = d.ch_fac_tipodocumento and c.ch_fac_seriedocumento = d.ch_fac_seriedocumento and c.ch_fac_numerodocumento = d.ch_fac_numerodocumento and c.cli_codigo = d.cli_codigo)
+			left join int_articulos art on (d.art_codigo = art.art_codigo)
+		where 
+			c.dt_fac_fecha between '".$funcion->date_format($v_fecha_desde,'YYYY-MM-DD')."' and '".$funcion->date_format($v_fecha_hasta,'YYYY-MM-DD')."'
+			and trim(c.ch_fac_seriedocumento) = '$cod_almacen'
+			and c.ch_fac_tipodocumento = '45'
+		group by
+			art.art_linea
+		order by 
+			dt_fac_fecha,ch_fac_tipodocumento,ch_fac_numerodocumento";
 	$rs2 = pg_exec($q);
-	//echo "EL QUERY !!".$q;
+
+	// echo "<pre>";
+	// echo "EL QUERY !!".$q;
+	// echo "</pre>";
+
 	$lineadt="<table>";
 			 	//	     1         2	 3	   4	     5	       6	 7	   8	     9	       10	 11	   12	     13	      14
                                 // 012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456
@@ -299,6 +312,7 @@ Imprimir Resumen
 						and trim(det.ch_fac_seriedocumento) = '".$B[1]."' 
 						and det.ch_fac_numerodocumento      = '".$B[2]."' 
 						and det.cli_codigo                  = '".$B[4]."' 
+						and art.art_linea				    = '".$B[5]."'
 						and det.ch_fac_tipodocumento   = cab.ch_fac_tipodocumento 
 						and det.ch_fac_seriedocumento  = cab.ch_fac_seriedocumento  
 						and det.ch_fac_numerodocumento = cab.ch_fac_numerodocumento 
@@ -307,6 +321,10 @@ Imprimir Resumen
 						";		
 
 			$rs1=pg_exec($det1);
+
+			// echo "<pre>";
+			// echo "EL QUERY det1!!".$det1;
+			// echo "</pre>";
 
 			$total_venta = 0;
 			$total_imp = 0;
