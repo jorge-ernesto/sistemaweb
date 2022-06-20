@@ -66,16 +66,33 @@ class RucModel extends Model{
 		return '';
 	}
 
-	function RUCupsert($ruc,$razsocial) {
+	function RUCupsert($ruc,$razsocial,$direccion = NULL) {
 		global $sqlca;
+
+		/**
+		 * Si dirección es diferente de NULL entonces evalua que si dirección devuelta por SUNAT es menor a 3 caracteres, insertara 5 guiones en el campo "address" de la tabla "ruc"
+		 */
+		$updateAddress = "";
+		$valueAddress  = "";
+		$insertAddress = "";
+		if ($direccion != NULL) {
+			if (strlen(TRIM($direccion)) <= 3) {
+				$direccion = "-----";
+			}
+			$updateAddress = ", address = '" . pg_escape_string($direccion) . "'";
+			$valueAddress  = ",address";
+			$insertAddress = ",'" . pg_escape_string($direccion) . "'";
+		}
 
 //		trigger_error("upserting ruc $ruc");
 		$sql = "SELECT 1 FROM ruc WHERE ruc='" . pg_escape_string($ruc) . "';";
 		if ($sqlca->query($sql) == 1) {
-			$sql = "UPDATE ruc SET razsocial = '" . pg_escape_string($razsocial) . "' WHERE ruc = '" . pg_escape_string($ruc) . "';";
+			$sql = "UPDATE ruc SET razsocial = '" . pg_escape_string($razsocial) . "' $updateAddress WHERE ruc = '" . pg_escape_string($ruc) . "';";
 		} else {
-			$sql = "INSERT INTO ruc (ruc,razsocial) VALUES ('" . pg_escape_string($ruc) . "','" . pg_escape_string($razsocial) . "');";
+			$sql = "INSERT INTO ruc (ruc,razsocial$valueAddress) VALUES ('" . pg_escape_string($ruc) . "','" . pg_escape_string($razsocial) . "' $insertAddress);";
 		}
+		error_log("sql");
+		error_log($sql);
 
 		$sqlca->query($sql);
 
@@ -133,7 +150,9 @@ class RucModel extends Model{
 			WHERE
 				(r.razsocial IS NULL
 				OR r.razsocial = ''
-				OR r.razsocial = r.ruc)
+				OR r.razsocial = r.ruc
+				OR r.address IS NULL
+				OR r.address = '')
 				AND t.ruc IS NOT NULL
 				AND t.ruc != ''
 				AND t.dia BETWEEN '{$FechaIni}' AND '{$FechaFin}'
@@ -257,9 +276,22 @@ class RucModel extends Model{
 				return Array(0 => 2);
 		}
 
+		$data = array();
 		foreach ($lines as $ll) {
-			if (substr($ll,0,5) == "NAME:")
-				return Array(0 => 3,1 => trim(substr($ll,5)));
+			if (substr($ll,0,5) == "NAME:"){
+				$data[0] = 3;
+				$data[1] = trim(substr($ll,5));
+				$data[2] = NULL;
+				$enviar = true;
+			}
+
+			if (substr($ll,0,17) == "FIELD:streetName:"){
+				$data[2] = trim(substr($ll,17));
+			}
+		}
+		
+		if ($data[0] = 3){
+			return $data;
 		}
 		return Array(0 => -1);
 	}

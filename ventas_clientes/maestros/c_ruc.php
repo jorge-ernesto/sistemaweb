@@ -121,6 +121,10 @@ class RucController extends Controller {
 				$i  = 0;
 				$p  = 1;
 				$fc = "";
+
+				// error_log("rdata");
+				// error_log(json_encode($rdata));
+
 				foreach ($rdata as $rr) {
 					if($i == 100) {								
 						$zf->addFile($fc,"rucs".$p.".txt");
@@ -132,6 +136,9 @@ class RucController extends Controller {
 					$i++;
 					$fc .= $rr . "|\n";
 				}
+
+				// error_log("rdata");
+				// error_log(json_encode($fc));
 
 				if($fc != "") {
 					$zf->addFile($fc,"rucs" . $p . ".txt");
@@ -171,7 +178,7 @@ class RucController extends Controller {
 							$stats[-2] += 1;
 							$stats[$cifdata[0]] += 1;
 							if ($cifdata[0] == 3)
-								RucModel::RUCupsert($rr,$cifdata[1]);
+								RucModel::RUCupsert($rr,$cifdata[1],$cifdata[2]);
 						}
 
 						$msg = "Procesados: {$stats[-2]}.";
@@ -214,7 +221,7 @@ class RucController extends Controller {
 								foreach ($ls as $ln => $ll) {
 									if($ln > 0) {
 										$lx = explode('|', $ll);
-										$rx = RucModel::RUCupsert($lx[0],$lx[1]);
+										$rx = RucModel::RUCupsert($lx[0],$lx[1],$lx[12]);
 									}
 								}
 							}
@@ -251,7 +258,7 @@ class RucController extends Controller {
 									$arrResponseApi = RucModel::apiReniec($ch, $iDNI);
 									++$t;
 									if ( $arrResponseApi['sStatus'] == 'success' ){
-										RucModel::RUCupsert($iDNI,$arrResponseApi['sNombresApellidos']);
+										RucModel::RUCupsert($iDNI,$arrResponseApi['sNombresApellidos'],NULL);
 										++$i;
 										$arrDniValidados['validos'][$i][] = $iDNI;
 									} else {
