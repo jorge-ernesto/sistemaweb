@@ -192,7 +192,7 @@ ORDER BY
 			";
 			error_log($sql);
 
-			if ($sqlca->query($sql) <= 0)
+			if ($sqlca->query($sql) < 0)
                	throw new Exception("Error get SearchPump");
 
 			while($reg = $sqlca->fetchRow())
