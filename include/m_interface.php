@@ -184,12 +184,12 @@ FROM
 SELECT * FROM
  (SELECT
   FIRST(CLI.cli_ruc) AS NUMERO,
-  FIRST(CLI.cli_razsocial) AS NOMBRE_RAZON_SOCIAL,
+  FIRST(replace(CLI.cli_razsocial, ',', '\,')) AS NOMBRE_RAZON_SOCIAL,
   '116'::character AS TIPO,
   FIRST(CLI.cli_ruc) AS NUMERO,
   FIRST(CASE WHEN CLI.cli_tipo = 'AC' THEN '1' ELSE '0' END)::CHARACTER AS CLIENTE,
-  FIRST(CLI.cli_direccion)::CHARACTER AS DIRECCION,
-  FIRST(CLI.cli_contacto)::CHARACTER AS TELEFONO
+  FIRST(replace(CLI.cli_direccion, ',', '\,')) AS DIRECCION,
+  FIRST(CLI.cli_contacto) AS TELEFONO
  FROM
   fac_ta_factura_cabecera AS FC
   JOIN int_clientes AS CLI ON(FC.cli_codigo = CLI.cli_codigo)
@@ -202,12 +202,12 @@ SELECT * FROM
  UNION
  (SELECT
   FIRST(CLI.cli_ruc) AS NUMERO,
-  FIRST(CLI.cli_razsocial) AS NOMBRE_RAZON_SOCIAL,
+  FIRST(replace(CLI.cli_razsocial, ',', '\,')) AS NOMBRE_RAZON_SOCIAL,
   '116'::character AS TIPO,
   FIRST(CLI.cli_ruc) AS NUMERO,
   FIRST(CASE WHEN CLI.cli_tipo = 'AC' THEN '1' ELSE '0' END)::CHARACTER AS CLIENTE,
-  FIRST(CLI.cli_direccion)::CHARACTER AS DIRECCION,
-  FIRST(CLI.cli_contacto)::CHARACTER AS TELEFONO
+  FIRST(replace(CLI.cli_direccion, ',', '\,')) AS DIRECCION,
+  FIRST(CLI.cli_contacto) AS TELEFONO
  FROM
   val_ta_cabecera AS VC
   JOIN int_clientes AS CLI ON(VC.ch_cliente = CLI.cli_codigo)
@@ -219,7 +219,7 @@ SELECT * FROM
  UNION
  (SELECT DISTINCT
   t.ruc as ruc, 
-  r.razsocial AS NOMBRE_RAZON_SOCIAL,
+  replace(r.razsocial, ',', '\,') AS NOMBRE_RAZON_SOCIAL,
   '116'::character AS TIPO,
   t.ruc AS NUMERO,
   '1'::character AS CLIENTE,
