@@ -351,7 +351,7 @@ if ($agrupado == 'S') {
 *******************************************************************************/
 
 		$sql = "SELECT
-				lpad(t.caja,3,'0') || '-' || min(t.trans) || '-' || max(t.trans) AS DocNro,
+				lpad(t.caja,4,'0') || '-' || lpad(min(t.trans)::text,8,'0') || '-' || lpad(max(t.trans)::text,8,'0') AS DocNro,
 				'{$Cod3DOCliVarios}' AS idCliente,
 				t.dia AS fecha,
 				sum(t.importe)-sum(t.igv) AS SubTotal,
@@ -527,7 +527,7 @@ if ($agrupado == 'S') {
 						min(t.trans) AS minimo,
 						max(t.trans) AS maximo,
 						t.caja AS caja,
-						lpad(t.caja,3,'0') || '-' || min(t.trans) || '-' || max(t.trans) AS rango
+						lpad(t.caja,4,'0') || '-' || lpad(min(t.trans)::text,8,'0') || '-' || lpad(max(t.trans)::text,8,'0') AS rango
 					FROM
 						$postrans t
 						LEFT JOIN pos_z_cierres cfp ON(t.caja=cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::date AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
@@ -646,7 +646,7 @@ if ($agrupado == 'S') {
 *******************************************************************************/
 
 		$sql = "SELECT
-				lpad(max(t.caja),3,'0'::text) || '-' || to_char(t.trans,'FM9999999999') AS DocNro,
+				lpad(max(t.caja),4,'0'::text) || '-' || lpad(to_char(t.trans,'FM9999999999'),8,'0') AS DocNro,
 				'{$Cod3DOCliVarios}' AS idCliente,
 				t.dia AS fecha,
 				sum(t.importe)-sum(t.igv) AS SubTotal,
@@ -890,7 +890,7 @@ if ($agrupado == 'S') {
 *******************************************************************************/
 
 		$sql = "SELECT
-				lpad(max(t.caja),3,'000'::text) || '-' || to_char(t.trans,'FM9999999999') AS DocNro,
+				lpad(max(t.caja),4,'000'::text) || '-' || lpad(to_char(t.trans,'FM9999999999'),8,'0') AS DocNro,
 				max(t.ruc) AS idCliente,
 				max(t.dia) AS fecha,
 				sum(t.importe)-sum(t.igv) AS SubTotal,
@@ -1141,7 +1141,7 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 			mssql_free_result($res);
 
 			$sql = "SELECT
-					lpad(t.caja,3,'000'::text) || '-' || to_char(t.trans,'FM9999999999') AS DocNro,
+					lpad(t.caja,4,'000'::text) || '-' || lpad(to_char(t.trans,'FM9999999999'),8,'0') AS DocNro,
 					t.dia AS Fecha,
 					trim(t.codigo) AS Codigo,
 					t.cantidad AS Cantidad,
@@ -1613,7 +1613,7 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 *******************************************************************************/
 
 		$sql = "SELECT
-				fc.ch_fac_seriedocumento || '-' || fc.ch_fac_numerodocumento AS DocNro,
+				fc.ch_fac_seriedocumento || '-' || lpad(fc.ch_fac_numerodocumento,8,'0') AS DocNro,
 				CASE
 					WHEN fc.cli_codigo = '9999' THEN '{$Cod3DOCliVarios}'::text
 					ELSE trim(c.cli_ruc)
@@ -1800,7 +1800,7 @@ echo "========== SINCRONIZANDO CABECERAS DE DOCUMENTOS MANUALES ==========\n";
 			mssql_free_result($res);
 
 			$sql = "SELECT
-					fc.ch_fac_seriedocumento || '-' || fc.ch_fac_numerodocumento AS DocNro,
+					fc.ch_fac_seriedocumento || '-' || lpad(fc.ch_fac_numerodocumento,8,'0') AS DocNro,
 					fc.dt_fac_fecha AS Fecha,
 					fd.art_codigo AS Codigo,
 					fd.nu_fac_cantidad * CASE
