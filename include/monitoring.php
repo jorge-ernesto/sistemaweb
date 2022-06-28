@@ -207,8 +207,8 @@ class MonitoringInterface{
              */
             $arrDataSQL = array(
                 'sql' => "SELECT DATE(dt_fecha) AS ultima_fecha, * FROM val_ta_cabecera WHERE ch_liquidacion IS NULL ORDER BY dt_fecha /*DESC*/ LIMIT 1;",
-                'sMessageDanger' => 'Problemas al buscar ultimo vale más antiguo y no liquidado',
-                'sMessageWarning' => 'No existe ultimo vale más antiguo y no liquidado',
+                'sMessageDanger' => 'Problemas al buscar vale más antiguo y no liquidado',
+                'sMessageWarning' => 'No existe vale más antiguo y no liquidado',
             );
             $arrData = $this->checkRegister($arrDataSQL);
             if ( $arrData['sStatus'] == "success" ) {
@@ -221,8 +221,8 @@ class MonitoringInterface{
              */
             $arrDataSQL = array(
                 'sql' => "SELECT DATE(dt_fac_fecha) AS ultima_fecha, * FROM fac_ta_factura_cabecera WHERE nu_fac_recargo3 NOT IN ('3','5') ORDER BY dt_fac_fecha /*DESC*/ LIMIT 1;",
-                'sMessageDanger' => 'Problemas al buscar ultimo documento electrónico de oficina más antiguo y no enviado',
-                'sMessageWarning' => 'No existe ultimo documento electrónico de oficina más antiguo y no enviado',
+                'sMessageDanger' => 'Problemas al buscar documento electrónico de oficina más antiguo y no enviado',
+                'sMessageWarning' => 'No existe documento electrónico de oficina más antiguo y no enviado',
             );
             $arrData = $this->checkRegister($arrDataSQL);
             if ( $arrData['sStatus'] == "success" ) {
@@ -235,8 +235,8 @@ class MonitoringInterface{
              */
             $arrDataSQL = array(
                 'sql' => "SELECT DATE(da_fecha) AS ultima_fecha, * FROM pos_aprosys WHERE ch_poscd = 'S' ORDER BY da_fecha DESC LIMIT 1;",
-                'sMessageDanger' => 'Problemas al buscar ultimo vale más antiguo y no liquidado',
-                'sMessageWarning' => 'No existe ultimo vale más antiguo y no liquidado',
+                'sMessageDanger' => 'Problemas al buscar ultimo dia cerrado',
+                'sMessageWarning' => 'No existe ultimo dia cerrado',
             );
             $arrData = $this->checkRegister($arrDataSQL);
             if ( $arrData['sStatus'] == "success" ) {
