@@ -1,5 +1,5 @@
 <?php
-function CSVFromQuery($sql,$file,$headers) {
+function CSVFromQuery($sql,$file,$headers,$debug = FALSE) {
 	global $sqlca;
 
 	if ($sqlca->query($sql)<=0)
@@ -20,8 +20,9 @@ function CSVFromQuery($sql,$file,$headers) {
 
 	while ($reg = $sqlca->fetchRow()) {
 		$line = "";
-		for ($i=0;$i<(count($reg)/2);$i++)
-			$line .= (($i==0)?"":",") . str_replace(",",",,",$reg[$i]);
+		for ($i=0;$i<(count($reg)/2);$i++){
+			$line .= (($i==0)?"":",") . str_replace(",","\,",$reg[$i]);
+		}
 		fwrite($fh,$line."\r\n");
 	}
 
@@ -184,12 +185,12 @@ FROM
 SELECT * FROM
  (SELECT
   FIRST(CLI.cli_ruc) AS NUMERO,
-  FIRST(replace(CLI.cli_razsocial, ',', '\,')) AS NOMBRE_RAZON_SOCIAL,
+  FIRST(CLI.cli_razsocial) AS NOMBRE_RAZON_SOCIAL,
   '116'::character AS TIPO,
   FIRST(CLI.cli_ruc) AS NUMERO,
   FIRST(CASE WHEN CLI.cli_tipo = 'AC' THEN '1' ELSE '0' END)::CHARACTER AS CLIENTE,
-  FIRST(replace(CLI.cli_direccion, ',', '\,')) AS DIRECCION,
-  FIRST(CLI.cli_contacto) AS TELEFONO
+  FIRST(CLI.cli_direccion)::CHARACTER AS DIRECCION,
+  FIRST(CLI.cli_contacto)::CHARACTER AS TELEFONO
  FROM
   fac_ta_factura_cabecera AS FC
   JOIN int_clientes AS CLI ON(FC.cli_codigo = CLI.cli_codigo)
@@ -202,12 +203,12 @@ SELECT * FROM
  UNION
  (SELECT
   FIRST(CLI.cli_ruc) AS NUMERO,
-  FIRST(replace(CLI.cli_razsocial, ',', '\,')) AS NOMBRE_RAZON_SOCIAL,
+  FIRST(CLI.cli_razsocial) AS NOMBRE_RAZON_SOCIAL,
   '116'::character AS TIPO,
   FIRST(CLI.cli_ruc) AS NUMERO,
   FIRST(CASE WHEN CLI.cli_tipo = 'AC' THEN '1' ELSE '0' END)::CHARACTER AS CLIENTE,
-  FIRST(replace(CLI.cli_direccion, ',', '\,')) AS DIRECCION,
-  FIRST(CLI.cli_contacto) AS TELEFONO
+  FIRST(CLI.cli_direccion)::CHARACTER AS DIRECCION,
+  FIRST(CLI.cli_contacto)::CHARACTER AS TELEFONO
  FROM
   val_ta_cabecera AS VC
   JOIN int_clientes AS CLI ON(VC.ch_cliente = CLI.cli_codigo)
@@ -219,7 +220,7 @@ SELECT * FROM
  UNION
  (SELECT DISTINCT
   t.ruc as ruc, 
-  replace(r.razsocial, ',', '\,') AS NOMBRE_RAZON_SOCIAL,
+  r.razsocial AS NOMBRE_RAZON_SOCIAL,
   '116'::character AS TIPO,
   t.ruc AS NUMERO,
   '1'::character AS CLIENTE,
@@ -245,7 +246,8 @@ SELECT * FROM
 				6	=>	"TELEFONO"
 			);
 
-			CSVFromQuery($sql,$ExportDir."maestro.txt",$headers);
+			$debug = TRUE;
+			CSVFromQuery($sql,$ExportDir."maestro.txt",$headers,$debug);
 
 			$sql = "	SELECT
 						a.ch_sucursal AS ALMACEN,
