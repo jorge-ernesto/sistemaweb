@@ -113,7 +113,7 @@ class Formato_Fisico_Model extends Model {
 		return true;
 	}*/
 
-	function ObtenerReporte($almacen, $ubica, $stk, $orden, $hora) {
+	function ObtenerReporte($almacen, $ubica, $stk, $orden, $hora = "") {
 		global $sqlca;
 
 		$fec = "SELECT da_fecha FROM pos_aprosys WHERE ch_poscd = 'A';";//Fecha Actual
