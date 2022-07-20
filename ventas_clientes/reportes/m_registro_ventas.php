@@ -21,7 +21,7 @@ class RegistroVentasModel extends Model {
 		/* Obtenemos fecha de parametro "reportsByRealDate" de "int_parametros" en formato "YYYY-MM" y fecha del reporte en formato "YYYY-MM" */
  		$dataParametro = $this->getFechaParametro($anio, $mes);
 
-		/* Obtenemos fecha_postrans del mes anterior y mes posterior */
+		/* Obtenemos fecha postrans del mes anterior y mes posterior */
 		$anio_ant = $anio;
 		$anio_des = $anio;
 		$mes_ant  = $mes-1;
@@ -38,7 +38,7 @@ class RegistroVentasModel extends Model {
 		}
 		$fecha_postrans_ant = $anio_ant . "" . $mes_ant;
 		$fecha_postrans_des = $anio_des . "" . $mes_des;
-		// echo "<script>console.log('" . json_encode( array($fecha_postrans, $fecha_postrans_ant, $fecha_postrans_des) ) . "')</script>";
+		// echo "<script>console.log('" . json_encode( array($fecha_postrans_ant, $fecha_postrans_des) ) . "')</script>";
 		
 		/* Validamos que tablas pos_trans del mes anterior y posterior existan */
 		$status_table_postrans_ant = $this->validateTableBySchema("pos_trans".$fecha_postrans_ant);
@@ -281,7 +281,7 @@ class RegistroVentasModel extends Model {
 		}
 
 		if ( $dataParametro['fecha_parametro'] != 0 ) {
-			if ( $status_table_postrans_ant == true ) {
+			if ( $status_table_postrans_ant == true ) { //
 
 				//El valor del parametro corresponde a un mes anterior al indicado en el registro de ventas
 				if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) > 0) {
@@ -443,7 +443,7 @@ class RegistroVentasModel extends Model {
 		";
 
 		if ( $dataParametro['fecha_parametro'] != 0 ) {
-			if ( $status_table_postrans_des == true ) {
+			if ( $status_table_postrans_des == true ) { //
 			
 				//El valor del parametro corresponde a un mes anterior al indicado en el registro de ventas / El valor del parametro corresponde al mismo mes y año indicado en el registro de ventas. Es decir las fechas son iguales
 				if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) > 0 || strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) == 0) {
@@ -865,6 +865,10 @@ class RegistroVentasModel extends Model {
     		Cab.ch_fac_numerodocumento;
 		";
 
+		echo "<pre>sql_facturas_manuales:";
+		echo "$sql_facturas_manuales";
+		echo "</pre>";
+
 		/* Recorremos informacion de Comprobantes de Oficina */
 		if ($sqlca->query($sql_facturas_manuales) < 0)
 			return false;
@@ -900,32 +904,32 @@ class RegistroVentasModel extends Model {
 	    	}
 
 			if ($a['tipo']=='07'){//7=N/Crédito
-				if ($a['moneda']=='02'){ //02 = DOLARES
-					if (trim($a['istranfer']) == 'T'){ //Transferencia gratuita
+				if ($a['moneda']=='02'){//02 = DOLARES
+					if (trim($a['istranfer']) == 'T'){ //Op. Gratuitas
 					    $imponible	= 0.00;
 		    			$igv		= -$a['igv']*$a['tipocambio'];
 		    			$exonerada	= 0.00;
 		    			$inafecto	= 0.00;
 		    			$importe	= -$a['igv']*$a['tipocambio'];
-					}else if ( trim($a['istranfer']) == 'S'){
+					}else if ( trim($a['istranfer']) == 'S'){ //Op. Exoneradas
 						$imponible	= -$a['importe']*$a['tipocambio'];
 		    			$igv		= 0.00;
 		    			$exonerada	= $a['importe']*$a['tipocambio'];
 		    			$inafecto	= 0.00;
 		    			$importe	= -$a['importe']*$a['tipocambio'];
-		    		}else if ( trim($a['istranfer']) == 'V'){
+		    		}else if ( trim($a['istranfer']) == 'V'){ //Op. Inafectas
 						$imponible	= -$a['importe']*$a['tipocambio'];
 		    			$igv		= 0.00;
 		    			$exonerada	= 0.00;
 		    			$inafecto	= -$a['importe']*$a['tipocambio'];
 		    			$importe	= -$a['importe']*$a['tipocambio'];
-		    		}else if ( trim($a['istranfer']) == 'U' || trim($a['istranfer']) == 'W'){
+		    		}else if ( trim($a['istranfer']) == 'U' || trim($a['istranfer']) == 'W'){ //Op. Gratuitas + Exoneradas || Op. Gratuitas + Inafectas
 						$imponible	= 0.00;
 		    			$igv		= 0.00;
 		    			$exonerada	= 0.00;
 		    			$inafecto	= 0.00;
 		    			$importe	= 0.00;
-					}else{
+					}else { //Op. Gravadas
 						$imponible	= -$a['imponible']*$a['tipocambio'];
 		    			$igv		= -$a['igv']*$a['tipocambio'];
 		    			$exonerada	= 0.00;
@@ -933,31 +937,31 @@ class RegistroVentasModel extends Model {
 		    			$importe	= -$a['importe']*$a['tipocambio'];
 					}
 				}else{//01 = SOLES
-	    			if (trim($a['istranfer']) == 'T'){ //Transferencia gratuita
+	    			if (trim($a['istranfer']) == 'T'){ //Op. Gratuitas
 					    $imponible	= 0.00;
 		    			$igv		= -$a['igv'];
 		    			$exonerada	= 0.00;
 		    			$inafecto	= 0.00;
 	    				$importe	= -$a['igv'];
-					}else if ( trim($a['istranfer']) == 'S'){
+					}else if ( trim($a['istranfer']) == 'S'){ //Op. Exoneradas
 						$imponible	= 0.00;
 	    				$igv		= 0.00;
 	    				$exonerada	= -$a['importe'];
 	    				$inafecto	= 0.00;
 	    				$importe	= -$a['importe'];
-	   	 			}else if ( trim($a['istranfer']) == 'V'){
+	   	 			}else if ( trim($a['istranfer']) == 'V'){ //Op. Inafectas
 						$imponible	= -$a['importe'];
 	 	   				$igv		= 0.00;
 	    				$exonerada	= 0.00;
 	    				$inafecto	= -$a['importe'];
 	    				$importe	= -$a['importe'];
-	    			}else if ( trim($a['istranfer']) == 'U' || trim($a['istranfer']) == 'W'){
+	    			}else if ( trim($a['istranfer']) == 'U' || trim($a['istranfer']) == 'W'){ //Op. Gratuitas + Exoneradas || Op. Gratuitas + Inafectas
 						$imponible	= 0.00;
 	    				$igv		= 0.00;
 	    				$exonerada	= 0.00;
 	    				$inafecto	= 0.00;
 	    				$importe	= 0.00;
-					}else{
+					}else { //Op. Gravadas
 						$imponible	= -$a['imponible'];
 	    				$igv		= -$a['igv'];
 	    				$exonerada	= 0.00;
@@ -966,32 +970,32 @@ class RegistroVentasModel extends Model {
 	    			}	
 				}
 			}else{
-				if ($a['moneda']=='02'){ //02 = DOLARES
-					if (trim($a['istranfer']) == 'T'){ //Transferencia gratuita
+				if ($a['moneda']=='02'){//02 = DOLARES
+					if (trim($a['istranfer']) == 'T'){ //Op. Gratuitas
 					    $imponible	= 0.00;
 		    			$igv		= $a['igv']*$a['tipocambio'];
 		    			$exonerada	= 0.00;
 		    			$inafecto	= 0.00;
 		    			$importe	= $a['igv']*$a['tipocambio'];
-					}else if ( trim($a['istranfer']) == 'S'){
+					}else if ( trim($a['istranfer']) == 'S'){ //Op. Exoneradas
 						$imponible	= $a['importe']*$a['tipocambio'];
 		    			$igv		= 0.00;
 		    			$exonerada	= $a['importe']*$a['tipocambio'];
 		    			$inafecto	= 0.00;
 		    			$importe	= $a['importe']*$a['tipocambio'];
-		    		}else if ( trim($a['istranfer']) == 'V'){
+		    		}else if ( trim($a['istranfer']) == 'V'){ //Op. Inafectas
 						$imponible	= $a['importe']*$a['tipocambio'];
 		    			$igv		= 0.00;
 		    			$exonerada	= 0.00;
 		    			$inafecto	= $a['importe']*$a['tipocambio'];
 		    			$importe	= $a['importe']*$a['tipocambio'];
-		    		}else if ( trim($a['istranfer']) == 'U' || trim($a['istranfer']) == 'W'){
+		    		}else if ( trim($a['istranfer']) == 'U' || trim($a['istranfer']) == 'W'){ //Op. Gratuitas + Exoneradas || Op. Gratuitas + Inafectas
 						$imponible	= 0.00;
 		    			$igv		= 0.00;
 		    			$exonerada	= 0.00;
 		    			$inafecto	= 0.00;
 		    			$importe	= 0.00;
-					}else{
+					}else { //Op. Gravadas
 						$imponible	= $a['imponible']*$a['tipocambio'];
 		    			$igv		= $a['igv']*$a['tipocambio'];
 		    			$exonerada	= 0.00;
@@ -999,31 +1003,31 @@ class RegistroVentasModel extends Model {
 		    			$importe	= $a['importe']*$a['tipocambio'];
 					}
 				}else{//01 = SOLES
-	    			if (trim($a['istranfer']) == 'T'){ //Transferencia gratuita
+	    			if (trim($a['istranfer']) == 'T'){ //Op. Gratuitas
 					    $imponible	= 0.00;
 		    			$igv		= $a['igv'];
 		    			$exonerada	= 0.00;
 		    			$inafecto	= 0.00;
 	    				$importe	= $a['igv'];
-					}else if ( trim($a['istranfer']) == 'S'){
+					}else if ( trim($a['istranfer']) == 'S'){ //Op. Exoneradas
 						$imponible	= 0.00;
 	    				$igv		= 0.00;
 	    				$exonerada	= $a['importe'];
 	    				$inafecto	= 0.00;
 	    				$importe	= $a['importe'];
-	   	 			}else if ( trim($a['istranfer']) == 'V'){
+	   	 			}else if ( trim($a['istranfer']) == 'V'){ //Op. Inafectas
 						$imponible	= $a['importe'];
 	 	   				$igv		= 0.00;
 	    				$exonerada	= 0.00;
 	    				$inafecto	= $a['importe'];
 	    				$importe	= $a['importe'];
-	    			}else if ( trim($a['istranfer']) == 'U' || trim($a['istranfer']) == 'W'){
+	    			}else if ( trim($a['istranfer']) == 'U' || trim($a['istranfer']) == 'W'){ //Op. Gratuitas + Exoneradas || Op. Gratuitas + Inafectas
 						$imponible	= 0.00;
 	    				$igv		= 0.00;
 	    				$exonerada	= 0.00;
 	    				$inafecto	= 0.00;
 	    				$importe	= 0.00;
-					}else{
+					}else { //Op. Gravadas
 						$imponible	= $a['imponible'];
 						$igv		= $a['igv'];
 	    				$exonerada	= 0.00;
@@ -1536,6 +1540,10 @@ WHERE
       		//Formamos tabla pos_transYYYYMM
 	    	$arrFecha = explode('-', $arrCond['dFechaEmision']);
 	    	$table_pos_transym = 'pos_trans' . $anio . $mes;
+			$table_pos_transym_ant = $arrCond['sNombreTabla_Ant'];
+			$table_pos_transym_des = $arrCond['sNombreTabla_Des'];
+			$status_table_ant = $arrCond['sStatusTabla_Ant'];
+			$status_table_des = $arrCond['sStatusTabla_Des'];
 
 			//Verificar si existe tabla pos_transYYYYMM
 			$iStatusTable = $sqlca->query("SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='".$table_pos_transym."'");
@@ -1545,27 +1553,82 @@ WHERE
 				$cond_tipo_documento = $arrCond['sTipoDocumento'];
 				$cond_trans = $arrCond['fIDTrans'];
 
-				$sql = "
-				SELECT
-				 usr,
-				 CASE
-				  WHEN tm='V' AND td='B' THEN '03'
-				  WHEN tm='V' AND td='F' THEN '01'
-				  ELSE '07'
-				 END AS tiporef,
-				 TO_CHAR(fecha, 'DD/MM/YYYY') AS fecharef,
-				 SUBSTR(TRIM(usr), 0, 5) AS serieref,
-				 SUBSTR(TRIM(usr), 6) AS numref
-				FROM
-				 " . $table_pos_transym . "
-				WHERE
-				 caja = '" . $cond_caja . "'
-				 AND td = '" . $cond_tipo_documento . "'
-				 AND trans = " . $cond_trans . "
-				 AND tm = 'V'
-				 AND grupo != 'D'
-				LIMIT 1;
+				$sql = "";
+				if ( $status_table_ant == true ) {
+					$sql .= "
+						(SELECT
+							usr,
+							CASE
+							WHEN tm='V' AND td='B' THEN '03'
+							WHEN tm='V' AND td='F' THEN '01'
+							ELSE '07'
+							END AS tiporef,
+							TO_CHAR(fecha, 'DD/MM/YYYY') AS fecharef,
+							SUBSTR(TRIM(usr), 0, 5) AS serieref,
+							SUBSTR(TRIM(usr), 6) AS numref
+						FROM
+							" . $table_pos_transym_ant . "
+						WHERE
+							caja = '" . $cond_caja . "'
+							AND td = '" . $cond_tipo_documento . "'
+							AND trans = " . $cond_trans . "
+							AND tm = 'V'
+							AND grupo != 'D')
+						
+						UNION ALL
+					";
+				}
+
+				$sql .= "
+					(SELECT
+						usr,
+						CASE
+						WHEN tm='V' AND td='B' THEN '03'
+						WHEN tm='V' AND td='F' THEN '01'
+						ELSE '07'
+						END AS tiporef,
+						TO_CHAR(fecha, 'DD/MM/YYYY') AS fecharef,
+						SUBSTR(TRIM(usr), 0, 5) AS serieref,
+						SUBSTR(TRIM(usr), 6) AS numref
+					FROM
+						" . $table_pos_transym . "
+					WHERE
+						caja = '" . $cond_caja . "'
+						AND td = '" . $cond_tipo_documento . "'
+						AND trans = " . $cond_trans . "
+						AND tm = 'V'
+						AND grupo != 'D')
 				";
+
+				if ( $status_table_des == true ) {
+					$sql .= "
+						UNION ALL
+		
+						(SELECT
+							usr,
+							CASE
+							WHEN tm='V' AND td='B' THEN '03'
+							WHEN tm='V' AND td='F' THEN '01'
+							ELSE '07'
+							END AS tiporef,
+							TO_CHAR(fecha, 'DD/MM/YYYY') AS fecharef,
+							SUBSTR(TRIM(usr), 0, 5) AS serieref,
+							SUBSTR(TRIM(usr), 6) AS numref
+						FROM
+							" . $table_pos_transym_des . "
+						WHERE
+							caja = '" . $cond_caja . "'
+							AND td = '" . $cond_tipo_documento . "'
+							AND trans = " . $cond_trans . "
+							AND tm = 'V'
+							AND grupo != 'D')
+					";
+				}
+
+				$sql .= "LIMIT 1;";
+
+				error_log("trans: " . $cond_trans);
+				error_log("sql: " . $sql);
 
     			$iStatus = $sqlca->query($sql);
 				if ((int)$iStatus >= 1) {//Existe registro en la tabla pos_transYM
@@ -1720,6 +1783,10 @@ venta_tickes.diatickes
 		global $sqlca;
 
 		$nombre_tabla = $arrCond['sNombreTabla'];
+		$nombre_tabla_ant = $arrCond['sNombreTabla_Ant'];
+		$nombre_tabla_des = $arrCond['sNombreTabla_Des'];
+		$status_tabla_ant = $arrCond['sStatusTabla_Ant'];
+		$status_tabla_des = $arrCond['sStatusTabla_Des'];
 		$cond_codigo_almacen = $arrCond['sCodigoAlmacen'];
 		$cond_caja = $arrCond['sCaja'];
 		$cond_tipo_documento = $arrCond['sTipoDocumento'];
@@ -1727,28 +1794,82 @@ venta_tickes.diatickes
 
   		$arrResponse = array('sStatus' => 'warning', 'sMessage' => 'No existe documento de referencia');
 
-		$sql = "
-SELECT
- usr,
- CASE
-  WHEN tm='V' AND td='B' THEN '03'
-  WHEN tm='V' AND td='F' THEN '01'
-  ELSE '07'
- END AS tiporef,
- TO_CHAR(fecha, 'DD/MM/YYYY') AS fecharef,
- SUBSTR(TRIM(usr), 0, 5) AS serieref,
- SUBSTR(TRIM(usr), 6) AS numref
-FROM
- " . $nombre_tabla . "
-WHERE
- es = '" . $cond_codigo_almacen . "'
- AND caja = '" . $cond_caja . "'
- AND td = '" . $cond_tipo_documento . "'
- AND trans = " . $cond_trans . "
- AND tm = 'V'
- AND grupo != 'D'
-LIMIT 1;
+		$sql = "";
+		if ( $status_tabla_ant == true ) {
+			$sql .= "
+				(SELECT
+					usr,
+					CASE
+					WHEN tm='V' AND td='B' THEN '03'
+					WHEN tm='V' AND td='F' THEN '01'
+					ELSE '07'
+					END AS tiporef,
+					TO_CHAR(fecha, 'DD/MM/YYYY') AS fecharef,
+					SUBSTR(TRIM(usr), 0, 5) AS serieref,
+					SUBSTR(TRIM(usr), 6) AS numref
+				FROM
+					" . $nombre_tabla_ant . "
+				WHERE
+					es = '" . $cond_codigo_almacen . "'
+					AND caja = '" . $cond_caja . "'
+					AND td = '" . $cond_tipo_documento . "'
+					AND trans = " . $cond_trans . "
+					AND tm = 'V'
+					AND grupo != 'D')
+				
+				UNION ALL
+			";
+		}
+
+		$sql .= "
+			(SELECT
+				usr,
+				CASE
+				WHEN tm='V' AND td='B' THEN '03'
+				WHEN tm='V' AND td='F' THEN '01'
+				ELSE '07'
+				END AS tiporef,
+				TO_CHAR(fecha, 'DD/MM/YYYY') AS fecharef,
+				SUBSTR(TRIM(usr), 0, 5) AS serieref,
+				SUBSTR(TRIM(usr), 6) AS numref
+			FROM
+				" . $nombre_tabla . "
+			WHERE
+				es = '" . $cond_codigo_almacen . "'
+				AND caja = '" . $cond_caja . "'
+				AND td = '" . $cond_tipo_documento . "'
+				AND trans = " . $cond_trans . "
+				AND tm = 'V'
+				AND grupo != 'D')
 		";
+
+		if ( $status_tabla_des == true ) {
+			$sql .= "
+				UNION ALL
+
+				(SELECT
+					usr,
+					CASE
+					WHEN tm='V' AND td='B' THEN '03'
+					WHEN tm='V' AND td='F' THEN '01'
+					ELSE '07'
+					END AS tiporef,
+					TO_CHAR(fecha, 'DD/MM/YYYY') AS fecharef,
+					SUBSTR(TRIM(usr), 0, 5) AS serieref,
+					SUBSTR(TRIM(usr), 6) AS numref
+				FROM
+					" . $nombre_tabla_des . "
+				WHERE
+					es = '" . $cond_codigo_almacen . "'
+					AND caja = '" . $cond_caja . "'
+					AND td = '" . $cond_tipo_documento . "'
+					AND trans = " . $cond_trans . "
+					AND tm = 'V'
+					AND grupo != 'D')
+			";
+		}
+
+		$sql .= "LIMIT 1;";
 
 		echo "<pre>";
 		echo $sql;

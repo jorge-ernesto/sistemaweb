@@ -176,6 +176,10 @@ function reporteExcelPersonalizado($resultado_postrans, $biincre, $igvincre, $to
 							//Datos para buscar registros
 							"sNombreTabla" => $arrParamsPOST['sTablePostransYM'],
 							"sCodigoAlmacen" => $arrParamsPOST['sCodigoAlmacen'],
+							"sNombreTabla_Ant" => $arrParamsPOST['sTablePostransYM_Ant'],
+							"sNombreTabla_Des" => $arrParamsPOST['sTablePostransYM_Des'],
+							"sStatusTabla_Ant" => $arrParamsPOST['sStatusPostransYM_Ant'],
+							"sStatusTabla_Des" => $arrParamsPOST['sStatusPostransYM_Des'],
 							//Datos para buscar documento origen
 							"sCaja" => $resultado_postrans['ticket'][$i]['caja'],
 							"sTipoDocumento" => $resultado_postrans['ticket'][$i]['td'],
@@ -831,6 +835,10 @@ function verify_reference_sales_invoice_document($arrCond){
 	pg_set_client_encoding($conn, "utf8");		
 
 	$nombre_tabla = $arrCond['sNombreTabla'];
+	$nombre_tabla_ant = $arrCond['sNombreTabla_Ant'];
+	$nombre_tabla_des = $arrCond['sNombreTabla_Des'];
+	$status_tabla_ant = $arrCond['sStatusTabla_Ant'];
+	$status_tabla_des = $arrCond['sStatusTabla_Des'];
 	$cond_codigo_almacen = $arrCond['sCodigoAlmacen'];
 	$cond_caja = $arrCond['sCaja'];
 	$cond_tipo_documento = $arrCond['sTipoDocumento'];
@@ -838,29 +846,85 @@ function verify_reference_sales_invoice_document($arrCond){
 
 	$arrResponse = array('sStatus' => 'warning', 'sMessage' => 'No existe documento de referencia');
 
-	$sql = "
-SELECT
-usr,
-CASE
-WHEN tm='V' AND td='B' THEN '03'
-WHEN tm='V' AND td='F' THEN '01'
-ELSE '07'
-END AS tiporef,
-TO_CHAR(fecha, 'DD/MM/YYYY') AS fecharef,
-SUBSTR(TRIM(usr), 0, 5) AS serieref,
-SUBSTR(TRIM(usr), 6) AS numref
-FROM
-" . $nombre_tabla . "
-WHERE
-es = '" . $cond_codigo_almacen . "'
-AND caja = '" . $cond_caja . "'
-AND td = '" . $cond_tipo_documento . "'
-AND trans = " . $cond_trans . "
-AND tm = 'V'
-AND grupo != 'D'
-LIMIT 1;
+	$sql = "";
+	if ( $status_tabla_ant == true ) {
+		$sql .= "
+			(SELECT
+				usr,
+				CASE
+				WHEN tm='V' AND td='B' THEN '03'
+				WHEN tm='V' AND td='F' THEN '01'
+				ELSE '07'
+				END AS tiporef,
+				TO_CHAR(fecha, 'DD/MM/YYYY') AS fecharef,
+				SUBSTR(TRIM(usr), 0, 5) AS serieref,
+				SUBSTR(TRIM(usr), 6) AS numref
+			FROM
+				" . $nombre_tabla_ant . "
+			WHERE
+				es = '" . $cond_codigo_almacen . "'
+				AND caja = '" . $cond_caja . "'
+				AND td = '" . $cond_tipo_documento . "'
+				AND trans = " . $cond_trans . "
+				AND tm = 'V'
+				AND grupo != 'D')
+				
+			UNION ALL
+		";
+	}
+
+	$sql .= "
+		(SELECT
+			usr,
+			CASE
+			WHEN tm='V' AND td='B' THEN '03'
+			WHEN tm='V' AND td='F' THEN '01'
+			ELSE '07'
+			END AS tiporef,
+			TO_CHAR(fecha, 'DD/MM/YYYY') AS fecharef,
+			SUBSTR(TRIM(usr), 0, 5) AS serieref,
+			SUBSTR(TRIM(usr), 6) AS numref
+		FROM
+			" . $nombre_tabla . "
+		WHERE
+			es = '" . $cond_codigo_almacen . "'
+			AND caja = '" . $cond_caja . "'
+			AND td = '" . $cond_tipo_documento . "'
+			AND trans = " . $cond_trans . "
+			AND tm = 'V'
+			AND grupo != 'D')
 	";
-	error_log(json_encode($sql));
+
+	if ( $status_tabla_des == true ) {
+		$sql .= "
+			UNION ALL
+
+			(SELECT
+				usr,
+				CASE
+				WHEN tm='V' AND td='B' THEN '03'
+				WHEN tm='V' AND td='F' THEN '01'
+				ELSE '07'
+				END AS tiporef,
+				TO_CHAR(fecha, 'DD/MM/YYYY') AS fecharef,
+				SUBSTR(TRIM(usr), 0, 5) AS serieref,
+				SUBSTR(TRIM(usr), 6) AS numref
+			FROM
+				" . $nombre_tabla_des . "
+			WHERE
+				es = '" . $cond_codigo_almacen . "'
+				AND caja = '" . $cond_caja . "'
+				AND td = '" . $cond_tipo_documento . "'
+				AND trans = " . $cond_trans . "
+				AND tm = 'V'
+				AND grupo != 'D')
+		";
+	}
+
+	$sql .= "LIMIT 1;";
+
+	error_log("trans: " . $cond_trans);
+	error_log("sql: " . $sql);
 
 	$result = pg_query($conn, $sql);
 	$fila = pg_fetch_assoc($result);

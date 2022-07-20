@@ -103,7 +103,7 @@ class RegistroVentasTemplate extends Template {
 
 			$modelRegistroVentas = new RegistroVentasModel();
 			for ($i = 0; $i < $ntickets - 7; $i++) {
-				$result .= RegistroVentasTemplate::imprimirLinea($results['ticket'][$i], $BI_incre, $IGV_incre, $TOTAL_incre, $i, 'trans', $modelRegistroVentas, $arrParamsPOST); //imprimirLinea
+				$result .= RegistroVentasTemplate::imprimirLinea($results['ticket'][$i], $BI_incre, $IGV_incre, $TOTAL_incre, $i, 'trans', $modelRegistroVentas, $arrParamsPOST); //imprimirLinea.
 			}
 
 			if ($ntickets > 0) {
@@ -631,12 +631,16 @@ class RegistroVentasTemplate extends Template {
 		return $result_resumen;
 	}
 
-    function imprimirLinea($linea, $BI_incre, $IGV_incre, $TOTAL_incre, $validar, $tipo_data, $modelRegistroVentas, $arrParamsPOST) { //imprimirLinea
+    function imprimirLinea($linea, $BI_incre, $IGV_incre, $TOTAL_incre, $validar, $tipo_data, $modelRegistroVentas, $arrParamsPOST) { //imprimirLinea.
     	if( $linea['rendi_gln'] != "" ) {
 	        $arrData = array(
 	            //Datos para buscar registros
 	            "sNombreTabla" => $arrParamsPOST['sTablePostransYM'],
 	            "sCodigoAlmacen" => $arrParamsPOST['sCodigoAlmacen'],
+				"sNombreTabla_Ant" => $arrParamsPOST['sTablePostransYM_Ant'],
+				"sNombreTabla_Des" => $arrParamsPOST['sTablePostransYM_Des'],
+				"sStatusTabla_Ant" => $arrParamsPOST['sStatusPostransYM_Ant'],
+				"sStatusTabla_Des" => $arrParamsPOST['sStatusPostransYM_Des'],
 	            //Datos para buscar documento origen
 	            "sCaja" => $linea['caja'],
 	            "sTipoDocumento" => $linea['td'],
@@ -938,6 +942,10 @@ class RegistroVentasTemplate extends Template {
 		            //Datos para buscar registros
 		            "sNombreTabla" => $arrParamsPOST['sTablePostransYM'],
 		            "sCodigoAlmacen" => $arrParamsPOST['sCodigoAlmacen'],
+					"sNombreTabla_Ant" => $arrParamsPOST['sTablePostransYM_Ant'],
+					"sNombreTabla_Des" => $arrParamsPOST['sTablePostransYM_Des'],
+					"sStatusTabla_Ant" => $arrParamsPOST['sStatusPostransYM_Ant'],
+					"sStatusTabla_Des" => $arrParamsPOST['sStatusPostransYM_Des'],
 		            //Datos para buscar documento origen
 		            "sCaja" => $results['ticket'][$h]['caja'],
 		            "sTipoDocumento" => $results['ticket'][$h]['td'],

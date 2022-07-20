@@ -63,14 +63,26 @@ class RegistroVentasController extends Controller {
 				echo "<script>console.log('results')</script>";
 				echo "<script>console.log('" . json_encode( array($results) ) . "')</script>";
 
+				// echo "<pre>";
+				// print_r($results['ticket']);
+				// echo "</pre>";
+
 				echo "<script>console.log('resultgnv')</script>";
 				echo "<script>console.log('" . json_encode( array($resultgnv) ) . "')</script>";
 				// die();
 				/***/
 
-		        $arrParamsPOST = array(
+				/* Obtenemos fecha postrans del mes anterior y mes posterior */
+				$dataPosTrans = $this->getPosTransAnteriorDespues($anio, $mes);
+				/***/
+				
+				$arrParamsPOST = array(
 		        	"sTablePostransYM" => 'pos_trans'.$anio.$mes,
 		        	"sCodigoAlmacen" => $almacen,
+					"sTablePostransYM_Ant" => 'pos_trans'.$dataPosTrans['anio_ant'].$dataPosTrans['mes_ant'],
+					"sTablePostransYM_Des" => 'pos_trans'.$dataPosTrans['anio_des'].$dataPosTrans['mes_des'],
+					"sStatusPostransYM_Ant" => $dataPosTrans['status_table_postrans_ant'],
+					"sStatusPostransYM_Des" => $dataPosTrans['status_table_postrans_des'],
 		        );
 
 		        $result_f = $templateRegistroVentas->reporte($results, $resultgnv, $BI_incre, $IGV_incre, $TOTAL_incre, $arrParamsPOST, $tipo);
@@ -99,9 +111,17 @@ class RegistroVentasController extends Controller {
 		        $TOTAL_incre 		= $_REQUEST['valor_venta'];
 		        $monto_igual 		= $_REQUEST['monto_igual'];
 
+				/* Obtenemos fecha postrans del mes anterior y mes posterior */
+				$dataPosTrans = $this->getPosTransAnteriorDespues($anio, $mes);
+				/***/
+
 		        $arrParamsPOST = array(
 		        	"sTablePostransYM" => 'pos_trans'.$anio.$mes,
 		        	"sCodigoAlmacen" => $almacen,
+					"sTablePostransYM_Ant" => 'pos_trans'.$dataPosTrans['anio_ant'].$dataPosTrans['mes_ant'],
+					"sTablePostransYM_Des" => 'pos_trans'.$dataPosTrans['anio_des'].$dataPosTrans['mes_des'],
+					"sStatusPostransYM_Ant" => $dataPosTrans['status_table_postrans_ant'],
+					"sStatusPostransYM_Des" => $dataPosTrans['status_table_postrans_des'],
 		        );
 				$dataPDF['desde'] = $anio."-".$mes."-".$desde;
 				$dataPDF['hasta'] = $anio."-".$mes."-".$hasta;
@@ -160,9 +180,18 @@ class RegistroVentasController extends Controller {
 		        $_SESSION['igvincre'] 	= $BI_incre;
 		        $_SESSION['totincre'] 	= $BI_incre;
 		        $_SESSION['sTipoVistaReporte'] = $_REQUEST['tipo'];
+
+				/* Obtenemos fecha postrans del mes anterior y mes posterior */
+				$dataPosTrans = $this->getPosTransAnteriorDespues($anio, $mes);
+				/***/
+
 				$arrParamsPOST = array(
 		        	"sTablePostransYM" => 'pos_trans'.$anio.$mes,
 		        	"sCodigoAlmacen" => $almacen,
+					"sTablePostransYM_Ant" => 'pos_trans'.$dataPosTrans['anio_ant'].$dataPosTrans['mes_ant'],
+					"sTablePostransYM_Des" => 'pos_trans'.$dataPosTrans['anio_des'].$dataPosTrans['mes_des'],
+					"sStatusPostransYM_Ant" => $dataPosTrans['status_table_postrans_ant'],
+					"sStatusPostransYM_Des" => $dataPosTrans['status_table_postrans_des'],
 				);
 				$_SESSION['arrParamsPOST_excel'] = $arrParamsPOST;	
 				$_SESSION['desde'] = $anio."-".$mes."-".$desde;
@@ -228,7 +257,20 @@ class RegistroVentasController extends Controller {
 					// $this->LogRegistroVentas($results, $dataLog);
 					//CERRAR 
 
-		        	$this->GenerarLibrosElectronicos($results, $arrResponseModel["arrData"], $anio, $mes, $resultgnv, $correlativo, $almacen, $tipo_ple,$BI_incre,$TOTAL_incre,$IGV_incre);
+					/* Obtenemos fecha postrans del mes anterior y mes posterior */
+					$dataPosTrans = $this->getPosTransAnteriorDespues($anio, $mes);
+					/***/
+
+					$arrParamsPOST = array(
+						"sTablePostransYM" => 'pos_trans'.$anio.$mes,
+						"sCodigoAlmacen" => $almacen,
+						"sTablePostransYM_Ant" => 'pos_trans'.$dataPosTrans['anio_ant'].$dataPosTrans['mes_ant'],
+						"sTablePostransYM_Des" => 'pos_trans'.$dataPosTrans['anio_des'].$dataPosTrans['mes_des'],
+						"sStatusPostransYM_Ant" => $dataPosTrans['status_table_postrans_ant'],
+						"sStatusPostransYM_Des" => $dataPosTrans['status_table_postrans_des'],
+					);
+
+		        	$this->GenerarLibrosElectronicos($results, $arrResponseModel["arrData"], $anio, $mes, $resultgnv, $correlativo, $almacen, $tipo_ple,$BI_incre,$TOTAL_incre,$IGV_incre,$arrParamsPOST);
 		        }
 
 				$result_f = '-';
@@ -256,7 +298,7 @@ class RegistroVentasController extends Controller {
     }
 
 	//$this->GenerarLibrosElectronicos($results, $arrResponseModel["arrData"], $anio, $mes, $resultgnv, $correlativo, $almacen, $tipo_ple,$BI_incre,$TOTAL_incre,$IGV_incre);
-    function GenerarLibrosElectronicos($resultado, $v, $anio, $mes, $resultgnv, $correlativo, $almacen, $version,$BI,$BT,$IGV) {
+    function GenerarLibrosElectronicos($resultado, $v, $anio, $mes, $resultgnv, $correlativo, $almacen, $version,$BI,$BT,$IGV,$arrParamsPOST) {
 
 		//Eliminamos archivos del PLE
 		$files = glob('/sistemaweb/ventas_clientes/reportes/excel/LE*.txt'); //obtenemos todos los nombres de los ficheros que comienzan con "LE"
@@ -291,27 +333,27 @@ class RegistroVentasController extends Controller {
                 if( ($BI<0 && $linea['imponible']>abs($BI) ) || ($BT<0  && $linea['importe']>abs($BT)) || ($IGV<0 && $linea['igv']>abs($IGV))){
 					    error_log("Entro 1");
 						if ($version == "3") {
-							$PLEDATA = $this->ImprimirLiniaPLE($linea, $anio, $mes, $almacen, "si", $correlativo,$BI,20,$IGV);
+							$PLEDATA = $this->ImprimirLiniaPLE($linea, $anio, $mes, $almacen, "si", $correlativo,$BI,20,$IGV,$arrParamsPOST);
 						} else {
-							$PLEDATA = $this->ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen, $BI,$BT,$IGV, $correlativo);
+							$PLEDATA = $this->ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen, $BI,$BT,$IGV, $correlativo,$arrParamsPOST);
 						}
 						$contador_incremento++;
 
                 }else if( ($BI>0) || ($BT>0) || ($IGV>0) ){
 						error_log("Entro 2");
                       	if ($version == "3") {
-                            $PLEDATA = $this->ImprimirLiniaPLE($linea, $anio, $mes, $almacen, "si", $correlativo,$BI,$BT,$IGV);
+                            $PLEDATA = $this->ImprimirLiniaPLE($linea, $anio, $mes, $almacen, "si", $correlativo,$BI,$BT,$IGV,$arrParamsPOST);
                         } else {
-                            $PLEDATA = $this->ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen, $BI,$BT,$IGV, $correlativo);
+                            $PLEDATA = $this->ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen, $BI,$BT,$IGV, $correlativo,$arrParamsPOST);
                         }
                 		$contador_incremento++;
 
                 }else{
 						error_log("Entro 3");
                     	if ($version == "3") {
-                            $PLEDATA = $this->ImprimirLiniaPLE($linea, $anio, $mes, $almacen, "si", $correlativo,0,0,0);
+                            $PLEDATA = $this->ImprimirLiniaPLE($linea, $anio, $mes, $almacen, "si", $correlativo,0,0,0,$arrParamsPOST);
                         } else {
-                            $PLEDATA = $this->ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen, 0,0,0, $correlativo);
+                            $PLEDATA = $this->ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen, 0,0,0, $correlativo,$arrParamsPOST);
                         }
 
                 }
@@ -326,10 +368,10 @@ class RegistroVentasController extends Controller {
 
                 if ($version == "3") {
 					error_log("Entro 4");
-                    $PLEDATA = $this->ImprimirLiniaPLE($linea, $anio, $mes, $almacen, "no", $correlativo,0,0,0);
+                    $PLEDATA = $this->ImprimirLiniaPLE($linea, $anio, $mes, $almacen, "no", $correlativo,0,0,0,$arrParamsPOST);
                 } else {
 					error_log("Entro 5");
-                    $PLEDATA = $this->ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen,0,0,0, $correlativo);
+                    $PLEDATA = $this->ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen,0,0,0, $correlativo,$arrParamsPOST);
                 }
 
                 $PLETXTLINI = $PLEDATA['registro'];
@@ -356,9 +398,9 @@ class RegistroVentasController extends Controller {
 				$linea = $resultado['manual_completado'][$i];
 
 				if ($version == "3"){
-							$PLEDATA = $this->ImprimirLiniaPLE($linea, $anio, $mes, $almacen, "no", $correlativo,0,0,0);
+							$PLEDATA = $this->ImprimirLiniaPLE($linea, $anio, $mes, $almacen, "no", $correlativo,0,0,0,$arrParamsPOST);
 						} else {
-							$PLEDATA = $this->ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen, 0,0,0, $correlativo);
+							$PLEDATA = $this->ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen, 0,0,0, $correlativo,$arrParamsPOST);
 				}
 
 				$PLETXTLINI = $PLEDATA['registro'];
@@ -378,9 +420,9 @@ class RegistroVentasController extends Controller {
 			$linea = $resultgnv['gnv'][$i];
 
 			if ($version == "3")
-				$PLEDATA = $this->ImprimirLiniaPLE($linea, $anio, $mes, $almacen, "no", $correlativo,0,0,0);
+				$PLEDATA = $this->ImprimirLiniaPLE($linea, $anio, $mes, $almacen, "no", $correlativo,0,0,0,$arrParamsPOST);
 			else
-				$PLEDATA = $this->ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen, 0,0,0, $correlativo);
+				$PLEDATA = $this->ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen, 0,0,0, $correlativo,$arrParamsPOST);
 
 			$PLETXTLINI = $PLEDATA['registro'];
 			echo implode("|", $PLETXTLINI) . "|" . PHP_EOL;
@@ -425,7 +467,7 @@ class RegistroVentasController extends Controller {
 			</script>";		
 	}
 
-	function ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen, $difBi, $valor_venta, $difIgv, $accion_ejecutar, $correlativo = "") { //PROBLEMA CON CANTIDAD DE PARAMETROS PHP7
+	function ImprimirLiniaPLE_SIMPLIFICADO($linea, $anio, $mes, $almacen, $difBi, $valor_venta, $difIgv, $accion_ejecutar, $correlativo = "",$arrParamsPOST) { //PROBLEMA CON CANTIDAD DE PARAMETROS PHP7
 
 		$reg_12			= "0.00";
 		$reg_14 		= "0.00";
@@ -448,6 +490,10 @@ class RegistroVentasController extends Controller {
 	            "sTipoDocumento" => $linea['td'],
 	            "fIDTrans" => $linea['rendi_gln'],
 	            "iNumeroDocumentoIdentidad" => $linea['ruc_bd_interno'],
+				"sNombreTabla_Ant" => $arrParamsPOST['sTablePostransYM_Ant'],
+				"sNombreTabla_Des" => $arrParamsPOST['sTablePostransYM_Des'],
+				"sStatusTabla_Ant" => $arrParamsPOST['sStatusPostransYM_Ant'],
+				"sStatusTabla_Des" => $arrParamsPOST['sStatusPostransYM_Des'],
 	        );
 
 	        $arrResponseModel = $this->datos_nota_credito_debito($anio, $mes, $linea['tipo'], $linea['serie'], $linea['trans'], $arrData);
@@ -517,7 +563,7 @@ class RegistroVentasController extends Controller {
 
 	}
 
-	function ImprimirLiniaPLE($linea, $anio, $mes, $almacen, $accion_ejecutar, $correlativo,$BI,$BT,$IGV) {
+	function ImprimirLiniaPLE($linea, $anio, $mes, $almacen, $accion_ejecutar, $correlativo,$BI,$BT,$IGV,$arrParamsPOST) {
 		$reg_12			= "0.00";
 		$reg_14 		= "0.00";
 		$reg_15 		= "0.00";
@@ -539,6 +585,10 @@ class RegistroVentasController extends Controller {
 	            "sTipoDocumento" => $linea['td'],
 	            "fIDTrans" => $linea['rendi_gln'],
 	            "iNumeroDocumentoIdentidad" => $linea['ruc_bd_interno'],
+				"sNombreTabla_Ant" => $arrParamsPOST['sTablePostransYM_Ant'],
+				"sNombreTabla_Des" => $arrParamsPOST['sTablePostransYM_Des'],
+				"sStatusTabla_Ant" => $arrParamsPOST['sStatusPostransYM_Ant'],
+				"sStatusTabla_Des" => $arrParamsPOST['sStatusPostransYM_Des'],
 	        );
 
 	        $arrResponseModel = $this->datos_nota_credito_debito($anio, $mes, $linea['tipo'], $linea['serie'], $linea['trans'], $arrData);
@@ -817,6 +867,53 @@ class RegistroVentasController extends Controller {
 		//Reescribimos archivo HTML
 		fwrite($archivo, $result_resumen);
 		fclose($archivo);
+	}
+
+	function getPosTransAnteriorDespues($anio, $mes){
+		/* Obtenemos fecha postrans del mes anterior y mes posterior */
+		$anio_ant = $anio;
+		$anio_des = $anio;
+		$mes_ant  = $mes-1;
+		$mes_des  = $mes+1;
+		$mes_ant  = strlen($mes_ant) == 1 ? "0".$mes_ant : $mes_ant;
+		$mes_des  = strlen($mes_des) == 1 ? "0".$mes_des : $mes_des;
+		if($mes == "01"){
+			$mes_ant  = "12";
+			$anio_ant = $anio-1;
+		}
+		if($mes == "12"){
+			$mes_des  = "01";
+			$anio_des = $anio+1;
+		}
+		$fecha_postrans_ant = $anio_ant . "" . $mes_ant;
+		$fecha_postrans_des = $anio_des . "" . $mes_des;
+		// echo "<script>console.log('" . json_encode( array($fecha_postrans_ant, $fecha_postrans_des) ) . "')</script>";
+		
+		/* Validamos que tablas pos_trans del mes anterior y posterior existan */
+		$status_table_postrans_ant = $this->validateTableBySchema("pos_trans".$fecha_postrans_ant);
+		$status_table_postrans_des = $this->validateTableBySchema("pos_trans".$fecha_postrans_des);
+		// echo "<script>console.log('" . json_encode( array($status_table_postrans_ant, $status_table_postrans_des) ) . "')</script>";
+
+		$response = array(
+			"mes_ant"  => $mes_ant,
+			"anio_ant" => $anio_ant,
+			"mes_des"  => $mes_des,
+			"anio_des" => $anio_des,
+			"status_table_postrans_ant" => $status_table_postrans_ant,
+			"status_table_postrans_des" => $status_table_postrans_des,
+		);
+
+		echo "<script>console.log('getPosTransAnteriorDespues')</script>";
+		echo "<script>console.log('" . json_encode( $response ) . "')</script>";
+
+		return $response;
+	}
+
+	function validateTableBySchema($table) {
+		global $sqlca;
+		$iStatusTable = $sqlca->query("SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='".$table."'");
+		error_log("SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='".$table."'");
+		return $iStatusTable;
 	}
 
 }
