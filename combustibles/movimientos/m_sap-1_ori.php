@@ -462,7 +462,7 @@ FIRST(No_Nombre_Cliente) AS CARDNAME,
 FIRST(Nu_Documento_Identidad) AS FEDERALTAXID,
 FIRST(Nu_Telefono1) AS PHONE,
 FIRST(Txt_Email) AS EMAIL,
-FIRST(Txt_Direccion) AS STREET,
+SUBSTRING( FIRST(Txt_Direccion) from 1 for 99 ) AS STREET,
 FIRST(No_Contacto) AS _contact_name
 FROM (
 (SELECT
@@ -495,7 +495,7 @@ UNION
  FIRST(CLI.cli_ndespacho_efectivo),
  FIRST(CLI.cli_anticipo),
  FIRST(CLI.cli_creditosol),
- FIRST(CLI.cli_direccion) AS Txt_Direccion,
+ SUBSTRING( FIRST(CLI.cli_direccion) from 1 for 99 ) AS Txt_Direccion,
  FIRST(CLI.cli_contacto) AS No_Contacto
 FROM
  val_ta_cabecera AS VC
@@ -2655,26 +2655,26 @@ ORDER BY 1;";
 		$res = array();
 
 		$sql = "SELECT
- vtc.ch_sucursal::INTEGER || TO_CHAR(vtc.dt_fecha, 'DDMMYY') || --vtc.ch_documento AS noperacionpe, CAI
- substr(vtc.ch_documento, position('-' in vtc.ch_documento)+1, char_length (vtc.ch_documento)+1 - position('-' in vtc.ch_documento)) AS noperacionpe,
- vtc.ch_sucursal::INTEGER || TO_CHAR(vtc.dt_fecha, 'DDMMYY') || --vtc.ch_documento AS noperacion, CAI
- substr(vtc.ch_documento, position('-' in vtc.ch_documento)+1, char_length (vtc.ch_documento)+1 - position('-' in vtc.ch_documento)) AS noperacion,
- client.cli_codigo AS cardcode,
- vtd.dt_fecha AS docdate,
- vtc.nu_importe AS doctotal,
+ FIRST(vtc.ch_sucursal::INTEGER) || TO_CHAR(FIRST(vtc.dt_fecha), 'DDMMYY') || --vtc.ch_documento AS noperacionpe, CAI
+ substr(FIRST(vtc.ch_documento), position('-' in FIRST(vtc.ch_documento))+1, char_length (FIRST(vtc.ch_documento))+1 - position('-' in FIRST(vtc.ch_documento))) AS noperacionpe,
+ FIRST(vtc.ch_sucursal::INTEGER) || TO_CHAR(FIRST(vtc.dt_fecha), 'DDMMYY') || --vtc.ch_documento AS noperacion, CAI
+ substr(FIRST(vtc.ch_documento), position('-' in FIRST(vtc.ch_documento))+1, char_length (FIRST(vtc.ch_documento))+1 - position('-' in FIRST(vtc.ch_documento))) AS noperacion,
+ FIRST(client.cli_codigo) AS cardcode,
+ FIRST(vtd.dt_fecha) AS docdate,
+ FIRST(vtc.nu_importe) AS doctotal,
  '' AS moneda,
- ftfc.ch_fac_forma_pago AS _type_payment_id,
- sap_cash_fund.sap_codigo AS fecuenta,
- sap_currency.sap_codigo AS femoneda,
+ FIRST(ftfc.ch_fac_forma_pago) AS _type_payment_id,
+ FIRST(sap_cash_fund.sap_codigo) AS fecuenta,
+ FIRST(sap_currency.sap_codigo) AS femoneda,
  1 AS fetc,
- vtc.nu_importe AS femonto,
+ FIRST(vtc.nu_importe) AS femonto,
  0 AS fecuentav,
  '' AS tccod,
  '' AS tccuenta,
  '' AS tcnumero,
  '' AS tcid,
- TO_CHAR(vtd.dt_fecha,'DD/MM') AS tcvalido,
- vtc.nu_importe AS tcmonto,
+ TO_CHAR(FIRST(vtd.dt_fecha),'DD/MM') AS tcvalido,
+ FIRST(vtc.nu_importe) AS tcmonto,
  '' AS bcuenta,
  '' AS breferencia,
  '' AS bfecha,
@@ -2690,6 +2690,8 @@ JOIN val_ta_cabecera vtc ON (vtd.ch_sucursal = vtc.ch_sucursal AND vtd.dt_fecha 
 WHERE
  vtc.dt_fecha BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
  AND client.cli_ndespacho_efectivo = '1' AND client.cli_anticipo = 'N'
+GROUP BY 
+ vtc.ch_documento
 ;";
 
 
@@ -4736,7 +4738,17 @@ WHERE
  AND pt.tm = 'V'
  AND pt.dia BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
  --AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
- AND pt.importe < ".$cantidad."
+ --AND pt.importe < ".$cantidad."
+ AND pt.trans IN (
+	SELECT
+		trans
+	FROM 
+		".$param['pos_trans']."
+	GROUP BY
+		trans
+	HAVING 
+		SUM(importe) < ".$cantidad."
+ )
 GROUP BY
  1,
  pt.turno;
@@ -4796,7 +4808,17 @@ WHERE
  AND pt.tm = 'V'
  AND pt.dia BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
  --AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
- AND pt.importe >= ".$cantidad."
+ --AND pt.importe >= ".$cantidad."
+ AND pt.trans IN (
+	SELECT
+		trans
+	FROM 
+		".$param['pos_trans']."
+	GROUP BY
+		trans
+	HAVING 
+		SUM(importe) >= ".$cantidad."
+ )
 GROUP BY
  --1,
  --pt.turno;
@@ -4886,6 +4908,7 @@ GROUP BY 1, ftfc.ch_fac_tiporecargo3;";
 			);
 		}
 
+		error_log("ticketHead");
 		error_log( json_encode( $this->ticketHead ) );
 		return array(
 			'error' => false,
@@ -5283,9 +5306,13 @@ SELECT
  SUM(PT.cantidad) AS quantity,
 
  ROUND((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)))) / ".$param['tax'].", 2) AS price,
- CASE 
-    WHEN (SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) = 0 THEN 0
-  	ELSE ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) 
+
+ --ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) AS discprcnt,
+ CASE
+  WHEN (SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) = 0 THEN
+    0
+  ELSE
+    ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4)
  END AS discprcnt,
 
  SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _price,--ROUND
@@ -5558,7 +5585,14 @@ SELECT
  SUM(PT.cantidad) AS quantity,
 
  ROUND((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)))) / ".$param['tax'].", 2) AS price,
- ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) AS discprcnt,
+
+ --ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) AS discprcnt,
+ CASE
+  WHEN (SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) = 0 THEN
+    0
+  ELSE
+    ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4)
+ END AS discprcnt,
 
  SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _price,--ROUND
  FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _discprcnt,
@@ -5639,7 +5673,17 @@ WHERE
  AND pt.td IN ('B')
  AND pt.tm = 'V'
  --AND PT.es = '".$param['warehouse']."'
- AND pt.importe < ".$cantidad."
+ --AND pt.importe < ".$cantidad."
+ AND pt.trans IN (
+	SELECT
+		trans
+	FROM 
+		".$param['pos_trans']."
+	GROUP BY
+		trans
+	HAVING 
+		SUM(importe) < ".$cantidad."
+ )
 GROUP BY
  PT.es,
  PT.caja,
@@ -5715,7 +5759,14 @@ SELECT
  SUM(PT.cantidad) AS quantity,
 
  ROUND((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)))) / ".$param['tax'].", 2) AS price,
- ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) AS discprcnt,
+ 
+ --ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) AS discprcnt,
+ CASE
+  WHEN (SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) = 0 THEN
+    0
+  ELSE
+    ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4)
+ END AS discprcnt,
 
  SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _price,--ROUND
  FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _discprcnt,
@@ -5796,7 +5847,17 @@ WHERE
  AND pt.td IN ('B')
  AND pt.tm = 'V'
  --AND PT.es = '".$param['warehouse']."'
- AND pt.importe >= ".$cantidad."
+ --AND pt.importe >= ".$cantidad."
+ AND pt.trans IN (
+	SELECT
+		trans
+	FROM 
+		".$param['pos_trans']."
+	GROUP BY
+		trans
+	HAVING 
+		SUM(importe) >= ".$cantidad."
+ )
 GROUP BY
  PT.es,
  PT.caja,
@@ -6345,7 +6406,17 @@ WHERE
  AND pt.fpago = '1' --Pago realizado con efectivo
  --AND pt.es = '".$param['warehouse']."'
  AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
- AND pt.importe < ".$cantidad."
+ --AND pt.importe < ".$cantidad."
+ AND pt.trans IN (
+	SELECT
+		trans
+	FROM 
+		".$param['pos_trans']."
+	GROUP BY
+		trans
+	HAVING 
+		SUM(importe) < ".$cantidad."
+ )
 GROUP BY
  -- PT.es,
  -- PT.caja,
@@ -6500,7 +6571,17 @@ WHERE
  AND pt.fpago = '1'
  --AND pt.es = '".$param['warehouse']."'
  AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
- AND pt.importe >= ".$cantidad."
+ --AND pt.importe >= ".$cantidad."
+ AND pt.trans IN (
+	SELECT
+		trans
+	FROM 
+		".$param['pos_trans']."
+	GROUP BY
+		trans
+	HAVING 
+		SUM(importe) >= ".$cantidad."
+ )
 GROUP BY
  PT.es,
  PT.caja,
@@ -7860,7 +7941,7 @@ fac_ta_factura_cabecera AS Cab
 JOIN fac_ta_factura_detalle AS FD USING (ch_fac_tipodocumento, ch_fac_seriedocumento, ch_fac_numerodocumento, cli_codigo)
 LEFT JOIN fac_ta_factura_complemento AS com ON (cab.cli_codigo = com.cli_codigo AND cab.ch_fac_seriedocumento=com.ch_fac_seriedocumento AND cab.ch_fac_numerodocumento=com.ch_fac_numerodocumento AND cab.ch_fac_tipodocumento=com.ch_fac_tipodocumento)
 LEFT JOIN int_clientes AS Cli ON (Cli.cli_codigo = Cab.cli_codigo)
-LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = Cab.dt_fac_fecha)
+--LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = Cab.dt_fac_fecha)
 WHERE
 Cab.ch_fac_tipodocumento = '20'
 AND Cab.dt_fac_fecha BETWEEN '".$param['initial_date']."' AND '".$param['initial_date']."'
@@ -8144,7 +8225,7 @@ fac_ta_factura_cabecera AS Cab
 JOIN fac_ta_factura_detalle AS FD USING (ch_fac_tipodocumento, ch_fac_seriedocumento, ch_fac_numerodocumento, cli_codigo)
 LEFT JOIN fac_ta_factura_complemento AS com ON (cab.cli_codigo = com.cli_codigo AND cab.ch_fac_seriedocumento=com.ch_fac_seriedocumento AND cab.ch_fac_numerodocumento=com.ch_fac_numerodocumento AND cab.ch_fac_tipodocumento=com.ch_fac_tipodocumento)
 LEFT JOIN int_clientes AS Cli ON (Cli.cli_codigo = Cab.cli_codigo)
-LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = Cab.dt_fac_fecha)
+--LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = Cab.dt_fac_fecha)
 WHERE
 Cab.ch_fac_tipodocumento = '20'
 AND Cab.dt_fac_fecha BETWEEN '".$param['initial_date']."' AND '".$param['initial_date']."'
@@ -8468,7 +8549,7 @@ fac_ta_factura_detalle AS FD
 JOIN fac_ta_factura_cabecera AS Cab USING (ch_fac_tipodocumento, ch_fac_seriedocumento, ch_fac_numerodocumento, cli_codigo)
 LEFT JOIN fac_ta_factura_complemento AS com ON (cab.cli_codigo = com.cli_codigo AND cab.ch_fac_seriedocumento=com.ch_fac_seriedocumento AND cab.ch_fac_numerodocumento=com.ch_fac_numerodocumento AND cab.ch_fac_tipodocumento=com.ch_fac_tipodocumento)
 LEFT JOIN int_clientes AS Cli ON (Cli.cli_codigo = Cab.cli_codigo)
-LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = Cab.dt_fac_fecha)
+--LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = Cab.dt_fac_fecha) --No se utiliza
 
 LEFT JOIN sap_mapeo_tabla_detalle AS SAPALMA ON (SAPALMA.opencomb_codigo = cab.ch_almacen AND SAPALMA.id_tipo_tabla = 2)
 JOIN int_articulos art ON (FD.art_codigo = art.art_codigo)
@@ -9890,7 +9971,8 @@ WHERE se.systemdate = '".$req['initial_systemdate']."' ORDER BY se.systemdate;";
 
 	public function getNOperacionTicketDetail($res, $noperacion) {
 		error_log($reg['_number']);
-		$res['_number'] = substr($res['_number'], 2);
+		// $res['_number'] = substr($res['_number'], 2); //Con substr le quitabamos los dos ceros iniciales, pero pueden haber casos donde haya mas de 2 ceros, puede haber 3 o 4, asi que se cambio por intval
+		$res['_number'] = intval($res['_number']);
 		if (isset($this->ticketHead[$res['_number']])) {
 			$val = $this->ticketHead[$res['_number']];
 			if ($res['_number'] == $val['u_exx_nroini']) {
