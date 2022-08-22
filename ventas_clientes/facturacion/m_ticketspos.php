@@ -374,13 +374,17 @@ SELECT
  truc.razsocial,
  trans.turno,
  round(trans.igv,4),
- (trans.importe / 7.5),
+ CASE 
+ 	WHEN TRIM(trans.indexa) = '' OR trans.indexa IS NULL THEN 0
+	ELSE (trans.importe / 7.5)
+ END AS puntos_bonus,
+ --(trans.importe / 7.5),
  SUBSTR(TRIM(trans.usr), 6) fenumero,
  trans.rendi_gln, --Documento origen
  trans.rendi_acu, --Documento resultante
  CASE 
-      WHEN trans.tipo = 'C' THEN ( SELECT t.ch_nombre1 || ' ' || t.ch_nombre2 || ' ' || t.ch_apellido_paterno || ' ' || t.ch_apellido_materno FROM pos_historia_ladosxtrabajador hl LEFT JOIN pla_ta_trabajadores t ON hl.ch_codigo_trabajador = t.ch_codigo_trabajador WHERE hl.dt_dia = DATE(trans.dia) AND hl.ch_sucursal = '" . pg_escape_string($almacen) . "' AND CAST(hl.ch_posturno AS CHARACTER) = trans.turno AND hl.ch_lado = trans.pump AND hl.ch_tipo = 'C' LIMIT 1 )
-		WHEN trans.tipo = 'M' THEN ( SELECT t.ch_nombre1 || ' ' || t.ch_nombre2 || ' ' || t.ch_apellido_paterno || ' ' || t.ch_apellido_materno FROM pos_historia_ladosxtrabajador hl LEFT JOIN pla_ta_trabajadores t ON hl.ch_codigo_trabajador = t.ch_codigo_trabajador WHERE hl.dt_dia = DATE(trans.dia) AND hl.ch_sucursal = '" . pg_escape_string($almacen) . "' AND CAST(hl.ch_posturno AS CHARACTER) = trans.turno AND hl.ch_lado = trans.caja AND hl.ch_tipo = 'M' LIMIT 1 ) 
+      WHEN trans.tipo = 'C' THEN ( SELECT t.ch_nombre1 || ' ' || t.ch_nombre2 || ' ' || t.ch_apellido_paterno || ' ' || t.ch_apellido_materno FROM pos_historia_ladosxtrabajador hl LEFT JOIN pla_ta_trabajadores t ON hl.ch_codigo_trabajador = t.ch_codigo_trabajador WHERE hl.dt_dia = DATE(trans.dia) AND hl.ch_sucursal = '" . pg_escape_string($almacen) . "' AND CAST(hl.ch_posturno AS CHARACTER) = trans.turno AND hl.ch_lado = trans.pump AND hl.ch_tipo = 'C' LIMIT 1 ) --Lado
+		WHEN trans.tipo = 'M' THEN ( SELECT t.ch_nombre1 || ' ' || t.ch_nombre2 || ' ' || t.ch_apellido_paterno || ' ' || t.ch_apellido_materno FROM pos_historia_ladosxtrabajador hl LEFT JOIN pla_ta_trabajadores t ON hl.ch_codigo_trabajador = t.ch_codigo_trabajador WHERE hl.dt_dia = DATE(trans.dia) AND hl.ch_sucursal = '" . pg_escape_string($almacen) . "' AND CAST(hl.ch_posturno AS CHARACTER) = trans.turno AND hl.ch_lado = trans.caja AND hl.ch_tipo = 'M' LIMIT 1 ) --POS
 		ELSE ''
  END AS trabajador, --Trabajador
  pf.nomusu as chofer
@@ -664,7 +668,11 @@ SELECT
  truc.razsocial,
  trans.turno,
  round(trans.igv,4),
- (trans.importe / 7.5),
+ CASE 
+ 	WHEN TRIM(trans.indexa) = '' OR trans.indexa IS NULL THEN 0
+	ELSE (trans.importe / 7.5)
+ END AS puntos_bonus,
+ --(trans.importe / 7.5),
  SUBSTR(TRIM(trans.usr), 6) fenumero,
  trans.rendi_gln, --Documento origen
  trans.rendi_acu, --Documento resultante

@@ -142,6 +142,8 @@ function reporteExcelPersonalizado($resultado_postrans, $modo, $iYear, $iMonth) 
                 if(isset($fila['usr']))
                     $usr=$fila['usr'];
 
+                $puntos_bonus = empty($fila['bonus']) || $fila['bonus'] == NULL || $fila['bonus'] == 0 ? '' : floor($fila['puntos']);
+
                 $objPHPExcel->setActiveSheetIndex($hoja)
                 ->setCellValue('A' . $bucle, $fila['tm'])
                 ->setCellValue('B' . $bucle, $fila['td'])
@@ -165,7 +167,7 @@ function reporteExcelPersonalizado($resultado_postrans, $modo, $iYear, $iMonth) 
                 ->setCellValue('T' . $bucle, $fila['bonus'])
                 ->setCellValue('U' . $bucle, $fila['ruc'])
                 ->setCellValue('V' . $bucle, $fila['razsocial'])
-                ->setCellValue('W' . $bucle, floor($fila['puntos']))
+                ->setCellValue('W' . $bucle, $puntos_bonus)
                 ;
                 
                 //DOCUMENTO ORIGINAL

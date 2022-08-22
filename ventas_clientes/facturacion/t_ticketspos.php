@@ -241,6 +241,7 @@ class TicketsPosTemplate extends Template {
             }
 
             $color = ($x%2==0?"grid_detalle_par":"grid_detalle_impar");
+            $puntos_bonus = empty($a['bonus']) || $a['bonus'] == NULL || $a['bonus'] == 0 ? '' : floor($a['puntos']);
 
             $result .= '<td class="'.$color.'"><input type="radio" name="xxx" onClick="return false;"></td>';
             $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['tm']) . '&nbsp;</td>';
@@ -264,7 +265,7 @@ class TicketsPosTemplate extends Template {
             $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['bonus']) . '&nbsp;</td>';
             $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['ruc']) . '&nbsp;</td>';
             $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($a['razsocial']) . '&nbsp;</td>';
-            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities(floor($a['puntos'])) . '&nbsp;</td>';            
+            $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($puntos_bonus) . '&nbsp;</td>';            
             $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($dFechaReferencia) . '&nbsp;</td>';
             $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($sSerieNumeroReferencia) . '&nbsp;</td>';
             $result .= '<td class="'.$color.'" align="center">&nbsp;' . htmlentities($dFechaReferencia_resultante) . '&nbsp;</td>';
