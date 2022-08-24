@@ -111,4 +111,19 @@ class DesconsolidarModel extends Model {
 				
 		return $ret;
 	}
+
+	function EmpezarDesconsolidacion(){
+		global $sqlca;
+		$sqlca->query("BEGIN;");
+	}
+
+	function FinalizarDesconsolidacion(){
+		global $sqlca;
+		$sqlca->query("COMMIT;");
+	}
+
+	function RevertirDesconsolidacion(){
+		global $sqlca;
+		$sqlca->query("ROLLBACK;");
+	}
 }

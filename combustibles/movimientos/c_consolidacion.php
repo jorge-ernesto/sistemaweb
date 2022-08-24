@@ -10,10 +10,12 @@ class ConsolidacionController extends Controller {
 		include 'movimientos/m_cuadre_ventas.php';
 		include 'movimientos/m_consolidacion.php';
 		include 'movimientos/t_consolidacion.php';
+		include 'movimientos/m_asientos_contables.php';
 
 		//get Class Template - Model
 		$objConsolidacionModel = new ConsolidacionModel();
 		$objCuadreVentasModel = new CuadreVentasModel();
+		$objAsientosContablesModel = new AsientosContablesModel();
 
 		$this->Init();
 
@@ -44,24 +46,35 @@ class ConsolidacionController extends Controller {
 
 			case "Consolidar":
 			case "Consolidacion":
+				// echo "<script>console.log('_REQUEST')</script>";
+				// echo "<script>console.log('" . json_encode($_REQUEST) . "')</script>";
+
 				/*
 					* Parametros
 					-sCodeWarehouse string(codigo de almacen)
 					-dEntry date(fecha a consolidar) format YYYY-MM-DD
 				*/
 				$arrParams = array(
-					'sCodeWarehouse' => $_REQUEST['almacen'],
-					'dEntry' => $_REQUEST['dia'],
+					'sCodeWarehouse' => TRIM($_REQUEST['almacen']),
+					'dEntry' => TRIM($_REQUEST['dia']),
 				);
 				/**
-				* Obtener el ultimo turno del dia a consolidar
-				*/
+				 * Obtener el ultimo turno del dia a consolidar
+			     */
 				$arrResponse = $objConsolidacionModel->validateDateTurnLast($arrParams);
+				// echo "<script>console.log('arrResponse')</script>";
+				// echo "<script>console.log('" . json_encode($arrResponse) . "')</script>";
+
 				if ($arrResponse['bStatus']){
 					$bStatusDocumentPending = true;
-					if ($arrResponse['sTurn']!=$_REQUEST['turno']){
+
+					/**
+					 * $arrResponse['sTurn'] -> Ultimo turno del dia a consolidar
+					 * $_REQUEST['turno']    -> Turno enviado desde la web
+					 */
+					if ($arrResponse['sTurn']!=$_REQUEST['turno']){ //Si son diferentes turnos, aqui entra la mayoria de casos
 						$bStatusDocumentPending = false;
-					} else {
+					} else { //Si son los mismos turnos, es decir los ultimos turnos
 						/**
 						* Obtener documentos electronicos no enviados
 						* Se buscará registros del día que se está consolidando el último turno y anterior a esa fecha
@@ -69,20 +82,50 @@ class ConsolidacionController extends Controller {
 						$arrResponseDocumentPending = $objConsolidacionModel->validateDocumentPending($arrParams);
 					}
 
+					/**
+					 * Solo entra si:
+					 * - No es el ultimo turno del dia
+					 * - Es el ultimo turno del dia, pero no hay documentos electronicos no enviados
+					 */
 					if ( $bStatusDocumentPending==false || (($bStatusDocumentPending) && ($arrResponseDocumentPending['bStatus'])) ){
 						/*
 						$reporte = CuadreVentasModel::obtenerReporteTurno($_REQUEST['dia'],$_REQUEST['turno'],NULL);
 						Agregado segun combobox almacen jala los sobrantes/faltantes
 						*/
 						$reporte = $objCuadreVentasModel->obtenerReporteTurnoConsolidacion($_REQUEST['dia'],$_REQUEST['turno'],NULL,$_REQUEST['almacen']);
+						// echo "<script>console.log('reporte')</script>";
+						// echo "<script>console.log('" . json_encode($reporte) . "')</script>";
 						if ($reporte!==FALSE) {
 							$validar = ConsolidacionModel::validarConsolidaciones($_REQUEST['almacen'], $_REQUEST['dia'], $_REQUEST['turno']);
+							// echo "<script>console.log('validar')</script>";
+							// echo "<script>console.log('" . json_encode($validar) . "')</script>";
 							if($validar == 0 && $validar != NULL){//ACTUALIZO SOLO EL REGISTRO PORQUE YA LO INSERTE
 									$actualizar = ConsolidacionModel::ActualizarConsolidaciones($reporte, $_REQUEST['almacen'], $_REQUEST['dia'], $_REQUEST['turno'], $_SESSION['auth_usuario'], $ip);
 
 									if($actualizar == 1){
-										$result_x = "<script>alert('Se completo la consolidacion del turno.')</script>";
-										ConsolidacionModel::finalizaConsolidacion();
+										/* Solo genera asientos si esta habilitado AccoutingEnabled */
+										$arrResponse = $objAsientosContablesModel->getAccoutingEnabled();
+										if ($arrResponse['bStatus']) {
+											/* Solo genera asientos si es el ultimo turno del dia */
+											if( (($bStatusDocumentPending) && ($arrResponseDocumentPending['bStatus'])) ){
+												/* Solo finaliza transaccion si genero asientos contables correctamente */
+												$arrResponse = $objAsientosContablesModel->generarAsientos($arrParams);
+												if ($arrResponse['error']) {
+													$result_x = "<script>alert('Error generando Asientos. ".$arrResponse['message']."')</script>";
+													ConsolidacionModel::revierteConsolidacion();											
+												} else {
+													$result_x = "<script>alert('Se completo la consolidacion del turno.')</script>
+													             <script>alert('Se generaron asientos contables.')</script>";
+													ConsolidacionModel::finalizaConsolidacion();
+												}
+											} else {
+												$result_x = "<script>alert('Se completo la consolidacion del turno.')</script>";
+												ConsolidacionModel::finalizaConsolidacion();
+											}
+										} else {
+											$result_x = "<script>alert('Se completo la consolidacion del turno.')</script>";
+											ConsolidacionModel::finalizaConsolidacion();
+										}
 									} else if ($res=="ERROR_CON_PRE") {
 										$result_x = "<script>alert('El turno ya fue consolidado. Intente nuevamente')</script>";
 										break;
@@ -127,11 +170,39 @@ class ConsolidacionController extends Controller {
 									break;
 								}trigger_error("XR: {$result_x}");
 								if ($result_x == "") {
-									if ($this->action == "Consolidar")
-										$result_x = "<script>alert('Se completo la consolidacion del turno. Se ha enviado a imprimir las winchas.')</script>";
-									else
-										$result_x = "<script>alert('Se completo la consolidacion del turno.')</script>";
-									ConsolidacionModel::finalizaConsolidacion();
+									/* Solo genera asientos si esta habilitado AccoutingEnabled */
+									$arrResponse = $objAsientosContablesModel->getAccoutingEnabled();
+									if ($arrResponse['bStatus']) {
+										/* Solo genera asientos si es el ultimo turno del dia */
+										if( (($bStatusDocumentPending) && ($arrResponseDocumentPending['bStatus'])) ){
+											/* Solo finaliza transaccion si genero asientos contables correctamente */
+											$arrResponse = $objAsientosContablesModel->generarAsientos($arrParams);
+											if ($arrResponse['error']) {
+												$result_x = "<script>alert('Error generando Asientos. ".$arrResponse['message']."')</script>";
+												ConsolidacionModel::revierteConsolidacion();
+											} else {
+												if ($this->action == "Consolidar")
+													$result_x = "<script>alert('Se completo la consolidacion del turno. Se ha enviado a imprimir las winchas.')</script>
+																 <script>alert('Se generaron asientos contables.')</script>";
+												else
+													$result_x = "<script>alert('Se completo la consolidacion del turno.')</script>
+													             <script>alert('Se generaron asientos contables.')</script>";
+												ConsolidacionModel::finalizaConsolidacion();
+											}
+										} else {
+											if ($this->action == "Consolidar")
+												$result_x = "<script>alert('Se completo la consolidacion del turno. Se ha enviado a imprimir las winchas.')</script>";
+											else
+												$result_x = "<script>alert('Se completo la consolidacion del turno.')</script>";
+											ConsolidacionModel::finalizaConsolidacion();
+										}
+									} else {
+										if ($this->action == "Consolidar")
+											$result_x = "<script>alert('Se completo la consolidacion del turno. Se ha enviado a imprimir las winchas.')</script>";
+										else
+											$result_x = "<script>alert('Se completo la consolidacion del turno.')</script>";
+										ConsolidacionModel::finalizaConsolidacion();
+									}
 								} else {
 									ConsolidacionModel::revierteConsolidacion();
 								}
@@ -148,9 +219,15 @@ class ConsolidacionController extends Controller {
 			default:
 
 				$siguiente 	= ConsolidacionModel::obtenerSiguiente($_REQUEST['almacen']); //Al buscar un almacen
+				// echo "<script>console.log('siguiente')</script>";
+				// echo "<script>console.log('" . json_encode($siguiente) . "')</script>";
 				$huecos = ConsolidacionModel::obtenerHuecos($_REQUEST['almacen'], $siguiente);
+				// echo "<script>console.log('huecos')</script>";
+				// echo "<script>console.log('" . json_encode($huecos) . "')</script>";
 				if(is_array($huecos) && isset($huecos) && !empty($huecos)){
 					$siguiente = $huecos;
+					// echo "<script>console.log('siguiente')</script>";
+					// echo "<script>console.log('" . json_encode($siguiente) . "')</script>";
 				}
 
 				$almacen 	= ConsolidacionModel::GetAlmacenes();
