@@ -38,12 +38,10 @@ class RegistroVentasModel extends Model {
 		}
 		$fecha_postrans_ant = $anio_ant . "" . $mes_ant;
 		$fecha_postrans_des = $anio_des . "" . $mes_des;
-		// echo "<script>console.log('" . json_encode( array($fecha_postrans_ant, $fecha_postrans_des) ) . "')</script>";
 		
 		/* Validamos que tablas pos_trans del mes anterior y posterior existan */
 		$status_table_postrans_ant = $this->validateTableBySchema("pos_trans".$fecha_postrans_ant);
 		$status_table_postrans_des = $this->validateTableBySchema("pos_trans".$fecha_postrans_des);
-		// echo "<script>console.log('" . json_encode( array($status_table_postrans_ant, $status_table_postrans_des) ) . "')</script>";
 
 		if ($nd == 'S')
 			$tipo_documento_tickes 	= array("'F','N'");
@@ -59,7 +57,7 @@ class RegistroVentasModel extends Model {
 
 		/** CONSULTA PARA LOS EXTORNOS **/
 		if ( $dataParametro['fecha_parametro'] != 0 ) {
-			if ( $status_table_postrans_ant == true ) {
+			if ( $status_table_postrans_ant == TRUE ) {
 
 				//El valor del parametro corresponde a un mes anterior al indicado en el registro de ventas
 				if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) > 0) {
@@ -142,7 +140,7 @@ class RegistroVentasModel extends Model {
 			venta_tickes.trans_ext";	
 			
 		if ( $dataParametro['fecha_parametro'] != 0 ) {
-			if ( $status_table_postrans_des == true ) {
+			if ( $status_table_postrans_des == TRUE ) {
 			
 				//El valor del parametro corresponde a un mes anterior al indicado en el registro de ventas / El valor del parametro corresponde al mismo mes y año indicado en el registro de ventas. Es decir las fechas son iguales
 				if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) > 0 || strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) == 0) {
@@ -187,12 +185,9 @@ class RegistroVentasModel extends Model {
 			}
 		}
 
-		/*** Agregado 2020-02-04 ***/
 		echo "<pre>sql_aferciones:";
 		echo "$sql_aferciones";
 		echo "</pre>";
-		// die();
-		/***/
 
 		if ($sqlca->query($sql_aferciones) < 0)
         	return false;
@@ -210,7 +205,6 @@ class RegistroVentasModel extends Model {
 		// echo "<script>console.log('" . json_encode( array($array_aferciones_cod) ) . "')</script>";
 
     	/** Obtener series de maquinas registradoras **/
-
     	$sql_series = "
        	SELECT
           	trim(dt_posz_fecha_sistema::TEXT) AS dt_posz_fecha_sistema,
@@ -233,11 +227,9 @@ class RegistroVentasModel extends Model {
 			nu_posturno;
 		";
 
-		/*** Agregado 2020-02-04 ***/
 		// echo "<pre>sql_series:";
 		// echo "$sql_series";
 		// echo "</pre>";
-		/***/
 
     	if ($sqlca->query($sql_series) < 0)
 			return false;
@@ -281,7 +273,7 @@ class RegistroVentasModel extends Model {
 		}
 
 		if ( $dataParametro['fecha_parametro'] != 0 ) {
-			if ( $status_table_postrans_ant == true ) { //
+			if ( $status_table_postrans_ant == TRUE ) { //
 
 				//El valor del parametro corresponde a un mes anterior al indicado en el registro de ventas
 				if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) > 0) {
@@ -340,12 +332,12 @@ class RegistroVentasModel extends Model {
 						FIRST(T.td) AS td,
 						FIRST(T.rendi_gln) AS rendi_gln,
 						FIRST(T.ruc) AS ruc_bd_interno,
-						FIRST(t.td) AS td, -- JEL
-						FIRST(t.codigo) AS codigo, -- JEL
+						FIRST(t.td) AS td,
+						FIRST(t.codigo) AS codigo,
 						CASE
 							WHEN FIRST(t.td) = 'B' OR FIRST(t.td) = 'F' THEN COALESCE( ROUND(SUM(T.balance), 2), 0 )
 							ELSE 0
-						END AS balance -- JEL --ICBPER
+						END AS balance --ICBPER
 					FROM
 						pos_trans" . $fecha_postrans_ant . " AS T
 						LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = T.dia)
@@ -421,12 +413,12 @@ class RegistroVentasModel extends Model {
 			FIRST(T.td) AS td,
 			FIRST(T.rendi_gln) AS rendi_gln,
 			FIRST(T.ruc) AS ruc_bd_interno,
-			FIRST(t.td) AS td, -- JEL
-			FIRST(t.codigo) AS codigo, -- JEL
+			FIRST(t.td) AS td,
+			FIRST(t.codigo) AS codigo,
 			CASE
 				WHEN FIRST(t.td) = 'B' OR FIRST(t.td) = 'F' THEN COALESCE( ROUND(SUM(T.balance), 2), 0 )
 				ELSE 0
-			END AS balance -- JEL --ICBPER
+			END AS balance --ICBPER
 		FROM
 			pos_trans" . $fecha_postrans . " AS T
 			LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = T.dia)
@@ -443,7 +435,7 @@ class RegistroVentasModel extends Model {
 		";
 
 		if ( $dataParametro['fecha_parametro'] != 0 ) {
-			if ( $status_table_postrans_des == true ) { //
+			if ( $status_table_postrans_des == TRUE ) { //
 			
 				//El valor del parametro corresponde a un mes anterior al indicado en el registro de ventas / El valor del parametro corresponde al mismo mes y año indicado en el registro de ventas. Es decir las fechas son iguales
 				if (strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) > 0 || strcmp($dataParametro['fecha_registro_ventas'], $dataParametro['fecha_parametro']) == 0) {
@@ -504,12 +496,12 @@ class RegistroVentasModel extends Model {
 						FIRST(T.td) AS td,
 						FIRST(T.rendi_gln) AS rendi_gln,
 						FIRST(T.ruc) AS ruc_bd_interno,
-						FIRST(t.td) AS td, -- JEL
-						FIRST(t.codigo) AS codigo, -- JEL
+						FIRST(t.td) AS td,
+						FIRST(t.codigo) AS codigo,
 						CASE
 							WHEN FIRST(t.td) = 'B' OR FIRST(t.td) = 'F' THEN COALESCE( ROUND(SUM(T.balance), 2), 0 )
 							ELSE 0
-						END AS balance -- JEL --ICBPER
+						END AS balance --ICBPER
 					FROM
 						pos_trans" . $fecha_postrans_des . " AS T
 						LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = T.dia)
@@ -536,17 +528,14 @@ class RegistroVentasModel extends Model {
 			1;
 		";
 
-		/*** Agregado 2020-02-04 ***/
 		echo "<pre>sql_tickes_factura:";
 		echo "$sql_tickes_factura";
 		echo "</pre>";
-		// die();
-		/***/
 
-		/* Recorremos informacion de Comprobantes de Playa */
 		if ($sqlca->query($sql_tickes_factura) < 0)
 			return false;
 
+		/* Recorremos informacion de Comprobantes de Playa */
 		$sumatotal_formato_sunat_bi 		= 0;
 		$sumatotal_formato_sunat_igv 		= 0;
 		$sumatotal_formato_sunat_exonerada 	= 0;
@@ -564,23 +553,23 @@ class RegistroVentasModel extends Model {
 		    $a = $sqlca->fetchRow();
 
 		    //Nuevos campos agregados
-	    	$result[$key_array][$correlativo]['td']	= $a['td'];
-	    	$result[$key_array][$correlativo]['rendi_gln'] = $a['rendi_gln'];
+	    	$result[$key_array][$correlativo]['td']	            = $a['td'];
+	    	$result[$key_array][$correlativo]['rendi_gln']      = $a['rendi_gln'];
 	    	$result[$key_array][$correlativo]['ruc_bd_interno']	= $a['ruc_bd_interno'];
-	    	$result[$key_array][$correlativo]['id_trans']	= $a['trans'];
+	    	$result[$key_array][$correlativo]['id_trans']	    = $a['trans'];
 
-	    	$trans_caja 										= trim($a['trans'] . "-" . $a['caja']);
-	    	$result[$key_array][$correlativo]['trans']			= $a['numero'];
-	    	$result[$key_array][$correlativo]['caja'] 			= $a['caja'];
-	    	$result[$key_array][$correlativo]['emision'] 		= $a['emision'];
-	    	$result[$key_array][$correlativo]['vencimiento'] 	= $a['vencimiento'];
-	    	$result[$key_array][$correlativo]['tipo'] 			= $a['tipo'];
+	    	$trans_caja 									 = trim($a['trans'] . "-" . $a['caja']);
+	    	$result[$key_array][$correlativo]['trans']		 = $a['numero'];
+	    	$result[$key_array][$correlativo]['caja'] 		 = $a['caja'];
+	    	$result[$key_array][$correlativo]['emision'] 	 = $a['emision'];
+	    	$result[$key_array][$correlativo]['vencimiento'] = $a['vencimiento'];
+	    	$result[$key_array][$correlativo]['tipo'] 		 = $a['tipo'];
 
-	    	$result[$key_array][$correlativo]['numero'] 		= $a['numero'];
-	    	$result[$key_array][$correlativo]['tipodi'] 		= $a['tipodi'];
-	    	$result[$key_array][$correlativo]['ruc'] 			= $a['ruc'];
-	    	$result[$key_array][$correlativo]['cliente']		= $a['cliente'];
-	    	$result[$key_array][$correlativo]['vfexp']			= 0;
+	    	$result[$key_array][$correlativo]['numero'] 	 = $a['numero'];
+	    	$result[$key_array][$correlativo]['tipodi'] 	 = $a['tipodi'];
+	    	$result[$key_array][$correlativo]['ruc'] 		 = $a['ruc'];
+	    	$result[$key_array][$correlativo]['cliente']	 = $a['cliente'];
+	    	$result[$key_array][$correlativo]['vfexp']		 = 0;
 
 			if($a['igv'] == 0.00){
 				$imponible	= 0.00;
@@ -629,7 +618,7 @@ class RegistroVentasModel extends Model {
 	    	$result[$key_array][$correlativo]['inafecto'] 		= $inafecto;
 	    	$result[$key_array][$correlativo]['isc']			= 0;
 	    	$result[$key_array][$correlativo]['igv'] 			= $igv;
-			$result[$key_array][$correlativo]['balance']    	= $balance; //JEL //ICBPER
+			$result[$key_array][$correlativo]['balance']    	= $balance; //ICBPER
 	    	$result[$key_array][$correlativo]['otros'] 			= 0;
 	    	$result[$key_array][$correlativo]['importe'] 		= $importe;
 	    	$result[$key_array][$correlativo]['tipocambio'] 	= $a['tipocambio'];
@@ -658,7 +647,7 @@ class RegistroVentasModel extends Model {
 			$tipo_pdf = $a['tipo_pdf'];
 			$result['ticket']['tipo'][$tipo_pdf]['total_imponible']	+= $imponible;
 			$result['ticket']['tipo'][$tipo_pdf]['total_igv']		+= $igv;			
-			$result['ticket']['tipo'][$tipo_pdf]['total_balance']	+= $balance; //JEL //ICBPER
+			$result['ticket']['tipo'][$tipo_pdf]['total_balance']	+= $balance; //ICBPER
 			$result['ticket']['tipo'][$tipo_pdf]['total_exonerada'] += $exonerada;
 			$result['ticket']['tipo'][$tipo_pdf]['total_inafecto'] 	+= $inafecto;
 			$result['ticket']['tipo'][$tipo_pdf]['total_importe'] 	+= $importe;
@@ -666,7 +655,7 @@ class RegistroVentasModel extends Model {
 			//VARIABLES PARA LA SUMA TOTAL TICKETS GUARDO 2
 	    	$result['ticket']['total_imponible']	+= $imponible;
 			$result['ticket']['total_igv']			+= $igv;			
-			$result['ticket']['total_balance']		+= $balance; //JEL //ICBPER
+			$result['ticket']['total_balance']		+= $balance; //ICBPER
 	    	$result['ticket']['total_exonerada'] 	+= $exonerada;
 	    	$result['ticket']['total_inafecto'] 	+= $inafecto;
 	    	$result['ticket']['total_importe'] 		+= $importe;
@@ -674,7 +663,7 @@ class RegistroVentasModel extends Model {
 	    	//TOTALES
 	    	$result['totales_imponible'] 		+= $imponible;
 			$result['totales_igv'] 				+= $igv;
-			$result['totales_balance']		    += $balance; //JEL //ICBPER
+			$result['totales_balance']		    += $balance; //ICBPER
 	    	$result['totales_exonerada'] 		+= $exonerada;
 	    	$result['totales_inafecto'] 		+= $inafecto;
 	    	$result['totales_importe'] 			+= $importe;
@@ -869,7 +858,6 @@ class RegistroVentasModel extends Model {
 		echo "$sql_facturas_manuales";
 		echo "</pre>";
 
-		/* Recorremos informacion de Comprobantes de Oficina */
 		if ($sqlca->query($sql_facturas_manuales) < 0)
 			return false;
 
@@ -877,6 +865,7 @@ class RegistroVentasModel extends Model {
 		$serie 				= explode(",", $serie);
 		$nserie 			= explode(",", $nserie);
 
+		/* Recorremos informacion de Comprobantes de Oficina */
         for ($i = 0; $i < $sqlca->numrows(); $i++) {
 
 		    $a = $sqlca->fetchRow();
@@ -1057,24 +1046,15 @@ class RegistroVentasModel extends Model {
 	    	$result[$keyStatus][$i]['numero2']	  = "";
 	    	$result[$keyStatus][$i]['istranfer']  = trim($a['istranfer']);
 			$result[$keyStatus][$i]['estado'] 	  = $a['estadoventa'];
-			$result[$keyStatus][$i]['balance']    = "0.00"; //JEL //ICBPER
+			$result[$keyStatus][$i]['balance']    = "0.00"; //ICBPER
 			$result[$keyStatus][$i]['status']     = $a['status'];
 			$result[$keyStatus][$i]['statusname'] = $a['statusname'];
-
-			/*Para la nueva versión en BD guarda el valor YYYY-MM-DD, en la anterior graba DD/MM/YYYY por ello es que se casteaba
-	    	$nuevofechad= split('/',$a['reffecha']);
-			$v_diad=$nuevofechad[0];
-			$v_mesd=$nuevofechad[1];
-			$v_anod=$nuevofechad[2];
-			$nuevofechaa = $v_anod . "-" . $v_mesd . "-" . $v_diad;
-			*/
 
 			$nuevodata= explode('*',$a['refdata']);
 			$dataref1=$nuevodata[0];//numero
 			$dataref2=$nuevodata[1];//serie
 			$dataref3=$nuevodata[2];//tipo
 
-			// $result[$keyStatus][$i]['reffec'] 		= $nuevofechaa;
 			$result[$keyStatus][$i]['reffec'] 		= $a['reffecha'];
 			$result[$keyStatus][$i]['reftip'] 		= $dataref3;
 			$result[$keyStatus][$i]['refser'] 		= $dataref2;
@@ -1084,7 +1064,7 @@ class RegistroVentasModel extends Model {
 			$tipo = $a['tipo'];
 			$result[$keyStatus]['tipo'][$tipo]['total_imponible'] += $imponible;
 			$result[$keyStatus]['tipo'][$tipo]['total_igv'] 	  += $igv;
-			$result[$keyStatus]['tipo'][$tipo]['total_balance']	  += "0.00"; //JEL //ICBPER
+			$result[$keyStatus]['tipo'][$tipo]['total_balance']	  += "0.00"; //ICBPER
 			$result[$keyStatus]['tipo'][$tipo]['total_exonerada'] += $exonerada;
 			$result[$keyStatus]['tipo'][$tipo]['total_inafecto']  += $inafecto;
 			$result[$keyStatus]['tipo'][$tipo]['total_importe']   += $importe;
@@ -1098,7 +1078,7 @@ class RegistroVentasModel extends Model {
 		    if ($a['tipo'] != '07') {
 				$result[$keyStatus]['total_imponible'] 	+= $imponible;
 				$result[$keyStatus]['total_igv'] 		+= $igv;
-				$result[$keyStatus]['total_balance']	+= "0.00"; //JEL //ICBPER
+				$result[$keyStatus]['total_balance']	+= "0.00"; //ICBPER
 				$result[$keyStatus]['total_exonerada'] 	+= $exonerada;
 				$result[$keyStatus]['total_inafecto'] 	+= $inafecto;
 				$result[$keyStatus]['total_importe'] 	+= $importe;
@@ -1108,18 +1088,16 @@ class RegistroVentasModel extends Model {
 			if ($a['tipo'] == '07') {
 				$result[$keyStatus]['nota_credito']['totales_imponible_credito'] += $imponible;
 				$result[$keyStatus]['nota_credito']['totales_igv_credito'] += $igv;
-				$result[$keyStatus]['nota_credito']['totales_balance_credito'] += "0.00"; //JEL //ICBPER
+				$result[$keyStatus]['nota_credito']['totales_balance_credito'] += "0.00"; //ICBPER
 				$result[$keyStatus]['nota_credito']['totales_importe_credito'] += $importe;
 				$result[$keyStatus]['nota_credito']['totales_exonerada_nc']	+= abs($exonerada);
 				$result[$keyStatus]['nota_credito']['totales_inafecto_nc'] += abs($inafecto);
 			}
 		}// /. FOR
 
-		/*** Agregado 2020-02-04 ***/
 		// echo "<pre>";
 		// print_r($result);				
 		// echo "</pre>";
-		/***/
 
 		return $result;
     }
@@ -1806,7 +1784,18 @@ venta_tickes.diatickes
 					END AS tiporef,
 					TO_CHAR(fecha, 'DD/MM/YYYY') AS fecharef,
 					SUBSTR(TRIM(usr), 0, 5) AS serieref,
-					SUBSTR(TRIM(usr), 6) AS numref
+					SUBSTR(TRIM(usr), 6) AS numref,
+					ROUND(importe, 4) AS importe,
+					es AS es,
+					caja AS caja,
+					trans AS id_trans,
+					(CASE
+						WHEN td = 'N' THEN '00000000000'
+						WHEN ruc = '' THEN '99999999'
+						WHEN ruc IS NULL THEN '99999999'
+					ELSE
+						ruc
+					END) as ruc
 				FROM
 					" . $nombre_tabla_ant . "
 				WHERE
@@ -1831,7 +1820,18 @@ venta_tickes.diatickes
 				END AS tiporef,
 				TO_CHAR(fecha, 'DD/MM/YYYY') AS fecharef,
 				SUBSTR(TRIM(usr), 0, 5) AS serieref,
-				SUBSTR(TRIM(usr), 6) AS numref
+				SUBSTR(TRIM(usr), 6) AS numref,
+				ROUND(importe, 4) AS importe,
+				es AS es,
+				caja AS caja,
+				trans AS id_trans,
+				(CASE
+					WHEN td = 'N' THEN '00000000000'
+					WHEN ruc = '' THEN '99999999'
+					WHEN ruc IS NULL THEN '99999999'
+				ELSE
+					ruc
+				END) as ruc
 			FROM
 				" . $nombre_tabla . "
 			WHERE
@@ -1856,7 +1856,18 @@ venta_tickes.diatickes
 					END AS tiporef,
 					TO_CHAR(fecha, 'DD/MM/YYYY') AS fecharef,
 					SUBSTR(TRIM(usr), 0, 5) AS serieref,
-					SUBSTR(TRIM(usr), 6) AS numref
+					SUBSTR(TRIM(usr), 6) AS numref,
+					ROUND(importe, 4) AS importe,
+					es AS es,
+					caja AS caja,
+					trans AS id_trans,
+					(CASE
+						WHEN td = 'N' THEN '00000000000'
+						WHEN ruc = '' THEN '99999999'
+						WHEN ruc IS NULL THEN '99999999'
+					ELSE
+						ruc
+					END) as ruc
 				FROM
 					" . $nombre_tabla_des . "
 				WHERE

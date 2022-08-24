@@ -8323,7 +8323,7 @@ WHERE
 
 		$where_agrupar_documentos_efectivo = "";
 
-		// Datos de tarjetas para concar					
+		// Datos de tarjetas para concar //					
 		if($detalle_boletas_nuevomundo == true){
 			$sql_cc = "SELECT
 						id_config, idtipodoc, idformapago, descripcion, cuenta10, cuenta12 
@@ -11327,7 +11327,7 @@ WHERE
 				SELECT 
 					to_char(date(dia),'YYMMDD') as dia, 
 					'$vmventas'::text as DCUENTA, 
-					codigo_concar::text as codigo, 
+					'99999999999'::text as codigo, 
 					' '::text as trans, 
 					'2'::text as tip,  
 					'H'::text as ddh, 
@@ -11345,7 +11345,7 @@ WHERE
 					AND date(dia) BETWEEN '$FechaIni' AND '$FechaFin' 
 					AND es = '$almacen' 
 				GROUP BY 
-					dia, es, codigo_concar 
+					dia, es, codigo
 				ORDER BY 
 					dia
 			) 
@@ -11416,7 +11416,7 @@ WHERE
 				SELECT 
 					to_char(date(dia),'YYMMDD') as dia, 
 					'$vmventas'::text as DCUENTA,  
-					codigo_concar::text as codigo,
+					'99999999999'::text as codigo,
 					trans::text as trans,
 					'2'::text as tip,  
 					'H'::text as ddh, 
@@ -11435,7 +11435,7 @@ WHERE
 					AND importe>0  
 					AND es = '$almacen' 
 				GROUP BY 
-					dia, trans, es, codigo_concar 
+					dia, trans, es, codigo 
 				ORDER BY 
 					dia
 			) 
@@ -11616,7 +11616,7 @@ WHERE
 		return $rstado;		
 	}
 
-	function interface_compras($FechaIni, $FechaFin, $almacen, $codEmpresa, $num_actual) { // COMPRAS
+	function interface_compras($FechaIni, $FechaFin, $almacen, $codEmpresa, $num_actual) { // COMPRAS //
 		global $sqlca;
 
 		//Obtenemos parametros para version concar
@@ -11770,9 +11770,9 @@ WHERE
 		$vcsubdiario_market                  = $a[16];
 
 		//FUNCIONALIDAD PARA RECORRER UNO A UNO LOS REGISTROS DE COMPRAS Y GENERAR ASIENTOS, DE MODO QUE REEMPLAZAREMOS QUERY CON UNIONS
-		$sql = "
+		$sql_compras = "
 			SELECT
-				to_char(date(c.pro_cab_fechaemision),'YYMMDD') as dia,
+				TO_CHAR(DATE(c.pro_cab_fechaemision),'YYMMDD') as dia,
 				''::text as DCUENTA,
 				c.pro_codigo::text as pro,
 				c.pro_cab_numdocumento::text as trans,
@@ -11782,7 +11782,6 @@ WHERE
 				-- round(FIRST(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_imptotal ELSE c.pro_cab_imptotal + pro_cab_impinafecto END), 2) as importe_total,	
 				-- round(FIRST(c.pro_cab_impto1), 2) as importe_igv,	
 				-- round(FIRST(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_impafecto ELSE c.pro_cab_impafecto + pro_cab_impinafecto END), 2) as importe_bi,	
-			
 				round(FIRST(COALESCE(c.pro_cab_imptotal,0)), 2) as importe_total,	
 				round(FIRST(COALESCE(c.pro_cab_impto1,0)), 2) as importe_impuesto,	
 				round(FIRST(COALESCE(c.pro_cab_impafecto,0)), 2) as importe_bi,	
@@ -11796,30 +11795,34 @@ WHERE
 				''::text as DCENCOS,
 				'C'::text as tip2,
 				c.pro_cab_tipdocumento::TEXT AS nutd,
-				CASE										
-					WHEN TRIM(FIRST(MOVI.art_codigo)) NOT IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles) THEN 'MARKET'
-					WHEN TRIM(FIRST(MOVI.art_codigo)) IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles WHERE ch_codigocombustible = '11620307') THEN 'GLP'
-					WHEN TRIM(FIRST(MOVI.art_codigo)) IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles WHERE ch_codigocombustible != '11620307') THEN 'COMBUSTIBLE'					
-					ELSE CASE
-								WHEN TRIM(rubro.ch_descripcion_breve)::text = 'COMBUSTIBLE' THEN 'COMBUSTIBLE'
-								ELSE 'MARKET'
-							END
-				END AS tipo_documento,
+				rubro.ch_descripcion_breve::text as tipo_compra,
+				FIRST(MOVI.exist) as tipo_compra_comb,
+				FIRST(MOVI2.exist) as tipo_compra_glp,
+				
+				FIRST(c.pro_cab_almacen) as pro_cab_almacen,
 				FIRST(c.pro_cab_tipdocumento) as pro_cab_tipdocumento,
 				FIRST(c.pro_cab_seriedocumento) as pro_cab_seriedocumento,
-				FIRST(c.pro_cab_numdocumento) as pro_cab_numdocumento
+				FIRST(c.pro_cab_numdocumento) as pro_cab_numdocumento,
+				FIRST(c.pro_cab_numero) as pro_codigo
 			FROM
 				cpag_ta_cabecera c
 				INNER JOIN cpag_ta_detalle d ON (c.pro_cab_tipdocumento = d.pro_cab_tipdocumento AND c.pro_cab_seriedocumento = d.pro_cab_seriedocumento AND c.pro_cab_numdocumento = d.pro_cab_numdocumento AND c.pro_codigo = d.pro_codigo)
-				LEFT JOIN cpag_ta_rubros rubro ON(rubro.ch_codigo_rubro = c.pro_cab_rubrodoc)
-				LEFT JOIN inv_movialma AS MOVI ON (c.pro_cab_tipdocumento = MOVI.mov_tipdocuref AND c.pro_cab_seriedocumento || '' || c.pro_cab_numdocumento = MOVI.mov_docurefe)
+				LEFT JOIN cpag_ta_rubros rubro ON(rubro.ch_codigo_rubro = c.pro_cab_rubrodoc)			
+				--LEFT JOIN inv_movialma AS MOVI ON (c.pro_cab_almacen = MOVI.mov_almacen AND c.pro_cab_tipdocumento = MOVI.mov_tipdocuref AND c.pro_cab_seriedocumento || '' || c.pro_cab_numdocumento = MOVI.mov_docurefe AND c.pro_codigo = MOVI.mov_entidad)
+				LEFT JOIN (
+					SELECT 1 AS exist, *
+					FROM   inv_movialma MOV1 
+					WHERE  MOV1.art_codigo IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles WHERE ch_codigocombustible != '11620307')
+				) AS MOVI ON (c.pro_cab_almacen = MOVI.mov_almacen AND c.pro_cab_tipdocumento = MOVI.mov_tipdocuref AND c.pro_cab_seriedocumento || '' || c.pro_cab_numdocumento = MOVI.mov_docurefe AND c.pro_codigo = MOVI.mov_entidad)
+				LEFT JOIN (
+					SELECT 1 AS exist, *
+					FROM   inv_movialma MOV2 
+					WHERE  TRIM(MOV2.art_codigo) = '11620307'
+				) AS MOVI2 ON (c.pro_cab_almacen = MOVI2.mov_almacen AND c.pro_cab_tipdocumento = MOVI2.mov_tipdocuref AND c.pro_cab_seriedocumento || '' || c.pro_cab_numdocumento = MOVI2.mov_docurefe AND c.pro_codigo = MOVI2.mov_entidad)
+				LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = c.pro_cab_fechaemision)
 			WHERE
-				date(c.pro_cab_fechaemision) BETWEEN '$FechaIni' AND '$FechaFin'
-				AND c.pro_cab_almacen = '$almacen'				
-				AND (	TRIM(MOVI.art_codigo) IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles WHERE ch_codigocombustible != '11620307')
-						OR TRIM(MOVI.art_codigo) IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles WHERE ch_codigocombustible = '11620307')				
-						OR TRIM(MOVI.art_codigo) NOT IN (SELECT TRIM(ch_codigocombustible) FROM comb_ta_combustibles) )
-				--AND ( MOVI.art_codigo IS NOT NULL OR TRIM(rubro.ch_descripcion_breve)::text = 'SERVICIOS VARIOS' )
+				c.pro_cab_almacen = '$almacen'
+				AND DATE(c.pro_cab_fechaemision) BETWEEN '$FechaIni' AND '$FechaFin'
 			GROUP BY
 				dia,
 				pro,
@@ -11833,48 +11836,63 @@ WHERE
 				dia, trans, pro, ddh DESC;
 		";
 
-		echo "<pre>";		
-		echo "COMPRAS: \n\n".$sql."\n\n";	
+		echo "<pre>sql_compras:";
+		echo "$sql_compras";
 		echo "</pre>";
 
-		//RECORREMOS UNO A UNO LAS COMPRAS PARA GENERAR LOS ASIENTOS
+		//ARRAY PARA ALMACENAR ASIENTOS
 		$data_asientos = array();
-		if ($sqlca->query($sql)>0) {
+
+		//RECORREMOS UNO A UNO LAS COMPRAS PARA GENERAR LOS ASIENTOS DE COMPRAS
+		if ($sqlca->query($sql_compras)>0) {
 			while ($reg = $sqlca->fetchRow()) {
 								
-				//DETERMINAMOS DE QUE TIPO ES LA COMPRA (COMBUSTIBLE, GLP O MARKET)
-				$es_tipo = $reg['tipo_documento'];
-				$cuenta_total      = "";
-				$cuenta_impuesto   = "";
-				$cuenta_bi         = "";
-				$cuenta_inafecto   = "";
-				$cuenta_percepcion = "";
-				$subdiario         = "";
-				if ( TRIM($es_tipo) == "COMBUSTIBLE" ) {
+				//VARIABLES PARA REALIZAR CONDICIONALES AL GENERAR ASIENTOS
+				$es_tipo = $reg['tipo_compra'];
+
+				//OBTENEMOS CUENTAS CONTABLES
+				if ( TRIM($es_tipo) == "COMBUSTIBLES" ) {
+					//COMBUSTIBLES POR DEFECTO
 					$cuenta_total      = $compra_combustible_cuenta_proveedor;
 					$cuenta_impuesto   = $compra_cuenta_impuesto;
+					$cuenta_inafecto   = $compra_cuenta_inafecto;
+					$cuenta_percepcion = $compra_cuenta_percepcion;
 					$cuenta_bi         = $compra_combustible_cuenta_bi;
-					$cuenta_inafecto   = $compra_cuenta_inafecto;
-					$cuenta_percepcion = $compra_cuenta_percepcion;
 					$subdiario         = $vcsubdiario;
-				} else if ( TRIM($es_tipo) == "GLP" ) {
-					$cuenta_total      = $compra_glp_cuenta_proveedor;
-					$cuenta_impuesto   = $compra_cuenta_impuesto;
-					$cuenta_bi         = $compra_glp_cuenta_bi;
-					$cuenta_inafecto   = $compra_cuenta_inafecto;
-					$cuenta_percepcion = $compra_cuenta_percepcion;
-					$subdiario         = $vcsubdiario_glp;
-				} else if ( TRIM($es_tipo) == "MARKET" ) {
+
+					if ( $reg['tipo_compra_comb'] == 1 ) { //COMBUSTIBLE LIQUIDO
+						$cuenta_total      = $compra_combustible_cuenta_proveedor;
+						$cuenta_impuesto   = $compra_cuenta_impuesto;
+						$cuenta_inafecto   = $compra_cuenta_inafecto;
+						$cuenta_percepcion = $compra_cuenta_percepcion;
+						$cuenta_bi         = $compra_combustible_cuenta_bi;
+						$subdiario         = $vcsubdiario;
+					} else if ( $reg['tipo_compra_glp'] == 1 ) { //GLP
+						$cuenta_total      = $compra_glp_cuenta_proveedor;
+						$cuenta_impuesto   = $compra_cuenta_impuesto;
+						$cuenta_inafecto   = $compra_cuenta_inafecto;
+						$cuenta_percepcion = $compra_cuenta_percepcion;
+						$cuenta_bi         = $compra_glp_cuenta_bi;
+						$subdiario         = $vcsubdiario_glp;
+					}
+				} else if ( TRIM($es_tipo) == "MARKET" ) { //MARKET
 					$cuenta_total      = $compra_market_cuenta_proveedor;
 					$cuenta_impuesto   = $compra_cuenta_impuesto;
-					$cuenta_bi         = $compra_market_cuenta_bi;
 					$cuenta_inafecto   = $compra_cuenta_inafecto;
 					$cuenta_percepcion = $compra_cuenta_percepcion;
+					$cuenta_bi         = $compra_market_cuenta_bi;
+					$subdiario         = $vcsubdiario_market;
+				} else { //OTROS
+					$cuenta_total      = $compra_market_cuenta_proveedor;
+					$cuenta_impuesto   = $compra_cuenta_impuesto;
+					$cuenta_inafecto   = $compra_cuenta_inafecto;
+					$cuenta_percepcion = $compra_cuenta_percepcion;
+					$cuenta_bi         = $compra_market_cuenta_bi;
 					$subdiario         = $vcsubdiario_market;
 				}
 
 				//CREAMOS LOS ASIENTOS POR CADA REGISTRO DE COMPRA
-				//TOTAL
+				//CUENTA TOTAL
 				$data_asientos[] = array(
 					0 => $reg['dia'],
 					1 => $cuenta_total,
@@ -11891,13 +11909,15 @@ WHERE
 					12 => $reg['tip2'],
 					13 => $reg['nutd'],
 					//DATA PARA DESGLOSE
-					14 => $reg['pro_cab_tipdocumento'], //TIPO DOCUMENTO
-					15 => $reg['pro_cab_seriedocumento'], //SERIE
-					16 => $reg['pro_cab_numdocumento'], //NUMERO
-					17 => '-'
+					14 => $reg['pro_cab_almacen'],        //ALMACEN
+					15 => $reg['pro_cab_tipdocumento'],   //TIPO DOCUMENTO
+					16 => $reg['pro_cab_seriedocumento'], //SERIE
+					17 => $reg['pro_cab_numdocumento'],   //NUMERO
+					18 => $reg['pro_codigo'],             //RUC
+					19 => '-'
 				);
 
-				//IMPUESTO
+				//CUENTA IMPUESTO
 				$data_asientos[] = array(
 					0 => $reg['dia'],
 					1 => $cuenta_impuesto,
@@ -11914,13 +11934,15 @@ WHERE
 					12 => $reg['tip2'],
 					13 => $reg['nutd'],
 					//DATA PARA DESGLOSE
-					14 => $reg['pro_cab_tipdocumento'], //TIPO DOCUMENTO
-					15 => $reg['pro_cab_seriedocumento'], //SERIE
-					16 => $reg['pro_cab_numdocumento'], //NUMERO
-					17 => '-'
+					14 => $reg['pro_cab_almacen'],        //ALMACEN
+					15 => $reg['pro_cab_tipdocumento'],   //TIPO DOCUMENTO
+					16 => $reg['pro_cab_seriedocumento'], //SERIE
+					17 => $reg['pro_cab_numdocumento'],   //NUMERO
+					18 => $reg['pro_codigo'],             //RUC
+					19 => '-'
 				);
 
-				//INAFECTO SOLO SI EXISTE
+				//CUENTA INAFECTO (SOLO SI EXISTE)
 				if ( $reg['importe_inafecto'] > 0 ) {					
 					$data_asientos[] = array(
 						0 => $reg['dia'],
@@ -11938,14 +11960,16 @@ WHERE
 						12 => $reg['tip2'],
 						13 => $reg['nutd'],	
 						//DATA PARA DESGLOSE
-						14 => $reg['pro_cab_tipdocumento'], //TIPO DOCUMENTO
-						15 => $reg['pro_cab_seriedocumento'], //SERIE
-						16 => $reg['pro_cab_numdocumento'], //NUMERO
-						17 => '-'
+						14 => $reg['pro_cab_almacen'],        //ALMACEN
+						15 => $reg['pro_cab_tipdocumento'],   //TIPO DOCUMENTO
+						16 => $reg['pro_cab_seriedocumento'], //SERIE
+						17 => $reg['pro_cab_numdocumento'],   //NUMERO
+						18 => $reg['pro_codigo'],             //RUC
+						19 => '-'
 					);
 				}
 
-				//PERCEPCION SOLO SI EXISTE
+				//CUENTA PERCEPCION (SOLO SI EXISTE)
 				if ( $reg['importe_percepcion'] > 0 ) {
 					$data_asientos[] = array(
 						0 => $reg['dia'],
@@ -11963,14 +11987,16 @@ WHERE
 						12 => $reg['tip2'],
 						13 => $reg['nutd'],	
 						//DATA PARA DESGLOSE
-						14 => $reg['pro_cab_tipdocumento'], //TIPO DOCUMENTO
-						15 => $reg['pro_cab_seriedocumento'], //SERIE
-						16 => $reg['pro_cab_numdocumento'], //NUMERO
-						17 => '-'
+						14 => $reg['pro_cab_almacen'],        //ALMACEN
+						15 => $reg['pro_cab_tipdocumento'],   //TIPO DOCUMENTO
+						16 => $reg['pro_cab_seriedocumento'], //SERIE
+						17 => $reg['pro_cab_numdocumento'],   //NUMERO
+						18 => $reg['pro_codigo'],             //RUC
+						19 => '-'
 					);
 				}
 
-				//BI
+				//CUENTA BI
 				$data_asientos[] = array(
 					0 => $reg['dia'],
 					1 => $cuenta_bi,
@@ -11987,10 +12013,12 @@ WHERE
 					12 => $reg['tip2'],
 					13 => $reg['nutd'],
 					//DATA PARA DESGLOSE
-					14 => $reg['pro_cab_tipdocumento'], //TIPO DOCUMENTO
-					15 => $reg['pro_cab_seriedocumento'], //SERIE
-					16 => $reg['pro_cab_numdocumento'], //NUMERO
-					17 => ( TRIM($es_tipo) == "COMBUSTIBLE" || TRIM($es_tipo) == "GLP" ) && $es_desglose == true ? 'ES_DESGLOSE' : '-' //SI ES COMBUSTIBLE LA BASE IMPONIBLE SE DESGLOSA
+					14 => $reg['pro_cab_almacen'],        //ALMACEN
+					15 => $reg['pro_cab_tipdocumento'],   //TIPO DOCUMENTO
+					16 => $reg['pro_cab_seriedocumento'], //SERIE
+					17 => $reg['pro_cab_numdocumento'],   //NUMERO
+					18 => $reg['pro_codigo'],             //RUC
+					19 => ( TRIM($es_tipo) == "COMBUSTIBLES" ) && $es_desglose == true ? 'ES_DESGLOSE' : '-' //SI ES COMBUSTIBLES, LA BASE IMPONIBLE SE DESGLOSA
 				);
 			}
 		}
@@ -12002,7 +12030,7 @@ WHERE
 		$data_asientos_ = array();
 		foreach ($data_asientos as $key => $value) {
 			//INGRESAMOS LA INFORMACION EN EL NUEVO ARRAY
-			if( $value['17'] == '-' ) {
+			if( $value['19'] == '-' ) {
 				$data_asientos_[] = array(
 					0 => $value[0],
 					1 => $value[1],
@@ -12021,7 +12049,7 @@ WHERE
 				);
 			}
 			
-			if ( $value[17] == 'ES_DESGLOSE' ) { //SI ES COMBUSTIBLE LA BASE IMPONIBLE SE DESGLOSA
+			if ( $value[19] == 'ES_DESGLOSE' ) { //SI ES COMBUSTIBLES, LA BASE IMPONIBLE SE DESGLOSA
 				$sql_desglose = "
 					SELECT 
 						SUM(MOVI.mov_costototal) as mov_costototal,
@@ -12030,7 +12058,7 @@ WHERE
 						inv_movialma as MOVI 
 						LEFT JOIN interface_equivalencia_producto q ON (MOVI.art_codigo = q.art_codigo)
 					WHERE
-						'".TRIM($value[14])."' = MOVI.mov_tipdocuref AND '".TRIM($value[15])."' || '' || '".TRIM($value[16])."' = MOVI.mov_docurefe
+						'".TRIM($value['14'])."' = MOVI.mov_almacen AND '".TRIM($value[15])."' = MOVI.mov_tipdocuref AND '".TRIM($value[16])."' || '' || '".TRIM($value[17])."' = MOVI.mov_docurefe AND '".TRIM($Vvalue[18])."' = MOVI.mov_entidad
 					GROUP BY 
 						MOVI.art_codigo;
 				";
