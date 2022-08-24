@@ -9,14 +9,14 @@ class jqGridModel {
 	public $sord     = '';
 	public $rows     = array();
 
-	public function Config($count){
+	public function Config($count, $rows = 30, $pagelimit = 3){
 
-		$total_pages		= $count > 0 ? ceil($count / 30) : 0;
-		$this->start		= 30 * (empty($_REQUEST['page']) ? 30 : $_REQUEST['page']) - 30;
-		$this->limit		= 30;
-		$this->Pagelimit	= 3;//De cuanto en cuanto se van a mostrar las paginas en el paginador
+		$total_pages		= $count > 0 ? ceil($count / $rows) : 0;
+		$this->start		= $rows * (empty($_REQUEST['page']) ? $rows : $_REQUEST['page']) - $rows;
+		$this->limit		= $rows;
+		$this->Pagelimit	= $pagelimit;//De cuanto en cuanto se van a mostrar las paginas en el paginador
 		
-		$this->page    = (empty($_REQUEST['page']) ? 30 : $_REQUEST['page']);
+		$this->page    = (empty($_REQUEST['page']) ? $rows : $_REQUEST['page']);
 		$this->total   = $total_pages;
 		$this->records = $count;
 

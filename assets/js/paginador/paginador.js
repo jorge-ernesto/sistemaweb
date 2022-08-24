@@ -54,6 +54,32 @@ $( function() {
 			PaginadorValeCreditos(page_siguiente);
 		}
 	})
+
+	//Menu 3: Contabilidad -> Libro Diario
+	//CONT_LD = Contabilidad Libro Diario
+	$( '.pagination-previousCONT_LD' ).click(function() {
+		var page_atras	= $('#pageActual').val();
+
+		if(parseInt(page_atras) > 1) {
+			page_atras--;
+			PaginadorLibroDiario(page_atras);
+		}
+	})
+	
+	$( '.pagination-linkCONT_LD' ).click(function() {
+		var page		= $(this).attr("data-page");
+		PaginadorLibroDiario(page);
+	})
+	
+	$( '.pagination-nextCONT_LD' ).click(function() {
+		var page_siguiente	= $('#pageActual').val();
+		var page_cantidad	= $('#cantidadPage').val();
+
+		if(parseInt(page_siguiente) < parseInt(page_cantidad)) {
+			page_siguiente++;
+			PaginadorLibroDiario(page_siguiente);
+		}
+	})
 });
 
 function PaginadorMovimientosInventarios(page){
@@ -93,5 +119,22 @@ function PaginadorValeCreditos(page){
 		page 	: page,
 	}, function(data){
 		$( "#div-Vale_CRUD" ).html(data);
+	})
+}
+
+function PaginadorLibroDiario(page){
+	$("#div-Vale_CRUD").prepend(block_loding_modal);
+	var data = {
+		Nu_Almacen 	: $('#cbo-almacen option:selected').val(),
+		Fe_Periodo 	: $('#txt-periodo').val(),
+		Fe_Mes  	: $('#txt-mes').val(),
+		Nu_Cantreg  : $('#txt-cantidadregistros').val(),
+	};
+	$.post('reportes/c_libro_diario.php', {
+		accion 	: 'listAll',
+   		data 	: data,
+		page 	: page,
+	}, function(data){
+		$( "#div-LibroDiario_CRUD" ).html(data);
 	})
 }
