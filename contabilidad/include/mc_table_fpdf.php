@@ -10,6 +10,10 @@ class PDF_MC_Table extends FPDF{
     protected $U = 0;
     protected $HREF = '';
 
+    //var extend
+    var $tipoHeader;
+    var $dataHeader;
+
     function SetWidths($w){
         //Set the array of column widths
         $this->widths=$w;
@@ -25,7 +29,7 @@ class PDF_MC_Table extends FPDF{
         $nb=0;
         for($i=0;$i<count($data);$i++)
             $nb=max($nb,$this->NbLines($this->widths[$i],$data[$i]['text']));
-        $h=5*$nb;
+        $h=2.5*$nb; //$h=5*$nb;
         //Issue a page break first if needed
         $this->CheckPageBreak($h);
         //Draw the cells of the row
@@ -48,7 +52,7 @@ class PDF_MC_Table extends FPDF{
             //Draw the border
             $this->Rect($x,$y,$w,$h,'D');
             //Print the text
-            $this->MultiCell($w,5,$data[$i]['text'],0,$a);
+            $this->MultiCell($w,2.5,$data[$i]['text'],0,$a); //$this->MultiCell($w,5,$data[$i]['text'],0,$a);
             //Put the position to the right of the cell
             $this->SetXY($x+$w,$y);
         }
@@ -191,5 +195,108 @@ class PDF_MC_Table extends FPDF{
         $this->SetStyle('U',false);
         $this->SetTextColor(0);
     }
+
+    function Header()
+    {
+        $tipo = $this->tipoHeader;
+        $response = $this->dataHeader;        
+
+        if ($tipo == 'LIBRO_DIARIO') {
+            $this->HeaderLibroDiario($response);
+        }    
+    }
+
+    function DefinirParametrosHeader($tipo, $data)
+    {
+        $this->tipoHeader = $tipo;
+        $this->dataHeader = $data;
+    }
+
+    function HeaderLibroDiario($response) 
+    {
+        $sTipoLetra = 'Helvetica';
+
+        //SETEAMOS FONT
+        $this->SetFont($sTipoLetra, 'B', 13);
+
+        //1 FILA
+        //IZQUIERDA
+        $this->Multicell(0, 4, $this->printText(wordwrap("FORMATO 5.1: \"LIBRO DIARIO\"", 80, "\n")));
+
+        //SETEAMOS FONT
+        $this->SetFont($sTipoLetra, 'B', 8);
+
+        //2 FILA
+        //IZQUIERDA
+        $meses = array("ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE");
+        $periodo = $meses[intval($response->param->Fe_Mes)] . " " . $response->param->Fe_Periodo;
+        $this->Cell(10, 10, 'PERIODO: ' . $periodo, 0, 0, 'L');
+        $this->Ln(4);
+
+        //3 FILA
+        //IZQUIERDA	
+        $this->Cell(10, 10, 'RUC: ' . $this->printText($response->data_company->ruc), 0, 0, 'L');
+        $this->Ln(4);
+
+        //4 FILA
+        //IZQUIERDA
+        $razsocial = $response->data_company->razsocial;
+        $this->Cell(10, 10, 'RAZON SOCIAL: ' . $this->printText($response->data_company->razsocial), 0, 0, 'L');
+        $this->Ln(4);
+
+        //HEADER 1
+        $arrHeaderTableDetail1 = array(
+            array('text' => 'CORRELATIVO DEL ASIENTO', 'align' => 'C'),
+            array('text' => 'FECHA OPE.', 'align' => 'C'),
+            array('text' => $this->printText('GLOSA O DESCRIPCIÓN DE LA OPERACION'), 'align' => 'C'),
+            array('text' => $this->printText('REFERENCIA DE LA OPERACIÓN'), 'align' => 'C'),
+            array('text' => 'CUENTA CONTABLE ASOCIADA', 'align' => 'C'),
+            array('text' => 'MOVIMIENTO', 'align' => 'C'),
+        );
+        //HEADER 2
+        $arrHeaderTableDetail2 = array(
+            array('text' => 'M', 'align' => 'C'),
+            array('text' => 'S/D', 'align' => 'C'),
+            array('text' => 'ASI', 'align' => 'C'),
+            array('text' => '', 'align' => 'C'),
+            array('text' => '', 'align' => 'C'),
+            array('text' => $this->printText('CÓDIGO DE LIBRO O REGISTRO'), 'align' => 'C'),
+            array('text' => $this->printText('NÚMERO CORRELA.'), 'align' => 'C'),
+            array('text' => $this->printText('NÚMERO DEL DOCUMENTO SUSTENTATORIO'), 'align' => 'C'),
+            array('text' => $this->printText('CÓDIGO'), 'align' => 'C'),
+            array('text' => $this->printText('DENOMINACIÓN'), 'align' => 'C'),
+            array('text' => 'DEBE', 'align' => 'C'),
+            array('text' => 'HABER', 'align' => 'C'),
+        );
+
+        $this->Ln(5);
+
+        //HEADER 1
+        $w = array(19,13,30,49,48,32);
+        $this->SetWidths($w);
+        $this->SetFont($sTipoLetra, '', 6);
+        $this->Row(
+            array('border' => 1),
+            $arrHeaderTableDetail1
+        );
+
+        //HEADER 2
+        $w = array(5,7,7,13,30,13,13,23,13,35,16,16);
+        $this->SetWidths($w);
+        $this->SetFont($sTipoLetra, '', 5);
+        $this->Row(
+            array('border' => 1),
+            $arrHeaderTableDetail2
+        );
+
+        $this->Ln(3);
+
+        //SETEAMOS FONT
+        // $this->SetFont($sTipoLetra, '', 5);
+    }
+
+    function printText($text) {
+		return utf8_decode($text);
+	}
 }
 ?>

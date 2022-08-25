@@ -9,7 +9,6 @@
 
 define('FPDF_VERSION','1.81');
 
-
 class FPDF
 {
 protected $page;               // current page number
@@ -109,14 +108,12 @@ function __construct($orientation='P', $unit='mm', $size='A4')
 		if(substr($this->fontpath,-1)!='/' && substr($this->fontpath,-1)!='\\')
 			$this->fontpath .= '/';
 	}
-	/*elseif(is_dir(dirname(__FILE__).'/font'))
-		$this->fontpath = dirname(__FILE__).'/font/';*/
-	elseif(is_dir(dirname(__FILE__).'/'))
-		$this->fontpath = dirname(__FILE__).'/';
+	elseif(is_dir(dirname(__FILE__).'/font'))
+		$this->fontpath = dirname(__FILE__).'/font/';
 	else
 		$this->fontpath = '';
 	// Core fonts
-	$this->CoreFonts = array('courier', 'courier2', 'helvetica', 'times', 'symbol', 'zapfdingbats');
+	$this->CoreFonts = array('courier', 'helvetica', 'times', 'symbol', 'zapfdingbats');
 	// Scale factor
 	if($unit=='pt')
 		$this->k = 1;
@@ -1138,12 +1135,11 @@ protected function _endpage()
 	$this->state = 1;
 }
 
-/*protected function _loadfont($font)
+protected function _loadfont($font)
 {
 	// Load a font definition file from the font directory
 	if(strpos($font,'/')!==false || strpos($font,"\\")!==false)
 		$this->Error('Incorrect font definition file name: '.$font);
-	error_log($this->fontpath.$font);
 	include($this->fontpath.$font);
 	if(!isset($name))
 		$this->Error('Could not include font definition file');
@@ -1151,30 +1147,6 @@ protected function _endpage()
 		$enc = strtolower($enc);
 	if(!isset($subsetted))
 		$subsetted = false;
-	return get_defined_vars();
-}*/
-protected function _loadfont($font)
-{
-	if ($font == 'courier.php') {
-		$type = 'Core';
-		$name = 'Courier';
-		$up = -100;
-		$ut = 50;
-		for($i=0;$i<=255;$i++)
-			$cw[chr($i)] = 600;
-		$enc = 'cp1252';
-		$uv = array(0=>array(0,128),128=>8364,130=>8218,131=>402,132=>8222,133=>8230,134=>array(8224,2),136=>710,137=>8240,138=>352,139=>8249,140=>338,142=>381,145=>array(8216,2),147=>array(8220,2),149=>8226,150=>array(8211,2),152=>732,153=>8482,154=>353,155=>8250,156=>339,158=>382,159=>376,160=>array(160,96));
-	} else if ($font == 'courierb.php') {
-		$type = 'Core';
-		$name = 'Courier-Bold';
-		$up = -100;
-		$ut = 50;
-		for($i=0;$i<=255;$i++)
-			$cw[chr($i)] = 600;
-		$enc = 'cp1252';
-		$uv = array(0=>array(0,128),128=>8364,130=>8218,131=>402,132=>8222,133=>8230,134=>array(8224,2),136=>710,137=>8240,138=>352,139=>8249,140=>338,142=>381,145=>array(8216,2),147=>array(8220,2),149=>8226,150=>array(8211,2),152=>732,153=>8482,154=>353,155=>8250,156=>339,158=>382,159=>376,160=>array(160,96));
-	}
-
 	return get_defined_vars();
 }
 
@@ -1922,126 +1894,5 @@ protected function _enddoc()
 	$this->_put('%%EOF');
 	$this->state = 3;
 }
-
-//implementacion para tabla con multilineas
-
-var $widths;
-var $aligns;
-
-function SetWidths($w)
-{
-	//Set the array of column widths
-	$this->widths=$w;
 }
-
-function SetAligns($a)
-{
-	//Set the array of column alignments
-	$this->aligns=$a;
-}
-
-
-function Row($conf, $data)
-{
-	/*echo '<hr><hr><pre>';
-	var_dump($conf);
-	echo '</pre>';
-	echo '<hr><pre>';
-	var_dump($data);
-	echo '</pre>';*/
-	//Calculate the height of the row
-	$nb=0;
-	for($i=0;$i<count($data);$i++)
-		$nb=max($nb,$this->NbLines($this->widths[$i],$data[$i]['text']));
-	$h=5*$nb;
-	//Issue a page break first if needed
-	$this->CheckPageBreak($h);
-	//Draw the cells of the row
-	for($i=0;$i<count($data);$i++)
-	{
-		$w=$this->widths[$i];
-		$a=isset($data[$i]['align']) ? $data[$i]['align'] : 'L';
-		//Save the current position
-		$x=$this->GetX();
-		$y=$this->GetY();
-		//Draw the border
-
-		if ($conf['border'] > 0) {
-			//$this->SetFillColor(255, 555, 255);
-			$this->SetDrawColor(0, 0, 0);
-		} else {
-			$this->SetFillColor(255, 255, 255);
-			$this->SetDrawColor(255, 255, 255);
-		}
-
-		$this->Rect($x,$y,$w,$h,'D');
-		//Print the text
-		$this->MultiCell($w,5,$data[$i]['text'],0,$a);
-		//Put the position to the right of the cell
-		$this->SetXY($x+$w,$y);
-	}
-	//Go to the next line
-	$this->Ln($h);
-}
-
-function CheckPageBreak($h)
-{
-	//If the height h would cause an overflow, add a new page immediately
-	if($this->GetY()+$h>$this->PageBreakTrigger)
-		$this->AddPage($this->CurOrientation);
-}
-
-function NbLines($w,$txt) {
-	//Computes the number of lines a MultiCell of width w will take
-	$cw=&$this->CurrentFont['cw'];
-	if($w==0)
-		$w=$this->w-$this->rMargin-$this->x;
-	$wmax=($w-2*$this->cMargin)*1000/$this->FontSize;
-	$s=str_replace("\r",'',$txt);
-	$nb=strlen($s);
-	if($nb>0 and $s[$nb-1]=="\n")
-		$nb--;
-	$sep=-1;
-	$i=0;
-	$j=0;
-	$l=0;
-	$nl=1;
-	while($i<$nb) {
-		$c=$s[$i];
-		if($c=="\n") {
-			$i++;
-			$sep=-1;
-			$j=$i;
-			$l=0;
-			$nl++;
-			continue;
-		}
-		if($c==' ')
-			$sep=$i;
-		$l+=$cw[$c];
-		if($l>$wmax) {
-			if($sep==-1) {
-				if($i==$j)
-					$i++;
-			}
-			else
-				$i=$sep+1;
-			$sep=-1;
-			$j=$i;
-			$l=0;
-			$nl++;
-		}
-		else
-			$i++;
-	}
-	return $nl;
-}
-
-function _setFont($font) {
-	$this->font = 'Courier';
-}
-
-function printText($text) {
-	return utf8_decode($text);
-}
-}
+?>

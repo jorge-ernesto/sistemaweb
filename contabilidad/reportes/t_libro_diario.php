@@ -208,124 +208,97 @@ class LibroDiarioTemplate extends Template {
 		require('/sistemaweb/contabilidad/include/mc_table_fpdf.php');
 
 		$pdf = new PDF_MC_Table();
+		$pdf->DefinirParametrosHeader('LIBRO_DIARIO', $response);
 
-		$sTipoLetra = 'Courier';
+		$sTipoLetra = 'Helvetica';
 		$pdf->AddPage();
-		$pdf->SetFont($sTipoLetra, 'B', 15);		
+		// $pdf->SetFont($sTipoLetra, 'B', 6);		
 
 		//HEADER
-		$this->pdf_header($pdf, $sTipoLetra, $response);
+		// $this->pdf_header($pdf, $sTipoLetra, $response);
 
-		//BODY
-		$arrHeaderTableDetail1 = array(
-			array('text' => 'CORRELATIVO DEL ASIENTO', 'align' => 'C'),
-			array('text' => 'FECHA OPE.', 'align' => 'C'),
-			array('text' => $this->printText('GLOSA O DESCRIPCIÓN DE LA OPERACION'), 'align' => 'C'),
-			array('text' => $this->printText('REFERENCIA DE LA OPERACIÓN'), 'align' => 'C'),
-			array('text' => 'CUENTA CONTABLE ASOCIADA', 'align' => 'C'),
-			array('text' => 'MOVIMIENTO', 'align' => 'C'),
-		);
-		$arrHeaderTableDetail2 = array(
-			array('text' => 'M', 'align' => 'C'),
-			array('text' => 'S/D', 'align' => 'C'),
-			array('text' => 'ASI', 'align' => 'C'),
-			array('text' => '', 'align' => 'C'),
-			array('text' => '', 'align' => 'C'),
-			array('text' => $this->printText('CÓDIGO DE LIBRO O REGISTRO'), 'align' => 'C'),
-			array('text' => $this->printText('NÚMERO CORRELA.'), 'align' => 'C'),
-			array('text' => $this->printText('NÚMERO DEL DOCUMENTO SUSTENTATORIO'), 'align' => 'C'),
-			array('text' => $this->printText('CÓDIGO'), 'align' => 'C'),
-			array('text' => $this->printText('DENOMINACIÓN'), 'align' => 'C'),
-			array('text' => 'DEBE', 'align' => 'C'),
-			array('text' => 'HABER', 'align' => 'C'),
-		);
-		$this->pdf_body($pdf, $sTipoLetra, $arrHeaderTableDetail1, $arrHeaderTableDetail2, $response);
+		//BODY	
+		$this->pdf_body($pdf, $sTipoLetra, $response);
 
 		$pdf->Output("/sistemaweb/contabilidad/reportes/pdf/reporte_libro_diario.pdf", "F");
 	}
 
 	function pdf_header($pdf, $sTipoLetra, $response){	
-		//1 FILA
-		//IZQUIERDA
-		$pdf->Multicell(0, 4, $this->printText(wordwrap("FORMATO 5.1: \"LIBRO DIARIO\"", 80, "\n")));
-
-		//SETEAMOS FONT
-		$pdf->SetFont($sTipoLetra, 'B', 9);
-
-		//2 FILA
-		//IZQUIERDA
-		$meses = array("ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE");
-		$periodo = $meses[intval($response->param->Fe_Mes)] . " " . $response->param->Fe_Periodo;
-		$pdf->Cell(10, 10, 'PERIODO: ' . $periodo, 0, 0, 'L');
-		$pdf->Ln(5);
-
-		//3 FILA
-		//IZQUIERDA	
-		$pdf->Cell(10, 10, 'RUC: ' . $this->printText($response->data_company->ruc), 0, 0, 'L');
-		$pdf->Ln(5);
-
-		//4 FILA
-		//IZQUIERDA
-		$razsocial = $response->data_company->razsocial;
-		$pdf->Cell(10, 10, 'RAZON SOCIAL: ' . $this->printText($response->data_company->razsocial), 0, 0, 'L');
-		$pdf->Ln(5);		
 	}
 
-	function pdf_body($pdf, $sTipoLetra, $arrHeaderTableDetail1, $arrHeaderTableDetail2, $response){
-		$pdf->Ln(5);
-
-		//HEADER 1
-		$w = array(21,12,35,45,40,40);
-		$pdf->SetWidths($w);
-
-		$pdf->SetFont($sTipoLetra, '', 8);
-
-		$pdf->Row(
-			array('border' => 1),
-			$arrHeaderTableDetail1
-		);
-
-		//HEADER 2
-		$w = array(7,7,7,12,35,15,15,15,15,25,20,20);
-		$pdf->SetWidths($w);
-
+	function pdf_body($pdf, $sTipoLetra, $response){
+		//SETEAMOS FONT
 		$pdf->SetFont($sTipoLetra, '', 6);
 
-		$pdf->Row(
-			array('border' => 1),
-			$arrHeaderTableDetail2
-		);
-
-		//SETEAMOS FONT
-		$pdf->SetFont($sTipoLetra, '', 7);
-		//SETEAMOS ESTILOS
-		// $pdf->Row()
-
-		$pdf->Ln(5);
+		//VARIABLES PARA INDEXAR Y TOTALIZAR	
+		$contador_asiento = 0;	
+		$total_debe = 0;
+		$total_haber = 0;	
 
 		//RECORREMOS ASIENTOS
-		foreach ($response->data as $key => $row) {
+		foreach ($response->data as $key => $rows) {
+			if ($act_entry_id != $rows->act_entry_id) {				
+				$contador_asiento = 0;
+				
+				if ($key != 0) {
+					$this->mostrarTotal($pdf, $total_debe, $total_haber);
+					$total_debe = 0;
+					$total_haber = 0;	
+				}
+			}
+			$contador_asiento++;
+			$total_debe += $rows->amtdt;
+			$total_haber += $rows->amtct;
+			
 			$pdf->Row(
 				array('border' => 0),
 				array(
 					array('text' => $response->param->Fe_Mes, 'align' => 'C'),
-					array('text' => $row->subbookcode, 'align' => 'C'),
-					array('text' => $row->registerno, 'align' => 'C'),
-					array('text' => $row->documentdate, 'align' => 'C'),
-					array('text' => $row->description_detail, 'align' => 'C'),
-					array('text' => $row->bookcode, 'align' => 'C'),
-					array('text' => '', 'align' => 'C'),
-					array('text' => $row->regid, 'align' => 'C'),
-					array('text' => $row->acctcode, 'align' => 'C'),
-					array('text' => $row->name, 'align' => 'C'),
-					array('text' => $row->amtdt, 'align' => 'C'),
-					array('text' => $row->amtct, 'align' => 'C'),
+					array('text' => $rows->subbookcode, 'align' => 'C'),
+					array('text' => $rows->registerno, 'align' => 'C'),
+					array('text' => $rows->documentdate, 'align' => 'C'),
+					array('text' => $rows->description_detail, 'align' => 'L'),
+					array('text' => $rows->bookcode, 'align' => 'L'),
+					array('text' => $contador_asiento, 'align' => 'C'),
+					array('text' => $rows->regid, 'align' => 'C'),
+					array('text' => $rows->acctcode, 'align' => 'C'),
+					array('text' => $rows->name, 'align' => 'L'),
+					array('text' => $rows->amtdt, 'align' => 'R'),
+					array('text' => $rows->amtct, 'align' => 'R'),
 				)				
 			);
+			$act_entry_id = $rows->act_entry_id;
+
+			if ($key == count($response->data)-1) {
+				$this->mostrarTotal($pdf, $total_debe, $total_haber);
+			}			
 		}
 	}
 
 	function printText($text) {
 		return utf8_decode($text);
+	}
+
+	function mostrarTotal($pdf, $total_debe, $total_haber) {
+		$pdf->Cell(191, 0, '___________________________', 0, 0, 'R');
+		$pdf->Ln(2);
+		$pdf->Row(
+			array('border' => 0),
+			array(
+				array('text' => '', 'align' => 'C'),
+				array('text' => '', 'align' => 'C'),
+				array('text' => '', 'align' => 'C'),
+				array('text' => '', 'align' => 'C'),
+				array('text' => '', 'align' => 'C'),
+				array('text' => '', 'align' => 'C'),
+				array('text' => '', 'align' => 'C'),
+				array('text' => '', 'align' => 'C'),
+				array('text' => '', 'align' => 'C'),
+				array('text' => '', 'align' => 'C'),
+				array('text' => $total_debe, 'align' => 'R'),
+				array('text' => $total_haber, 'align' => 'R'),
+			)				
+		);
+		$pdf->Ln(2);
 	}
 }
