@@ -238,11 +238,11 @@ ORDER BY
 		$sql = "
 SELECT
 bpartner.Nu_Codigo_Cliente AS cardcode,
-FIRST(No_Nombre_Cliente) AS CARDNAME,
+SUBSTRING( FIRST(No_Nombre_Cliente) from 1 for 99 ) AS CARDNAME,
 FIRST(Nu_Documento_Identidad) AS FEDERALTAXID,
 FIRST(Nu_Telefono1) AS PHONE,
 FIRST(Txt_Email) AS EMAIL,
-FIRST(Txt_Direccion) AS STREET,
+SUBSTRING( FIRST(Txt_Direccion) from 1 for 99 ) AS STREET,
 FIRST(No_Contacto) AS _contact_name
 FROM (
 (SELECT
@@ -268,14 +268,14 @@ UNION
 
 (SELECT
  CLI.cli_codigo AS Nu_Codigo_Cliente,
- FIRST(CLI.cli_razsocial) AS No_Nombre_Cliente,
+ SUBSTRING( FIRST(CLI.cli_razsocial) from 1 for 99 ) AS No_Nombre_Cliente,
  FIRST(CLI.cli_ruc) AS Nu_Documento_Identidad,
  FIRST(CLI.cli_telefono1) AS Nu_Telefono1,
  FIRST(CLI.cli_email) AS Txt_Email,
  FIRST(CLI.cli_ndespacho_efectivo),
  FIRST(CLI.cli_anticipo),
  FIRST(CLI.cli_creditosol),
- FIRST(CLI.cli_direccion) AS Txt_Direccion,
+ SUBSTRING( FIRST(CLI.cli_direccion) from 1 for 99 ) AS Txt_Direccion,
  FIRST(CLI.cli_contacto) AS No_Contacto
 FROM
  val_ta_cabecera AS VC
@@ -288,7 +288,7 @@ UNION
 
 (SELECT
  CLI.ruc AS Nu_Codigo_Cliente,
- FIRST(CLI.razsocial) AS No_Nombre_Cliente,
+ SUBSTRING( FIRST(CLI.razsocial) from 1 for 99 ) AS No_Nombre_Cliente,
  FIRST(CLI.ruc) AS Nu_Documento_Identidad,
  '' AS Nu_Telefono1,
  '' AS Txt_Email,
@@ -458,7 +458,7 @@ ORDER BY 2;";
 		$sql = "
 SELECT
 bpartner.Nu_Codigo_Cliente AS cardcode,
-FIRST(No_Nombre_Cliente) AS CARDNAME,
+SUBSTRING( FIRST(No_Nombre_Cliente) from 1 for 99 ) AS CARDNAME,
 FIRST(Nu_Documento_Identidad) AS FEDERALTAXID,
 FIRST(Nu_Telefono1) AS PHONE,
 FIRST(Txt_Email) AS EMAIL,
@@ -488,7 +488,7 @@ UNION
 
 (SELECT
  CLI.cli_codigo AS Nu_Codigo_Cliente,
- FIRST(CLI.cli_razsocial) AS No_Nombre_Cliente,
+ SUBSTRING( FIRST(CLI.cli_razsocial) from 1 for 99 ) AS No_Nombre_Cliente,
  FIRST(CLI.cli_ruc) AS Nu_Documento_Identidad,
  FIRST(CLI.cli_telefono1) AS Nu_Telefono1,
  FIRST(CLI.cli_email) AS Txt_Email,
@@ -508,7 +508,7 @@ UNION
 
 (SELECT
  CLI.ruc AS Nu_Codigo_Cliente,
- FIRST(CLI.razsocial) AS No_Nombre_Cliente,
+ SUBSTRING( FIRST(CLI.razsocial) from 1 for 99 ) AS No_Nombre_Cliente,
  FIRST(CLI.ruc) AS Nu_Documento_Identidad,
  '' AS Nu_Telefono1,
  '' AS Txt_Email,
@@ -528,7 +528,7 @@ UNION --ESTE UNION SE AGREGO COMO PARTE DEL REQUERIMIENTO DE ENERGIGIAS PARA OBT
 
 (SELECT
  CLI.cli_ruc AS Nu_Codigo_Cliente,
- FIRST(CLI.cli_razsocial) AS No_Nombre_Cliente,
+ SUBSTRING( FIRST(CLI.cli_razsocial)  from 1 for 99 ) AS No_Nombre_Cliente,
  FIRST(CLI.cli_ruc) AS Nu_Documento_Identidad,
  '' AS Nu_Telefono1,
  '' AS Txt_Email,
