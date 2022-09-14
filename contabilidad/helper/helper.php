@@ -2,6 +2,7 @@
 include("/sistemaweb/valida_sess.php");
 include("/sistemaweb/functions.php");
 
+ini_set('memory_limit', '-1');
 date_default_timezone_set('America/Lima');
 
 class HelperClass {
@@ -618,5 +619,210 @@ class HelperClass {
         echo "\n$debug\n";        
         error_log($debug);
         echo "<script>console.log('".$debug."')</script>";		
+	}
+
+	/**
+	* Funcion para obtener información adicional para el array de asientos, buscando por tableid y regid, es decir debe existir en el array de asientos los registros tableid y regid
+	*/
+	function get_data_arrayEntry($arrEntry) {
+		foreach ($arrEntry as $key => $entry) {
+			if (isset($entry['tableid']) && isset($entry['regid'])) {
+				$response_tableid_regid = $this->get_data_by_tableid_regid($entry['tableid'], $entry['regid']);
+				$documento              = $response_tableid_regid['documento'];
+				$serie                  = $response_tableid_regid['serie'];
+				$numero                 = $response_tableid_regid['numero'];
+				$tipo_documento_sunat   = $response_tableid_regid['tipo_documento_sunat'];
+
+				$arrEntry[$key]['documento_sustentatorio'] = isset($documento) && !empty($documento) ? $documento : '-';
+				$arrEntry[$key]['serie']                   = $serie;
+				$arrEntry[$key]['numero']                  = $numero;
+				$arrEntry[$key]['tipo_documento_sunat']    = $tipo_documento_sunat;
+			}
+		}
+		return $arrEntry;
+	}
+
+	/**
+	* Los valores para el campo "tableid"
+	* Descripción breve
+	* 1 = pos_transXXXXYY
+	* 2 = fac_ta_factura_cabecera
+	* 3 = cpag_ta_cabecera
+	* 4 = c_cash_transaction
+	*
+	* Los valores para el campo "regid", entendiendo que viene acompañado de "tableid":
+	* Descripción breve
+	* 1 = es * caja * trans * tabla * usr * Tipo de Documento SUNAT
+	* 2 = ch_almacen * ch_fac_tipodocumento * ch_fac_seriedocumento * ch_fac_numerodocumento * cli_codigo * Tipo de Documento SUNAT
+	* 3 = pro_cab_almacen * pro_cab_tipdocumento * pro_cab_seriedocumento * pro_cab_numdocumento * pro_codigo * Tipo de Documento SUNAT
+	* 4 = c_cash_transaction_id
+	*/
+	function get_data_by_tableid_regid($tableid, $regid, $db = FALSE, $param = array()) {
+		if ($tableid == "1") {
+			//OBTENEMOS DATOS
+			$porciones         = explode("*", $regid);									
+			$data['es']        = $porciones[0];
+			$data['caja']      = $porciones[1];
+			$data['trans']     = $porciones[2];
+			$data['tabla']     = $porciones[3];		
+			$data['usr']       = $porciones[4];	
+
+			//Serie y Numero de Documento
+			$data['documento'] = $porciones[4];
+			$porciones_usr     = explode("-", $porciones[4]);
+			$data['serie']     = $porciones_usr[0];
+			$data['numero']    = $porciones_usr[1];
+
+			//Tipo de Documento Sunat
+			$data['tipo_documento_sunat'] = $porciones[5];
+
+			//LOGICA PARA OBTENER DATOS ADICIONALES
+			if ($db) {
+				if (isset($param["tipo_documento_entidad_emisor"]) && isset($param["numero_documento_entidad_emisor"])) {
+					$dataDB = $this->get_tabla($tableid, $data);
+				}
+			}
+		} else if ($tableid == "2") {
+			//OBTENEMOS DATOS
+			$porciones                      = explode("*", $regid);									
+			$data['ch_almacen']             = $porciones[0];
+			$data['ch_fac_tipodocumento']   = $porciones[1];
+			$data['ch_fac_seriedocumento']  = $porciones[2];
+			$data['ch_fac_numerodocumento'] = $porciones[3];
+			$data['cli_codigo']             = $porciones[4];
+
+			//Serie y Numero de Documento
+			$data['documento']              = $porciones[2]."-".$porciones[3];
+			$data['serie']                  = $porciones[2];
+			$data['numero']                 = $porciones[3];
+
+			//Tipo de Documento Sunat
+			$data['tipo_documento_sunat'] = $porciones[5];
+
+			//LOGICA PARA OBTENER DATOS ADICIONALES
+			if ($db) {
+				if (isset($param["tipo_documento_entidad_emisor"]) && isset($param["numero_documento_entidad_emisor"])) {
+					$dataDB = $this->get_tabla($tableid, $data);
+				}
+			}
+		} else if ($tableid == "3") {
+			//OBTENEMOS DATOS
+			$porciones                      = explode("*", $regid);									
+			$data['pro_cab_almacen']        = $porciones[0];
+			$data['pro_cab_tipdocumento']   = $porciones[1];
+			$data['pro_cab_seriedocumento'] = $porciones[2];
+			$data['pro_cab_numdocumento']   = $porciones[3];
+			$data['pro_codigo']             = $porciones[4];
+
+			//Serie y Numero de Documento
+			$data['documento']              = $porciones[2]."-".$porciones[3];
+			$data['serie']                  = $porciones[2];
+			$data['numero']                 = $porciones[3];
+
+			//Tipo de Documento Sunat
+			$data['tipo_documento_sunat'] = $porciones[5];
+
+			//LOGICA PARA OBTENER DATOS ADICIONALES
+			if ($db) {
+				if (isset($param["tipo_documento_entidad_emisor"]) && isset($param["numero_documento_entidad_emisor"])) {
+					$dataDB = $this->get_tabla($tableid, $data);
+				}
+			}						
+		} else if ($tableid == "4") {
+			$data['documento'] = "-";
+		} else {
+			$data['documento'] = "-";
+		}
+		
+		//RETORNAMOS INFORMACION
+		return $data;
+	}
+
+	function get_data_tabla($tabla) {
+		global $sqlca;
+
+		if ($tabla == 1) {
+			//EJECUTAMOS QUERY
+				$sql = "
+				SELECT
+					usr AS documento
+				FROM 
+					".$tabla."
+				WHERE
+					1 = 1
+					AND es    = '$es'
+					AND caja  = '$caja'
+					AND trans = '$trans'
+				LIMIT 1;
+			";
+
+			if ($sqlca->query($sql) < 0) {
+				return array(
+					'error' => TRUE,
+					'sql' => $sql,
+				);
+			}
+			
+			$row = $sqlca->fetchRow();			
+			$data['documento'] = $row['documento'];
+		} else if ($tabla == 2) {
+			//EJECUTAMOS QUERY
+			$sql = "
+			SELECT
+				ch_fac_seriedocumento || '-' || ch_fac_numerodocumento AS documento
+			FROM 
+				fac_ta_factura_cabecera
+			WHERE
+				1 = 1
+				AND ch_almacen             = '$ch_almacen'
+				AND ch_fac_tipodocumento   = '$ch_fac_tipodocumento'
+				AND ch_fac_seriedocumento  = '$ch_fac_seriedocumento'
+				AND ch_fac_numerodocumento = '$ch_fac_numerodocumento'
+				AND cli_codigo             = '$cli_codigo'
+			LIMIT 1;
+			";
+
+			if ($sqlca->query($sql) < 0) {
+				return array(
+					'error' => TRUE,
+					'sql' => $sql,
+				);
+			}
+
+			$row = $sqlca->fetchRow();			
+			$data['documento'] = $row['documento'];
+		} else if ($tabla == 3) {
+			//EJECUTAMOS QUERY
+			$sql = "
+				SELECT
+					pro_cab_seriedocumento || '-' || pro_cab_numdocumento AS documento
+				FROM 
+					cpag_ta_cabecera
+				WHERE
+					1 = 1
+					AND pro_cab_almacen        = '$pro_cab_almacen'
+					AND pro_cab_tipdocumento   = '$pro_cab_tipdocumento'
+					AND pro_cab_seriedocumento = '$pro_cab_seriedocumento'
+					AND pro_cab_numdocumento   = '$pro_cab_numdocumento'
+					AND pro_codigo             = '$pro_codigo'
+				LIMIT 1;
+			";
+
+			if ($sqlca->query($sql) < 0) {
+				return array(
+					'error' => TRUE,
+					'sql' => $sql,
+				);
+			}
+			
+			$row = $sqlca->fetchRow();			
+			$data['documento'] = $row['documento'];
+		} else if ($tabla == 4) {
+			$data['documento'] = $row['documento'];
+		} else {
+			$data['documento'] = $row['documento'];
+		}
+		
+		return $data;
 	}
 }

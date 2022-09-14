@@ -203,7 +203,9 @@ class PDF_MC_Table extends FPDF{
 
         if ($tipo == 'LIBRO_DIARIO') {
             $this->HeaderLibroDiario($response);
-        }    
+        } else if ($tipo == 'LIBRO_MAYOR') {
+            $this->HeaderLibroMayor($response);
+        }
     }
 
     function DefinirParametrosHeader($tipo, $data)
@@ -229,7 +231,7 @@ class PDF_MC_Table extends FPDF{
         //2 FILA
         //IZQUIERDA
         $meses = array("ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE");
-        $periodo = $meses[intval($response->param->Fe_Mes)] . " " . $response->param->Fe_Periodo;
+        $periodo = $meses[intval($response->param->Fe_Mes)-1] . " " . $response->param->Fe_Periodo;
         $this->Cell(10, 10, 'PERIODO: ' . $periodo, 0, 0, 'L');
         $this->Ln(4);
 
@@ -289,7 +291,7 @@ class PDF_MC_Table extends FPDF{
             $arrHeaderTableDetail2
         );
 
-        $this->Ln(3);
+        $this->Ln(2.5);
 
         //SETEAMOS FONT
         // $this->SetFont($sTipoLetra, '', 5);
@@ -298,5 +300,81 @@ class PDF_MC_Table extends FPDF{
     function printText($text) {
 		return utf8_decode($text);
 	}
+
+    function HeaderLibroMayor($response) 
+    {
+        $sTipoLetra = 'Helvetica';
+
+        //SETEAMOS FONT
+        $this->SetFont($sTipoLetra, 'B', 13);
+
+        //1 FILA
+        //IZQUIERDA
+        $this->Multicell(0, 4, $this->printText(wordwrap("FORMATO 6.1: \"LIBRO MAYOR\"", 80, "\n")));
+
+        //SETEAMOS FONT
+        $this->SetFont($sTipoLetra, 'B', 8);
+
+        //2 FILA
+        //IZQUIERDA
+        $meses = array("ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE");
+        $periodo = $meses[intval($response->param->Fe_Mes)-1] . " " . $response->param->Fe_Periodo;
+        $this->Cell(10, 10, 'PERIODO: ' . $periodo, 0, 0, 'L');
+        $this->Ln(4);
+
+        //3 FILA
+        //IZQUIERDA	
+        $this->Cell(10, 10, 'RUC: ' . $this->printText($response->data_company->ruc), 0, 0, 'L');
+        $this->Ln(4);
+
+        //4 FILA
+        //IZQUIERDA
+        $razsocial = $response->data_company->razsocial;
+        $this->Cell(10, 10, 'RAZON SOCIAL: ' . $this->printText($response->data_company->razsocial), 0, 0, 'L');
+        $this->Ln(4);
+
+        //HEADER 1
+        $arrHeaderTableDetail1 = array(
+            array('text' => $this->printText('FECHA DE LA OPERACIÓN'), 'align' => 'C'),
+            array('text' => $this->printText('NÚMERO CORRELATIVO DEL LIBRO DIARIO.'), 'align' => 'C'),
+            array('text' => $this->printText('DESCRIPCIÓN O GLOSA DE LA OPERACION'), 'align' => 'C'),
+            array('text' => $this->printText('SALDOS Y MOVIMIENTOS'), 'align' => 'C'),
+        );
+        //HEADER 2
+        $arrHeaderTableDetail2 = array(
+            array('text' => '', 'align' => 'C'),
+            array('text' => 'M', 'align' => 'C'),
+            array('text' => 'S/D', 'align' => 'C'),
+            array('text' => 'ASI', 'align' => 'C'),
+            array('text' => '', 'align' => 'C'),
+            array('text' => 'DEUDOR', 'align' => 'C'),
+            array('text' => 'ACREEDOR', 'align' => 'C'),
+        );
+
+        $this->Ln(5);
+
+        //HEADER 1
+        $w = array(16,30,95,40);
+        $this->SetWidths($w);
+        $this->SetFont($sTipoLetra, '', 6);
+        $this->Row(
+            array('border' => 1),
+            $arrHeaderTableDetail1
+        );
+
+        //HEADER 2
+        $w = array(16,10,10,10,95,20,20);
+        $this->SetWidths($w);
+        $this->SetFont($sTipoLetra, '', 5);
+        $this->Row(
+            array('border' => 1),
+            $arrHeaderTableDetail2
+        );
+
+        $this->Ln(2.5);
+
+        //SETEAMOS FONT
+        // $this->SetFont($sTipoLetra, '', 5);
+    }
 }
 ?>

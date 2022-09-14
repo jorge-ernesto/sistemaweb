@@ -13,6 +13,9 @@ $sqlca = new pgsqlDB('localhost', 'postgres', 'postgres', 'integrado');
 include('/sistemaweb/assets/jgridpaginador.php');
 $objjqGridModel = new jqGridModel();
 
+include("/sistemaweb/contabilidad/helper/helper.php");	
+$objHelper = new HelperClass();	
+
 include('/sistemaweb/include/mvc_sistemaweb.php');
 include('t_libro_diario.php');
 include('m_libro_diario.php');
@@ -24,16 +27,19 @@ $accion = $_POST['accion'];
 
 try {
 	if ($accion == "listAll") {
-		$response = $objLibroDiarioModel->getListAll($_POST['data'], $objjqGridModel);
+		$response = $objLibroDiarioModel->getListAll($_POST['data'], $objjqGridModel, $objHelper);
 		echo "<script>console.log('response')</script>";
 		echo "<script>console.log('" . json_encode($response) . "')</script>";
 		$objLibroDiarioTemplate->gridView(json_encode($response));
-	} else if($accion == "listAllPDF") {
-		$response = $objLibroDiarioModel->getListAllExcel($_POST["data"]);
+	} else if($accion == "listPDF") {
+		$response = $objLibroDiarioModel->getList($_POST["data"], $objHelper);
 		$objLibroDiarioTemplate->gridViewPDF(json_encode($response));
-	} else if ($accion == "listAllExcel") {
-		$response = $objLibroDiarioModel->getListAllExcel($_POST["data"]);
+	} else if($accion == "listExcel") {
+		$response = $objLibroDiarioModel->getList($_POST["data"], $objHelper);
 		$objLibroDiarioTemplate->gridViewExcel(json_encode($response));
+	} else if ($accion == "listPLE") {
+		$response = $objLibroDiarioModel->getList($_POST["data"], $objHelper);
+		$objLibroDiarioTemplate->gridViewPLE(json_encode($response));
 	}
 } catch (Exception $r) {
 	echo $r->getMessage();

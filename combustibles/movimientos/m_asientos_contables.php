@@ -1,10 +1,17 @@
 <?php
 /**
+* Los valores para el campo "tableid"
+* Descripción breve
+* 1 = pos_transXXXXYY
+* 2 = fac_ta_factura_cabecera
+* 3 = cpag_ta_cabecera
+* 4 = c_cash_transaction
+*
 * Los valores para el campo "regid", entendiendo que viene acompañado de "tableid":
 * Descripción breve
-* 1 = es * caja * trans
-* 2 = ch_almacen * ch_fac_tipodocumento * ch_fac_seriedocumento * ch_fac_numerodocumento * cli_codigo
-* 3 = pro_cab_almacen * pro_cab_tipdocumento * pro_cab_seriedocumento * pro_cab_numdocumento * pro_codigo
+* 1 = es * caja * trans * tabla * usr * Tipo de Documento SUNAT
+* 2 = ch_almacen * ch_fac_tipodocumento * ch_fac_seriedocumento * ch_fac_numerodocumento * cli_codigo * Tipo de Documento SUNAT
+* 3 = pro_cab_almacen * pro_cab_tipdocumento * pro_cab_seriedocumento * pro_cab_numdocumento * pro_codigo * Tipo de Documento SUNAT
 * 4 = c_cash_transaction_id
 *
 * Los valores para el campo "account_order" de la tabla "act_config":
@@ -41,13 +48,14 @@ class AsientosContablesModel extends Model {
 		$objHelper = new HelperClass();	
 
 		//ACTIVAMOS MODO DEBUG
+		$this->setIsDebug(false);
 		$this->setIsDebug(true);
 
 		//ASIENTOS VENTAS COMBUSTIBLE Y ASIENTOS VENTAS MARKET	
 		$objHelper->str_debug("ASIENTOS_VENTA_PLAYA");
 		$req['is_error']            = FALSE;		
 		$data['dataVentasPlaya']    = $this->obtenerVentasPlaya($arrParams);
-		$res['asientosVentasPlaya'] = $this->generarAsientosVentasPlaya($data['dataVentasPlaya']);			
+		$res['asientosVentasPlaya'] = $this->generarAsientosVentasPlaya($data['dataVentasPlaya']);
 		$response                   = $this->checkResponse($res['asientosVentasPlaya'], $req);
 
 		//SI HAY UN ERROR DETIENE LA GENERACION DE ASIENTOS
@@ -71,7 +79,7 @@ class AsientosContablesModel extends Model {
 		$objHelper->str_debug("ASIENTOS_CTA_COBRAR_PLAYA_B_F");
 		$req['is_error']               = FALSE;
 		$data['dataVentasPlaya']       = $this->obtenerVentasPlaya($arrParams);
-		$res['asientosCtaCobrarPlaya'] = $this->generarAsientosCtaCobrarPlaya($data['dataVentasPlaya']);
+		$res['asientosCtaCobrarPlaya'] = $this->generarAsientosCtaCobrarPlaya_B_F($data['dataVentasPlaya']);
 		$response                      = $this->checkResponse($res['asientosCtaCobrarPlaya'], $req);
 
 		//SI HAY UN ERROR DETIENE LA GENERACION DE ASIENTOS
@@ -79,12 +87,36 @@ class AsientosContablesModel extends Model {
 			return $response;
 		}
 
-		//ASIENTOS CTA COBRAR COMBUSTIBLE Y ASIENTOS CTA COBRAR MAKET (NOTAS DE CREDITO)
+		//ASIENTOS CTA COBRAR COMBUSTIBLE Y ASIENTOS CTA COBRAR MARKET (NOTAS DE CREDITO)
 		$objHelper->str_debug("ASIENTOS_CTA_COBRAR_PLAYA_NC");
 		$req['is_error']               = FALSE;
 		$data['dataVentasPlaya']       = $this->obtenerVentasPlaya($arrParams);
-		$res['asientosCtaCobrarPlaya'] = $this->generarAsientosCtaCobrarPlayaNC($data['dataVentasPlaya']);
+		$res['asientosCtaCobrarPlaya'] = $this->generarAsientosCtaCobrarPlaya_NC($data['dataVentasPlaya']);
 		$response                      = $this->checkResponse($res['asientosCtaCobrarPlaya'], $req);
+
+		//SI HAY UN ERROR DETIENE LA GENERACION DE ASIENTOS
+		if ($response['error']) {
+			return $response;
+		}
+
+		//ASIENTOS RECONOCIMIENTO DE SOBRANTES Y FALTANTES
+		$objHelper->str_debug("RECONOCIMIENTO SOBRANTES Y FALTANTES");
+		$req['is_error']                   = FALSE;
+		$data['dataSobrantesFaltantes']    = $this->obtenerSobrantesFaltantes($arrParams);
+		$res['asientosSobrantesFaltantes'] = $this->generarAsientosSobrantesFaltantes($data['dataSobrantesFaltantes']);
+		$response                          = $this->checkResponse($res['asientosSobrantesFaltantes'], $req);
+
+		//SI HAY UN ERROR DETIENE LA GENERACION DE ASIENTOS
+		if ($response['error']) {
+			return $response;
+		}
+
+		//ASIENTOS RECONOCIMIENTO DE REDONDEO EFECTIVO
+		$objHelper->str_debug("RECONOCIMIENTO SOBRANTES Y FALTANTES");
+		$req['is_error']                 = FALSE;
+		$data['dataRedondeoEfectivo']    = $this->obtenerRedondeoEfectivo($arrParams);
+		$res['asientosRedondeoEfectivo'] = $this->generarAsientosRedondeoEfectivo($data['dataRedondeoEfectivo']);
+		$response                        = $this->checkResponse($res['asientosRedondeoEfectivo'], $req);
 
 		//SI HAY UN ERROR DETIENE LA GENERACION DE ASIENTOS
 		if ($response['error']) {
@@ -103,7 +135,16 @@ class AsientosContablesModel extends Model {
 			return $response;
 		}
 
-		$this->setIsDebug(false);
+		//GENERAMOS BALANCE CONTABLE
+		$objHelper->str_debug("GENERAMOS BALANCE");
+		$req['is_error'] = FALSE;
+		$res['balance']  = $this->generarBalance($arrParams);
+		$response        = $this->checkResponse($res['balance'], $req);
+
+		//SI HAY UN ERROR DETIENE LA GENERACION DE ASIENTOS
+		if ($response['error']) {
+			return $response;
+		}
 
 		//RETORNAMOS RESPUESTA CORRECTA
 		return array(
@@ -403,7 +444,9 @@ class AsientosContablesModel extends Model {
 				END AS balance, --ICBPER
 				FIRST(T.tipo) AS tipo_venta,
 				FIRST(T.fpago) AS fpago,
-           		FIRST(T.at) AS at
+           		FIRST(T.at) AS at,
+				'pos_trans" . $fecha_postrans_ant . "' AS tabla,
+				TRIM(T.usr) AS usr
 			FROM
 				pos_trans" . $fecha_postrans_ant . " AS T
 				LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = T.dia)
@@ -488,7 +531,9 @@ class AsientosContablesModel extends Model {
 			END AS balance, --ICBPER
 			FIRST(T.tipo) AS tipo_venta,
 			FIRST(T.fpago) AS fpago,
-			FIRST(T.at) AS at
+			FIRST(T.at) AS at,
+			'pos_trans" . $fecha_postrans . "' AS tabla,
+			TRIM(T.usr) AS usr
 		FROM
 			pos_trans" . $fecha_postrans . " AS T
 			LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = T.dia)
@@ -573,7 +618,9 @@ class AsientosContablesModel extends Model {
 				END AS balance, --ICBPER
 				FIRST(T.tipo) AS tipo_venta,
 				FIRST(T.fpago) AS fpago,
-           		FIRST(T.at) AS at
+           		FIRST(T.at) AS at,
+				'pos_trans" . $fecha_postrans_des . "' AS tabla,
+				TRIM(T.usr) AS usr
 			FROM
 				pos_trans" . $fecha_postrans_des . " AS T
 				LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = T.dia)
@@ -695,6 +742,8 @@ class AsientosContablesModel extends Model {
 			$result[$tipo_venta][$correlativo]['tipo_venta']    = $a['tipo_venta'];
 			$result[$tipo_venta][$correlativo]['fpago']         = $a['fpago'];
 			$result[$tipo_venta][$correlativo]['at']            = $a['at'];
+			$result[$tipo_venta][$correlativo]['tabla']         = $a['tabla'];
+			$result[$tipo_venta][$correlativo]['usr']           = $a['usr'];
 
 			$result[$tipo_venta][$correlativo]['reffec'] = "";
 		    $result[$tipo_venta][$correlativo]['reftip'] = "";
@@ -744,32 +793,34 @@ class AsientosContablesModel extends Model {
 		$sql_cuentas_contables = "
 		SELECT
 			COALESCE(c1.act_config_id,'0') ||'*'|| COALESCE(c1.value,'0') AS venta_comb_subdiario
-			,COALESCE(c2.act_config_id,'0') ||'*'|| COALESCE(c2.value,'0') AS venta_comb_ctacobrar_soles
-			,COALESCE(c3.act_config_id,'0') ||'*'|| COALESCE(c3.value,'0') AS venta_comb_ctacobrar_dolares
-			,COALESCE(c4.act_config_id,'0') ||'*'|| COALESCE(c4.value,'0') AS venta_comb_impuesto
-			,COALESCE(c5.act_config_id,'0') ||'*'|| COALESCE(c5.value,'0') AS venta_glp_ctacobrar_soles
-			,COALESCE(c6.act_config_id,'0') ||'*'|| COALESCE(c6.value,'0') AS venta_glp_ctacobrar_dolares
-			,COALESCE(c7.act_config_id,'0') ||'*'|| COALESCE(c7.value,'0') AS venta_glp_impuesto
+			,COALESCE(c2.act_config_id,'0') ||'*'|| COALESCE(c2.value,'0') AS venta_glp_subdiario
+			,COALESCE(c3.act_config_id,'0') ||'*'|| COALESCE(c3.value,'0') AS venta_comb_ctacobrar_soles
+			,COALESCE(c4.act_config_id,'0') ||'*'|| COALESCE(c4.value,'0') AS venta_comb_ctacobrar_dolares
+			,COALESCE(c5.act_config_id,'0') ||'*'|| COALESCE(c5.value,'0') AS venta_comb_impuesto
+			,COALESCE(c6.act_config_id,'0') ||'*'|| COALESCE(c6.value,'0') AS venta_glp_ctacobrar_soles
+			,COALESCE(c7.act_config_id,'0') ||'*'|| COALESCE(c7.value,'0') AS venta_glp_ctacobrar_dolares
+			,COALESCE(c8.act_config_id,'0') ||'*'|| COALESCE(c8.value,'0') AS venta_glp_impuesto
 			
-			,COALESCE(c8.act_config_id,'0') ||'*'|| COALESCE(c8.value,'0') AS venta_market_subdiario
-			,COALESCE(c9.act_config_id,'0') ||'*'|| COALESCE(c9.value,'0') AS venta_market_ctacobrar_soles
-			,COALESCE(c10.act_config_id,'0') ||'*'|| COALESCE(c10.value,'0') AS venta_market_ctacobrar_dolares
-			,COALESCE(c11.act_config_id,'0') ||'*'|| COALESCE(c11.value,'0') AS venta_market_impuesto
-			,COALESCE(c12.act_config_id,'0') ||'*'|| COALESCE(c12.value,'0') AS venta_market_icbper
+			,COALESCE(c9.act_config_id,'0') ||'*'|| COALESCE(c9.value,'0') AS venta_market_subdiario
+			,COALESCE(c10.act_config_id,'0') ||'*'|| COALESCE(c10.value,'0') AS venta_market_ctacobrar_soles
+			,COALESCE(c11.act_config_id,'0') ||'*'|| COALESCE(c11.value,'0') AS venta_market_ctacobrar_dolares
+			,COALESCE(c12.act_config_id,'0') ||'*'|| COALESCE(c12.value,'0') AS venta_market_impuesto
+			,COALESCE(c13.act_config_id,'0') ||'*'|| COALESCE(c13.value,'0') AS venta_market_icbper
 		FROM 
 			act_config c1
-			LEFT JOIN act_config c2 ON   c2.module = 1   AND c2.category = 1   AND c2.subcategory = 0   --Cuenta Combustible Cta. Cobrar - SOLES
-			LEFT JOIN act_config c3 ON   c3.module = 1   AND c3.category = 1   AND c3.subcategory = 1   --Cuenta Combustible Cta. Cobrar - DOLARES
-			LEFT JOIN act_config c4 ON   c4.module = 1   AND c4.category = 1   AND c4.subcategory = 2   --Cuenta Combustible Impuesto
-			LEFT JOIN act_config c5 ON   c5.module = 1   AND c5.category = 2   AND c5.subcategory = 0   --Cuenta GLP Cta. Cobrar - SOLES
-			LEFT JOIN act_config c6 ON   c6.module = 1   AND c6.category = 2   AND c6.subcategory = 1   --Cuenta GLP Cta. Cobrar - DOLARES
-			LEFT JOIN act_config c7 ON   c7.module = 1   AND c7.category = 2   AND c7.subcategory = 2   --Cuenta GLP Impuesto
+			LEFT JOIN act_config c2 ON   c2.module = 1   AND c2.category = 0   AND c2.subcategory = 1   --Subdiario de Venta GLP
+			LEFT JOIN act_config c3 ON   c3.module = 1   AND c3.category = 1   AND c3.subcategory = 0   --Cuenta Combustible Cta. Cobrar - SOLES
+			LEFT JOIN act_config c4 ON   c4.module = 1   AND c4.category = 1   AND c3.subcategory = 1   --Cuenta Combustible Cta. Cobrar - DOLARES
+			LEFT JOIN act_config c5 ON   c5.module = 1   AND c5.category = 1   AND c5.subcategory = 2   --Cuenta Combustible Impuesto
+			LEFT JOIN act_config c6 ON   c6.module = 1   AND c6.category = 2   AND c6.subcategory = 0   --Cuenta GLP Cta. Cobrar - SOLES
+			LEFT JOIN act_config c7 ON   c7.module = 1   AND c7.category = 2   AND c7.subcategory = 1   --Cuenta GLP Cta. Cobrar - DOLARES
+			LEFT JOIN act_config c8 ON   c8.module = 1   AND c8.category = 2   AND c8.subcategory = 2   --Cuenta GLP Impuesto
 			
-			LEFT JOIN act_config c8 ON   c8.module  = 2   AND c8.category = 0   AND c8.subcategory = 0   --Subdiario de Venta Market
-			LEFT JOIN act_config c9 ON   c9.module  = 2   AND c9.category = 1   AND c9.subcategory = 0   --Cuenta Market Cta. Cobrar - SOLES
-			LEFT JOIN act_config c10 ON   c10.module = 2   AND c10.category = 1   AND c10.subcategory = 1   --Cuenta Market Cta. Cobrar - DOLARES
-			LEFT JOIN act_config c11 ON   c11.module = 2   AND c11.category = 1   AND c11.subcategory = 2   --Cuenta Market Impuesto
-			LEFT JOIN act_config c12 ON   c12.module = 2   AND c12.category = 1   AND c12.subcategory = 3   --Cuenta Market ICBPER
+			LEFT JOIN act_config c9 ON   c9.module = 2   AND c9.category = 0   AND c9.subcategory = 0   --Subdiario de Venta Market
+			LEFT JOIN act_config c10 ON   c10.module = 2   AND c10.category = 1   AND c10.subcategory = 0   --Cuenta Market Cta. Cobrar - SOLES
+			LEFT JOIN act_config c11 ON   c11.module = 2   AND c11.category = 1   AND c11.subcategory = 1   --Cuenta Market Cta. Cobrar - DOLARES
+			LEFT JOIN act_config c12 ON   c12.module = 2   AND c12.category = 1   AND c12.subcategory = 2   --Cuenta Market Impuesto
+			LEFT JOIN act_config c13 ON   c13.module = 2   AND c13.category = 1   AND c13.subcategory = 3   --Cuenta Market ICBPER
 		WHERE   
 			c1.module = 1   AND c1.category = 0   AND c1.subcategory = 0;   --Subdiario de Venta Combustible
 		";
@@ -780,20 +831,21 @@ class AsientosContablesModel extends Model {
 	
 		$a = $sqlca->fetchRow();
 		$cuenta['venta_comb_subdiario']           = $objHelper->getCuentaContable($a[0]);
+		$cuenta['venta_glp_subdiario']            = $objHelper->getCuentaContable($a[1]);
 
-		$cuenta['venta_comb_ctacobrar_soles']     = $objHelper->getCuentaContable($a[1]);
-		$cuenta['venta_comb_ctacobrar_dolares']   = $objHelper->getCuentaContable($a[2]);
-		$cuenta['venta_comb_impuesto']            = $objHelper->getCuentaContable($a[3]);
+		$cuenta['venta_comb_ctacobrar_soles']     = $objHelper->getCuentaContable($a[2]);
+		$cuenta['venta_comb_ctacobrar_dolares']   = $objHelper->getCuentaContable($a[3]);
+		$cuenta['venta_comb_impuesto']            = $objHelper->getCuentaContable($a[4]);
 		
-		$cuenta['venta_glp_ctacobrar_soles']      = $objHelper->getCuentaContable($a[4]);
-		$cuenta['venta_glp_ctacobrar_dolares']    = $objHelper->getCuentaContable($a[5]);
-		$cuenta['venta_glp_impuesto']             = $objHelper->getCuentaContable($a[6]);
+		$cuenta['venta_glp_ctacobrar_soles']      = $objHelper->getCuentaContable($a[5]);
+		$cuenta['venta_glp_ctacobrar_dolares']    = $objHelper->getCuentaContable($a[6]);
+		$cuenta['venta_glp_impuesto']             = $objHelper->getCuentaContable($a[7]);
 		
-		$cuenta['venta_market_subdiario']         = $objHelper->getCuentaContable($a[7]);
-		$cuenta['venta_market_ctacobrar_soles']   = $objHelper->getCuentaContable($a[8]);
-		$cuenta['venta_market_ctacobrar_dolares'] = $objHelper->getCuentaContable($a[9]);
-		$cuenta['venta_market_impuesto']          = $objHelper->getCuentaContable($a[10]);
-		$cuenta['venta_market_icbper']            = $objHelper->getCuentaContable($a[11]);
+		$cuenta['venta_market_subdiario']         = $objHelper->getCuentaContable($a[8]);
+		$cuenta['venta_market_ctacobrar_soles']   = $objHelper->getCuentaContable($a[9]);
+		$cuenta['venta_market_ctacobrar_dolares'] = $objHelper->getCuentaContable($a[10]);
+		$cuenta['venta_market_impuesto']          = $objHelper->getCuentaContable($a[11]);
+		$cuenta['venta_market_icbper']            = $objHelper->getCuentaContable($a[12]);
 
 		if ($this->isDebug) {
 			echo "<script>console.log('cuentas_contables')</script>";
@@ -837,7 +889,7 @@ class AsientosContablesModel extends Model {
 							$cuenta_69       = $objHelper->getCuentaContablePersonalizada(array("tipo" => "C", "module" => "1", "category" => "1", "subcategory" => "3", "account_order" => "2", "art_codigo" => $codigo, "value" => $value));
 							$cuenta_20       = $objHelper->getCuentaContablePersonalizada(array("tipo" => "C", "module" => "1", "category" => "1", "subcategory" => "3", "account_order" => "3", "art_codigo" => $codigo, "value" => $value));
 						} else if ($codigo == "11620307") { //Cuentas GLP
-							$subdiario       = $cuenta['venta_comb_subdiario'];
+							$subdiario       = $cuenta['venta_glp_subdiario'];
 							$cuenta_total    = $cuenta['venta_glp_ctacobrar_soles'];
 							$cuenta_impuesto = $cuenta['venta_glp_impuesto'];
 							$cuenta_bi       = $objHelper->getCuentaContablePersonalizada(array("tipo" => "C", "module" => "1", "category" => "2", "subcategory" => "3", "account_order" => "1", "art_codigo" => $codigo, "value" => $value));
@@ -864,21 +916,27 @@ class AsientosContablesModel extends Model {
 					}
 
 					$tableid         = 1; //Tabla pos_transXXXXYY
-					$regid           = $value["es"] ."*". $value["caja"] . "*" . $value["id_trans"];
+					$regid           = $value["es"] ."*". $value["caja"] . "*" . $value["id_trans"] . "*" . $value["tabla"];
 					$int_clientes_id = ( TRIM($value["ruc"]) == "" ) ? NULL : $value["ruc"];
-					$tab_currency    = "01"; //Tabla "int_tabla_general", campo "tab_tabla"
+					$tab_currency    = "01"; //Tabla "int_tabla_general", campo "tab_tabla" con valor "04"
 
 					if ($tipo_pdf == 'F') { //Factura
 						$description = "Por Factura de Venta " . $value["serie"] . "-" . $value["numero"];
+						$regid .= "*" . $value["usr"];
 					} else if ($tipo_pdf == 'B') { //Boleta
 						$description = "Por Boleta de Venta " . $value["serie"] . "-" . $value["numero"];
+						$regid .= "*" . $value["usr"];
 					} else if ($tipo_pdf == 'N') { //Nota de Despacho
 						$description = "Por Nota de Despacho " . $value["caja"] . "-" . $value["id_trans"];
+						$regid .= "*" . $value["caja"] . "-" . $value["id_trans"];
 					} else if ($tipo_pdf == 'A') { //Nota de Credito
 						$description = "Por Nota de Credito " . $value["serie"] . "-" . $value["numero"];
+						$regid .= "*" . $value["usr"];
 					} else { //Otros
 						$description = "Por Documento " . $value["serie"] . "-" . $value["numero"];
+						$regid .= "*" . $value["usr"];
 					}
+					$regid .= "*" . $value["tipo"];
 				}
 
 				/* Información para Detalle (act_entryline) */
@@ -1115,7 +1173,7 @@ class AsientosContablesModel extends Model {
 							"registerno"         => $correlativo,
 							"documentdate"       => $value["emision"],
 							"tableid"            => $tableid,
-							"regid"              => $value["es"] ."*". $value["caja"] . "*" . $value["id_trans"],
+							"regid"              => $regid,
 							"int_clientes_id"    => $int_clientes_id,
 							"c_cash_mpayment_id" => NULL,
 							"tab_currency"       => $tab_currency,
@@ -1434,9 +1492,10 @@ class AsientosContablesModel extends Model {
 			$result[$keyStatus][$i]['balance']    = "0.00"; //ICBPER
 			$result[$keyStatus][$i]['status']     = $a['status'];
 			$result[$keyStatus][$i]['statusname'] = $a['statusname'];
-			$result[$keyStatus][$i]['almacen']    = $a['almacen'];
+			$result[$keyStatus][$i]['almacen']    	  = $a['almacen'];
 			$result[$keyStatus][$i]['tipodocumento']  = $a['tipodocumento'];
 			$result[$keyStatus][$i]['descargarstock'] = $a['descargarstock'];
+			$result[$keyStatus][$i]['moneda'] 		  = $a['moneda'];
 
 			$nuevodata= explode('*',$a['refdata']);
 			$dataref1=$nuevodata[0];//numero
@@ -1613,9 +1672,9 @@ class AsientosContablesModel extends Model {
 			$act_entrytype_id = 3; //Asientos Ventas Oficina
 			
 			$tableid         = 2;
-			$regid           = $value["almacen"] ."*". $value["tipodocumento"] . "*" . $value["serie"] . "*" . $value["numero"] . "*" . $value["ruc"];
+			$regid           = $value["almacen"] ."*". $value["tipodocumento"] . "*" . $value["serie"] . "*" . $value["numero"] . "*" . $value["ruc"] . "*" . $value["tipo"];
 			$int_clientes_id = ( TRIM($value["ruc"]) == "" ) ? NULL : $value["ruc"];
-			$tab_currency    = ( $moneda == "02" ) ? "02" : "01"; //Tabla "int_tabla_general", campo "tab_tabla"
+			$tab_currency    = ( $moneda == "02" ) ? "02" : "01"; //Tabla "int_tabla_general", campo "tab_tabla" con valor "04"
 
 			if ($tipo == "01") { //Factura
 				$description = "Por Factura de Venta " . $value["serie"] . "-" . $value["numero"];
@@ -1815,7 +1874,7 @@ class AsientosContablesModel extends Model {
 				"registerno"         => $correlativo,
 				"documentdate"       => $value["emision"],
 				"tableid"            => $tableid,
-				"regid"              => $value["almacen"] ."*". $value["tipodocumento"] . "*" . $value["serie"] . "*" . $value["numero"] . "*" . $value["ruc"],
+				"regid"              => $regid,
 				"int_clientes_id"    => $int_clientes_id,
 				"c_cash_mpayment_id" => NULL,
 				"tab_currency"       => $tab_currency,
@@ -1831,7 +1890,7 @@ class AsientosContablesModel extends Model {
 		return $this->executeInsert($data_asientos);
 	}
 
-	public function generarAsientosCtaCobrarPlaya($data) {
+	public function generarAsientosCtaCobrarPlaya_B_F($data) {
 		$objHelper = new HelperClass();
 		if ($data['error']) {			
 			$res = array(
@@ -1852,52 +1911,54 @@ class AsientosContablesModel extends Model {
 		/* Obtenemos cuentas contables para Asientos Cta Cobrar Playa (Combustibles y Market) */
 		$sql_cuentas_contables = "
 		SELECT
-			 COALESCE(c01.act_config_id,'0') ||'*'|| COALESCE(c01.value,'0') AS ctacobrar_comb_subdiario
-			,COALESCE(c02.act_config_id,'0') ||'*'|| COALESCE(c02.value,'0') AS ctacobrar_comb_cliente
-			,COALESCE(c03.act_config_id,'0') ||'*'|| COALESCE(c03.value,'0') AS ctacobrar_comb_caja_efectivo
-			,COALESCE(c04.act_config_id,'0') ||'*'|| COALESCE(c04.value,'0') AS ctacobrar_glp_cliente
-			,COALESCE(c05.act_config_id,'0') ||'*'|| COALESCE(c05.value,'0') AS ctacobrar_glp_caja_efectivo
+			COALESCE(c01.act_config_id,'0') ||'*'|| COALESCE(c01.value,'0') AS ctacobrar_comb_subdiario
+			,COALESCE(c02.act_config_id,'0') ||'*'|| COALESCE(c02.value,'0') AS ctacobrar_glp_subdiario
+			,COALESCE(c03.act_config_id,'0') ||'*'|| COALESCE(c03.value,'0') AS ctacobrar_comb_cliente
+			,COALESCE(c04.act_config_id,'0') ||'*'|| COALESCE(c04.value,'0') AS ctacobrar_comb_caja_efectivo
+			,COALESCE(c05.act_config_id,'0') ||'*'|| COALESCE(c05.value,'0') AS ctacobrar_glp_cliente
+			,COALESCE(c06.act_config_id,'0') ||'*'|| COALESCE(c06.value,'0') AS ctacobrar_glp_caja_efectivo
 
-			,COALESCE(c06.act_config_id,'0') ||'*'|| COALESCE(c06.value,'0') AS ctacobrar_mkt_subdiario
-			,COALESCE(c07.act_config_id,'0') ||'*'|| COALESCE(c07.value,'0') AS ctacobrar_mkt_cliente
-			,COALESCE(c08.act_config_id,'0') ||'*'|| COALESCE(c08.value,'0') AS ctacobrar_mkt_caja_efectivo
+			,COALESCE(c07.act_config_id,'0') ||'*'|| COALESCE(c07.value,'0') AS ctacobrar_mkt_subdiario
+			,COALESCE(c08.act_config_id,'0') ||'*'|| COALESCE(c08.value,'0') AS ctacobrar_mkt_cliente
+			,COALESCE(c09.act_config_id,'0') ||'*'|| COALESCE(c09.value,'0') AS ctacobrar_mkt_caja_efectivo
 
-			,COALESCE(c09.act_config_id,'0') ||'*'|| COALESCE(c09.value,'0') AS comb_gasto_cobrotc_1
-			,COALESCE(c10.act_config_id,'0') ||'*'|| COALESCE(c10.value,'0') AS comb_gasto_cobrotc_2
-			,COALESCE(c11.act_config_id,'0') ||'*'|| COALESCE(c11.value,'0') AS comb_gasto_cobrotc_3
+			,COALESCE(c10.act_config_id,'0') ||'*'|| COALESCE(c10.value,'0') AS comb_gasto_cobrotc_1
+			,COALESCE(c11.act_config_id,'0') ||'*'|| COALESCE(c11.value,'0') AS comb_gasto_cobrotc_2
+			,COALESCE(c12.act_config_id,'0') ||'*'|| COALESCE(c12.value,'0') AS comb_gasto_cobrotc_3
 
-			,COALESCE(c12.act_config_id,'0') ||'*'|| COALESCE(c12.value,'0') AS glp_gasto_cobrotc_1
-			,COALESCE(c13.act_config_id,'0') ||'*'|| COALESCE(c13.value,'0') AS glp_gasto_cobrotc_2
-			,COALESCE(c14.act_config_id,'0') ||'*'|| COALESCE(c14.value,'0') AS glp_cobro_cobrotc_3
+			,COALESCE(c13.act_config_id,'0') ||'*'|| COALESCE(c13.value,'0') AS glp_gasto_cobrotc_1
+			,COALESCE(c14.act_config_id,'0') ||'*'|| COALESCE(c14.value,'0') AS glp_gasto_cobrotc_2
+			,COALESCE(c15.act_config_id,'0') ||'*'|| COALESCE(c15.value,'0') AS glp_cobro_cobrotc_3
 
-			,COALESCE(c15.act_config_id,'0') ||'*'|| COALESCE(c15.value,'0') AS mkt_gasto_cobrotc_1
-			,COALESCE(c16.act_config_id,'0') ||'*'|| COALESCE(c16.value,'0') AS mkt_gasto_cobrotc_2
-			,COALESCE(c17.act_config_id,'0') ||'*'|| COALESCE(c17.value,'0') AS mkt_gasto_cobrotc_3
+			,COALESCE(c16.act_config_id,'0') ||'*'|| COALESCE(c16.value,'0') AS mkt_gasto_cobrotc_1
+			,COALESCE(c17.act_config_id,'0') ||'*'|| COALESCE(c17.value,'0') AS mkt_gasto_cobrotc_2
+			,COALESCE(c18.act_config_id,'0') ||'*'|| COALESCE(c18.value,'0') AS mkt_gasto_cobrotc_3
 		FROM 
-			act_config c01			
-			LEFT JOIN act_config c02 ON   c02.module = 4   AND c02.category = 1   AND c02.subcategory = 0   --Cuenta Cobrar Combustible Cliente - SOLES
-			LEFT JOIN act_config c03 ON   c03.module = 4   AND c03.category = 1   AND c03.subcategory = 1   --Cuenta Cobrar Combustible Caja Efectivo - SOLES   --No se utiliza, ya que se utiliza lo de act_config_cash
-			LEFT JOIN act_config c04 ON   c04.module = 4   AND c04.category = 2   AND c04.subcategory = 0   --Cuenta Cobrar GLP Cliente - SOLES
-			LEFT JOIN act_config c05 ON   c05.module = 4   AND c05.category = 2   AND c05.subcategory = 1   --Cuenta Cobrar GLP Caja Efectivo - SOLES           --No se utiliza, ya que se utiliza lo de act_config_cash
+			act_config c01	
+			LEFT JOIN act_config c02 ON   c02.module = 4   AND c02.category = 0   AND c02.subcategory = 1   --Subdiario de Cta Cobrar GLP
+			LEFT JOIN act_config c03 ON   c03.module = 4   AND c03.category = 1   AND c03.subcategory = 0   --Cuenta Cobrar Combustible Cliente - SOLES
+			LEFT JOIN act_config c04 ON   c04.module = 4   AND c04.category = 1   AND c04.subcategory = 1   --Cuenta Cobrar Combustible Caja Efectivo - SOLES   --No se utiliza, ya que se utiliza lo de act_config_cash
+			LEFT JOIN act_config c05 ON   c05.module = 4   AND c05.category = 2   AND c05.subcategory = 0   --Cuenta Cobrar GLP Cliente - SOLES
+			LEFT JOIN act_config c06 ON   c06.module = 4   AND c06.category = 2   AND c06.subcategory = 1   --Cuenta Cobrar GLP Caja Efectivo - SOLES           --No se utiliza, ya que se utiliza lo de act_config_cash
 
-			LEFT JOIN act_config c06 ON   c06.module = 5   AND c06.category = 0   AND c06.subcategory = 0   --Subdiario de Cta Cobrar Market
-			LEFT JOIN act_config c07 ON   c07.module = 5   AND c07.category = 1   AND c07.subcategory = 0   --Cuenta Cobrar Market Cliente - SOLES
-			LEFT JOIN act_config c08 ON   c08.module = 5   AND c08.category = 1   AND c08.subcategory = 1   --Cuenta Cobrar Market Caja Efectivo - SOLES        --No se utiliza, ya que se utiliza lo de act_config_cash
+			LEFT JOIN act_config c07 ON   c07.module = 5   AND c07.category = 0   AND c07.subcategory = 0   --Subdiario de Cta Cobrar Market
+			LEFT JOIN act_config c08 ON   c08.module = 5   AND c08.category = 1   AND c08.subcategory = 0   --Cuenta Cobrar Market Cliente - SOLES
+			LEFT JOIN act_config c09 ON   c09.module = 5   AND c09.category = 1   AND c09.subcategory = 1   --Cuenta Cobrar Market Caja Efectivo - SOLES        --No se utiliza, ya que se utiliza lo de act_config_cash
 
 			--COMBUSTIBLE
-			LEFT JOIN act_config c09 ON   c09.module = 4   AND c09.category = 1   AND c09.subcategory = 2   AND c09.account_order = 1   --Gastos financieros Cobro (%) TC
-			LEFT JOIN act_config c10 ON   c10.module = 4   AND c10.category = 1   AND c10.subcategory = 2   AND c10.account_order = 2   --Gastos financieros Cobro (%) TC
-			LEFT JOIN act_config c11 ON   c11.module = 4   AND c11.category = 1   AND c11.subcategory = 2   AND c11.account_order = 3   --Cargas imputables a cuenta de costo y gasto
+			LEFT JOIN act_config c10 ON   c10.module = 4   AND c10.category = 1   AND c10.subcategory = 2   AND c10.account_order = 1   --Gastos financieros Cobro (%) TC
+			LEFT JOIN act_config c11 ON   c11.module = 4   AND c11.category = 1   AND c11.subcategory = 2   AND c11.account_order = 2   --Gastos financieros Cobro (%) TC
+			LEFT JOIN act_config c12 ON   c12.module = 4   AND c12.category = 1   AND c12.subcategory = 2   AND c12.account_order = 3   --Cargas imputables a cuenta de costo y gasto
 			
 			--GLP
-			LEFT JOIN act_config c12 ON   c12.module = 4   AND c12.category = 2   AND c12.subcategory = 2   AND c12.account_order = 1   --Gastos financieros Cobro (%) TC
-			LEFT JOIN act_config c13 ON   c13.module = 4   AND c13.category = 2   AND c13.subcategory = 2   AND c13.account_order = 2   --Gastos financieros Cobro (%) TC
-			LEFT JOIN act_config c14 ON   c14.module = 4   AND c14.category = 2   AND c14.subcategory = 2   AND c14.account_order = 3   --Cargas imputables a cuenta de costo y gasto
+			LEFT JOIN act_config c13 ON   c13.module = 4   AND c13.category = 2   AND c13.subcategory = 2   AND c13.account_order = 1   --Gastos financieros Cobro (%) TC
+			LEFT JOIN act_config c14 ON   c14.module = 4   AND c14.category = 2   AND c14.subcategory = 2   AND c14.account_order = 2   --Gastos financieros Cobro (%) TC
+			LEFT JOIN act_config c15 ON   c15.module = 4   AND c15.category = 2   AND c15.subcategory = 2   AND c15.account_order = 3   --Cargas imputables a cuenta de costo y gasto
 			
 			--MARKET
-			LEFT JOIN act_config c15 ON   c15.module = 5   AND c15.category = 1   AND c15.subcategory = 2   AND c15.account_order = 1   --Gastos financieros Cobro (%) TC
-			LEFT JOIN act_config c16 ON   c16.module = 5   AND c16.category = 1   AND c16.subcategory = 2   AND c16.account_order = 2   --Gastos financieros Cobro (%) TC
-			LEFT JOIN act_config c17 ON   c17.module = 5   AND c17.category = 1   AND c17.subcategory = 2   AND c17.account_order = 3   --Cargas imputables a cuenta de costo y gasto
+			LEFT JOIN act_config c16 ON   c16.module = 5   AND c16.category = 1   AND c16.subcategory = 2   AND c16.account_order = 1   --Gastos financieros Cobro (%) TC
+			LEFT JOIN act_config c17 ON   c17.module = 5   AND c17.category = 1   AND c17.subcategory = 2   AND c17.account_order = 2   --Gastos financieros Cobro (%) TC
+			LEFT JOIN act_config c18 ON   c18.module = 5   AND c18.category = 1   AND c18.subcategory = 2   AND c18.account_order = 3   --Cargas imputables a cuenta de costo y gasto
 		WHERE   
 			c01.module = 4   AND c01.category = 0   AND c01.subcategory = 0;   --Subdiario de Cta Cobrar Combustible
 		";
@@ -1908,26 +1969,27 @@ class AsientosContablesModel extends Model {
 
 		$a = $sqlca->fetchRow();
 		$cuenta['ctacobrar_comb_subdiario']           = $objHelper->getCuentaContable($a[0]);
-		$cuenta['ctacobrar_comb_cliente_soles']       = $objHelper->getCuentaContable($a[1]);
-		$cuenta['ctacobrar_comb_caja_efectivo_soles'] = $objHelper->getCuentaContable($a[2]); //No se utiliza, ya que se utiliza lo de act_config_cash
-		$cuenta['ctacobrar_glp_cliente_soles']        = $objHelper->getCuentaContable($a[3]);
-		$cuenta['ctacobrar_glp_caja_efectivo_soles']  = $objHelper->getCuentaContable($a[4]); //No se utiliza, ya que se utiliza lo de act_config_cash
+		$cuenta['ctacobrar_glp_subdiario']            = $objHelper->getCuentaContable($a[1]);
+		$cuenta['ctacobrar_comb_cliente_soles']       = $objHelper->getCuentaContable($a[2]);
+		$cuenta['ctacobrar_comb_caja_efectivo_soles'] = $objHelper->getCuentaContable($a[3]); //No se utiliza, ya que se utiliza lo de act_config_cash
+		$cuenta['ctacobrar_glp_cliente_soles']        = $objHelper->getCuentaContable($a[4]);
+		$cuenta['ctacobrar_glp_caja_efectivo_soles']  = $objHelper->getCuentaContable($a[5]); //No se utiliza, ya que se utiliza lo de act_config_cash
 		
-		$cuenta['ctacobrar_mkt_subdiario']            = $objHelper->getCuentaContable($a[5]);
-		$cuenta['ctacobrar_mkt_cliente_soles']        = $objHelper->getCuentaContable($a[6]);
-		$cuenta['ctacobrar_mkt_caja_efectivo_soles']  = $objHelper->getCuentaContable($a[7]); //No se utiliza, ya que se utiliza lo de act_config_cash
+		$cuenta['ctacobrar_mkt_subdiario']            = $objHelper->getCuentaContable($a[6]);
+		$cuenta['ctacobrar_mkt_cliente_soles']        = $objHelper->getCuentaContable($a[7]);
+		$cuenta['ctacobrar_mkt_caja_efectivo_soles']  = $objHelper->getCuentaContable($a[8]); //No se utiliza, ya que se utiliza lo de act_config_cash
 
-		$cuenta['comb_gasto_cobrotc_1']               = $objHelper->getCuentaContable($a[8]);
-		$cuenta['comb_gasto_cobrotc_2']               = $objHelper->getCuentaContable($a[9]);
-		$cuenta['comb_gasto_cobrotc_3']               = $objHelper->getCuentaContable($a[10]);
+		$cuenta['comb_gasto_cobrotc_1']               = $objHelper->getCuentaContable($a[9]);
+		$cuenta['comb_gasto_cobrotc_2']               = $objHelper->getCuentaContable($a[10]);
+		$cuenta['comb_gasto_cobrotc_3']               = $objHelper->getCuentaContable($a[11]);
 
-		$cuenta['glp_gasto_cobrotc_1']                = $objHelper->getCuentaContable($a[11]);
-		$cuenta['glp_gasto_cobrotc_2']                = $objHelper->getCuentaContable($a[12]);
-		$cuenta['glp_gasto_cobrotc_3']                = $objHelper->getCuentaContable($a[13]);
+		$cuenta['glp_gasto_cobrotc_1']                = $objHelper->getCuentaContable($a[12]);
+		$cuenta['glp_gasto_cobrotc_2']                = $objHelper->getCuentaContable($a[13]);
+		$cuenta['glp_gasto_cobrotc_3']                = $objHelper->getCuentaContable($a[14]);
 
-		$cuenta['mkt_gasto_cobrotc_1']                = $objHelper->getCuentaContable($a[14]);
-		$cuenta['mkt_gasto_cobrotc_2']                = $objHelper->getCuentaContable($a[15]);
-		$cuenta['mkt_gasto_cobrotc_3']                = $objHelper->getCuentaContable($a[16]);
+		$cuenta['mkt_gasto_cobrotc_1']                = $objHelper->getCuentaContable($a[15]);
+		$cuenta['mkt_gasto_cobrotc_2']                = $objHelper->getCuentaContable($a[16]);
+		$cuenta['mkt_gasto_cobrotc_3']                = $objHelper->getCuentaContable($a[17]);
 		
 		if ($this->isDebug) {
 			echo "<script>console.log('cuentas_contables')</script>";
@@ -2114,7 +2176,7 @@ class AsientosContablesModel extends Model {
 				$ctacobrar_gasto_cobrotc_2 = $cuenta['comb_gasto_cobrotc_2'];
 				$ctacobrar_gasto_cobrotc_3 = $cuenta['comb_gasto_cobrotc_3'];
 			} else if ($tipo == "GLP") {
-				$subdiario                 = $cuenta['ctacobrar_comb_subdiario'];
+				$subdiario                 = $cuenta['ctacobrar_glp_subdiario'];
 				$ctacobrar_12_cliente      = $cuenta['ctacobrar_glp_cliente_soles'];
 				$ctacobrar_gasto_cobrotc_1 = $cuenta['glp_gasto_cobrotc_1'];
 				$ctacobrar_gasto_cobrotc_2 = $cuenta['glp_gasto_cobrotc_2'];
@@ -2139,7 +2201,7 @@ class AsientosContablesModel extends Model {
 			$tableid         = 1; //Tabla pos_transXXXXYY
 			$regid           = "-";
 			$int_clientes_id = NULL;
-			$tab_currency    = "01"; //Tabla "int_tabla_general", campo "tab_tabla"
+			$tab_currency    = "01"; //Tabla "int_tabla_general", campo "tab_tabla" con valor "04"
 
 			if ($tipo == "COMBUSTIBLE") { //Asientos Cta. Cobrar Combustibles
 				$description = "Cta Cobrar Combustible";
@@ -2274,9 +2336,9 @@ class AsientosContablesModel extends Model {
 			$data_detalle = $value['HABER']['td']['F']['detalle'];
 			foreach ($data_detalle as $keydetalle => $detalle) {
 				$importe = $detalle['importe'];
-				$detalleserie        = $detalle['serie'];
-				$detallenumero       = $detalle['numero'];
-				$detalleregid        = $detalle["es"] ."*". $detalle["caja"] . "*" . $detalle["id_trans"];
+				$detalleserie        = $detalle["serie"];
+				$detallenumero       = $detalle["numero"];
+				$detalleregid        = $detalle["es"] ."*". $detalle["caja"] . "*" . $detalle["id_trans"] . "*" . $detalle["tabla"] . "*" . $detalle["usr"] . "*" . $detalle["tipo"];
 				$detalleintclienteid = ( TRIM($detalle["ruc"]) == "" ) ? NULL : $detalle["ruc"];
 				
 				$act_entryline[] = array(
@@ -2361,7 +2423,7 @@ class AsientosContablesModel extends Model {
 				"registerno"         => $correlativo,
 				"documentdate"       => TRIM($arrParams['dEntry']),
 				"tableid"            => $tableid,
-				"regid"              => '-',
+				"regid"              => $regid,
 				"int_clientes_id"    => $int_clientes_id,
 				"c_cash_mpayment_id" => NULL,
 				"tab_currency"       => $tab_currency,
@@ -2377,7 +2439,7 @@ class AsientosContablesModel extends Model {
 		return $this->executeInsert($data_asientos);
 	}
 
-	public function generarAsientosCtaCobrarPlayaNC($data) {
+	public function generarAsientosCtaCobrarPlaya_NC($data) {
 		$objHelper = new HelperClass();
 		if ($data['error']) {			
 			$res = array(
@@ -2399,24 +2461,26 @@ class AsientosContablesModel extends Model {
 		$sql_cuentas_contables = "
 		SELECT
 			COALESCE(c01.act_config_id,'0') ||'*'|| COALESCE(c01.value,'0') AS ctacobrar_comb_subdiario
-			,COALESCE(c02.act_config_id,'0') ||'*'|| COALESCE(c02.value,'0') AS ctacobrar_comb_cliente
-			,COALESCE(c03.act_config_id,'0') ||'*'|| COALESCE(c03.value,'0') AS ctacobrar_comb_caja_efectivo
-			,COALESCE(c04.act_config_id,'0') ||'*'|| COALESCE(c04.value,'0') AS ctacobrar_glp_cliente
-			,COALESCE(c05.act_config_id,'0') ||'*'|| COALESCE(c05.value,'0') AS ctacobrar_glp_caja_efectivo
+			,COALESCE(c02.act_config_id,'0') ||'*'|| COALESCE(c02.value,'0') AS ctacobrar_glp_subdiario
+			,COALESCE(c03.act_config_id,'0') ||'*'|| COALESCE(c03.value,'0') AS ctacobrar_comb_cliente
+			,COALESCE(c04.act_config_id,'0') ||'*'|| COALESCE(c04.value,'0') AS ctacobrar_comb_caja_efectivo
+			,COALESCE(c05.act_config_id,'0') ||'*'|| COALESCE(c05.value,'0') AS ctacobrar_glp_cliente
+			,COALESCE(c06.act_config_id,'0') ||'*'|| COALESCE(c06.value,'0') AS ctacobrar_glp_caja_efectivo
 
-			,COALESCE(c06.act_config_id,'0') ||'*'|| COALESCE(c06.value,'0') AS ctacobrar_mkt_subdiario
-			,COALESCE(c07.act_config_id,'0') ||'*'|| COALESCE(c07.value,'0') AS ctacobrar_mkt_cliente
-			,COALESCE(c08.act_config_id,'0') ||'*'|| COALESCE(c08.value,'0') AS ctacobrar_mkt_caja_efectivo
+			,COALESCE(c07.act_config_id,'0') ||'*'|| COALESCE(c07.value,'0') AS ctacobrar_mkt_subdiario
+			,COALESCE(c08.act_config_id,'0') ||'*'|| COALESCE(c08.value,'0') AS ctacobrar_mkt_cliente
+			,COALESCE(c09.act_config_id,'0') ||'*'|| COALESCE(c09.value,'0') AS ctacobrar_mkt_caja_efectivo
 		FROM 
-			act_config c01			
-			LEFT JOIN act_config c02 ON   c02.module = 4   AND c02.category = 1   AND c02.subcategory = 0   --Cuenta Cobrar Combustible Cliente - SOLES
-			LEFT JOIN act_config c03 ON   c03.module = 4   AND c03.category = 1   AND c03.subcategory = 1   --Cuenta Cobrar Combustible Caja Efectivo - SOLES   --No se utiliza, ya que se utiliza lo de act_config_cash
-			LEFT JOIN act_config c04 ON   c04.module = 4   AND c04.category = 2   AND c04.subcategory = 0   --Cuenta Cobrar GLP Cliente - SOLES
-			LEFT JOIN act_config c05 ON   c05.module = 4   AND c05.category = 2   AND c05.subcategory = 1   --Cuenta Cobrar GLP Caja Efectivo - SOLES           --No se utiliza, ya que se utiliza lo de act_config_cash
+			act_config c01	
+			LEFT JOIN act_config c02 ON   c02.module = 4   AND c02.category = 0   AND c02.subcategory = 1   --Subdiario de Cta Cobrar GLP
+			LEFT JOIN act_config c03 ON   c03.module = 4   AND c03.category = 1   AND c03.subcategory = 0   --Cuenta Cobrar Combustible Cliente - SOLES
+			LEFT JOIN act_config c04 ON   c04.module = 4   AND c04.category = 1   AND c04.subcategory = 1   --Cuenta Cobrar Combustible Caja Efectivo - SOLES   --No se utiliza, ya que se utiliza lo de act_config_cash
+			LEFT JOIN act_config c05 ON   c05.module = 4   AND c05.category = 2   AND c05.subcategory = 0   --Cuenta Cobrar GLP Cliente - SOLES
+			LEFT JOIN act_config c06 ON   c06.module = 4   AND c06.category = 2   AND c06.subcategory = 1   --Cuenta Cobrar GLP Caja Efectivo - SOLES           --No se utiliza, ya que se utiliza lo de act_config_cash
 
-			LEFT JOIN act_config c06 ON   c06.module = 5   AND c06.category = 0   AND c06.subcategory = 0   --Subdiario de Cta Cobrar Market
-			LEFT JOIN act_config c07 ON   c07.module = 5   AND c07.category = 1   AND c07.subcategory = 0   --Cuenta Cobrar Market Cliente - SOLES
-			LEFT JOIN act_config c08 ON   c08.module = 5   AND c08.category = 1   AND c08.subcategory = 1   --Cuenta Cobrar Market Caja Efectivo - SOLES        --No se utiliza, ya que se utiliza lo de act_config_cash
+			LEFT JOIN act_config c07 ON   c07.module = 5   AND c07.category = 0   AND c07.subcategory = 0   --Subdiario de Cta Cobrar Market
+			LEFT JOIN act_config c08 ON   c08.module = 5   AND c08.category = 1   AND c08.subcategory = 0   --Cuenta Cobrar Market Cliente - SOLES
+			LEFT JOIN act_config c09 ON   c09.module = 5   AND c09.category = 1   AND c09.subcategory = 1   --Cuenta Cobrar Market Caja Efectivo - SOLES        --No se utiliza, ya que se utiliza lo de act_config_cash
 		WHERE   
 			c01.module = 4   AND c01.category = 0   AND c01.subcategory = 0;   --Subdiario de Cta Cobrar Combustible
 		";
@@ -2427,14 +2491,15 @@ class AsientosContablesModel extends Model {
 	
 		$a = $sqlca->fetchRow();
 		$cuenta['ctacobrar_comb_subdiario']           = $objHelper->getCuentaContable($a[0]);
-		$cuenta['ctacobrar_comb_cliente_soles']       = $objHelper->getCuentaContable($a[1]);
-		$cuenta['ctacobrar_comb_caja_efectivo_soles'] = $objHelper->getCuentaContable($a[2]); //No se utiliza, ya que se utiliza lo de act_config_cash
-		$cuenta['ctacobrar_glp_cliente_soles']        = $objHelper->getCuentaContable($a[3]);
-		$cuenta['ctacobrar_glp_caja_efectivo_soles']  = $objHelper->getCuentaContable($a[4]); //No se utiliza, ya que se utiliza lo de act_config_cash
+		$cuenta['ctacobrar_glp_subdiario']            = $objHelper->getCuentaContable($a[1]);
+		$cuenta['ctacobrar_comb_cliente_soles']       = $objHelper->getCuentaContable($a[2]);
+		$cuenta['ctacobrar_comb_caja_efectivo_soles'] = $objHelper->getCuentaContable($a[3]); //No se utiliza, ya que se utiliza lo de act_config_cash
+		$cuenta['ctacobrar_glp_cliente_soles']        = $objHelper->getCuentaContable($a[4]);
+		$cuenta['ctacobrar_glp_caja_efectivo_soles']  = $objHelper->getCuentaContable($a[5]); //No se utiliza, ya que se utiliza lo de act_config_cash
 		
-		$cuenta['ctacobrar_mkt_subdiario']            = $objHelper->getCuentaContable($a[5]);
-		$cuenta['ctacobrar_mkt_cliente_soles']        = $objHelper->getCuentaContable($a[6]);
-		$cuenta['ctacobrar_mkt_caja_efectivo_soles']  = $objHelper->getCuentaContable($a[7]); //No se utiliza, ya que se utiliza lo de act_config_cash
+		$cuenta['ctacobrar_mkt_subdiario']            = $objHelper->getCuentaContable($a[6]);
+		$cuenta['ctacobrar_mkt_cliente_soles']        = $objHelper->getCuentaContable($a[7]);
+		$cuenta['ctacobrar_mkt_caja_efectivo_soles']  = $objHelper->getCuentaContable($a[8]); //No se utiliza, ya que se utiliza lo de act_config_cash
 		
 		if ($this->isDebug) {
 			echo "<script>console.log('cuentas_contables')</script>";
@@ -2492,7 +2557,7 @@ class AsientosContablesModel extends Model {
 							$ctacobrar_12_cliente = $cuenta['ctacobrar_comb_cliente_soles'];
 	
 						} else if ($codigo == "11620307") { //Cuentas GLP
-							$subdiario            = $cuenta['ctacobrar_comb_subdiario'];
+							$subdiario            = $cuenta['ctacobrar_glp_subdiario'];
 							$ctacobrar_12_cliente = $cuenta['ctacobrar_glp_cliente_soles'];
 	
 						}
@@ -2512,9 +2577,9 @@ class AsientosContablesModel extends Model {
 					}										
 	
 					$tableid         = 1; //Tabla pos_transXXXXYY
-					$regid           = $value["es"] ."*". $value["caja"] . "*" . $value["id_trans"];
+					$regid           = $value["es"] ."*". $value["caja"] . "*" . $value["id_trans"] . "*" . $value["tabla"] . "*" . $value["usr"] . "*" . $value["tipo"];
 					$int_clientes_id = ( TRIM($value["ruc"]) == "" ) ? NULL : $value["ruc"];
-					$tab_currency    = "01"; //Tabla "int_tabla_general", campo "tab_tabla"
+					$tab_currency    = "01"; //Tabla "int_tabla_general", campo "tab_tabla" con valor "04"
 
 					if ($tipo_pdf == 'A') { //Nota de Credito
 						$description = "Por Nota de Credito " . $value["serie"] . "-" . $value["numero"];
@@ -2576,7 +2641,7 @@ class AsientosContablesModel extends Model {
 								//Datos adicionales
 								$importeReferencia         = $arrResponseModel["arrDataModel"]["importe"];
 								$descripcionReferencia     = "Por Documento de Referencia $sSerieNumeroReferencia";
-								$regidReferencia           = $arrResponseModel["arrDataModel"]["es"] ."*". $arrResponseModel["arrDataModel"]["caja"] ."*". $arrResponseModel["arrDataModel"]["id_trans"];
+								$regidReferencia           = $arrResponseModel["arrDataModel"]["es"] ."*". $arrResponseModel["arrDataModel"]["caja"] ."*". $arrResponseModel["arrDataModel"]["id_trans"] ."*". $arrResponseModel["arrDataModel"]["tabla"] ."*". $arrResponseModel["arrDataModel"]["usr"] ."*". $arrResponseModel["arrDataModel"]["tiporef"];
 								$int_clientes_idReferencia = $arrResponseModel["arrDataModel"]["ruc"];
 							}
 						}
@@ -2636,7 +2701,7 @@ class AsientosContablesModel extends Model {
 							"registerno"         => $correlativo,
 							"documentdate"       => $value["emision"],
 							"tableid"            => $tableid,
-							"regid"              => $value["es"] ."*". $value["caja"] . "*" . $value["id_trans"],
+							"regid"              => $regid,
 							"int_clientes_id"    => $int_clientes_id,
 							"c_cash_mpayment_id" => NULL,
 							"tab_currency"       => $tab_currency,
@@ -2653,6 +2718,467 @@ class AsientosContablesModel extends Model {
 			echo "<script>console.log('" . json_encode($data_asientos, JSON_FORCE_OBJECT) . "')</script>";
 		}
 		
+		return $this->executeInsert($data_asientos);
+	}
+
+	public function obtenerSobrantesFaltantes($arrParams) {
+		$objHelper = new HelperClass();	
+
+		global $sqlca;
+
+		/* Recogemos parametros */
+		$almacen = TRIM($arrParams['sCodeWarehouse']);
+		$fecha   = TRIM($arrParams['dEntry']);
+
+		//CONSULTA PARA OBTENER SOBRANTES Y FALTANTES
+		$sql_sobrantes_faltantes = "
+			SELECT
+				id_diferencia_trabajador,
+				es,
+				ch_codigo_trabajador,
+				dia,
+				turno,
+				flag,
+				importe
+			FROM
+				comb_diferencia_trabajador
+			WHERE
+				es = '$almacen'
+				AND dia = '$fecha'
+		";
+
+		if ($sqlca->query($sql_sobrantes_faltantes) < 0) {
+			return array('error' => TRUE, 'message' => 'Error en sql_sobrantes_faltantes');
+		}
+
+		/* Recorremos informacion de Sobrantes y Faltantes */
+		$correlativo = 0;
+		for ($i = 0; $i < $sqlca->numrows(); $i++) {
+			$a = $sqlca->fetchRow();
+	
+			$result['sobfal'][$correlativo]['id_diferencia_trabajador']	= $a['id_diferencia_trabajador'];
+			$result['sobfal'][$correlativo]['es']	                    = $a['es'];
+			$result['sobfal'][$correlativo]['ch_codigo_trabajador']	    = $a['ch_codigo_trabajador'];
+			$result['sobfal'][$correlativo]['dia']	                    = $a['dia'];
+			$result['sobfal'][$correlativo]['turno']	                = $a['turno'];
+			$result['sobfal'][$correlativo]['flag']	                    = $a['flag'];
+			$result['sobfal'][$correlativo]['importe']	                = $a['importe'];
+			$result['sobfal']['total']['importe']                      += $a['importe'];
+
+			$correlativo++;
+		}
+
+		if ($this->isDebug) {
+			echo "<script>console.log('result')</script>";
+			echo "<script>console.log('" . json_encode($result, JSON_FORCE_OBJECT) . "')</script>";
+		}		
+	
+		return array(
+			'error' => FALSE,
+			'result' => $result,
+			'arrParams' => $arrParams,
+		);
+	}
+
+	public function generarAsientosSobrantesFaltantes($data) {
+		$objHelper = new HelperClass();
+		if ($data['error']) {			
+			$res = array(
+				'error' => TRUE,
+				'message' => $data['message'],
+			);
+			return $res;
+		}
+
+		/* Recogemos parametros */
+		$arrParams = $data['arrParams'];
+
+		/* Recogemos data */
+		$data = $data['result'];
+
+		global $sqlca;
+
+		/* Obtenemos cuentas contables para Asientos Sobrantes y Faltantes */
+		$sql_cuentas_contables = "
+		SELECT
+			 COALESCE(c01.act_config_id,'0') ||'*'|| COALESCE(c01.value,'0') AS subdiario
+			,COALESCE(c02.act_config_id,'0') ||'*'|| COALESCE(c02.value,'0') AS efectivo
+			,COALESCE(c03.act_config_id,'0') ||'*'|| COALESCE(c03.value,'0') AS otros_ingresos
+			,COALESCE(c04.act_config_id,'0') ||'*'|| COALESCE(c04.value,'0') AS entregas_trabajador			
+		FROM 
+			act_config c01
+			LEFT JOIN act_config c02 ON   c02.module = 9   AND c02.category = 1   AND c02.subcategory = 0   --Efectivo Sobrantes y Faltantes
+			LEFT JOIN act_config c03 ON   c03.module = 9   AND c03.category = 1   AND c03.subcategory = 1   --Otros Ingresos
+			LEFT JOIN act_config c04 ON   c04.module = 9   AND c04.category = 1   AND c04.subcategory = 2   --Entregas a Trabajador
+		WHERE   
+			c01.module = 9   AND c01.category = 0   AND c01.subcategory = 1;   --Subdiario de Sobrantes y Faltantes
+		";
+	
+		if ($sqlca->query($sql_cuentas_contables) < 0) {
+			return array('error' => TRUE, 'message' => 'Error en sql_cuentas_contables');
+		}
+
+		$a = $sqlca->fetchRow();
+		$cuenta['cnf']['subdiario']              = $objHelper->getCuentaContable($a[0]);
+		$cuenta['sobfal']['efectivo']            = $objHelper->getCuentaContable($a[1]);
+		$cuenta['sobfal']['otros_ingresos']      = $objHelper->getCuentaContable($a[2]);
+		$cuenta['sobfal']['entregas_trabajador'] = $objHelper->getCuentaContable($a[3]);
+
+		if ($this->isDebug) {
+			echo "<script>console.log('cuentas_contables')</script>";
+			echo "<script>console.log('" . json_encode($cuenta, JSON_FORCE_OBJECT) . "')</script>";
+		}
+
+		/* Array para almacenar asientos */
+		$data_asientos = array();
+
+		/* Obtenemos cuentas contables */
+		$subdiario                  = $cuenta['cnf']['subdiario'];		
+		//Sobrantes		
+		$cuenta_efectivo            = $cuenta['sobfal']['efectivo'];
+		$cuenta_otros_ingresos      = $cuenta['sobfal']['otros_ingresos'];		
+		//Faltantes
+		$cuenta_efectivo            = $cuenta['sobfal']['efectivo'];
+		$cuenta_entregas_trabajador = $cuenta['sobfal']['entregas_trabajador'];
+
+		/* Obtenemos Tipo de Asiento Contable (act_entrytype), descripcion del asiento y tableid del asiento para insertar en Detalle (act_entryline) y Cabecera (act_entry) */
+        $act_entrytype_id = 9;
+		$tableid          = 0;
+		$regid            = "-";	
+		$int_clientes_id  = NULL;
+		$tab_currency     = "01"; //Tabla "int_tabla_general", campo "tab_tabla" con valor "04"
+		$description      = "Por Reconocimiento de Sobrantes y Faltantes";
+
+		/* Información para Detalle (act_entryline) */
+		$total_importe = $data['sobfal']['total']['importe'];
+		if ($total_importe >= 0) {
+			//CUENTA EFECTIVO
+			$act_entryline[] = array(
+				"act_entry_id"   => NULL,
+				"act_account_id" => $cuenta_efectivo,
+				"amtdt"          => $total_importe, //DEBE
+				"amtct"          => "0.00",
+				"amtsourcedt"    => $total_importe, //DEBE
+				"amtsourcect"    => "0.00",
+				"description"        => $description,
+				"tableid"            => $tableid,
+				"regid"              => $regid,
+				"int_clientes_id"    => $int_clientes_id,
+				"c_cash_mpayment_id" => NULL,
+				"tab_currency"       => $tab_currency,
+			);
+
+			//CUENTA OTROS INGRESOS
+            $act_entryline[] = array(
+                "act_entry_id"   => NULL,
+                "act_account_id" => $cuenta_otros_ingresos,
+                "amtdt"          => "0.00",
+                "amtct"          => $total_importe, //HABER
+                "amtsourcedt"    => "0.00",
+                "amtsourcect"    => $total_importe, //HABER
+                "description"        => $description,
+                "tableid"            => $tableid,
+                "regid"              => $regid,
+                "int_clientes_id"    => $int_clientes_id,
+                "c_cash_mpayment_id" => NULL,
+                "tab_currency"       => $tab_currency,
+            );
+		} else {
+			$total_importe = ABS($total_importe);
+			//CUENTA EFECTIVO
+			$act_entryline[] = array(
+				"act_entry_id"   => NULL,
+				"act_account_id" => $cuenta_efectivo,
+				"amtdt"          => "0.00",
+				"amtct"          => $total_importe, //HABER
+				"amtsourcedt"    => "0.00",
+				"amtsourcect"    => $total_importe, //HABER
+				"description"        => $description,
+				"tableid"            => $tableid,
+				"regid"              => $regid,
+				"int_clientes_id"    => $int_clientes_id,
+				"c_cash_mpayment_id" => NULL,
+				"tab_currency"       => $tab_currency,
+			);
+
+			//CUENTA ENTREGAS A TRABAJADOR
+            $act_entryline[] = array(
+                "act_entry_id"   => NULL,
+                "act_account_id" => $cuenta_entregas_trabajador,
+                "amtdt"          => $total_importe, //DEBE
+                "amtct"          => "0.00",
+                "amtsourcedt"    => $total_importe, //DEBE
+                "amtsourcect"    => "0.00",
+                "description"        => $description,
+                "tableid"            => $tableid,
+                "regid"              => $regid,
+                "int_clientes_id"    => $int_clientes_id,
+                "c_cash_mpayment_id" => NULL,
+                "tab_currency"       => $tab_currency,
+            );
+		}
+
+		// OBTENEMOS NUMERO DE ASIENTO
+        $responseCorrelativo = $objHelper->getCorrelativoSubdiario($subdiario, $arrParams);
+        if ($responseCorrelativo['error'] == TRUE) {
+            return $responseCorrelativo;
+        }				
+        $correlativo = $responseCorrelativo['correlativo'];
+        // END OBTENEMOS NUMERO DE ASIENTO
+
+		/* Informacion para Cabecera (act_entry) */
+        $data_asientos[] = array(
+            "ch_sucursal"        => TRIM($arrParams['sCodeWarehouse']),
+            "dateacct"           => TRIM($arrParams['dEntry']),
+            "description"        => $description,
+            "act_entrytype_id"   => $act_entrytype_id,
+            "subbookcode"        => $subdiario,
+            "registerno"         => $correlativo,
+            "documentdate"       => TRIM($arrParams['dEntry']),
+            "tableid"            => $tableid,
+            "regid"              => $regid,
+            "int_clientes_id"    => $int_clientes_id,
+            "c_cash_mpayment_id" => NULL,
+            "tab_currency"       => $tab_currency,
+            "act_entryline"      => $act_entryline,
+        );
+
+		if ($this->isDebug) {
+			echo "<script>console.log('data_asientos')</script>";
+			echo "<script>console.log('" . json_encode($data_asientos, JSON_FORCE_OBJECT) . "')</script>";
+		}
+	
+		return $this->executeInsert($data_asientos);
+	}
+
+	public function obtenerRedondeoEfectivo($arrParams) {
+		$objHelper = new HelperClass();	
+
+		global $sqlca;
+	
+		/* Recogemos parametros */
+		$almacen = TRIM($arrParams['sCodeWarehouse']);
+		$fecha   = TRIM($arrParams['dEntry']);
+
+		/* Obtenemos partes del parametro fecha */
+		$porciones = explode("-", $fecha);
+		$anio      = $porciones[0];
+		$mes       = $porciones[1];
+		$desde     = $porciones[2];
+		$hasta     = $porciones[2];
+
+		/* Obtenemos fechas para usar en queries */
+		$result 			= Array();
+		$fecha_postrans 	= $anio . "" . $mes;
+		$fecha_inicial 		= $anio . "-" . $mes . "-" . $desde;
+		$fecha_final 		= $anio . "-" . $mes . "-" . $hasta;
+
+		//CONSULTA PARA OBTENER TOTAL REDONDEO EFECTIVO
+		//Nota: Query sacada de /sistemaweb/combustibles/liquidacion_ventas_diarias.php
+		$sql_redondeo_efectivo = "
+			SELECT 
+				sum(x) as total
+			FROM 
+				(SELECT 
+					round((((first(t.soles_km)*100)%10)/100),2) AS x 
+				FROM 
+					pos_trans" . $fecha_postrans . " AS t
+				WHERE 
+					t.es='" . pg_escape_string($almacen) . "'
+					AND t.td IN ('B','F')
+					AND t.fpago = '1' 
+					AND t.dia BETWEEN '" . pg_escape_string($fecha_inicial) . "' AND '" . pg_escape_string($fecha_final) . "' 
+				GROUP BY 
+					t.caja,t.trans) x;
+		";
+
+		if ($sqlca->query($sql_redondeo_efectivo) < 0) {
+			return array('error' => TRUE, 'message' => 'Error en sql_redondeo_efectivo');
+		}
+
+		/* Recorremos informacion de Redondeo Efectivo */
+		$a = $sqlca->fetchRow();
+		$result['redondeoefe']['total']['importe'] = $a['total'];
+
+		if ($this->isDebug) {
+			echo "<script>console.log('result')</script>";
+			echo "<script>console.log('" . json_encode($result, JSON_FORCE_OBJECT) . "')</script>";
+		}		
+	
+		return array(
+			'error' => FALSE,
+			'result' => $result,
+			'arrParams' => $arrParams,
+		);
+	}
+	
+	public function generarAsientosRedondeoEfectivo($data) {
+		$objHelper = new HelperClass();
+		if ($data['error']) {			
+			$res = array(
+				'error' => TRUE,
+				'message' => $data['message'],
+			);
+			return $res;
+		}
+
+		/* Recogemos parametros */
+		$arrParams = $data['arrParams'];
+
+		/* Recogemos data */
+		$data = $data['result'];
+
+		global $sqlca;
+
+		/* Obtenemos cuentas contables para Asientos Redondeo Efectivo */
+		$sql_cuentas_contables = "
+		SELECT
+			 COALESCE(c01.act_config_id,'0') ||'*'|| COALESCE(c01.value,'0') AS subdiario
+			,COALESCE(c02.act_config_id,'0') ||'*'|| COALESCE(c02.value,'0') AS efectivo_redondeo_faltante
+			,COALESCE(c03.act_config_id,'0') ||'*'|| COALESCE(c03.value,'0') AS perdida_por_redondeo
+			,COALESCE(c04.act_config_id,'0') ||'*'|| COALESCE(c04.value,'0') AS gasto_administrativo			
+			,COALESCE(c05.act_config_id,'0') ||'*'|| COALESCE(c05.value,'0') AS cargas_imputables_costo_gasto	
+		FROM 
+			act_config c01
+			LEFT JOIN act_config c02 ON   c02.module = 10   AND c02.category = 1   AND c02.subcategory = 0   --Efectivo Redondeo Faltante
+			LEFT JOIN act_config c03 ON   c03.module = 10   AND c03.category = 1   AND c03.subcategory = 1   --Perdida por Redondeo
+			LEFT JOIN act_config c04 ON   c04.module = 10   AND c04.category = 1   AND c04.subcategory = 2   --Gasto Administrativo
+			LEFT JOIN act_config c05 ON   c05.module = 10   AND c05.category = 1   AND c05.subcategory = 3   --Cargas imputables a cuenta de costo y gasto
+		WHERE   
+			c01.module = 10   AND c01.category = 0   AND c01.subcategory = 1;   --Subdiario de Redondeo Efectivo
+		";
+	
+		if ($sqlca->query($sql_cuentas_contables) < 0) {
+			return array('error' => TRUE, 'message' => 'Error en sql_cuentas_contables');
+		}
+	
+		$a = $sqlca->fetchRow();
+		$cuenta['cnf']['subdiario']                             = $objHelper->getCuentaContable($a[0]);
+		$cuenta['redondeoefe']['efectivo_redondeo_faltante']    = $objHelper->getCuentaContable($a[1]);
+		$cuenta['redondeoefe']['perdida_por_redondeo']          = $objHelper->getCuentaContable($a[2]);
+		$cuenta['redondeoefe']['gasto_administrativo']          = $objHelper->getCuentaContable($a[3]);
+		$cuenta['redondeoefe']['cargas_imputables_costo_gasto'] = $objHelper->getCuentaContable($a[4]);
+
+		if ($this->isDebug) {
+			echo "<script>console.log('cuentas_contables')</script>";
+			echo "<script>console.log('" . json_encode($cuenta, JSON_FORCE_OBJECT) . "')</script>";
+		}
+
+		/* Array para almacenar asientos */
+		$data_asientos = array();
+
+		/* Obtenemos cuentas contables */
+		$subdiario                         = $cuenta['cnf']['subdiario'];		
+		//Faltante		
+		$cta_efectivo_redondeo_faltante    = $cuenta['redondeoefe']['efectivo_redondeo_faltante'];
+		$cta_perdida_por_redondeo          = $cuenta['redondeoefe']['perdida_por_redondeo'];				
+		$cta_gasto_administrativo          = $cuenta['redondeoefe']['gasto_administrativo'];
+		$cta_cargas_imputables_costo_gasto = $cuenta['redondeoefe']['cargas_imputables_costo_gasto'];
+		
+		/* Obtenemos Tipo de Asiento Contable (act_entrytype), descripcion del asiento y tableid del asiento para insertar en Detalle (act_entryline) y Cabecera (act_entry) */
+		$act_entrytype_id = 10;
+		$tableid          = 0;
+		$regid            = "-";	
+		$int_clientes_id  = NULL;
+		$tab_currency     = "01"; //Tabla "int_tabla_general", campo "tab_tabla" con valor "04"
+		$description      = "Por Reconocimiento de Redondeo Efectivo Faltante";
+
+		/* Información para Detalle (act_entryline) */
+		$total_importe = $data['redondeoefe']['total']['importe'];
+		//CUENTA EFECTIVO REDONDEO FALTANTE
+		$act_entryline[] = array(
+            "act_entry_id"   => NULL,
+            "act_account_id" => $cta_efectivo_redondeo_faltante,
+            "amtdt"          => "0.00",
+            "amtct"          => $total_importe, //HABER
+            "amtsourcedt"    => "0.00",
+            "amtsourcect"    => $total_importe, //HABER
+            "description"        => $description,
+            "tableid"            => $tableid,
+            "regid"              => $regid,
+            "int_clientes_id"    => $int_clientes_id,
+            "c_cash_mpayment_id" => NULL,
+            "tab_currency"       => $tab_currency,
+        );
+
+		//CUENTA PERDIDA POR REDONDEO
+		$act_entryline[] = array(
+            "act_entry_id"   => NULL,
+            "act_account_id" => $cta_perdida_por_redondeo,
+            "amtdt"          => $total_importe, //DEBE
+            "amtct"          => "0.00",
+            "amtsourcedt"    => $total_importe, //DEBE
+            "amtsourcect"    => "0.00",
+            "description"        => $description,
+            "tableid"            => $tableid,
+            "regid"              => $regid,
+            "int_clientes_id"    => $int_clientes_id,
+            "c_cash_mpayment_id" => NULL,
+            "tab_currency"       => $tab_currency,
+        );
+
+		//CUENTA GASTO ADMINISTRATIVO
+		$act_entryline[] = array(
+            "act_entry_id"   => NULL,
+            "act_account_id" => $cta_gasto_administrativo,
+            "amtdt"          => $total_importe, //DEBE
+            "amtct"          => "0.00",
+            "amtsourcedt"    => $total_importe, //DEBE
+            "amtsourcect"    => "0.00",
+            "description"        => $description,
+            "tableid"            => $tableid,
+            "regid"              => $regid,
+            "int_clientes_id"    => $int_clientes_id,
+            "c_cash_mpayment_id" => NULL,
+            "tab_currency"       => $tab_currency,
+        );
+
+		//CUENTA CARGAS IMPUTABLES A CUENTA DE COSTO Y GASTO		 
+		$act_entryline[] = array(
+            "act_entry_id"   => NULL,
+            "act_account_id" => $cta_cargas_imputables_costo_gasto,
+            "amtdt"          => "0.00",
+            "amtct"          => $total_importe, //HABER
+            "amtsourcedt"    => "0.00",
+            "amtsourcect"    => $total_importe, //HABER
+            "description"        => $description,
+            "tableid"            => $tableid,
+            "regid"              => $regid,
+            "int_clientes_id"    => $int_clientes_id,
+            "c_cash_mpayment_id" => NULL,
+            "tab_currency"       => $tab_currency,
+        );
+
+		// OBTENEMOS NUMERO DE ASIENTO
+		$responseCorrelativo = $objHelper->getCorrelativoSubdiario($subdiario, $arrParams);
+		if ($responseCorrelativo['error'] == TRUE) {
+			return $responseCorrelativo;
+		}				
+		$correlativo = $responseCorrelativo['correlativo'];
+		// END OBTENEMOS NUMERO DE ASIENTO
+
+		/* Informacion para Cabecera (act_entry) */
+		$data_asientos[] = array(
+			"ch_sucursal"        => TRIM($arrParams['sCodeWarehouse']),
+			"dateacct"           => TRIM($arrParams['dEntry']),
+			"description"        => $description,
+			"act_entrytype_id"   => $act_entrytype_id,
+			"subbookcode"        => $subdiario,
+			"registerno"         => $correlativo,
+			"documentdate"       => TRIM($arrParams['dEntry']),
+			"tableid"            => $tableid,
+			"regid"              => $regid,
+			"int_clientes_id"    => $int_clientes_id,
+			"c_cash_mpayment_id" => NULL,
+			"tab_currency"       => $tab_currency,
+			"act_entryline"      => $act_entryline,
+		);
+	
+		if ($this->isDebug) {
+			echo "<script>console.log('data_asientos')</script>";
+			echo "<script>console.log('" . json_encode($data_asientos, JSON_FORCE_OBJECT) . "')</script>";
+		}
+	
 		return $this->executeInsert($data_asientos);
 	}
 
@@ -2685,7 +3211,7 @@ class AsientosContablesModel extends Model {
 				c.pro_cab_numdocumento::text as trans,
 				'1'::text as tip,
 				'H'::text as ddh,	
-			
+
 				-- round(FIRST(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_imptotal ELSE c.pro_cab_imptotal + pro_cab_impinafecto END), 2) as importe_total,	
 				-- round(FIRST(c.pro_cab_impto1), 2) as importe_igv,	
 				-- round(FIRST(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_impafecto ELSE c.pro_cab_impafecto + pro_cab_impinafecto END), 2) as importe_bi,	
@@ -3021,9 +3547,9 @@ class AsientosContablesModel extends Model {
 			$act_entrytype_id = 7;
 			
 			$tableid         = 3;
-			$regid           = $value["pro_cab_almacen"] ."*". $value["pro_cab_tipdocumento"] . "*" . $value["pro_cab_seriedocumento"] . "*" . $value["pro_cab_numdocumento"] . "*" . $value["pro_codigo"];
+			$regid           = $value["pro_cab_almacen"] ."*". $value["pro_cab_tipdocumento"] . "*" . $value["pro_cab_seriedocumento"] . "*" . $value["pro_cab_numdocumento"] . "*" . $value["pro_codigo"] . "*" . $value["tipo_documento"];
 			$int_clientes_id = ( TRIM($value["pro_codigo"]) == "" ) ? NULL : $value["pro_codigo"];
-			$tab_currency    = ( $moneda == "02" ) ? "02" : "01"; //Tabla "int_tabla_general", campo "tab_tabla"
+			$tab_currency    = ( $moneda == "02" ) ? "02" : "01"; //Tabla "int_tabla_general", campo "tab_tabla" con valor "04"
 			
 
 			if ($tipo == "01") { //Factura
@@ -3475,6 +4001,130 @@ class AsientosContablesModel extends Model {
 		return $this->executeInsert($data_asientos);
 	}	
 
+	function generarBalance($arrParams) {
+		global $sqlca;
+
+		/* Recogemos parametros */
+		$almacen = TRIM($arrParams['sCodeWarehouse']);
+		$fecha   = TRIM($arrParams['dEntry']);
+
+		/* Obtenemos partes del parametro fecha */
+		$porciones = explode("-", $fecha);
+		$anio      = $porciones[0];
+		$mes       = $porciones[1];		
+
+		/* Obtenemos fechas para usar en queries */
+		$result        = Array();
+		$fecha_mes     = $anio . "-" . $mes;
+		$fecha_balance = $anio . "-" . $mes . "-" . "01";
+
+		//ELIMINAMOS BALANCE DE TODO EL MES
+		$sql_eliminar_balance = "DELETE FROM act_balance WHERE TRIM(ch_sucursal) = '$almacen' AND TO_CHAR(DATE(dateacct),'YYYY-MM') = '$fecha_mes'";
+
+		//VERIFICAMOS QUE ELIMINACION SE REALIZO CORRECTAMENTE
+		$iStatus = $sqlca->query($sql_eliminar_balance);
+		
+		if ((int)$iStatus >= 0) {
+			//GENERAMOS BALANCE DE TODO EL MES
+			$sql_generar_balance = "
+				SELECT
+					e.ch_sucursal, 
+					a.act_account_id,
+					el.tab_currency,
+					SUM(el.amtdt) AS amtdt, 
+					SUM(el.amtct) AS amtct, 
+					SUM(el.amtsourcedt) AS amtsourcedt,
+					SUM(el.amtsourcect) AS amtsourcect
+				FROM
+					act_entryline el
+					LEFT JOIN act_entry   AS e ON (el.act_entry_id   = e.act_entry_id)
+					LEFT JOIN act_account AS a ON (el.act_account_id = a.act_account_id)
+				WHERE
+					1 = 1
+					AND TRIM(e.ch_sucursal) = '". $almacen . "'
+					AND TO_CHAR(DATE(e.documentdate),'YYYY-MM') = '" . $fecha_mes . "'
+				GROUP BY
+					e.ch_sucursal, a.act_account_id, el.tab_currency
+				ORDER BY 
+					1,2,3;
+			";
+
+			echo "<pre>sql_facturas_manuales:";
+			echo "$sql_generar_balance";
+			echo "</pre>";
+
+			if ($sqlca->query($sql_generar_balance) < 0) {
+				return array('error' => TRUE, 'message' => 'Error en sql_generar_balance');
+			}
+
+			//RECORREMOS INFORMACION DE BALANCE
+			for ($i = 0; $i < $sqlca->numrows(); $i++) {
+				$a = $sqlca->fetchRow();
+			
+				$result[$i]['ch_sucursal']    = $a['ch_sucursal'];
+				$result[$i]['act_account_id'] = $a['act_account_id'];
+				$result[$i]['tab_currency']   = $a['tab_currency'];
+				$result[$i]['amtdt']          = $a['amtdt'];
+				$result[$i]['amtct']          = $a['amtct'];
+				$result[$i]['amtsourcedt']    = $a['amtsourcedt'];
+				$result[$i]['amtsourcect']    = $a['amtsourcect'];
+			}
+
+			if ($this->isDebug) {
+				echo "<script>console.log('result')</script>";
+				echo "<script>console.log('" . json_encode($result, JSON_FORCE_OBJECT) . "')</script>";
+			}
+
+			//RECORREMOS INFORMACION DE BALANCE
+			foreach ($result as $key => $value) {	
+				$ch_sucursal    = $value['ch_sucursal'];
+				$act_account_id = $value['act_account_id'];
+				$tab_currency   = $value['tab_currency'];
+
+				if ($tab_currency == "01") {
+					$amtdt = $value['amtdt'];
+					$amtct = $value['amtct'];
+				} else {
+					$amtdt = $value['amtsourcedt'];
+					$amtct = $value['amtsourcect'];
+				}
+
+				//INSERTAMOS BALANCE
+				$sql_insertar_balance = "
+					INSERT INTO act_balance (
+						act_balance_id, 
+						ch_sucursal, 
+						dateacct, 
+						act_account_id, 
+						amtdt, 
+						amtct, 
+						tab_currency
+					) VALUES (
+						nextval('seq_act_balance_id'),
+						'$ch_sucursal',
+						'$fecha_balance',
+						'$act_account_id',
+						'$amtdt',
+						'$amtct',
+						'$tab_currency'
+					);
+				";
+				
+				$iStatus = $sqlca->query($sql_insertar_balance);
+
+				if ((int)$iStatus < 0) {
+					return array('error' => TRUE, 'message' => 'Error en insert sql_insertar_balance');
+				}
+			}
+		} else {
+			return array('error' => TRUE, 'message' => 'Error en sql_eliminar_balance');
+		}
+
+		return array(
+			'error' => FALSE
+		);
+	}
+
 	/**
 	* Funcion para activar la depuracion
 	* @param TRUE activa depuracion
@@ -3579,9 +4229,9 @@ class AsientosContablesModel extends Model {
 					$act_entrytype_id_value 
 					$subbookcode_value
 					$registerno_value 
+					$documentdate_value
 					$tableid_value 
 					$regid_value 
-					$documentdate_value 
 					$int_clientes_id_value 
 					$c_cash_mpayment_id_value 
 					$tab_currency_value

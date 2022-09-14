@@ -45,7 +45,7 @@ $( function() {
 		console.log('data', data);
 
 		$.post( "reportes/c_libro_diario.php", {
-			accion 	: 'listAllPDF',
+			accion 	: 'listPDF',
 			data 	: data
 		}, function(data){
 			var message = `<div class="column is-12 text-center"><div class="notification is-info">Exportado</div></div>`;
@@ -60,5 +60,72 @@ $( function() {
 	});
 
 	$( "#btn-excel" ).click(function(e) {
+		$( "#div-LibroDiario_CRUD" ).show();
+		$( "#div-LibroDiario_CRUD" ).prepend(block_loding_modal);
+		
+		$( '#btn-excel' ).attr('disabled', true);
+		$( '#btn-excel' ).addClass('is-loading');
+
+		var data = {
+	        Nu_Almacen 	: $('#cbo-almacen option:selected').val(),
+	        Fe_Periodo 	: $('#txt-periodo').val(),
+	        Fe_Mes  	: $('#txt-mes').val(),
+			Nu_Cantreg  : $('#txt-cantidadregistros').val(),
+		};
+		console.log('data', data);
+
+		$.post( "reportes/c_libro_diario.php", {
+			accion 	: 'listExcel',
+			data 	: data
+		}, function(data){
+			var message = `<div class="column is-12 text-center"><div class="notification is-info">Exportado</div></div>`;
+			$( "#div-LibroDiario_CRUD" ).html(message);
+
+			data = JSON.parse(data);
+			console.log(data);
+
+			var link = document.createElement('a');
+			link.href = `${data.ruta}${data.nombre_archivo}`;
+			link.download = `${data.nombre_archivo}`;
+			link.dispatchEvent(new MouseEvent('click'));
+
+			$( '#btn-excel' ).removeClass('is-loading');
+			$( '#btn-excel' ).attr('disabled', false);
+		})
+	});
+
+	$( "#btn-ple" ).click(function(e) {
+		$( "#div-LibroDiario_CRUD" ).show();
+		$( "#div-LibroDiario_CRUD" ).prepend(block_loding_modal);
+		
+		$( '#btn-ple' ).attr('disabled', true);
+		$( '#btn-ple' ).addClass('is-loading');
+
+		var data = {
+	        Nu_Almacen 	: $('#cbo-almacen option:selected').val(),
+	        Fe_Periodo 	: $('#txt-periodo').val(),
+	        Fe_Mes  	: $('#txt-mes').val(),
+			Nu_Cantreg  : $('#txt-cantidadregistros').val(),
+		};
+		console.log('data', data);
+
+		$.post( "reportes/c_libro_diario.php", {
+			accion 	: 'listPLE',
+			data 	: data
+		}, function(data){
+			var message = `<div class="column is-12 text-center"><div class="notification is-info">Exportado</div></div>`;
+			$( "#div-LibroDiario_CRUD" ).html(message);
+
+			data = JSON.parse(data);
+			console.log(data);
+
+			var link = document.createElement('a');
+			link.href = `${data.ruta}${data.nombre_archivo}`;
+			link.download = `${data.nombre_archivo}`;
+			link.dispatchEvent(new MouseEvent('click'));		
+
+			$( '#btn-ple' ).removeClass('is-loading');
+			$( '#btn-ple' ).attr('disabled', false);
+		})
 	});
 });

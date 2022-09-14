@@ -62,7 +62,7 @@ class LibroDiarioModel {
 	
 		try {
 			$sql = "
-			SELECT
+				SELECT
 					ch_almacen as almacen,
 					trim(ch_nombre_almacen) as nombre
 				FROM
@@ -85,7 +85,7 @@ class LibroDiarioModel {
 		}
     }
 
-	function getListAll($data, $jqGridModel) {
+	function getListAll($data, $jqGridModel, $objHelper) {
 		// echo "<script>console.log('data')</script>";
 		// echo "<script>console.log('" . json_encode($data) . "')</script>";
 
@@ -109,15 +109,15 @@ class LibroDiarioModel {
 			$cond_almacen = "AND TRIM(e.ch_sucursal) = '" . $Nu_Almacen . "'";
 
 		$sql_total = "
-		SELECT
-			COUNT(el.*) total
-		FROM
-			act_entryline el
-			LEFT JOIN act_entry e ON (el.act_entry_id = e.act_entry_id)
-		WHERE
-			1 = 1
-			--AND TO_CHAR(DATE(e.documentdate),'YYYY-MM') = '" . $Fe_Fecha . "'
-			" . $cond_almacen . "
+			SELECT
+				COUNT(el.*) total
+			FROM
+				act_entryline el
+				LEFT JOIN act_entry e ON (el.act_entry_id = e.act_entry_id)
+			WHERE
+				1 = 1
+				AND TRIM(e.ch_sucursal) = '" . $Nu_Almacen . "'
+				--AND TO_CHAR(DATE(e.documentdate),'YYYY-MM') = '" . $Fe_Fecha . "'
 		";
 		// echo "<pre>sql_total";
 		// print_r($sql_total);
@@ -132,54 +132,65 @@ class LibroDiarioModel {
 
 		try {
 			$sql = "
-			SELECT 	
-				el.act_entryline_id, 
-				el.act_entry_id, 
-				el.act_account_id,
-				el.amtdt, 
-				el.amtct, 
-				el.amtsourcedt, 
-				el.amtsourcect, 
-				el.description AS description_detail, 
-				el.tableid, 
-				el.regid, 
-				el.int_clientes_id, 
-				el.c_cash_mpayment_id,
-				el.tab_currency,
-				--------
-				a.acctcode, 
-				a.name,
-				--------
-				e.ch_sucursal, 
-				e.dateacct, 
-				e.description AS description_head, 
-				e.act_entrytype_id, 
-				e.subbookcode, 
-				e.registerno, 
-				TO_CHAR(e.documentdate, 'DD/MM/YYYY') AS documentdate, --YYYY-MM-DD HH12:MM:SS
-				--e.tableid,            --Existe en detalle con información mas precisa
-				--e.regid,              --Existe en detalle con información mas precisa
-				--e.int_clientes_id,    --Existe en detalle con información mas precisa
-				--e.c_cash_mpayment_id, --Existe en detalle con información mas precisa
-				--e.tab_currency,       --Existe en detalle con información mas precisa
-				-------
-				et.bookcode
-			FROM
-				act_entryline el				
-				LEFT JOIN act_entry     e  ON (el.act_entry_id    = e.act_entry_id)
-				LEFT JOIN act_entrytype et ON (e.act_entrytype_id = et.act_entrytype_id)
-				LEFT JOIN act_account   a  ON (el.act_account_id  = a.act_account_id)
-			WHERE
-				1 = 1 
-				--AND TO_CHAR(DATE(documentdate),'YYYY-MM') = '" . $Fe_Fecha . "'
-				AND TRIM(e.ch_sucursal) = '" . $Nu_Almacen . "'
-			ORDER BY
-				--e.act_entrytype_id ASC, e.act_entry_id ASC, el.act_entryline_id ASC
-				e.ch_sucursal ASC, e.subbookcode ASC, e.registerno ASC, el.act_entryline_id ASC
-			LIMIT
-				" . $paginador["limit"] . "
-			OFFSET
-				" . $paginador["start"];	
+				SELECT 	
+					el.act_entryline_id, 
+					el.act_entry_id, 
+					el.act_account_id,
+					el.amtdt, 
+					el.amtct, 
+					el.amtsourcedt, 
+					el.amtsourcect, 
+					el.description AS description_detail, 
+					el.tableid, 
+					el.regid, 
+					el.int_clientes_id, 
+					el.c_cash_mpayment_id,
+					el.tab_currency,
+					--------
+					a.acctcode, 
+					a.name,
+					--------
+					e.ch_sucursal, 
+					e.dateacct, 
+					e.description AS description_head, 
+					e.act_entrytype_id, 
+					e.subbookcode, 
+					e.registerno, 
+					TO_CHAR(e.documentdate, 'DD/MM/YYYY') AS documentdate, --YYYY-MM-DD HH12:MM:SS
+					e.documentdate AS documentdate_datetime,
+					--e.tableid,            --Existe en detalle con información mas precisa
+					--e.regid,              --Existe en detalle con información mas precisa
+					--e.int_clientes_id,    --Existe en detalle con información mas precisa
+					--e.c_cash_mpayment_id, --Existe en detalle con información mas precisa
+					--e.tab_currency,       --Existe en detalle con información mas precisa
+					-------
+					et.bookcode,
+					et.bookcode_order,
+					-------
+					mone.tab_car_04 AS isocode,
+					-------
+					r.ruc AS ruc,
+					r.razsocial AS razsocial,
+					cli.cli_codigo AS cli_codigo,
+					cli.cli_razsocial AS cli_razsocial
+				FROM
+					act_entryline el
+					LEFT JOIN act_entry         AS e    ON (el.act_entry_id      = e.act_entry_id)
+					LEFT JOIN act_entrytype     AS et   ON (e.act_entrytype_id   = et.act_entrytype_id)
+					LEFT JOIN act_account       AS a    ON (el.act_account_id    = a.act_account_id)
+					LEFT JOIN int_tabla_general AS mone ON (el.tab_currency      = (substring(trim(mone.tab_elemento) for 2 from length(trim(mone.tab_elemento))-1)) AND mone.tab_tabla = '04' AND mone.tab_elemento != '000000')
+					LEFT JOIN ruc               AS r    ON (TRIM(r.ruc)          = TRIM(el.int_clientes_id::VARCHAR) AND el.tableid IN (1,3))
+					LEFT JOIN int_clientes      AS cli  ON (TRIM(cli.cli_codigo) = TRIM(el.int_clientes_id::VARCHAR) AND el.tableid IN (2))
+				WHERE
+					1 = 1 
+					AND TRIM(e.ch_sucursal) = '" . $Nu_Almacen . "'
+					--AND TO_CHAR(DATE(e.documentdate),'YYYY-MM') = '" . $Fe_Fecha . "'
+				ORDER BY
+					e.ch_sucursal ASC, et.bookcode_order ASC, e.subbookcode ASC, e.registerno ASC, el.act_entryline_id ASC
+				LIMIT
+					" . $paginador["limit"] . "
+				OFFSET
+					" . $paginador["start"];
 			// echo "<pre>sql";
 			// print_r($sql);
 			// echo "</pre>";
@@ -198,7 +209,10 @@ class LibroDiarioModel {
 				);
 			}
 
-			$jqGridModel->DataSource($sqlca->fetchAll());
+			$arrEntry = $sqlca->fetchAll();
+			$arrEntry = $objHelper->get_data_arrayEntry($arrEntry);
+
+			$jqGridModel->DataSource($arrEntry);
 
 			$response = array(
 				'status' => 'success',
@@ -214,7 +228,7 @@ class LibroDiarioModel {
 		}
 	}
 
-	function getListAllExcel($data) {
+	function getList($data, $objHelper) {
 		// echo "<script>console.log('data')</script>";
     	// echo "<script>console.log('" . json_encode($data) . "')</script>";
 
@@ -235,23 +249,23 @@ class LibroDiarioModel {
 			$cond_almacen = "AND VC.ch_sucursal = '" . $Nu_Almacen . "'";
 
 		$sql_company = "
-		SELECT
-			EMPRE.ruc,
-			EMPRE.razsocial,
-			EMPRE.ch_direccion,
-			EMPRE.ebiurl,
-			EMPRE.ebiauth,
-			ALMA.ch_nombre_almacen AS no_almacen,
-			ALMA.ch_direccion_almacen
-		FROM
-			inv_ta_almacenes AS ALMA
-			JOIN int_ta_sucursales AS EMPRE
-				USING ( ch_sucursal )
-		WHERE
-			EMPRE.ebikey IS NOT NULL AND EMPRE.ebikey != ''
-			AND ALMA.ch_clase_almacen = '1'
-			AND ALMA.ch_almacen = '" . $Nu_Almacen . "'
-		LIMIT 1
+			SELECT
+				EMPRE.ruc,
+				EMPRE.razsocial,
+				EMPRE.ch_direccion,
+				EMPRE.ebiurl,
+				EMPRE.ebiauth,
+				ALMA.ch_nombre_almacen AS no_almacen,
+				ALMA.ch_direccion_almacen
+			FROM
+				inv_ta_almacenes AS ALMA
+				JOIN int_ta_sucursales AS EMPRE
+					USING ( ch_sucursal )
+			WHERE
+				EMPRE.ebikey IS NOT NULL AND EMPRE.ebikey != ''
+				AND ALMA.ch_clase_almacen = '1'
+				AND ALMA.ch_almacen = '" . $Nu_Almacen . "'
+			LIMIT 1
 		";
 		// echo "<pre>sql_company";
 		// print_r($sql_company);
@@ -263,50 +277,61 @@ class LibroDiarioModel {
 
 		try {
 			$sql = "
-			SELECT 	
-				el.act_entryline_id, 
-				el.act_entry_id, 
-				el.act_account_id,
-				el.amtdt, 
-				el.amtct, 
-				el.amtsourcedt, 
-				el.amtsourcect, 
-				el.description AS description_detail, 
-				el.tableid, 
-				el.regid, 
-				el.int_clientes_id, 
-				el.c_cash_mpayment_id,
-				el.tab_currency,
-				--------
-				a.acctcode, 
-				a.name,
-				--------
-				e.ch_sucursal, 
-				e.dateacct, 
-				e.description AS description_head, 
-				e.act_entrytype_id, 
-				e.subbookcode, 
-				e.registerno, 
-				TO_CHAR(e.documentdate, 'DD/MM/YYYY') AS documentdate, --YYYY-MM-DD HH12:MM:SS
-				--e.tableid,            --Existe en detalle con información mas precisa
-				--e.regid,              --Existe en detalle con información mas precisa
-				--e.int_clientes_id,    --Existe en detalle con información mas precisa
-				--e.c_cash_mpayment_id, --Existe en detalle con información mas precisa
-				--e.tab_currency,       --Existe en detalle con información mas precisa
-				-------
-				et.bookcode
-			FROM
-				act_entryline el				
-				LEFT JOIN act_entry     e  ON (el.act_entry_id    = e.act_entry_id)
-				LEFT JOIN act_entrytype et ON (e.act_entrytype_id = et.act_entrytype_id)
-				LEFT JOIN act_account   a  ON (el.act_account_id  = a.act_account_id)
-			WHERE
-				1 = 1 
-				--AND TO_CHAR(DATE(documentdate),'YYYY-MM') = '" . $Fe_Fecha . "'
-				AND TRIM(e.ch_sucursal) = '" . $Nu_Almacen . "'
-			ORDER BY
-				--e.act_entrytype_id ASC, e.act_entry_id ASC, el.act_entryline_id ASC
-				e.ch_sucursal ASC, e.subbookcode ASC, e.registerno ASC, el.act_entryline_id ASC
+				SELECT 	
+					el.act_entryline_id, 
+					el.act_entry_id, 
+					el.act_account_id,
+					el.amtdt, 
+					el.amtct, 
+					el.amtsourcedt, 
+					el.amtsourcect, 
+					el.description AS description_detail, 
+					el.tableid, 
+					el.regid, 
+					el.int_clientes_id, 
+					el.c_cash_mpayment_id,
+					el.tab_currency,
+					--------
+					a.acctcode, 
+					a.name,
+					--------
+					e.ch_sucursal, 
+					e.dateacct, 
+					e.description AS description_head, 
+					e.act_entrytype_id, 
+					e.subbookcode, 
+					e.registerno, 
+					TO_CHAR(e.documentdate, 'DD/MM/YYYY') AS documentdate, --YYYY-MM-DD HH12:MM:SS
+					e.documentdate AS documentdate_datetime,
+					--e.tableid,            --Existe en detalle con información mas precisa
+					--e.regid,              --Existe en detalle con información mas precisa
+					--e.int_clientes_id,    --Existe en detalle con información mas precisa
+					--e.c_cash_mpayment_id, --Existe en detalle con información mas precisa
+					--e.tab_currency,       --Existe en detalle con información mas precisa
+					-------
+					et.bookcode,
+					et.bookcode_order,
+					-------
+					mone.tab_car_04 AS isocode,
+					-------
+					r.ruc AS ruc,
+					r.razsocial AS razsocial,
+					cli.cli_codigo AS cli_codigo,
+					cli.cli_razsocial AS cli_razsocial
+				FROM
+					act_entryline el
+					LEFT JOIN act_entry         AS e    ON (el.act_entry_id      = e.act_entry_id)
+					LEFT JOIN act_entrytype     AS et   ON (e.act_entrytype_id   = et.act_entrytype_id)
+					LEFT JOIN act_account       AS a    ON (el.act_account_id    = a.act_account_id)
+					LEFT JOIN int_tabla_general AS mone ON (el.tab_currency      = (substring(trim(mone.tab_elemento) for 2 from length(trim(mone.tab_elemento))-1)) AND mone.tab_tabla = '04' AND mone.tab_elemento != '000000')
+					LEFT JOIN ruc               AS r    ON (TRIM(r.ruc)          = TRIM(el.int_clientes_id::VARCHAR) AND el.tableid IN (1,3))
+					LEFT JOIN int_clientes      AS cli  ON (TRIM(cli.cli_codigo) = TRIM(el.int_clientes_id::VARCHAR) AND el.tableid IN (2))
+				WHERE
+					1 = 1
+					AND TRIM(e.ch_sucursal) = '" . $Nu_Almacen . "'
+					--AND TO_CHAR(DATE(e.documentdate),'YYYY-MM') = '" . $Fe_Fecha . "'
+				ORDER BY
+					e.ch_sucursal ASC, et.bookcode_order ASC, e.subbookcode ASC, e.registerno ASC, el.act_entryline_id ASC
 			";
 			// echo "<pre>sql";
 			// print_r($sql);
@@ -326,10 +351,13 @@ class LibroDiarioModel {
 				);
 			}
 
+			$arrEntry = $sqlca->fetchAll();
+			$arrEntry = $objHelper->get_data_arrayEntry($arrEntry);
+
 			$response = array(
 				'status' => 'success',
 				'message' => 'Registros encontrados satisfactoriamente',
-				'data' => $sqlca->fetchAll(),
+				'data' => $arrEntry,
 				'param' => $data,
 				'data_company' => $data_company,
 			);

@@ -1795,7 +1795,8 @@ venta_tickes.diatickes
 						WHEN ruc IS NULL THEN '99999999'
 					ELSE
 						ruc
-					END) as ruc
+					END) AS ruc,
+					'" . $nombre_tabla_ant . "' AS tabla
 				FROM
 					" . $nombre_tabla_ant . "
 				WHERE
@@ -1831,7 +1832,8 @@ venta_tickes.diatickes
 					WHEN ruc IS NULL THEN '99999999'
 				ELSE
 					ruc
-				END) as ruc
+				END) AS ruc,
+				'" . $nombre_tabla . "' AS tabla
 			FROM
 				" . $nombre_tabla . "
 			WHERE
@@ -1867,7 +1869,8 @@ venta_tickes.diatickes
 						WHEN ruc IS NULL THEN '99999999'
 					ELSE
 						ruc
-					END) as ruc
+					END) AS ruc,
+					'" . $nombre_tabla_des . "' AS tabla
 				FROM
 					" . $nombre_tabla_des . "
 				WHERE

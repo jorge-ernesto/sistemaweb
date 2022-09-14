@@ -300,13 +300,12 @@ class RegistroVentasController extends Controller {
 	//$this->GenerarLibrosElectronicos($results, $arrResponseModel["arrData"], $anio, $mes, $resultgnv, $correlativo, $almacen, $tipo_ple,$BI_incre,$TOTAL_incre,$IGV_incre);
     function GenerarLibrosElectronicos($resultado, $v, $anio, $mes, $resultgnv, $correlativo, $almacen, $version,$BI,$BT,$IGV,$arrParamsPOST) {
 
-		//Eliminamos archivos del PLE
-		$files = glob('/sistemaweb/ventas_clientes/reportes/excel/LE*.txt'); //obtenemos todos los nombres de los ficheros que comienzan con "LE"
+		//ELIMINAMOS ARCHIVOS PLE
+		$files = glob('/sistemaweb/ventas_clientes/reportes/excel/LE*.txt'); //Obtenemos todos los nombres de los ficheros que comienzan con "LE"
 		foreach($files as $file){
 			if(is_file($file))
-			unlink($file); //elimino el fichero
+			unlink($file); //Elimino el fichero
 		}
-		//Cerrar Eliminamos archivos del PLE
 
 		ob_clean();
 		
@@ -452,10 +451,10 @@ class RegistroVentasController extends Controller {
 
 		$bufer = ob_get_clean();
 		
-		//Creamos archivo TXT
+		//CREAMOS EL ARCHIVO TXT
 		$archivo = fopen("/sistemaweb/ventas_clientes/reportes/excel/$nombre_archivo", "w") or die("error creando fichero!");
 				
-		//Reescribimos archivo TXT
+		//REESCRIBIMOS EL ARCHIVO TXT
 		fwrite($archivo, $bufer);
 		fclose($archivo);
 
