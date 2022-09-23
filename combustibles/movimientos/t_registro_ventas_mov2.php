@@ -6,7 +6,7 @@ class RegistroVentasMOVTemplate extends Template {
 		return '<div align="center"><h3 align="center" style="color:#336699;">Movimientos de Venta en Playa y Oficina</h3></div>';
 	}
 
-	function search_form($paginacion, $almacen, $dia1, $dia2, $tipodoc, $art_codigo, $art_cliente) {
+	function search_form($paginacion, $almacen, $dia1, $dia2, $tipodoc, $art_codigo, $art_cliente, $serie, $numero) {
 
 		$tipos = Array(""=>"Todos", "N"=>"Nota de Credito", "F"=>"Factura", "B"=>"Boleta");
 
@@ -55,6 +55,24 @@ class RegistroVentasMOVTemplate extends Template {
 				<input type="text" id="txt-No_Proveedor" onkeyup="autocompleteBridge(1)" class="mayuscula" name="art_cliente2" placeholder="Ingresar código o nombre cliente" autocomplete="off" maxlength="35" size="35"/>  
 				<input type="text" readonly id="txt-No_ProveedorRUC" name="art_cliente" placeholder="Ingresar codigo cliente" value="'.$art_cliente.'" maxlength="25" size="25">
         '));
+
+        $form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('
+			<tr>
+			<td>
+				<div id="label" style="display:block;">Serie:</td></div>            
+			<td>
+			<div id="label2" style="display:block;">
+				<input type="text" id="txt-serie" name="serie" placeholder="Ingresar serie" value="'.$serie.'" maxlength="4" size="15">  
+		'));
+        
+		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('
+			<tr>
+			<td>
+				<div id="label" style="display:block;">Numero:</td></div>            
+			<td>
+			<div id="label2" style="display:block;">
+				<input type="text" id="txt-numero" name="numero" placeholder="Ingresar numero" value="'.$numero.'" maxlength="8" size="15">  
+		'));
 		
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<tr><td>Tipo Documento: '));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<td>'));
@@ -71,12 +89,12 @@ class RegistroVentasMOVTemplate extends Template {
 			$paginacion['paginas'] = '0';
 		}
  		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('P&aacute;gina '.$paginacion['paginas'].' de '.$paginacion['numero_paginas'].' P&aacute;ginas&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'));
-		$form->addElement(FORM_GROUP_MAIN, new f2element_obj_image('/sistemaweb/icons/first.gif', espacios(2),array( "border"=>"0", "alt"=>"Primera P&aacute;gina","onclick"=>"javascript:PaginarRegistros('".$paginacion['pp']."','".$paginacion['primera_pagina']."','".$almacen."','".$dia1."','".$dia2."','".$tipodoc."','".$art_codigo."','".$art_cliente."')")));
-	   	$form->addElement(FORM_GROUP_MAIN, new f2element_obj_image('/sistemaweb/icons/left.gif', espacios(5),array( "border"=>"0", "alt"=>"P&aacute;gina Anterior","onclick"=>"javascript:PaginarRegistros('".$paginacion['pp']."','".$paginacion['pagina_previa']."','".$almacen."','".$dia1."','".$dia2."','".$tipodoc."','".$art_codigo."','".$art_cliente."')")));
-	    	$form->addElement(FORM_GROUP_MAIN, new f2element_text ('paginas','', $paginacion['paginas'], espacios(5), 3, 2, array( "onChange"=>"javascript:PaginarRegistros('".$paginacion['pp']."',this.value,'".$almacen."','".$dia1."','".$dia2."','".$tipodoc."','".$art_codigo."','".$art_cliente."')")));
-	    	$form->addElement(FORM_GROUP_MAIN, new f2element_obj_image('/sistemaweb/icons/right.gif', espacios(2),array( "border"=>"0", "alt"=>"P&aacute;gina Siguente","onclick"=>"javascript:PaginarRegistros('".$paginacion['pp']."','".$paginacion['pagina_siguiente']."','".$almacen."','".$dia1."','".$dia2."','".$tipodoc."','".$art_codigo."','".$art_cliente."')")));
-	    	$form->addElement(FORM_GROUP_MAIN, new f2element_obj_image('/sistemaweb/icons/last.gif', espacios(2),array( "border"=>"0", "alt"=>"&Uacute;ltima P&aacute;gina","onclick"=>"javascript:PaginarRegistros('".$paginacion['pp']."','".$paginacion['ultima_pagina']."','".$almacen."','".$dia1."','".$dia2."','".$tipodoc."','".$art_codigo."','".$art_cliente."')")));
-		$form->addElement(FORM_GROUP_MAIN, new f2element_text ('numero_registros','Registros por P&aacute;gina : ', $paginacion['pp'], espacios(2), 4, 4,array("onChange"=>"javascript:PaginarRegistros(this.value,'".$paginacion['primera_pagina']."','".$almacen."','".$dia1."','".$dia2."','".$tipodoc."','".$art_codigo."','".$art_cliente."')")));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_obj_image('/sistemaweb/icons/first.gif', espacios(2),array( "border"=>"0", "alt"=>"Primera P&aacute;gina","onclick"=>"javascript:PaginarRegistros('".$paginacion['pp']."','".$paginacion['primera_pagina']."','".$almacen."','".$dia1."','".$dia2."','".$tipodoc."','".$art_codigo."','".$art_cliente."','".$serie."','".$numero."')")));
+	   	$form->addElement(FORM_GROUP_MAIN, new f2element_obj_image('/sistemaweb/icons/left.gif', espacios(5),array( "border"=>"0", "alt"=>"P&aacute;gina Anterior","onclick"=>"javascript:PaginarRegistros('".$paginacion['pp']."','".$paginacion['pagina_previa']."','".$almacen."','".$dia1."','".$dia2."','".$tipodoc."','".$art_codigo."','".$art_cliente."','".$serie."','".$numero."')")));
+	    	$form->addElement(FORM_GROUP_MAIN, new f2element_text ('paginas','', $paginacion['paginas'], espacios(5), 3, 2, array( "onChange"=>"javascript:PaginarRegistros('".$paginacion['pp']."',this.value,'".$almacen."','".$dia1."','".$dia2."','".$tipodoc."','".$art_codigo."','".$art_cliente."','".$serie."','".$numero."')")));
+	    	$form->addElement(FORM_GROUP_MAIN, new f2element_obj_image('/sistemaweb/icons/right.gif', espacios(2),array( "border"=>"0", "alt"=>"P&aacute;gina Siguente","onclick"=>"javascript:PaginarRegistros('".$paginacion['pp']."','".$paginacion['pagina_siguiente']."','".$almacen."','".$dia1."','".$dia2."','".$tipodoc."','".$art_codigo."','".$art_cliente."','".$serie."','".$numero."')")));
+	    	$form->addElement(FORM_GROUP_MAIN, new f2element_obj_image('/sistemaweb/icons/last.gif', espacios(2),array( "border"=>"0", "alt"=>"&Uacute;ltima P&aacute;gina","onclick"=>"javascript:PaginarRegistros('".$paginacion['pp']."','".$paginacion['ultima_pagina']."','".$almacen."','".$dia1."','".$dia2."','".$tipodoc."','".$art_codigo."','".$art_cliente."','".$serie."','".$numero."')")));
+		$form->addElement(FORM_GROUP_MAIN, new f2element_text ('numero_registros','Registros por P&aacute;gina : ', $paginacion['pp'], espacios(2), 4, 4,array("onChange"=>"javascript:PaginarRegistros(this.value,'".$paginacion['primera_pagina']."','".$almacen."','".$dia1."','".$dia2."','".$tipodoc."','".$art_codigo."','".$art_cliente."','".$serie."','".$numero."')")));
 	    	$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr></table>'));
 
 		$form->addElement(FORM_GROUP_MAIN, new form_element_anytext(

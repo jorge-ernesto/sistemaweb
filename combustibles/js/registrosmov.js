@@ -1,5 +1,5 @@
-function PaginarRegistros(rxp, valor, almacen, dia1, dia2, tipodoc, art_codigo, art_cliente) {   	
-	urlPagina = 'control.php?rqst=MOVIMIENTOS.MOVIMIENTOVENTAS&action=Buscar&rxp='+rxp+'&pagina='+valor+'&almacen='+almacen+'&dia1='+dia1+'&dia2='+dia2+'&tipodoc='+tipodoc+'&art_codigo='+art_codigo+'&art_cliente='+art_cliente;
+function PaginarRegistros(rxp, valor, almacen, dia1, dia2, tipodoc, art_codigo, art_cliente, serie, numero) {   	
+	urlPagina = 'control.php?rqst=MOVIMIENTOS.MOVIMIENTOVENTAS&action=Buscar&rxp='+rxp+'&pagina='+valor+'&almacen='+almacen+'&dia1='+dia1+'&dia2='+dia2+'&tipodoc='+tipodoc+'&art_codigo='+art_codigo+'&art_cliente='+art_cliente+'&serie='+serie+'&numero='+numero;
 	document.getElementById('control').src = urlPagina;	
 }
 

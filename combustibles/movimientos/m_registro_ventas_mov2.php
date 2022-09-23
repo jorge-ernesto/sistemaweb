@@ -27,7 +27,7 @@ class RegistroVentasMOVModel extends Model {
 		return $result;
     }
 
-    function Paginacion($pp, $pagina, $reporte, $almacen, $dia1, $dia2, $tipodoc, $articulo, $cliente) {
+    function Paginacion($pp, $pagina, $reporte, $almacen, $dia1, $dia2, $tipodoc, $articulo, $cliente, $serie, $numero) {
 		global $sqlca;
 
 		//Documentos de playa
@@ -66,6 +66,16 @@ class RegistroVentasMOVModel extends Model {
 		if (trim($cliente) != "") {
 			$condclienteT .= "AND trans.ruc='" . pg_escape_string($cliente) . "' ";
 			$condcliente .= "AND CLI.cli_ruc='" . pg_escape_string($cliente) . "' ";
+		}
+
+		if (trim($serie) != "") {
+			$condserieT .= "AND SUBSTR(TRIM(trans.usr), 0, 5) LIKE '%" . pg_escape_string($serie) . "%' ";
+			$condserie .= "AND Cab.ch_fac_seriedocumento LIKE '%" . pg_escape_string($serie) . "%' ";
+		}
+
+		if (trim($numero) != "") {
+			$condnumeroT .= "AND SUBSTR(TRIM(trans.usr), 6) LIKE '%" . pg_escape_string($numero) . "%' ";
+			$condnumero .= "AND Cab.ch_fac_numerodocumento LIKE '%" . pg_escape_string($numero) . "%' ";
 		}
 
 		//Obtenemos tabla pos_trans
@@ -112,6 +122,8 @@ class RegistroVentasMOVModel extends Model {
 				$condt
 				$condarticuloT
 				$condclienteT
+				$condserieT
+				$condnumeroT
 		)
 		UNION ALL
 		(
@@ -150,6 +162,8 @@ class RegistroVentasMOVModel extends Model {
 				$cond
 				$condarticulo
 				$condcliente
+				$condserie
+				$condnumero
 		)
 		ORDER BY 4";
 

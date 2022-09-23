@@ -25,16 +25,16 @@ class RegistroVentasMOVController extends Controller {
         switch($this->action) {        	
 			case "Buscar":
 				$reporte   = "HTML";  
-				$res       = RegistroVentasMOVModel::Paginacion($_REQUEST['rxp'], $_REQUEST['pagina'], $reporte, $_REQUEST['almacen'], $_REQUEST['dia1'], $_REQUEST['dia2'], $_REQUEST['tipo_doc'], $_REQUEST['art_codigo'], $_REQUEST['art_cliente']);	
+				$res       = RegistroVentasMOVModel::Paginacion($_REQUEST['rxp'], $_REQUEST['pagina'], $reporte, $_REQUEST['almacen'], $_REQUEST['dia1'], $_REQUEST['dia2'], $_REQUEST['tipo_doc'], $_REQUEST['art_codigo'], $_REQUEST['art_cliente'], $_REQUEST['serie'], $_REQUEST['numero']);	
 				echo "<script>console.log('REQUEST:, " . json_encode($_REQUEST) . "')</script>";
 				echo "<script>console.log('" . json_encode($res) . "')</script>";
-				$result    = RegistroVentasMOVTemplate::search_form($res["paginacion"], $_REQUEST['almacen'], $_REQUEST['dia1'], $_REQUEST['dia2'], $_REQUEST['tipo_doc'], $_REQUEST['art_codigo'], $_REQUEST['art_cliente']);		    	
+				$result    = RegistroVentasMOVTemplate::search_form($res["paginacion"], $_REQUEST['almacen'], $_REQUEST['dia1'], $_REQUEST['dia2'], $_REQUEST['tipo_doc'], $_REQUEST['art_codigo'], $_REQUEST['art_cliente'], $_REQUEST['serie'], $_REQUEST['numero']);		    	
 				$result_f  = RegistroVentasMOVTemplate::reporte($res);						
 				break;			
 			
 			case "Excel":
 				$reporte = "Excel";
-				$res       = RegistroVentasMOVModel::Paginacion($_REQUEST['rxp'], $_REQUEST['pagina'], $reporte, $_SESSION['almacen'], $_REQUEST['dia1'], $_REQUEST['dia2'],$_REQUEST['tipo_doc'],$_REQUEST['art_codigo'],$_REQUEST['art_cliente']);
+				$res       = RegistroVentasMOVModel::Paginacion($_REQUEST['rxp'], $_REQUEST['pagina'], $reporte, $_SESSION['almacen'], $_REQUEST['dia1'], $_REQUEST['dia2'],$_REQUEST['tipo_doc'],$_REQUEST['art_codigo'],$_REQUEST['art_cliente'], $_REQUEST['serie'], $_REQUEST['numero']);
 				$resultt   = RegistroVentasMOVTemplate::reporteExcel($res,$_SESSION['almacen'], $_REQUEST['dia1'], $_REQUEST['dia2']) ;
 				//$resultt   = RegistroVentasMOVTemplate::gridViewEXCEL($res) ;
 				break;
@@ -42,8 +42,8 @@ class RegistroVentasMOVController extends Controller {
 			default:	
 				$reporte   = "HTML";
 				$almacen   = $_SESSION['almacen'];
-				$res       = RegistroVentasMOVModel::Paginacion($_REQUEST['rxp'], $_REQUEST['pagina'], $reporte, $almacen, date("d/m/Y"), date("d/m/Y"),"","","");
-				$result    = RegistroVentasMOVTemplate::search_form($res["paginacion"], $almacen,"","","","","");			    	
+				$res       = RegistroVentasMOVModel::Paginacion($_REQUEST['rxp'], $_REQUEST['pagina'], $reporte, $almacen, date("d/m/Y"), date("d/m/Y"),"","","","","");
+				$result    = RegistroVentasMOVTemplate::search_form($res["paginacion"], $almacen,"","","","","","","");			    	
 				$result_f  = RegistroVentasMOVTemplate::reporte($res);
 				break;
 		}		

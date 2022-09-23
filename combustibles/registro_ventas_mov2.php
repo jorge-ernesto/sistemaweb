@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta charset="utf-8">a
+		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Movimientos Ventas</title>
 		<link rel="stylesheet" href="/sistemaweb/sistemaweb.css" type="text/css">
