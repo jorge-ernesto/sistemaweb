@@ -30,12 +30,12 @@ class AfericionesModel extends Model { // BOLETA A AFERICION
 
 		$query .= "		ORDER BY dia desc, turno, caja, trans ";
 
-		echo "\n\n PRINCIPAL COMBUSTIBLE: \n\n".$query;
+		echo "\n\n QUERY: \n\n".$query;
 
 		$resultado_1 = $sqlca->query($query);
 		$numrows = $sqlca->numrows();
 
-		$paginador = new paginador($numrows,$pp, $pagina);
+		$paginador = new paginador($numrows, $pp, $pagina);
 	
 		$listado2['partir'] 		= $paginador->partir();
 		$listado2['fin'] 		= $paginador->fin();
@@ -49,14 +49,12 @@ class AfericionesModel extends Model { // BOLETA A AFERICION
 
 		$query .= " LIMIT " . pg_escape_string($pp) . " ";
 		$query .= " OFFSET " . pg_escape_string($paginador->partir());
-		
-		//echo $query;
 
 		if ($sqlca->query($query) <= 0)
 			return $sqlca->get_error();
 	    
-		$listado[] = array();
-		$resultado = Array();
+		$listado = array();
+		$resultado = array();
 
 		for ($i = 0; $i < $sqlca->numrows(); $i++) {
 			$a = $sqlca->fetchRow();
@@ -344,7 +342,7 @@ WHERE
 		$a = $sqlca->fetchRow();
 		$TmpAfericion = $a[0];
 		
-		//APLICAMOS INFORMACION DE AFERICIONES DIRECTAMENTE AL PARTE EXISTENTE POR DIA, CODIGO, SURTIDOR, ALMACEN
+		//APLICAMOS INFORMACION DE AFERICIONES DIRECTAMENTE AL PARTE EXISTENTE POR DIA, CODIGO, SURTIDOR, ALMACEN //
 		$query3 = "UPDATE comb_ta_contometros SET nu_afericionveces_x_5 = '".$TmpAfericion."' WHERE dt_fechaparte = '".$dia."' AND TRIM(ch_codigocombustible) = '".TRIM($codigo)."' AND ch_surtidor = '".$ch_surtidor."' AND TRIM(ch_sucursal) = '".TRIM($es)."';";
 		
 		error_log('query3: '.$query3);

@@ -84,7 +84,7 @@ class MovimientoAlmacenCRUDModel {
 		}
     }
 
-    function getFechaSistema() {
+    function getFechaSistema() { //FECHA DE SISTEMA PARA LOS REPORTES DE MOVIMIENTO DE INVENTARIO
 		global $sqlca;
 
 		//$sql = "SELECT TO_CHAR(da_fecha, 'DD/MM/YYYY') AS fe_sistema FROM pos_aprosys WHERE ch_poscd = 'A' ORDER BY da_fecha ASC LIMIT 1;";
@@ -426,8 +426,24 @@ class MovimientoAlmacenCRUDModel {
 		}
 	}
 
-	public function compraAdd($arrFormData, $arrTableProductos, $arrConversionGLP, $arrRegistroCompras, $arrFormAgregarDocumentoReferencia, $arrDatosComplementarios, $arrFletes, $usuario, $ip, $enviar_orden_compra) {
+	public function compraAdd($arrFormData, $arrTableProductos, $arrConversionGLP, $arrRegistroCompras, $arrFormAgregarDocumentoReferencia, $arrDatosComplementarios, $arrFletes, $usuario, $ip, $enviar_orden_compra) { //
 		global $sqlca;
+
+		error_log( json_encode(
+			array(
+				"arrFormData" => $arrFormData, 
+				"arrTableProductos" => $arrTableProductos, 
+				"arrConversionGLP" => $arrConversionGLP, 
+				"arrRegistroCompras" => $arrRegistroCompras, 
+				"arrFormAgregarDocumentoReferencia" => $arrFormAgregarDocumentoReferencia, 
+				"arrDatosComplementarios" => $arrDatosComplementarios, 
+				"arrFletes" => $arrFletes, 
+				"usuario" => $usuario, 
+				"ip" => $ip, 
+				"enviar_orden_compra" => $enviar_orden_compra
+			)
+		) );
+		// die();
 
 		//IGV
 		$Nu_IGV = MovimientoAlmacenCRUDModel::getIgv();
@@ -441,7 +457,7 @@ class MovimientoAlmacenCRUDModel {
 
 		try {
 
-			$Nu_Tipo_Movimiento_Inventario 	= trim($arrFormData['Nu_Tipo_Movimiento_Inventario']);
+			$Nu_Tipo_Movimiento_Inventario 	= trim($arrFormData['Nu_Tipo_Movimiento_Inventario']); //21
 			$Nu_Tipo_Movimiento_Inventario 	= strip_tags($Nu_Tipo_Movimiento_Inventario);
 
 			$Nu_Almacen_Interno 			= trim($arrFormData['Nu_Almacen_Interno']);
@@ -456,7 +472,7 @@ class MovimientoAlmacenCRUDModel {
 			$Nu_Naturaleza_Movimiento_Inventario = trim($arrFormData['Nu_Naturaleza_Movimiento_Inventario']);
 			$Nu_Naturaleza_Movimiento_Inventario = strip_tags($Nu_Naturaleza_Movimiento_Inventario);
 
-			if($Nu_Naturaleza_Movimiento_Inventario == "1" || $Nu_Naturaleza_Movimiento_Inventario == "2")
+			if($Nu_Naturaleza_Movimiento_Inventario == "1" || $Nu_Naturaleza_Movimiento_Inventario == "2") //NATURALEZA DE INGRESO
 				$Nu_Almacen_Interno = $Nu_Almacen_Destino;
 			else
 				$Nu_Almacen_Interno = $Nu_Almacen_Origen;
@@ -467,6 +483,7 @@ class MovimientoAlmacenCRUDModel {
 			$Fe_Emision 					= trim($arrFormData['Fe_Emision']);
 			$Fe_Emision 					= strip_tags($Fe_Emision);
 			$Fe_Emision 					= explode("/", $Fe_Emision);
+			$Fe_Emision 					= $Fe_Emision[2] . "-" . $Fe_Emision[1] . "-" . $Fe_Emision[0];
 			$Fe_Emision 					= $Fe_Emision[2] . "-" . $Fe_Emision[1] . "-" . $Fe_Emision[0];
 
 			$Fe_Emision_Registro_Compra 	= trim($arrFormData['Fe_Emision_Registro_Compra']);
@@ -543,12 +560,12 @@ RETURNING
 			$row = $sqlca->fetchRow();
 			$Nu_Formulario = $row["nu_formulario"];
 
-			if ($enviar_orden_compra == '0'){
+			if ($enviar_orden_compra == '0'){ //INGRESO DIRECTO
 				/* conversion GLP compras */
 				$Enviar_Conversion_GLP = trim($arrConversionGLP['Enviar_Conversion_GLP']);
 				$Enviar_Conversion_GLP = strip_tags($Enviar_Conversion_GLP);
 
-				if($Enviar_Conversion_GLP == 'true'){
+				if($Enviar_Conversion_GLP == 'true'){ //NORMALMENTE NO ENTRA AQUI
 					$Nu_Kilos = trim($arrConversionGLP['Nu_Kilos']);
 					$Nu_Kilos = strip_tags($Nu_Kilos);
 
@@ -635,8 +652,8 @@ RETURNING
 			} else {
 				//SI NO SE ENLAZO CON ORDEN(ES) DE COMPRA
 				$Nu_Tipo_Orden_Compra = '01';
-				if ($enviar_orden_compra == '0'){
-					if ($Nu_Naturaleza_Movimiento_Inventario == '2') {
+				if ($enviar_orden_compra == '0'){ //INGRESO DIRECTO
+					if ($Nu_Naturaleza_Movimiento_Inventario == '2') { //NATURALEZA INGRESO
 						$status = $sqlca->query("SELECT * FROM int_num_documentos WHERE num_tipdocumento = '01' AND num_seriedocumento = '" . $Nu_Almacen_Interno . "' LIMIT 1");
 						
 						if ( $status == 0 ) {
@@ -663,7 +680,7 @@ RETURNING
 							$Nu_Serie_Orden_Compra = $Nu_Almacen_Destino;
 							$Nu_Numero_Orden_Compra = $row["num_numactual"];
 
-							$addOrdenCompraCabecera = MovimientoAlmacenCRUDModel::addOrdenCompraCabecera(
+							$addOrdenCompraCabecera = MovimientoAlmacenCRUDModel::addOrdenCompraCabecera( //Agregamos a la tabla orden de compra cabecera, a la tabla com_cabecera
 								$Nu_Almacen_Interno,
 								$Nu_Documento_Identidad,
 								$Nu_Tipo_Orden_Compra,
@@ -722,7 +739,7 @@ RETURNING
 					mov_almaorigen,
 					mov_almadestino,
 					mov_naturaleza,
-					mov_fecha,
+					mov_fecha, --ESTA ES LA FECHA DEL PROBLEMA
 					mov_numero,
 					mov_entidad,
 					mov_tipdocuref,
@@ -743,7 +760,7 @@ RETURNING
 					'" . $Nu_Almacen_Origen . "',
 					'" . $Nu_Almacen_Destino . "',
 					'" . $Nu_Naturaleza_Movimiento_Inventario . "',
-					'" . $Fe_Emision . "',
+					'" . $Fe_Emision . "', --ESTA ES LA FECHA DEL PROBLEMA
 					'" . $Nu_Formulario . "',
 					'" . $Nu_Documento_Identidad . "',
 					'" . $Nu_Tipo_Documento_Compra . "',
@@ -772,7 +789,7 @@ RETURNING
 					);
 				}
 
-				if ( $enviar_orden_compra == '0' ) {
+				if ( $enviar_orden_compra == '0' ) { //INGRESO DIRECTO
 					/* Enviar lote Pedido Vencimientos */
 					$Nu_Lote 	= trim($arrTableProductos[$i]['Nu_Lote']);
 					$Nu_Lote 	= strip_tags($Nu_Lote);
@@ -861,7 +878,7 @@ RETURNING
 								$Nu_Total_Compra 	= ($Nu_Cantidad * $Nu_Precio_Compra);
 								$Nu_Impuesto_Compra = ($Nu_Total_Compra - ($Nu_Total_Compra / $Nu_IGV));
 								
-								$addOrdenCompraDetalle = MovimientoAlmacenCRUDModel::addOrdenCompraDetalle(
+								$addOrdenCompraDetalle = MovimientoAlmacenCRUDModel::addOrdenCompraDetalle( //Agregamos a la tabla orden de compra detalle
 									$Nu_Documento_Identidad,
 									$Nu_Tipo_Orden_Compra,
 									$Nu_Serie_Orden_Compra,
@@ -888,7 +905,7 @@ RETURNING
 			}
 
 			/* Fletes */
-			if ( isset($arrFletes['Enviar_Flete']) ) {
+			if ( isset($arrFletes['Enviar_Flete']) ) { //NO ENTRA AQUI
 				$Enviar_Flete = trim($arrFletes['Enviar_Flete']);
 				$Enviar_Flete = strip_tags($Enviar_Flete);
 				if (  $Enviar_Flete == 'true' ) {
@@ -936,7 +953,7 @@ RETURNING
 			$Enviar_Datos_Complementarios = trim($arrDatosComplementarios['Enviar_Datos_Complementarios']);
 			$Enviar_Datos_Complementarios = strip_tags($Enviar_Datos_Complementarios);
 
-			if ($Enviar_Datos_Complementarios == 'true') {
+			if ($Enviar_Datos_Complementarios == 'true') { //NO ENTRA AQUI
 				
 				$Fe_Recepcion = trim($arrDatosComplementarios['Fe_Recepcion']);
 				$Fe_Recepcion = strip_tags($Fe_Recepcion);
@@ -975,11 +992,11 @@ RETURNING
 				}
 			}
 
-			/* Registro de Compras */
+			/* Registro de Compras */ //REGISTRO DE COMPRAS SUNAT
 			$Enviar_Regisro_Compra = trim($arrRegistroCompras['Enviar_Regisro_Compra']);
 			$Enviar_Regisro_Compra = strip_tags($Enviar_Regisro_Compra);
 
-			if($Enviar_Regisro_Compra == 'true'){
+			if($Enviar_Regisro_Compra == 'true'){ //BOTON REGISTRO DE COMPRAS SUNAT SELECCIONADO
 				$sqlca->query("
 				SELECT
 					COUNT(*) AS nu_existe_registro_compra
@@ -996,7 +1013,7 @@ RETURNING
 				$validacionRC = '';
 				$messageRC = '';
 
-				if($exist['nu_existe_registro_compra'] == 1){
+				if($exist['nu_existe_registro_compra'] == 1){ //SI YA EXISTE ERROR
 					$validacionRC = 'error';
 					$sqlca->query("
 					SELECT
@@ -1017,7 +1034,7 @@ RETURNING
 						'message' => $messageRC//'messageRC'
 					);
 					//error_log('13 $response: '.$response['message']);
-				}else{
+				}else{ //NO EXISTE PROCEDE
 
 					$Fe_Periodo_RC = trim($arrRegistroCompras['Fe_Periodo_RC']);
 					$Fe_Periodo_RC = strip_tags($Fe_Periodo_RC);
@@ -1096,7 +1113,7 @@ RETURNING
 
 					$getCorrelativoPeriodo = MovimientoAlmacenCRUDModel::getCorrelativoPeriodo($Fe_Periodo_RC);
 
-					$addRegistroComprasCabecera = MovimientoAlmacenCRUDModel::addRegistroComprasCabecera(
+					$addRegistroComprasCabecera = MovimientoAlmacenCRUDModel::addRegistroComprasCabecera( //
 						$Nu_Almacen_Interno,
 						$Nu_Documento_Identidad,
 						$Nu_Tipo_Documento_Compra,
@@ -1176,6 +1193,8 @@ RETURNING
 					}
 				}
 			}
+
+			die();
 
 			if($response['status'] == 'error'){
 				MovimientoAlmacenCRUDModel::ROLLBACKTransacction();
@@ -1307,6 +1326,9 @@ RETURNING
 		);
 		";
 
+		error_log("addOrdenCompraCabecera");
+		error_log($sql);
+
 		/*
 		--TABLA: Orden de compra - CAMPO: com_cab_estado -> VALOR: 'Inventario'
 		Observaciones: Según el archivo de Orden de Compras
@@ -1367,6 +1389,9 @@ RETURNING
 			" . $Nu_Impuesto_Compra . "
 		);
 		";
+
+		error_log("addOrdenCompraCabecera");
+		error_log($sql);
 
 		//echo "<br>";
 		//echo "Detalle com_detalle: " . $sql;
@@ -1519,6 +1544,9 @@ RETURNING
 		);
 		";
 
+		error_log("addRegistroComprasCabecera");
+		error_log($sql);
+
 		//echo "<br />";
 		//echo "INSERT RC Cabecera: " . $sql;
 		if ($sqlca->query($sql) < 0)
@@ -1562,6 +1590,9 @@ RETURNING
 			" . $Nu_Totacl_RC . "
 		);
 		";
+		
+		error_log("addRegistrosComprasDetalle");
+		error_log($sql);
 
 		//echo "<br />";
 		//echo "INSERT RC Detalle: " . $sql;

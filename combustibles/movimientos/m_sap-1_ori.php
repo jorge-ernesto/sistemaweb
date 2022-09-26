@@ -1350,7 +1350,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  (CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE
   ''
  END) AS u_exc_manguera,
@@ -1604,7 +1604,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  (CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE
   ''
  END) AS u_exc_manguera,
@@ -2243,7 +2243,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  FIRST(PT.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PT.fecha), 'HH12:MI:SS') AS u_exc_hora,
@@ -2376,7 +2376,7 @@ SELECT
  vtc.ch_caja AS u_exc_caja,
  --SURTIDOR.nu_manguera::TEXT AS u_exc_manguera,
  CASE WHEN vtc.ch_lado != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = vtc.ch_lado::INTEGER AND SURTIDOR.ch_codigocombustible = vtd.ch_articulo)::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = vtc.ch_lado::INTEGER AND SURTIDOR.ch_codigocombustible = vtd.ch_articulo LIMIT 1)::TEXT
  ELSE
   ''
  END AS u_exc_manguera,
@@ -3001,7 +3001,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  FIRST(PT.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PT.fecha), 'HH12:MI:SS') AS u_exc_hora,
@@ -3139,7 +3139,7 @@ SELECT
  vtc.ch_caja AS u_exc_caja,
  --SURTIDOR.nu_manguera::TEXT AS u_exc_manguera,
  CASE WHEN vtc.ch_lado != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = vtc.ch_lado::INTEGER AND SURTIDOR.ch_codigocombustible = vtd.ch_articulo)::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = vtc.ch_lado::INTEGER AND SURTIDOR.ch_codigocombustible = vtd.ch_articulo LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  vtc.ch_turno AS u_exc_turno,
  TO_CHAR(vtc.dt_fecha, 'HH12:MI:SS') AS u_exc_hora,
@@ -4145,7 +4145,7 @@ END AS discprcnt,
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  FIRST(PT.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PT.fecha), 'HH12:MI:SS') AS u_exc_hora,
@@ -4278,7 +4278,7 @@ SELECT
  vtc.ch_caja AS u_exc_caja,
  --SURTIDOR.nu_manguera::TEXT AS u_exc_manguera,
  CASE WHEN vtc.ch_lado != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = vtc.ch_lado::INTEGER AND SURTIDOR.ch_codigocombustible = vtd.ch_articulo)::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = vtc.ch_lado::INTEGER AND SURTIDOR.ch_codigocombustible = vtd.ch_articulo LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  vtc.ch_turno AS u_exc_turno,
  TO_CHAR(vtc.dt_fecha, 'HH12:MI:SS') AS u_exc_hora,
@@ -5329,7 +5329,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  FIRST(PT.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PT.fecha), 'HH12:MI:SS') AS u_exc_hora,
@@ -5608,7 +5608,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  FIRST(PT.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PT.fecha), 'HH12:MI:SS') AS u_exc_hora,
@@ -5782,7 +5782,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  FIRST(PT.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PT.fecha), 'HH12:MI:SS') AS u_exc_hora,
@@ -7818,7 +7818,10 @@ GROUP BY
  FIRST(SAPCC.sap_codigo) AS ocrcode2,
  '' AS u_exc_dispensador,
  PTA.caja AS u_exc_caja,
- FIRST(SURTIDOR.nu_manguera) AS u_exc_manguera,
+ --FIRST(SURTIDOR.nu_manguera) AS u_exc_manguera,
+ CASE WHEN FIRST(PTA.pump) != '' THEN
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PTA.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PTA.codigo) LIMIT 1)::TEXT
+ ELSE '' END AS u_exc_manguera,
  FIRST(PTA.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PTA.fecha), 'HH12:MI:SS') AS u_exc_hora,
  FIRST(pt.placa) AS u_exc_placa,
@@ -7829,7 +7832,7 @@ GROUP BY
 FROM
  pos_ta_afericiones AS PTA
  JOIN ".$param['pos_trans']." pt ON (pta.trans = pt.trans AND pta.es = pt.es AND pta.caja = pt.caja AND pta.turno = pt.turno AND pta.pump = pt.pump)
- JOIN comb_ta_surtidores AS SURTIDOR ON (PTA.pump::INTEGER = SURTIDOR.ch_numerolado::INTEGER AND SURTIDOR.ch_codigocombustible = PTA.codigo)
+ --JOIN comb_ta_surtidores AS SURTIDOR ON (PTA.pump::INTEGER = SURTIDOR.ch_numerolado::INTEGER AND SURTIDOR.ch_codigocombustible = PTA.codigo)
  JOIN inv_ta_almacenes AS ALMA ON (ALMA.ch_almacen = PTA.es)
  JOIN int_ta_sucursales AS ORG ON (ORG.ch_sucursal = ALMA.ch_sucursal)
  LEFT JOIN sap_mapeo_tabla_detalle AS SAPCC ON (SAPCC.opencomb_codigo = ORG.ch_sucursal AND SAPCC.id_tipo_tabla = 1)
@@ -8688,7 +8691,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  FIRST(PT.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PT.fecha), 'HH12:MI:SS') AS u_exc_hora,

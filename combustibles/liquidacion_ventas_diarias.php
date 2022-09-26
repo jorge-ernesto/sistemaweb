@@ -15,7 +15,7 @@ $funcion     = new class_funciones;
 $conector_id = $funcion->conectar("","","","","");
 
 //Debug
-$_SESSION['debug'] = false;
+$_SESSION['debug'] = true;
 $debug = ($_SESSION['debug']) ? true : false;
 
 $no_mostrar  = "style='display:none;'";
@@ -39,7 +39,7 @@ $fecha_al = $ano_al."-".$mes_al."-".$dia_al;
 // verifica fecha de inicio consolidada
 
 if ($_REQUEST['boton'] == "Consultar") {
-	$flag = validaDia($fecha_del,$_POST['almacen']); //Funcionalidad para verificar consolidacion de fecha
+	$flag = validaDia($fecha_del,$_POST['almacen']); //Funcionalidad para verificar consolidacion por dia, turno y almacen
 	if ($flag == 1) { 
 		echo "<script>alert('La fecha de inicio debe estar consolidada!');</script>";	
 		$dia_del=date("d");
@@ -853,6 +853,9 @@ echo "</pre>";*/
 		return $result;
    }
     	
+   /** 
+	* Verificar consolidacion por dia, turno y almacen
+    */
    function validaDia($dia, $almacen) {
 		global $sqlca;
 

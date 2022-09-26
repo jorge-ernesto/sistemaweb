@@ -22,23 +22,25 @@ class KardexActModel extends Model {
 		if (("pos_trans".$FechaDiv[2].$FechaDiv[1]) != $postrans && $tipovista == "D")
 			return "INVALID_DATE";
 
-    	$saldos 		= KardexActModel::saldoInicial($desde, $art_desde, $estacion, $linea);
+    	$saldos 		= KardexActModel::saldoInicial($desde, $art_desde, $estacion, $linea); //Obtenemos saldo inicial
+		echo "<script>console.log('saldos')</script>";
+		echo "<script>console.log('" . json_encode( $saldos ) . "')</script>";
     	$formularios 	= KardexActModel::obtenerTiposFormularios();
 
-        $resultado 		= Array();
+      $resultado 		= Array();
     	$anteriores 	= Array();
 
     	foreach ($saldos['almacenes'] as $cod_almacen => $almacen) {
         	foreach ($almacen['codigos'] as $codigo => $articulo) {
-		        $resultado['almacenes'][$cod_almacen]['articulos'][$codigo]['saldoinicial']['cant_anterior'] = $articulo['stk_stock'];
-		        $resultado['almacenes'][$cod_almacen]['articulos'][$codigo]['saldoinicial']['unit_anterior'] = $articulo['stk_costounitario'];
-		        $resultado['almacenes'][$cod_almacen]['articulos'][$codigo]['saldoinicial']['costo_total'] = $articulo['stk_costototal'];
-		        $resultado['almacenes'][$cod_almacen]['articulos'][$codigo]['saldoinicial']['codigo_CUO'] = $articulo['cod_CUO'];
+				$resultado['almacenes'][$cod_almacen]['articulos'][$codigo]['saldoinicial']['cant_anterior'] = $articulo['stk_stock'];
+				$resultado['almacenes'][$cod_almacen]['articulos'][$codigo]['saldoinicial']['unit_anterior'] = $articulo['stk_costounitario'];
+				$resultado['almacenes'][$cod_almacen]['articulos'][$codigo]['saldoinicial']['costo_total'] = $articulo['stk_costototal'];
+				$resultado['almacenes'][$cod_almacen]['articulos'][$codigo]['saldoinicial']['codigo_CUO'] = $articulo['cod_CUO'];
 
-		        $anteriores[$cod_almacen][$codigo]['cant_anterior'] = $articulo['stk_stock'];
+				$anteriores[$cod_almacen][$codigo]['cant_anterior'] = $articulo['stk_stock'];
 	        	$anteriores[$cod_almacen][$codigo]['unit_anterior'] = $articulo['stk_costounitario'];
         	}
-   		}
+   	}
 
 		$sql = "";
 
@@ -236,10 +238,10 @@ SELECT
  pos.es,
  FIRST(pos.ruc),
  (CASE WHEN pos.usr != '' THEN  SUBSTR(TRIM(pos.usr), 0, 5) ELSE s.printerserial END)::TEXT,
- FIRST(COALESCE(ITEMESTAN.cantidad, 0) + COALESCE(ITEMPLU.cantidad, 0)),
- FIRST(inv.mov_costounitario),
- (FIRST(COALESCE(ITEMESTAN.cantidad, 0) + COALESCE(ITEMPLU.cantidad, 0)) * FIRST(inv.mov_costounitario)),
- FIRST(inv.mov_costopromedio),
+ FIRST(COALESCE(ITEMESTAN.cantidad, 0) + COALESCE(ITEMPLU.cantidad, 0)),  --
+ FIRST(inv.mov_costounitario), --
+ (FIRST(COALESCE(ITEMESTAN.cantidad, 0) + COALESCE(ITEMPLU.cantidad, 0)) * FIRST(inv.mov_costounitario)), --
+ FIRST(inv.mov_costopromedio), --
  art.art_codigo AS codigo,
  '3' AS natu,
  pos.es,
@@ -458,9 +460,9 @@ ORDER BY
 		}
 
 		//Query
-		// echo "<pre>";
-		// print_r($sql);
-		// echo "</pre>";
+		echo "\n\n<pre>Query search";
+		echo($sql);
+		echo "</pre>";
 		// die();
 
 
@@ -744,6 +746,9 @@ ORDER BY
         return $resultado;
     }
 
+	 /**
+	  * Obtenemos SALDO INICIAL (Lo obtiene de inv_saldoalma)
+	  */
     function saldoInicial($desde, $art_desde, $estacion, $linea) {
         global $sqlca;
 
@@ -790,6 +795,9 @@ ORDER BY
 		";
 
         //echo "\n\nSaldo Inicial:".$sql;
+		  echo "\n\n<pre>Saldo Inicial:";
+		  echo $sql;
+		  echo "</pre>";
 
         if ($sqlca->query($sql) < 0)
             return -1;
@@ -851,6 +859,9 @@ ORDER BY
 			";
 
             //echo "\n\nSaldo Inicial 2: ".$sql;
+				echo "\n\n<pre>Saldo Inicial 2";
+				echo $sql;
+				echo "</pre>";
 
             if ($sqlca->query($sql) < 0)
                 return $resultado;
@@ -910,6 +921,10 @@ ORDER BY
         return $a[0];
     }
 
+	 /**
+	  * Columna Tipo de Operacion
+	  * select * from inv_tipotransa order by 1;
+	  */
     function obtenerTiposFormularios() {
         global $sqlca;
 

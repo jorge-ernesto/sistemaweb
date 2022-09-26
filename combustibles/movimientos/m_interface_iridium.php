@@ -37,7 +37,7 @@ class InterfaceMovModel extends Model {
     		
     		$FechaDiv = explode("/", $Fecha);
     		$Fecha = $FechaDiv[2]."-".$FechaDiv[1]."-".$FechaDiv[0];
-		echo "FUNCTION: interface_fn_opensoft_iridium('".$Fecha."','".$CodAlmacen."','".$CodModulo."')--";
+			error_log("FUNCTION: interface_fn_opensoft_iridium('".$Fecha."','".$CodAlmacen."','".$CodModulo."');");
    		$result = $sqlca->functionDB("interface_fn_opensoft_iridium('".$Fecha."','".$CodAlmacen."','".$CodModulo."')");
 
     		return $result;

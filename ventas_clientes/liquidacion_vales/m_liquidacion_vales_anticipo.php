@@ -511,7 +511,7 @@ WHERE
                     WHERE 
                         TRIM(ch_fac_seriedocumento) = '". TRIM($serieRef) ."' 
                         AND TRIM(ch_fac_numerodocumento) = '". TRIM($numeroRef) ."'
-                        AND TRIM(nu_tipo_pago) = '07'   --FORMA DE PAGO: OTROS
+                        AND (TRIM(nu_tipo_pago) = '07' OR TRIM(nu_tipo_pago) = '06')   --FORMA DE PAGO: OTROS Y CREDITO
                         AND TRIM(ch_fac_anticipo) = 'S' --ANTICIPO: SI
                     LIMIT 1;
                     ";
@@ -526,7 +526,7 @@ WHERE
             }                          
                           
             $registro = $sqlca->firstRow($sql);
-            if($registro['nu_tipo_pago'] == '07' && $registro['ch_fac_anticipo'] == 'S'){
+            if($registro['nu_tipo_pago'] == '07' && $registro['ch_fac_anticipo'] == 'S' || $registro['nu_tipo_pago'] == '06' && $registro['ch_fac_anticipo'] == 'S'){
                 return true;
             } 
             

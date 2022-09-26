@@ -96,7 +96,7 @@ $CxModule = $_REQUEST['mod'];
 
 switch ($CxModule) {
 
-	case "IH": // NAME TABLE: c_invoiceheader CABECERA
+	case "IH": // NAME TABLE: c_invoiceheader CABECERA //
 
 		argRangedCheck();
 $sql = "
@@ -227,7 +227,7 @@ t.fecha;
 		echo $comprimido;
 	break;
 
-   	case "ID": // InvoiceDetail - DETALLE
+   	case "ID": // InvoiceDetail - DETALLE //
 
 		argRangedCheck();
 
@@ -243,11 +243,14 @@ t.fecha;
 			t.precio,
 			t.cantidad,
 			t.importe,
-			1 AS activo
+			1 AS activo,
+			art.art_codigo as art_codigo,
+			art.art_plutipo as art_plutipo
 		FROM
 			{$PosTransTable} AS t
 			JOIN inv_ta_almacenes AS a ON (t.es = a.ch_almacen)
 			LEFT JOIN pos_z_cierres AS cfp ON(t.caja = cfp.ch_posz_pos AND t.dia = cfp.dt_posz_fecha_sistema::DATE AND t.turno::integer = cfp.nu_posturno AND t.es = cfp.ch_sucursal)
+			LEFT JOIN int_articulos art on (t.codigo = art.art_codigo)
 		WHERE
 			t.dia BETWEEN '{$BeginDate}' AND '{$EndDate}'
 			AND t.td IN ('B','F')
@@ -536,7 +539,7 @@ t.fecha;
 
         break;
 
-    case "PI": // Product Information
+    case "PI": // Product Information //
 
         argKeyCheck();
 
@@ -1061,7 +1064,7 @@ WHERE art.art_estado = '0' AND sal.stk_periodo = '$BeginYear' AND alm.ch_clase_a
 
 	break;
 
-	case "INVMOVH":
+	case "INVMOVH": //
 		argRangedCheck();
 		$sql = "
 SELECT

@@ -335,7 +335,7 @@ WHERE
 		return $resultado;
 	}
 
-	function tmListado($pp, $pagina, $tipo_consulta, $tm, $td,  $bonus,$almacen, $lado, $caja, $turno, $periodo, $mes, $dia_desde, $dia_hasta, $art_codigo, $ruc, $cuenta, $tarjeta, $tipo, $fpago, $feserie, $fenumero) {
+	function tmListado($pp, $pagina, $tipo_consulta, $tm, $td,  $bonus,$almacen, $lado, $caja, $turno, $periodo, $mes, $dia_desde, $dia_hasta, $art_codigo, $ruc, $cuenta, $tarjeta, $tipo, $fpago, $feserie, $fenumero) { //
 		global $sqlca;
 
     	$tur = $turno;
@@ -587,7 +587,7 @@ ORDER BY
 			$trabajador  = $a[24];
 			$chofer      = $a[25];
 
-			$resultado[$i]['tm'] 		  = $tm;
+			$resultado[$i]['tm'] 		  = $tm; //
 			$resultado[$i]['td'] 		  = $td;
 			$resultado[$i]['trans'] 	  = $trans;
 			$resultado[$i]['fecha'] 	  = $fecha;
@@ -1246,7 +1246,7 @@ WHERE
 	/**
 	 * Buscar documento origen de extorno
 	 */
-	function verify_reference_sales_invoice_document($arrCond){
+	function verify_reference_sales_invoice_document($arrCond){ //
 		global $sqlca;
 
 		$nombre_tabla = $arrCond['sNombreTabla'];

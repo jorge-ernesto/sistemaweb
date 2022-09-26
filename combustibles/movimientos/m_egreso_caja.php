@@ -427,10 +427,10 @@ class RegistroCajasModel extends Model {
 				LIMIT $limit
 
 			";
-
-/*echo "<pre>";
+echo "MostarResultadoDetalle";
+echo "<pre>";
 echo $sql;
-echo "</pre>";*/
+echo "</pre>";
 		    	if ($sqlca->query($sql) < 0) {
 		        	throw new Exception("No se encontro Resultados.");
 		    	}
@@ -1172,6 +1172,10 @@ echo "</pre>";
 			AND cct.type = '1'
 			AND cct.ware_house = '$sucursal'
 		LIMIT 1;";
+		echo "DetalleReporteRecibo";
+		echo "<pre>";
+		echo $query;
+		echo "</pre>";
 
         if ($sqlca->query($query) <= 0) {
             return false;
@@ -1215,9 +1219,10 @@ echo "</pre>";
 				AND cct.ware_house = '$sucursal'
 		";
 
-/*echo "<pre>";
+echo "DetalleReporteRecibo_complemento_registro";
+echo "<pre>";
 print_r($sql);
-echo "</pre>";*/
+echo "</pre>";
 
 		if ($sqlca->query($sql) < 0)
 		    return false;
@@ -1263,9 +1268,10 @@ echo "</pre>";*/
 				cct.transaction = '$id_recibo'
 				AND cct.type = '1'
 				AND cct.ware_house = '$sucursal'";
-/*echo "<pre>";
+echo "DetalleReporteRecibo_medio_pago";
+echo "<pre>";
 echo $query;
-echo "</pre>";*/
+echo "</pre>";
 
 		if ($sqlca->query($query) <= 0) {
 		    return false;

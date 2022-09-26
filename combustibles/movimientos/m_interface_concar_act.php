@@ -11778,7 +11778,7 @@ WHERE
 				c.pro_cab_numdocumento::text as trans,
 				'1'::text as tip,
 				'H'::text as ddh,	
-				
+
 				-- round(FIRST(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_imptotal ELSE c.pro_cab_imptotal + pro_cab_impinafecto END), 2) as importe_total,	
 				-- round(FIRST(c.pro_cab_impto1), 2) as importe_igv,	
 				-- round(FIRST(CASE WHEN pro_cab_impinafecto IS NULL THEN c.pro_cab_impafecto ELSE c.pro_cab_impafecto + pro_cab_impinafecto END), 2) as importe_bi,	
@@ -11787,6 +11787,7 @@ WHERE
 				round(FIRST(COALESCE(c.pro_cab_impafecto,0)), 2) as importe_bi,	
 				round(FIRST(COALESCE(c.pro_cab_impinafecto,0)), 2) as importe_inafecto,	
 				round(FIRST(COALESCE(c.regc_sunat_percepcion,0)), 2) as importe_percepcion,	
+				FIRST(TC.tca_venta_oficial) as tipo_cambio,
 			
 				'COMPRA '|| rubro.ch_descripcion_breve::text as venta,
 				c.pro_cab_almacen as sucursal,
@@ -11803,7 +11804,7 @@ WHERE
 				FIRST(c.pro_cab_tipdocumento) as pro_cab_tipdocumento,
 				FIRST(c.pro_cab_seriedocumento) as pro_cab_seriedocumento,
 				FIRST(c.pro_cab_numdocumento) as pro_cab_numdocumento,
-				FIRST(c.pro_cab_numero) as pro_codigo
+				FIRST(c.pro_codigo) as pro_codigo
 			FROM
 				cpag_ta_cabecera c
 				INNER JOIN cpag_ta_detalle d ON (c.pro_cab_tipdocumento = d.pro_cab_tipdocumento AND c.pro_cab_seriedocumento = d.pro_cab_seriedocumento AND c.pro_cab_numdocumento = d.pro_cab_numdocumento AND c.pro_codigo = d.pro_codigo)

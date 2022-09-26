@@ -120,8 +120,9 @@ class LibroMayorTemplate extends Template {
 			//MOSTRAMOS CABECERA
 			$porciones             = explode("*", $keyAccount);
 			$acctcode              = $porciones[1];
-			$denominacion_acctcode = $this->getDenominacion($acctcode);
-			$pdf->Cell(181, 0, $denominacion_acctcode, 0, 0, 'L');
+			$act_account_id        = $porciones[2];
+			$denominacion          = $this->getDenominacion($act_account_id);
+			$pdf->Cell(181, 0, $acctcode." ".$denominacion, 0, 0, 'L');
 			$pdf->Ln(3);
 
 			//VARIABLES PARA TOTALIZAR
@@ -172,264 +173,31 @@ class LibroMayorTemplate extends Template {
 		$pdf->Ln(1.5);
 	}
 
-	function gridViewExcel($response) {
-		$response = json_decode($response);	
-		include_once('../../include/Classes/PHPExcel.php');
-
-		error_reporting(E_ALL);
-		date_default_timezone_set('Europe/London');
-
-		if (PHP_SAPI == 'cli')
-    		die('This example should only be run from a Web Browser');
-
-		$objPHPExcel = new PHPExcel();
-
-		$objPHPExcel->getProperties()->setCreator("opensoft")
-        ->setLastModifiedBy("OpenSysperu")
-        ->setTitle("Office 2007 XLSX Test Document")
-        ->setSubject("Office 2007 XLSX Test Document")
-        ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
-        ->setKeywords("office 2007 openxml php")
-        ->setCategory("Test result file");
-
-		//CONTENIDO
-		// Miscellaneous glyphs, UTF-8
-		$hoja++;
-		$objPHPExcel->createSheet($hoja);//creamos la pestaña
-		$objPHPExcel->setActiveSheetIndex($hoja);
-		$objPHPExcel->getActiveSheet($hoja)->setTitle("LIBRO DIARIO DETALLADO");
-
-		$objPHPExcel->getActiveSheet($hoja)->getStyle('A1')->getFont()->setBold(true);
-		$objPHPExcel->getActiveSheet($hoja)->mergeCells('A1:S1');
-		$objPHPExcel->getActiveSheet($hoja)->getStyle('A1')->getAlignment()->applyFromArray(array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,));
-
-		$objPHPExcel->getActiveSheet($hoja)->getStyle('A3:A5')->getFont()->setBold(true);
-		$objPHPExcel->getActiveSheet($hoja)->getStyle('A7:Q7')->getFont()->setBold(true);
-		$objPHPExcel->getActiveSheet($hoja)->getStyle('A7:Q7')->getAlignment()->applyFromArray(array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,));
-		
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('A')->setWidth(11);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('B')->setWidth(4);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('C')->setWidth(4);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('D')->setWidth(5);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('E')->setWidth(10);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('F')->setWidth(12);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('G')->setWidth(9);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('H')->setWidth(9);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('I')->setWidth(14);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('J')->setWidth(4);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('K')->setWidth(7);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('L')->setWidth(9);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('M')->setWidth(11);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('N')->setWidth(11);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('O')->setWidth(12);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('P')->setWidth(22);
-		$objPHPExcel->getActiveSheet($hoja)->getColumnDimension('Q')->setWidth(20);
-
-		$objPHPExcel->getActiveSheet($hoja)->freezePane('A8');
-		$bucle = 8;
-
-		$meses     = array("ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE");
-		$periodo   = $meses[intval($response->param->Fe_Mes)] . " " . $response->param->Fe_Periodo;
-		$ruc       = $response->data_company->ruc;
-		$razsocial = $response->data_company->razsocial;
-
-		$objPHPExcel->setActiveSheetIndex($hoja)
-		->setCellValue("A1", "LIBRO DIARIO DETALLADO")
-		->setCellValue("A3", "PERIODO: $periodo")
-		->setCellValue("A4", "RUC: $ruc")
-		->setCellValue("A5", "RAZÓN SOCIAL: $razsocial")
-		->setCellValue("A7", "FECHA")
-		->setCellValue("B7", "MES")
-		->setCellValue("C7", "S/D")
-		->setCellValue("D7", "ASI.")
-		->setCellValue("E7", "CUENTA")
-		->setCellValue("F7", "DESCRIPCION")
-		->setCellValue("G7", "DEBE")
-		->setCellValue("H7", "HABER")
-		->setCellValue("I7", "GLOSA")
-		->setCellValue("J7", "DOC")
-		->setCellValue("K7", "SERIE")
-		->setCellValue("L7", "NUMERO")
-		->setCellValue("M7", "FECHA DOC")
-		->setCellValue("N7", "FECHA VEN")
-		->setCellValue("O7", "RUC")
-		->setCellValue("P7", "RAZ SOCIAL")
-		->setCellValue("Q7", "FECHA Y HORA REG");		
-
-		//RECORREMOS ASIENTOS
-		foreach ($response->data as $key => $rows) {
-			
-			/**
-			* Los valores para el campo "tableid"
-			* Descripción breve
-			* 1 = pos_transXXXXYY
-			* 2 = fac_ta_factura_cabecera
-			* 3 = cpag_ta_cabecera
-			* 4 = c_cash_transaction
-			*/
-
-			/**
-			* Obtenemos Razon Social
-			*/
-			$razsocial = "";
-			if ($rows->tableid == "1" || $rows->tableid == "3") {
-				$razsocial = $rows->razsocial;
-			} else if ($rows->tableid == "2") {
-				$razsocial = $rows->cli_razsocial;
-			} else {
-				$razsocial = isset($rows->razsocial) ? $rows->razsocial : $rows->cli_razsocial;
-			}
-			
-			/**
-			* Obtenemos Fecha de Vencimiento
-			*/
-			$duedate = "";
-			if ( strpos($rows->acctcode, "12") === 0 || strpos($rows->acctcode, "42") === 0 ) {
-				$duedate = $rows->documentdate;
-			}
-
-			$objPHPExcel->setActiveSheetIndex($hoja)
-			->setCellValue('A' . $bucle, $rows->documentdate)
-			->setCellValue('B' . $bucle, "=\"".$response->param->Fe_Mes."\"")
-			->setCellValue('C' . $bucle, "=\"".$rows->subbookcode."\"")
-			->setCellValue('D' . $bucle, "=\"".$rows->registerno."\"")
-			->setCellValue('E' . $bucle, "=\"".$rows->acctcode."\"")
-			->setCellValue('F' . $bucle, $rows->name)
-			->setCellValue('G' . $bucle, $rows->amtdt)
-			->setCellValue('H' . $bucle, $rows->amtct)
-			->setCellValue('I' . $bucle, $rows->description_detail)
-			->setCellValue('J' . $bucle, "=\"".$rows->tipo_documento_sunat."\"")
-			->setCellValue('K' . $bucle, "=\"".$rows->serie."\"")
-			->setCellValue('L' . $bucle, "=\"".$rows->numero."\"")
-			->setCellValue('M' . $bucle, $rows->documentdate)
-			->setCellValue('N' . $bucle, $duedate)
-			->setCellValue('O' . $bucle, $rows->int_clientes_id)
-			->setCellValue('P' . $bucle, $razsocial)			
-			->setCellValue('Q' . $bucle, $rows->documentdate_datetime);
-
-			$bucle++;
-		}
-
-		$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-		$objWriter->save('/sistemaweb/contabilidad/reportes/excel/LIBRO_DIARIO.xls');
-
-		$data = array(
-			"ruta" => "/sistemaweb/contabilidad/reportes/excel/",
-			"nombre_archivo" => "LIBRO_DIARIO.xls",
-		);
-		echo json_encode($data);
-	}
-
-	function gridViewPLE($response) {
-		$response = json_decode($response);
-		
-		//ELIMINAMOS ARCHIVOS PLE
-		$files = glob('/sistemaweb/contabilidad/reportes/excel/LE*.txt'); //Obtenemos todos los nombres de los ficheros que comienzan con "LE"
-		foreach($files as $file){
-			if(is_file($file))
-			unlink($file); //Elimino el fichero
-		}
-		
-		ob_clean();
-		
-		//VARIABLES PARA INDEXAR
-		$contador_asiento = 0;	
-
-		//RECORREMOS ASIENTOS
-		$param = $response->param;
-		foreach ($response->data as $key => $rows) {
-			if ($act_entry_id != $rows->act_entry_id) {				
-				$contador_asiento = 0;
-			}
-			$contador_asiento++;
-
-			//OBTENEMOS LINEAS PARA EL PLE
-			$PLEDATA    = $this->ImprimirLiniaPLE($rows, $param, $contador_asiento);
-			$PLETXTLINI = $PLEDATA['registro'];
-			$result    .= implode("|", $PLETXTLINI) . "|" . PHP_EOL;
-			
-			$act_entry_id = $rows->act_entry_id;
-		}
-
-		//NOMBRE DE ARCHIVO TXT
-		$nombre_archivo = "LE_LIBRO_DIARIO.txt";
-
-		//CREAMOS EL ARCHIVO TXT
-		$archivo = fopen("/sistemaweb/contabilidad/reportes/excel/$nombre_archivo", "w") or die("error creando fichero!");
-				
-		//REESCRIBIMOS EL ARCHIVO TXT
-		fwrite($archivo, $result);
-		fclose($archivo);
-
-		$data = array(
-			"ruta" => "/sistemaweb/contabilidad/reportes/excel/",
-			"nombre_archivo" => $nombre_archivo,
-		);
-		echo json_encode($data);
-	}
-
-	function ImprimirLiniaPLE($rows, $param, $contador_asiento) {
-		$tipo_documento_sunat = $rows->tipo_documento_sunat;
-		$serie = $rows->serie;
-		$numero = $rows->numero;
-		
-		$PLETXT[0] = $param->Fe_Periodo . $param->Fe_Mes . "00"; //CAMPO 1
-		$PLETXT[1] = $param->Fe_Mes .".". $rows->subbookcode .".". $rows->registerno; //CAMPO 2
-		$PLETXT[2] = "M".$contador_asiento; //CAMPO 3
-		$PLETXT[3] = $rows->acctcode; //CAMPO 4
-		$PLETXT[4] = ""; //CAMPO 5
-		$PLETXT[5] = ""; //CAMPO 6
-		$PLETXT[6] = $rows->isocode; //CAMPO 7
-		$PLETXT[7] = "0"; //CAMPO 8
-		$PLETXT[8] = "0"; //CAMPO 9
-		$PLETXT[9] = isset($tipo_documento_sunat) && !empty($tipo_documento_sunat) ? $tipo_documento_sunat : '00'; //CAMPO 10
-		$PLETXT[10] = isset($serie) && !empty($serie) ? $serie : '0'; //CAMPO 11
-		$PLETXT[11] = isset($numero) && !empty($numero) ? $numero : '0'; //CAMPO 12
-		$PLETXT[12] = $rows->documentdate; //CAMPO 13
-		$PLETXT[13] = ""; //CAMPO 14
-		$PLETXT[14] = $rows->documentdate; //CAMPO 15
-		$PLETXT[15] = $rows->description_detail; //CAMPO 16
-		$PLETXT[16] = ""; //CAMPO 17
-		$PLETXT[17] = $rows->amtdt; //CAMPO 18
-		$PLETXT[18] = $rows->amtct; //CAMPO 19
-		$PLETXT[19] = ""; //CAMPO 20
-		$PLETXT[20] = "1"; //CAMPO 21
-
-		return array(
-			"registro" => $PLETXT
-		);
-	}
-
 	/* FUNCIONES ADICIONALES */
 	function printText($text) {
 		return utf8_decode($text);
 	}	
 
-	function getDenominacion($acctcode) {
+	function getDenominacion($act_account_id) {
 		global $sqlca;
 		
-		//OBTENEMOS DENOMINACIONES
-		//MOSTRARA SOLO UNO, EL PRIMER RESULTADO. COMENTAR "LIMIT 1" SI QUEREMOS QUE SE MUESTRE TODOS LOS POSIBLES RESULTADOS (SOLO SI LOS HUBIERA) Y QUE SE CONCATENEN
+		//OBTENEMOS DENOMINACION
 		$sql = "
 			SELECT 
-				DISTINCT(name) AS name
+				name
 			FROM 
 				act_account 
 			WHERE 
-				TRIM(acctcode) = '" . TRIM($acctcode) . "' 
-			/*LIMIT 1*/";
+				act_account_id = '" . TRIM($act_account_id) . "' 
+			LIMIT 1";
 		
 		if ($sqlca->query($sql) < 0) {
 			return "-";
 		}
 
-		//RECORREMOS Y CONCATENAMOS DENOMINACIONES
-		$denominacion = "";
-		for ($i = 0; $i < $sqlca->numrows(); $i++) {
-			$a = $sqlca->fetchRow();			
-			$denominacion .= $a['name'] . " | ";
-		}
-		$denominacion = $acctcode . " " . substr($denominacion, 0, -3);
+		//OBTENEMOS DENOMINACION
+		$a = $sqlca->fetchRow();
+		$denominacion = $a['name'];		
 		
 		//VALIDAMOS LARGO DE LA DENOMINACION
 		if (strlen($denominacion) >= 80) {

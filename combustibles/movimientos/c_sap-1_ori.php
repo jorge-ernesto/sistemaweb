@@ -161,6 +161,7 @@ class c_sap_1 {
 		$v_sap_1 = new v_sap_1();
 
 		$m_sap_1->setIsDebug(true);
+
 		$m_sap_1->setIsViewTableName(true);
 		$user = $m_sap_1->getUserIdByChLogin();
 		if ($user['error']) {
@@ -276,13 +277,13 @@ class c_sap_1 {
 		/**
 		 * 2. Venta efectivo
 		 */
-		$req['tableName'] = 'INTODLNPE';
+		$req['tableName'] = 'INTODLNPE'; //
 		$req['client'] = "AND client.cli_ndespacho_efectivo = '1' AND client.cli_anticipo = 'N'";//efectivo
 		$data['shipmentHeaderSaleEffective'] = $m_sap_1->getShipmentHeaderSaleEffective($req);
 		$data['shipmentHeaderSaleEffective']['isViewTableName'] = $m_sap_1->isViewTableName;
 		$v_sap_1->tableShipmentHeaderSaleEffective($data['shipmentHeaderSaleEffective']);
 
-		$req['tableName'] = 'INTDLNPE1';
+		$req['tableName'] = 'INTDLNPE1'; //
 		$data['shipmentDetailSaleEffective'] = $m_sap_1->getShipmentDetailSaleEffective($req);
 		$data['shipmentDetailSaleEffective']['isViewTableName'] = $m_sap_1->isViewTableName;
 		$v_sap_1->tableShipmentDetailSaleEffective($data['shipmentDetailSaleEffective']);
@@ -315,13 +316,13 @@ class c_sap_1 {
 			/* Fin */
 		}else{
 			$req['client'] = "AND client.cli_ndespacho_efectivo = '0' AND client.cli_anticipo = 'N'";//credito
-			$req['tableName'] = 'INTODLNPC';
+			$req['tableName'] = 'INTODLNPC'; //
 			$data['shipmentHeaderSaleCredit'] = $m_sap_1->getShipmentHeaderSaleCredit($req);
 			$data['shipmentHeaderSaleCredit']['isViewTableName'] = $m_sap_1->isViewTableName;
 			$v_sap_1->tableShipmentHeaderSaleCredit($data['shipmentHeaderSaleCredit']);		
 		}
 
-		$req['tableName'] = 'INTDLNPC1';
+		$req['tableName'] = 'INTDLNPC1'; //
 		$data['shipmentDetailSaleCredit'] = $m_sap_1->getShipmentDetailSaleCredit($req);
 		$data['shipmentDetailSaleCredit']['isViewTableName'] = $m_sap_1->isViewTableName;
 		$v_sap_1->tableShipmentDetailSaleCredit($data['shipmentDetailSaleCredit']);
@@ -367,15 +368,16 @@ class c_sap_1 {
 		$data['paymentSaleAnticipation']['isViewTableName'] = $m_sap_1->isViewTableName;
 		$v_sap_1->tablePaymentSaleAnticipation($data['paymentSaleAnticipation']);
 
-		$req['tableName'] = 'INTODLNA';
+		$req['tableName'] = 'INTODLNA'; //
 		$data['shipmentHeaderSaleAnticipation'] = $m_sap_1->getShipmentHeaderSaleAnticipation($req);
 		$data['shipmentHeaderSaleAnticipation']['isViewTableName'] = $m_sap_1->isViewTableName;
 		$v_sap_1->tableShipmentHeaderSaleAnticipation($data['shipmentHeaderSaleAnticipation']);
 
-		$req['tableName'] = 'INTDLNA1';
+		$req['tableName'] = 'INTDLNA1'; //
 		$data['shipmentDetailSaleAnticipation'] = $m_sap_1->getShipmentDetailSaleAnticipation($req);
 		$data['shipmentDetailSaleAnticipation']['isViewTableName'] = $m_sap_1->isViewTableName;
 		$v_sap_1->tableShipmentDetailSaleAnticipation($data['shipmentDetailSaleAnticipation']);
+		die();
 
 		/*$req['tableName'] = 'INTOINVA';//aun por confirmar en centauro
 		$data['invoiceHeaderSaleAnticipation'] = $m_sap_1->getInvoiceHeaderSaleAnticipation($req);
@@ -658,6 +660,9 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 		$res = array();
 		$m_sap_1 = new m_sap_1();
 		$v_sap_1 = new v_sap_1();
+
+		$m_sap_1->setIsDebug(true);
+
 		//validar que se reciba la fecha y no esté vacía
 		$arr_initial_date = explode('/', $req['initial_date']);
 
@@ -788,12 +793,12 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 
 
 			$req['client'] = "AND client.cli_ndespacho_efectivo = '1' AND client.cli_anticipo = 'N'";//efectivo
-			$req['tableName'] = 'INTODLNPE';
+			$req['tableName'] = 'INTODLNPE'; //
 			$data['shipmentHeaderSaleEffective'] = $m_sap_1->getShipmentHeaderSaleEffective($req);
 			$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['shipmentHeaderSaleEffective'], array('isUnique' => true));
 			$this->checkResponseInsert($req, $res); 
 
-			$req['tableName'] = 'INTDLNPE1';
+			$req['tableName'] = 'INTDLNPE1'; //
 			$data['shipmentDetailSaleEffective'] = $m_sap_1->getShipmentDetailSaleEffective($req);
 			$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['shipmentDetailSaleEffective'], array('isUnique' => true));
 			$this->checkResponseInsert($req, $res); 
@@ -824,13 +829,13 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 				/* Fin */
 			}else{
 				$req['client'] = "AND client.cli_ndespacho_efectivo = '0' AND client.cli_anticipo = 'N'";//credito
-				$req['tableName'] = 'INTODLNPC';
+				$req['tableName'] = 'INTODLNPC'; //
 				$data['shipmentHeaderSaleCredit'] = $m_sap_1->getShipmentHeaderSaleCredit($req);
 				$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['shipmentHeaderSaleCredit'], array('isUnique' => true));
 				$this->checkResponseInsert($req, $res); 
 			}
 
-			$req['tableName'] = 'INTDLNPC1';
+			$req['tableName'] = 'INTDLNPC1'; //
 			$data['shipmentDetailSaleCredit'] = $m_sap_1->getShipmentDetailSaleCredit($req);
 			$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['shipmentDetailSaleCredit'], array('isUnique' => true));
 			$this->checkResponseInsert($req, $res); 
@@ -882,12 +887,12 @@ TABLA INTAJUSTE , CODIGO 23000 , quedamos en que no se pasarian esos movimientos
 
 
 
-			$req['tableName'] = 'INTODLNA';//SQL error: [SAP AG][LIBODBCHDB SO][HDBODBC] General error;287 cannot insert NULL or update to NULL: INDICATOR, SQL state S1000 in SQLExecDirect
+			$req['tableName'] = 'INTODLNA'; //
 			$data['shipmentHeaderSaleAnticipation'] = $m_sap_1->getShipmentHeaderSaleAnticipation($req);
 			$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['shipmentHeaderSaleAnticipation'], array('isUnique' => true));
 			$this->checkResponseInsert($req, $res); 
 
-			$req['tableName'] = 'INTDLNA1';
+			$req['tableName'] = 'INTDLNA1'; //
 			$data['shipmentDetailSaleAnticipation'] = $m_sap_1->getShipmentDetailSaleAnticipation($req);
 			$res['tables'][$req['tableName']] = $m_sap_1->setTableHana($hanaInstance, $data['shipmentDetailSaleAnticipation'], array('isUnique' => true));
 			$this->checkResponseInsert($req, $res); 

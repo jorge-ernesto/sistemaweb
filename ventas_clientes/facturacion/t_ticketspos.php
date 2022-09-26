@@ -198,7 +198,7 @@ class TicketsPosTemplate extends Template {
             if(isset($a['usr']))
                 $usr=$a['usr'];
 
-            //DOCUMENTO ORIGINAL
+            //DOCUMENTO ORIGINAL //
             $dFechaReferencia = "";
             $sSerieNumeroReferencia = "";
             if ( $a['rendi_gln'] != "" ) {

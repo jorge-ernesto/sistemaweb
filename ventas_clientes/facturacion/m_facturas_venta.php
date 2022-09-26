@@ -384,7 +384,15 @@ WHERE
     	return $arrResponse;
 	}
 
-	public function get_sales_serial($arrPost){
+	public function get_sales_serial($arrPost){ //
+			//error_log(json_encode($_SESSION));
+
+			//Filtro de almacen con el que el usuario se logueo
+			$where_almacen = "";
+			if (isset($_SESSION["almacen"])) {
+				$where_almacen = "AND ch_almacen = '". $_SESSION['almacen'] ."'";
+			}
+
    		global $sqlca;
 
    		$sql = "
@@ -396,6 +404,7 @@ FROM
  int_num_documentos
 WHERE
  num_tipdocumento = '" . $arrPost['iTipoDocumento'] . "'
+ $where_almacen
 ORDER BY
  2
     	";
@@ -589,14 +598,14 @@ LIMIT 1
     	return $arrResponse;
   	}
 
-  	function add_sales_invoice($arrPost, $arrUserIp, $dHoraActual){ //GUARDAR O MODIFICAR
+  	function add_sales_invoice($arrPost, $arrUserIp, $dHoraActual){ //GUARDAR O MODIFICAR 
   		// Verificando si el código de impuesto será inafecto
   		// Según lo acordado, no interesa si hay productos con IGV / EXO / ETC, basta con que haya un item de inafecto
   		// Todo el comprobante se vuelve como inafecto
 	  	$sEstadoInafecto = "N";
 	  	foreach ($arrPost['arrDetailSaleInvoice'] as $row) {
 	  		if ( empty($row['iCodigoImpuestoItem']) )
-	  			$sEstadoInafecto = "S"; // INAFECTAS
+	  			$sEstadoInafecto = "S"; // INAFECTAS //
 		}
 
 		//OPENSOFT-23	
@@ -636,7 +645,7 @@ LIMIT 1
 	  		$this->begin_transaction();
 
 	  	  // add sale invoice - Header - table fac_ta_factura_cabecera
-	  	  $arrResponseHeader = $this->insert_sales_invoice_header($arrPost, $sEstadoInafecto);
+	  	  $arrResponseHeader = $this->insert_sales_invoice_header($arrPost, $sEstadoInafecto); //INSERT CABECERA
 
 	  	  if ($arrResponseHeader['sStatus'] == 'danger') {
 	  	  	$this->rollback_transaction();
@@ -644,7 +653,7 @@ LIMIT 1
 	  	  }
 
 	  	  // add sale invoice - Detail - table fac_ta_factura_detalle
-	  	  $arrResponseDetail = $this->insert_sales_invoice_detail($arrPost,  $sEstadoInafecto);
+	  	  $arrResponseDetail = $this->insert_sales_invoice_detail($arrPost,  $sEstadoInafecto); //INSERT DETALLE
 
 	  	  if ($arrResponseDetail['sStatus'] == 'danger') {
 	  	  	$this->rollback_transaction();
@@ -652,7 +661,7 @@ LIMIT 1
 	  	  }
 
 	  	  // add sale invoice - Complementary - table fac_ta_factura_complemento
-	  	  $arrResponseComplementary = $this->insert_sales_invoice_complementary($arrPost, $arrUserIp);
+	  	  $arrResponseComplementary = $this->insert_sales_invoice_complementary($arrPost, $arrUserIp); //INSERT COMPLEMENTO
 
 	  	  if ($arrResponseComplementary['sStatus'] == 'danger') {
 	  	  	$this->rollback_transaction();
@@ -699,7 +708,7 @@ LIMIT 1
 		$sEstadoInafecto = "N";
 		foreach ($arrPost['arrDetailSaleInvoice'] as $row) {
 			if ( empty($row['iCodigoImpuestoItem']) )
-				$sEstadoInafecto = "S";
+				$sEstadoInafecto = "S"; // INAFECTAS //
 	    }
 
 	    $arrResponseReferencia = array('iStatus' => -2, 'sStatus' => 'success', 'sMessage' => 'No debemos buscar documento de referencia', 'iData' => 0);
@@ -735,7 +744,7 @@ LIMIT 1
 			$arrResponseDelete = $this->cancel_or_delete_sales_invoice($arrPostDelete);
 			if ( $arrResponseDelete['sStatus']=='success' ) {
 				// add sale invoice - Header - table fac_ta_factura_cabecera
-				$arrResponseHeader = $this->insert_sales_invoice_header($arrPost, $sEstadoInafecto);
+				$arrResponseHeader = $this->insert_sales_invoice_header($arrPost, $sEstadoInafecto); //INSERT CABECERA
 
 				if ($arrResponseHeader['sStatus'] == 'danger') {
 				$this->rollback_transaction();
@@ -743,7 +752,7 @@ LIMIT 1
 				}
 
 				// add sale invoice - Detail - table fac_ta_factura_detalle
-				$arrResponseDetail = $this->insert_sales_invoice_detail($arrPost,  $sEstadoInafecto);
+				$arrResponseDetail = $this->insert_sales_invoice_detail($arrPost,  $sEstadoInafecto); //INSERT DETALLE
 
 				if ($arrResponseDetail['sStatus'] == 'danger') {
 					$this->rollback_transaction();
@@ -751,7 +760,7 @@ LIMIT 1
 				}
 
 				// add sale invoice - Complementary - table fac_ta_factura_complemento
-				$arrResponseComplementary = $this->insert_sales_invoice_complementary($arrPost, $arrUserIp);
+				$arrResponseComplementary = $this->insert_sales_invoice_complementary($arrPost, $arrUserIp); //INSERT COMPLEMENTO
 
 				if ($arrResponseComplementary['sStatus'] == 'danger') {
 					$this->rollback_transaction();
@@ -1008,7 +1017,7 @@ INSERT INTO fac_ta_factura_cabecera (
  '" . strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sDescargarStock'])) . "',
  '" . strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['iIdCliente'])) . "',
  '" . strip_tags(stripslashes($sCodigoImpuestoOCS)) . "',
- '" . strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sDespachoPerdido'])) . "',
+ '" . strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['sDespachoPerdido'])) . "', //
  " . ( strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['fTotGravada'])) + strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['fTotExonerada'])) + strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['fTotInafecta'])) ) . ",
  " . $fImpuesto . ",
  " . strip_tags(stripslashes($arrPost['arrHeaderSaleInvoice']['fTotGratuita'])) . ",
@@ -1777,7 +1786,7 @@ SELECT
  (string_to_array(VCOM.nu_fac_complemento_direccion, '*'))[2] AS ss_importe_detraccion,
  (string_to_array(VCOM.nu_fac_complemento_direccion, '*'))[3] AS nu_porcentaje_detraccion,
  (string_to_array(VCOM.nu_fac_complemento_direccion, '*'))[4] AS nu_codigo_bienes_servicio_detraccion,
- TRIM(VC.ch_fac_tiporecargo2) AS no_codigo_impuesto,
+ TRIM(VC.ch_fac_tiporecargo2) AS no_codigo_impuesto, --ch_fac_tiporecargo2
  VC.ch_liquidacion AS nu_liquidacion,
  VC.nu_fac_recargo3 AS nu_estado_documento_sunat,
  TRIM(VCOM.ch_cat_sunat) AS ch_cat_sunat,

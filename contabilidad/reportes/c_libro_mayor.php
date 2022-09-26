@@ -28,8 +28,8 @@ $accion = $_POST['accion'];
 try {
 	if($accion == "listPDF") {
 		$response = $objLibroMayorModel->getList($_POST["data"], $objHelper);
-		// echo "<script>console.log('response')</script>";
-		// echo "<script>console.log('" . json_encode($response) . "')</script>";
+		echo "<script>console.log('response')</script>";
+		echo "<script>console.log('" . json_encode($response) . "')</script>";
 		$objLibroMayorTemplate->gridViewPDF(json_encode($response));
 	} else if($accion == "listExcel") {
 		$response = $objLibroMayorModel->getList($_POST["data"], $objHelper);

@@ -92,7 +92,7 @@
 				});
 
 				/* BUSCAR TICKET */
-				$(document).on('click','#btnseleccionar',function(){
+				$(document).on('click','#btnseleccionar',function(){ //Buscar Ticket
 
 					$('#table_fill').html("");
 					$('#table_anular_final').html("");
@@ -223,7 +223,7 @@
 
 				$('#btnanularfinal').off('click');
 
-				$(document).on('click','#btnanularfinal',function(){
+				$(document).on('click','#btnanularfinal',function(){ //Anular Ticket
 
 					if($('#chk_validacion1').is(':checked') && $('#chk_validacion2').is(':checked')){
 

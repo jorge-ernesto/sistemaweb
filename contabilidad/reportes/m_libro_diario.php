@@ -117,7 +117,7 @@ class LibroDiarioModel {
 			WHERE
 				1 = 1
 				AND TRIM(e.ch_sucursal) = '" . $Nu_Almacen . "'
-				--AND TO_CHAR(DATE(e.documentdate),'YYYY-MM') = '" . $Fe_Fecha . "'
+				AND TO_CHAR(DATE(e.documentdate),'YYYY-MM') = '" . $Fe_Fecha . "'
 		";
 		// echo "<pre>sql_total";
 		// print_r($sql_total);
@@ -184,7 +184,7 @@ class LibroDiarioModel {
 				WHERE
 					1 = 1 
 					AND TRIM(e.ch_sucursal) = '" . $Nu_Almacen . "'
-					--AND TO_CHAR(DATE(e.documentdate),'YYYY-MM') = '" . $Fe_Fecha . "'
+					AND TO_CHAR(DATE(e.documentdate),'YYYY-MM') = '" . $Fe_Fecha . "'
 				ORDER BY
 					e.ch_sucursal ASC, et.bookcode_order ASC, e.subbookcode ASC, e.registerno ASC, el.act_entryline_id ASC
 				LIMIT
@@ -272,7 +272,6 @@ class LibroDiarioModel {
 		// echo "</pre>";
 
 		$sqlca->query($sql_company);
-
 		$data_company = $sqlca->fetchRow();
 
 		try {
@@ -329,7 +328,7 @@ class LibroDiarioModel {
 				WHERE
 					1 = 1
 					AND TRIM(e.ch_sucursal) = '" . $Nu_Almacen . "'
-					--AND TO_CHAR(DATE(e.documentdate),'YYYY-MM') = '" . $Fe_Fecha . "'
+					AND TO_CHAR(DATE(e.documentdate),'YYYY-MM') = '" . $Fe_Fecha . "'
 				ORDER BY
 					e.ch_sucursal ASC, et.bookcode_order ASC, e.subbookcode ASC, e.registerno ASC, el.act_entryline_id ASC
 			";

@@ -149,7 +149,9 @@ class ConsultaCuentaxPagarModel extends Model {
 		ORDER BY
 			cab.pro_cab_fechaemision DESC; ";
 
-	//echo $sql;
+	echo "<pre>DocumentosCobrar:";
+	echo $sql;
+	echo "</pre>";
 
 		if ($sqlca->query($sql) < 0)
 			return false;
@@ -193,7 +195,9 @@ class ConsultaCuentaxPagarModel extends Model {
 		ORDER BY
 			cab.pro_cab_fechaemision DESC; ";
 
-	//echo $sql;
+	echo "<pre>DocumentosAnticipos:";
+	echo $sql;
+	echo "</pre>";
 
 		if ($sqlca->query($sql) < 0)
 			return false;
@@ -231,14 +235,16 @@ class ConsultaCuentaxPagarModel extends Model {
 		WHERE
 			cab.mov_entidad = '$cliente'
 			AND cab.mov_almacen = '$estacion'
-			AND (cab.cpag_tipo_pago IS NULL OR cab.cpag_serie_pago IS NULL OR cab.cpag_num_pago IS NULL)
+			AND (cab.cpag_tipo_pago IS NULL OR cab.cpag_serie_pago IS NULL OR cab.cpag_num_pago IS NULL) --SOLO LO MUESTRA SI ES NULL
 		GROUP BY
 			documento,
 			femision
 		ORDER BY
 			femision DESC;";
 
-	//echo $sql;
+	echo "<pre>DocumentosVales:";
+	echo $sql;
+	echo "</pre>";
 
 		if ($sqlca->query($sql) < 0)
 			return false;

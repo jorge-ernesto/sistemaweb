@@ -31,7 +31,7 @@ if ( is_null($v_fecha_desde) or is_null($v_fecha_hasta) ) {
 
 $v_ilimit = 0;
 
-if ( $boton == 'Imprimir' ) {
+if ( $boton == 'Imprimir' ) { //Boton Imprimir
 	// Limpia la tabla del reporte
 	//limpia_tabla();
 	// Aqui carga los contometros del combex desde la 
@@ -59,10 +59,20 @@ if ( $boton == 'Imprimir' ) {
 	 AND '".$funcion->date_format($v_fecha_hasta,'YYYY-MM-DD')."'||to_char(".$v_turno_hasta.",'99')  
 	 GROUP BY dia, turno
 	";
+	echo "<pre>";
+	echo $v_sqlcont;
+	echo "</pre>";
 				
 	$v_xsqlcont = pg_exec($conector_id,$v_sqlcont);
 	$v_ilimit = pg_numrows($v_xsqlcont);
+	echo "<pre>";
+	echo "v_ilim<br>";
+	echo $v_ilimit;
+	echo "</pre>";
 	//if (false)
+
+	$cantidad_acumulada = 0;
+	$importe_acumulado = 0;
 
 	if ( $v_ilimit > 0 ) {
 		$v_irow = 0;
@@ -70,26 +80,47 @@ if ( $boton == 'Imprimir' ) {
 			$v_fecha_act = pg_result($v_xsqlcont, $v_irow, 0);
 			$v_turno_act = pg_result($v_xsqlcont, $v_irow, 1);
 
+			echo "***********************************************";
+			echo "<pre>";
+			print_r( array( $v_fecha_act, $v_turno_act ) );
+			echo "</pre>";
+
 			// si la fecha es igual que la que se pide entonces verificar el turno
 			// si la fecha no es igual asigna el turno actual al primero de la lista
 
 			// caso de avance= carga_postrans("A");
 			$v_sqlfunc = "
 			SELECT combex_fn_reporte_contometros('".$funcion->date_format($v_fecha_act,'YYYY-MM-DD')."',".$v_turno_act.")";
+			echo "<pre>";
+			echo $v_sqlfunc;
+			echo "</pre>";
 			
 			// echo $v_sqlfunc."<br>";
 			$v_xsql = pg_exec( $v_sqlfunc );
 			$v_xsql = pg_exec("SELECT * FROM vista_reporte_combex_contometros");
+			echo "<pre>";
+			echo "SELECT * FROM vista_reporte_combex_contometros";
+			echo "</pre>";
+
 			$v_ilim2 = pg_numrows($v_xsql);
+			echo "<pre>";
+			echo "v_ilim2: $v_ilim2<br>";
+
 			if ( $v_ilim2 > 0 ) {
 				$v_irow2 = 0;
 				while ( $v_irow2 < $v_ilim2 ) {
 					$v_lado = trim(pg_result($v_xsql, $v_irow2, 0));
+					// echo "<pre>";
+					// echo "v_lado<br>";
+					// echo $v_lado;
+					// echo "</pre>";
 					if ( strlen($v_lado) > 1 ){
 						$v_lado = $v_lado;
 					} else {
 						$v_lado = "0".$v_lado;
 					}
+					echo "-----<br>";
+					echo "v_lado: $v_lado<br>";
 
 					$v_mang = trim(pg_result($v_xsql, $v_irow2, 1));
 					if ( strlen($v_mang) > 1 ) {
@@ -98,6 +129,8 @@ if ( $boton == 'Imprimir' ) {
 					} else {
 						$v_surt = "0".$v_mang;
 					}
+					echo "v_mang: $v_mang<br>";
+					echo "v_surt: $v_surt<br>";
 					
 					$v_cantini = pg_result($v_xsql, $v_irow2, 2);
 					$v_valoini = pg_result($v_xsql, $v_irow2, 3);
@@ -106,11 +139,25 @@ if ( $boton == 'Imprimir' ) {
 					$v_valofin = pg_result($v_xsql, $v_irow2, 6);
 					$v_pfin = pg_result($v_xsql, $v_irow2, 7);
 					$v_cantcon = $v_cantfin - $v_cantini;
-					// $v_impocon = $v_valofin - $v_valoini;
-					$v_impocon = $v_cantcon * $v_pfin;
+					$v_impocon = $v_valofin - $v_valoini; //ESTO VEO QUE CUADRA PERFECTAMENTE CON comb_ta_contometro
+					// $v_impocon = $v_cantcon * $v_pfin;
+					echo "v_cantini: $v_cantini<br>";
+					echo "v_valoini: $v_valoini<br>";
+					echo "v_pini:    $v_pini<br>";
+					echo "v_cantfin: $v_cantfin<br>";
+					echo "v_valofin: $v_valofin<br>";
+					echo "v_pfin:    $v_pfin<br>";
+					echo "v_cantcon: $v_cantcon<br>";
+					echo "v_impocon: $v_impocon<br>";
+					
+					//Obtenemos cantidades acumuladas
+					$cantidad_acumulada += $v_cantcon;
+					$importe_acumulado += $v_impocon;
 
 					$v_xsql2 = pg_exec( "SELECT trim(prod".$v_mang.") FROM pos_cmblados WHERE lado = '".$v_lado."' " );
 					$v_prod = pg_result($v_xsql2,0,0);
+					echo "v_prod: $v_prod<br>";
+
 					$v_xsql2 = pg_exec( "SELECT ch_nombrebreve, ch_codigocombustible FROM comb_ta_combustibles WHERE ch_codigocombex = '".$v_prod."' " );
 					if ( pg_numrows($v_xsql2) > 0 ) {
 						$v_prod = pg_result($v_xsql2, 0, 0);
@@ -119,6 +166,8 @@ if ( $boton == 'Imprimir' ) {
 						$v_prod = "No Prod"; 
 						$v_codcom = "No Existe"; 
 					}
+					echo "v_prod: $v_prod<br>";
+					echo "v_codcom: $v_codcom<br>";
 					
 					// aqui verifica si ya existe el lado y surt en la tabla
 					if ( pg_numrows(pg_exec("SELECT tmpprec FROM tempo WHERE tmplado = '".$v_lado."' AND tmpsurt = '".$v_surt."'")) > 0 ) {
@@ -178,7 +227,16 @@ if ( $boton == 'Imprimir' ) {
 			}
 
 			$v_irow++;
+
+			echo "*******************************************<br>";
+			echo "cantidad_acumulada: $cantidad_acumulada<br>";
+			echo "importe_acumulado: $importe_acumulado<br>";
 		}
+
+		echo "*******************************************<br>";
+		echo "cantidad_acumulada: $cantidad_acumulada<br>";
+		echo "importe_acumulado: $importe_acumulado<br>";
+		echo "</pre>";
 	} // Fin del if de carga de contometros
 
 // Aqui comienza la carga de las transacciones desde las tablas pos_transxxx

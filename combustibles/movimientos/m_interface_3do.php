@@ -94,7 +94,7 @@ class Interface3DOModel extends Model {
 		return TRUE;
 	}
 
-	function ActualizarInterfaces($Parametros,$FechaIni,$FechaFin,$CodAlmacen, $agrupado) {
+	function ActualizarInterfaces($Parametros,$FechaIni,$FechaFin,$CodAlmacen, $agrupado) { //ActualizarInterfaces
         require_once("/sistemaweb/include/mssqlemu.php");
 
 		/*** Agregado 2020-01-22 ***/
@@ -144,10 +144,24 @@ class Interface3DOModel extends Model {
 			return "Fecha de fin no consolidada. Debe consolidar fecha de fin para migrar informacion.";
 
 		$mssql = mssql_connect($MSSQLDBHost,$MSSQLDBUser,$MSSQLDBPass);
+		// error_log("mssql_connect($MSSQLDBHost,$MSSQLDBUser,$MSSQLDBPass)");
 
 		if ($mssql===FALSE) {
+			// error_log("Error al conectarse a la base de datos del 3DO");
 			return "Error al conectarse a la base de datos del 3DO";
 		}
+
+		// error_log("mssql_connect");
+		// error_log($mssql);
+		// error_log(json_encode($mssql));
+
+		// if (function_exists('mssql_connect')) {
+		// 	error_log("Las funciones de mssql_connect estan disponibles");
+		// } else {
+		// 	error_log("Las funciones de mssql_connect no estan disponibles");
+		// }
+		// die();
+
 		mssql_select_db($MSSQLDBName,$mssql);
 
 		$Almacenes = Array();
@@ -176,6 +190,10 @@ class Interface3DOModel extends Model {
 		if ($Cod3DOCliVarios == NULL || $Cod3DOCliVarios == "")
 			return "No se pudo asociar Clientes Varios en base de datos 3DO";*/
 		$Cod3DOCliVarios = "1049";
+
+		// error_log("Cod3DOAlmacen");
+		// error_log(json_encode($Almacenes));
+		// die();
 
 		mssql_query("BEGIN TRANSACTION;",$mssql);
 		$sqlca->query("BEGIN;");
@@ -410,11 +428,11 @@ if ($agrupado == 'S') {
 				t.dia,
 				t.caja";
 
-		echo "<pre> Query 3:";
-		print_r($sql);
-		echo "</pre>";
+		// echo "<pre> Tickets Boleta Cabecera Agrupados:";
+		// print_r($sql);
+		// echo "</pre>";
 
-		echo "\nTickets Boleta Cabecera Agrupados:\n".$sql;
+		// echo "\nTickets Boleta Cabecera Agrupados:\n".$sql;
 
 		if ($sqlca->query($sql)<0)
 			return onError_AIExit($mssql,"Error al obtener cabaceras de tickets boleta acumulados a trasladar");
@@ -715,7 +733,11 @@ if ($agrupado == 'S') {
 				t.dia,
 				t.caja";
 
-		echo "\nTickets Boleta Cabecera Detallado:\n".$sql;
+		// echo "<pre> Tickets Boleta Cabecera Detallado:";
+		// print_r($sql);
+		// echo "</pre>";
+
+		// echo "\nTickets Boleta Cabecera Detallado:\n".$sql;
 
 		if ($sqlca->query($sql)<0)
 			return onError_AIExit($mssql,"Error al obtener cabaceras de tickets boleta detallado a trasladar");
@@ -952,6 +974,10 @@ if ($agrupado == 'S') {
 				t.caja,
 				t.dia";
 
+			// echo "<pre> Tickets Factura Cabecera:";
+			// print_r($sql);
+			// echo "</pre>";
+
 			//echo "Tickets Factura Cabecera:\n".$sql;
 
 			if ($sqlca->query($sql)<0)
@@ -1163,6 +1189,10 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 				ORDER BY
 					t.trans;";
 
+// echo "<pre> Tickets Factura Detalle:";
+// print_r($sql);
+// echo "</pre>";
+
 //echo "Tickets Factura Detalle:\n".$sql;
 
 			if ($sqlca->query($sql)<0)
@@ -1314,7 +1344,7 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 			WHERE
 				t.dia BETWEEN '{$FechaIni}' AND '{$FechaFin} 23:59:59'
 				AND t.es = '{$CodAlmacen}'
-				AND t.usr IS NOT NULL AND t.usr != '' --DOCUMENTOS ELECTRONICOS
+				AND t.usr IS NOT NULL AND t.usr != '' --DOCUMENTOS ELECTRONICOS --
 			GROUP BY
 				t.trans,
 				t.caja,
@@ -1323,6 +1353,10 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 				t.trans,
 				t.caja,
 				t.dia";
+
+			// echo "<pre> Tickets Factura Cabecera:";
+			// print_r($sql);
+			// echo "</pre>";
 
 			//echo "Tickets Factura Cabecera:\n".$sql;
 			//modificado TD(Eliminado)
@@ -1417,6 +1451,8 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 			//echo $sql;
 
 			if (mssql_query($sql,$mssql)===FALSE) {
+				error_log("Insert cabecera de ticket factura (FE)");
+				error_log($sql);
 				error_log($mssql);
 				return onError_AIExit($mssql,"Error al trasladar cabecera de ticket factura (FE) {$reg[0]} al 3DO");
 			}
@@ -1533,6 +1569,9 @@ echo "========== SINCRONIZANDO CABECERAS DE TICKETS ==========\n";
 				ORDER BY
 					t.trans;";
 
+// echo "<pre> Tickets Factura Detalle:";
+// print_r($sql);
+// echo "</pre>";
 //echo "Tickets Factura Detalle:\n".$sql;
 
 			if ($sqlca->query($sql)<0)
@@ -1823,6 +1862,10 @@ echo "========== SINCRONIZANDO CABECERAS DE DOCUMENTOS MANUALES ==========\n";
 					AND fc.dt_fac_fecha BETWEEN '$FechaIni' AND '$FechaFin'
 					AND fc.ch_almacen = '$CodAlmacen';";
 
+			// echo "<pre> Detalle de documentos manuales:";
+			// print_r($sql);
+			// echo "</pre>";
+
 			if ($sqlca->query($sql)<0)
 				return onError_AIExit($mssql,"Error al seleccionar delatte de documentos manuales a trasladas");
 
@@ -1920,6 +1963,10 @@ echo "========== SINCRONIZANDO DETALLE DE DOCUMENTOS MANUALES ==========\n";
 				m.mov_fecha BETWEEN '$FechaIni' AND '$FechaFin 23:59:59'
 				AND m.mov_almacen = '$CodAlmacen';";
 
+		// echo "<pre> Movimientos de almacen:";
+		// print_r($sql);
+		// echo "</pre>";
+
 		if ($sqlca->query($sql)<0)
 			return onError_AIExit($mssql,"Error al obtener movimientos de almacen a trasladar");
 
@@ -1971,10 +2018,10 @@ echo "========== SINCRONIZANDO KARDEX ==========\n";
 		}
 
 		$sqlca->query("INSERT INTO \"3do_migraciones\" (ch_almacen,fecha_inicio,fecha_fin,ch_usuario) VALUES ('$CodAlmacen','$FechaIni','$FechaFin','{$_SESSION['auth_usuario']}');");
-		$sqlca->query("COMMIT;");
-		mssql_query("COMMIT TRANSACTION;",$mssql);
-		// $sqlca->query("ROLLBACK;");
-		// mssql_query("ROLLBACK TRANSACTION;",$mssql);
+		// $sqlca->query("COMMIT;");
+		// mssql_query("COMMIT TRANSACTION;",$mssql);
+		$sqlca->query("ROLLBACK;");
+		mssql_query("ROLLBACK TRANSACTION;",$mssql);
 		mssql_close($mssql);
 
 		return TRUE;

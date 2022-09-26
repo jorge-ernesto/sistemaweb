@@ -170,7 +170,7 @@ class controllerSalesInvoice {
 		return $modelSalesInvoice->check_get_plates_generated_settlement_vouchers($arrGet);
 	}
 
-	public function generate_printed_representation_pdf_FE_sunat($arrGet, $arrDataHelper){ //METODO PARA REPRESENTACION PDF / ENVIO A SUNAT
+	public function generate_printed_representation_pdf_FE_sunat($arrGet, $arrDataHelper){ //METODO PARA REPRESENTACION PDF / ENVIO A SUNAT //CAMBIO
 		$bStatusFESunat = true;
 
 		error_log('Obtener compania');
@@ -185,7 +185,7 @@ class controllerSalesInvoice {
 		}
 
 		error_log('Obtener cabecera');
-		$arrHeader = $this->get_header($arrGet);
+		$arrHeader = $this->get_header($arrGet); //Aqui además de la cabecera, obtiene datos del complemento
 		if ( ($bStatusFESunat) && $arrHeader['sStatus'] == "danger" ) {
 			if (strip_tags(stripslashes($arrGet['sAction'])) == "representacion_interna_pdf_sunat") {
 				echo '<script type="text/javascript">alert("' . $arrHeader['sMessage'] . '");window.close();</script>';
@@ -376,7 +376,7 @@ class controllerSalesInvoice {
 				error_log(json_encode( strcmp($fe_vencimiento_verify, $fe_emision_verify) ));				
 				
 				if ( ($bStatusFESunat) ) {
-					if( TRIM($arrData["arrHeader"]["nu_tipo_pago"]) == "06" && TRIM($arrData["arrHeader"]["no_nombre_forma_pago"]) == "CREDITO" ){ //SI ES DOCUMENTO CON FORMA DE PAGO CREDITO
+					if( TRIM($arrData["arrHeader"]["nu_tipo_pago"]) == "06" && TRIM($arrData["arrHeader"]["no_nombre_forma_pago"]) == "CREDITO" ){ //SI ES DOCUMENTO CON FORMA DE PAGO CREDITO //
 						if( strcmp($fe_vencimiento_verify, $fe_emision_verify) <= 0 ){ //strcmp: Devuelve < 0 si str1 es menor que str2; > 0 si str1 es mayor que str2 y 0 si son iguales. SI FECHA DE VENCIMIENTO ES MENOR O IGUAL A LA FECHA DE EMISION
 							echo json_encode(array('sStatus' => 'danger', 'sMessage' => 'Problemas F.Vencimiento menor o igual a la de F.Emisión en Factura Crédito', 'fe_vencimiento_verify' => $fe_vencimiento_verify));
 							$bStatusFESunat = false;
@@ -542,7 +542,7 @@ EOT;
 					$arrResponse = array('sStatus' => 'success', 'sMessage' => 'Se puede registrar');
 			}
 		} else if ($arrPost['sNombreValidacion'] == 'tipos_impuesto') {
-			/*
+			/* ch_fac_tiporecargo2
 			- Reglas SUNAT (FE):
 				* Códigos de Tipo de Afectación del IGV - Cat. 07
 					1. 10 Gravado - Operación Onerosa
@@ -799,7 +799,7 @@ EOT;
 			);			
 		}
 
-		// Adicionar 2003 - Detracciones
+		// Adicionar 2003 - Detracciones //
 		if (
 			!empty($arrHeader["arrRow"]["nu_numero_cuenta_detraccion"]) &&
 			!empty($arrHeader["arrRow"]["ss_importe_detraccion"]) &&
@@ -896,7 +896,7 @@ EOT;
 			);
 		}
 
-		// Adicionar Detracciones
+		// Adicionar Detracciones //
 		if (
 			!empty($arrHeader["arrRow"]["nu_numero_cuenta_detraccion"]) &&
 			!empty($arrHeader["arrRow"]["ss_importe_detraccion"]) &&
@@ -956,7 +956,7 @@ EOT;
 		return true;
 	}
 
-	private function generate_document_content_SUNAT_format_OCS($arrData, $arrDataHelper) { //METODO PARA OBTENER CAMPO CONTENT EN EBI_QUEUE
+	private function generate_document_content_SUNAT_format_OCS($arrData, $arrDataHelper) { //METODO PARA OBTENER CAMPO CONTENT EN EBI_QUEUE //CAMBIO
 		$arrCadenaFESUNAT = "";
 
 		if ( $arrData["arrHeader"]["no_anulado"] == "S" ) {
@@ -1076,7 +1076,7 @@ EOT;
 					$iCodigoImpuesto = $row2["iCodigoImpuesto"];
 					if ( $iCodigoImpuesto == "10" ) {//10=Op. Gravadas
 						// $fCostoUnitario = round($row["ss_precio_venta_item"] / $row2["fImpuesto"], 4, PHP_ROUND_HALF_UP);
-						$fCostoUnitario = round($row["ss_subtotal"] / $row["qt_cantidad"], 6, PHP_ROUND_HALF_UP);
+						$fCostoUnitario = round($row["ss_subtotal"] / $row["qt_cantidad"], 6, PHP_ROUND_HALF_UP); //OPENSOFT-87: Problema en emisión de documentos Facturas de Ventas - VU*Q vs Subtotal //CAMBIO
 					}
 				}
 

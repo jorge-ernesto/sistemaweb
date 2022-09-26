@@ -116,6 +116,9 @@ ORDER BY
 		return $arrResult;
 	}
 
+	/**
+	 * Funcion para obtener Cabecera
+	 */
     function getHeader($arrPOST){
 		global $sqlca;
 
@@ -164,7 +167,7 @@ FROM
 	)
 	JOIN sap_mapeo_tabla_detalle AS ERPSERIE --AGREGAR LEFT SI HICIERA FALTA
 		ON(ERPSERIE.opencomb_codigo = EBIS.ebi_serial_id::TEXT AND ERPSERIE.id_tipo_tabla = (SELECT id_tipo_tabla FROM sap_mapeo_tabla WHERE no_tabla='Series de Documentos' AND id_tipo_interface=(SELECT id_tipo_interface FROM tipo_interface WHERE no_tipo_interface='SAP BUSINESS ONE (EXCEL Y TEXTO)' LIMIT 1) LIMIT 1))
-	JOIN sap_mapeo_tabla_detalle AS ERPMP
+	JOIN sap_mapeo_tabla_detalle AS ERPMP --DEBE CONTAR CON EL CAMPO fpago
 		ON(ERPMP.opencomb_codigo = PT.fpago AND ERPMP.id_tipo_tabla = (SELECT id_tipo_tabla FROM sap_mapeo_tabla WHERE no_tabla='Condiciones de Pago' AND id_tipo_interface=(SELECT id_tipo_interface FROM tipo_interface WHERE no_tipo_interface='SAP BUSINESS ONE (EXCEL Y TEXTO)' LIMIT 1) LIMIT 1))
 	LEFT JOIN interface_equivalencia_producto AS IEP
 		ON(IEP.art_codigo = PT.codigo)
@@ -279,6 +282,9 @@ ORDER BY
 		return $arrResult;
 	}
 
+	/**
+	 * Funcion para obtener Detalle
+	 */
     function getDetail($arrPOST){
 		global $sqlca;
 

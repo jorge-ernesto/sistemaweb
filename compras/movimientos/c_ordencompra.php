@@ -85,7 +85,7 @@ class OrdenCompraController extends Controller {
 				$result_f = "&nbsp;";
 				break;
 
-			case "Insertar":
+			case "Insertar": //INSERTA
 				$proveedor = trim($_REQUEST['proveedor']);
 				$credito = $_REQUEST['m_credito'];
 				$percepcion2=trim($_REQUEST['xpercepcion']);
@@ -104,7 +104,7 @@ class OrdenCompraController extends Controller {
 						$res = OrdenCompraModel::agregar($_REQUEST['numero'],$_REQUEST['serie'],$_REQUEST['fecha'],$_REQUEST['almacen'],$proveedor,$_REQUEST['moneda'],$tcambio,$credito,$fpago,$_REQUEST['factura'],$_REQUEST['comentario'],$_REQUEST['fentrega'],$_REQUEST['glosa'],$val_per[0],$val_per[1]);
 						if ($res==TRUE) {//Agrego correctamente ORDEN CABECERA -> com_cabecera
 							//Agregar FLETE
-							if ( trim($_POST['chflete']) == 'S' ){
+							if ( trim($_POST['chflete']) == 'S' ){ //AGREGAMOS FLETE
 								$fe_flete = trim($_POST['fe_flete']);
 								$fe_flete = strip_tags($fe_flete);
 								$fe_flete = explode("/", $fe_flete);

@@ -6,7 +6,7 @@ class VarillasTemplate extends Template {
 		return '<h2 align="center"><b>Liquidacion de Venta GNV</b></h2>';
 	}
 
-	function formPag($paginacion, $vec, $fecha, $fecha2) {
+	function formPag($paginacion, $vec, $fecha="", $fecha2="") {
 
 		$fecha 	  = $vec[0];
 		$fecha2	  = $vec[1];
@@ -342,7 +342,7 @@ class VarillasTemplate extends Template {
 		return $form->getForm();
 	}
 
-	function resultadosBusqueda($resultados,$fecha,$fecha2) {
+	function resultadosBusqueda($resultados,$fecha="",$fecha2="") {
 
 		$result .= '<table align="center">';
 		$result .= '<tr>';

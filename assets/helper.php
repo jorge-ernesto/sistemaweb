@@ -90,7 +90,7 @@ if($accion == 'getAlmacenes'){
 		'status' => $status,
 		'arrTipoVenta' => $arrTipoVenta,
 	));
-} else if($accion == 'getValuesFechaTCL'){//Array TCL = Get Values: Turno, Caja, Lado
+} else if($accion == 'getValuesFechaTCL'){//Array TCL = Get Values: Turno, Caja, Lado //Consultar turnos por fecha
 
 	$nu_tipo_venta 	= trim($_POST['nu_tipo_venta']);
 

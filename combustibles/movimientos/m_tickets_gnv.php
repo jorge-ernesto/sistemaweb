@@ -67,6 +67,8 @@ class TicketsGNVModel extends Model {
     }
 
 	function xls2array($filename) {
+		// error_log("xls2array");
+
 		$objReader = new PHPExcel_Reader_Excel5();
 		$objReader->setReadDataOnly( true );
 		$obj = $objReader->load( $filename );
@@ -80,9 +82,15 @@ class TicketsGNVModel extends Model {
 			$row = PHPExcel_Cell::columnIndexFromString($coord[0]) - 1;
 			$coords[$col][$row] = $value;
 		}
+
+		// error_log( json_encode( $coords ) );
 		return $coords;
 	}
 
+	/**
+	 * $arrDataExcel: Coordenadas, informacion dentro del excel
+	 * $arrDataHeader: Array creado con informacion como el nombre del archivo excel, nombre de la tabla, almacen, etc
+	 */
 	function array2sqlHeader($arrDataExcel, $arrDataHeader) {
 		global $sqlca;
 		
@@ -97,8 +105,16 @@ class TicketsGNVModel extends Model {
 		} else {
 			//Eliminar valores de excel que no sirve
 			unset($arrDataExcel[0],$arrDataExcel[1],$arrDataExcel[2],$arrDataExcel[3],$arrDataExcel[4],$arrDataExcel[5],$arrDataExcel[6],$arrDataExcel[7]);
+			
+			error_log("arrDataExcel");
+			error_log(json_encode( $arrDataExcel ));
+			
 			$counter = $arrDataHeader['iStartExcel'];
 			foreach ($arrDataExcel as $row) {
+
+				error_log("arrDataExcel");
+				error_log(json_encode( $row ));
+
 				if ( isset($row[7]) && strtoupper($row[1]) != 'RECIBO' ) {
 					//Get datetime from float
 	                $EXCEL_DATE = $row[2];
@@ -127,17 +143,17 @@ class TicketsGNVModel extends Model {
 
 					$status[$counter] = 2;
 
-					$sTypeDocument = strtoupper($row[11]);
+					$sTypeDocument = strtoupper($row[7]);
 					if ($sTypeDocument == 'BOLETA') {
 						$c_doctype_id[$counter] 	= 35;
-						$c_bpartner_id[$counter] 	= 9999;
+						$c_bpartner_id[$counter] 	= 99999999;
 					} else if ($sTypeDocument == 'FACTURA' || $sTypeDocument == 'VENTA CREDITO') {
 						$c_doctype_id[$counter] 	= 10;
-						$c_bpartner_id[$counter] 	= trim($row[7]);
+						$c_bpartner_id[$counter] 	= trim($row[5]);
 					}
 
 					// get number and serial
-					$arrDocumentNumberSerial = explode(' ', $row[12]);
+					$arrDocumentNumberSerial = explode(' ', $row[9]);
 					$documentno[$counter]  	= $arrDocumentNumberSerial[1];
 					$documentserial[$counter] = $arrDocumentNumberSerial[0];
 
@@ -165,6 +181,7 @@ class TicketsGNVModel extends Model {
 		}// ./ Else
 
 		$sql = "INSERT INTO " . $arrDataHeader['sNameTable'] . " (" . implode ( ",", array_filter ( $arrDataHeader['arrTableColumns'], 'is_string' ) ) . ") VALUES " . implode(',', $arrHeaderGNV);
+		error_log($sql);
 
     	$iStatusSQL = $sqlca->query($sql);
     	if ( (int)$iStatusSQL < 0 ) {
@@ -184,6 +201,10 @@ class TicketsGNVModel extends Model {
         unset($arrHeaderGNV);
 	}
 
+	/**
+	 * $arrDataExcel: Coordenadas, informacion dentro del excel
+	 * $arrDataHeader: Array creado con informacion como el nombre del archivo excel, nombre de la tabla, almacen, etc
+	 */
 	function array2sqlDetail($arrDataExcel, $arrDataDetail) {
 		global $sqlca;
 
@@ -217,12 +238,12 @@ class TicketsGNVModel extends Model {
 					$updatedby[$counter] = 1;
 					$isactive[$counter] = 1;
 					$c_product_id[$counter] = '11620308';
-					$unitprice[$counter] = (double)$row[17];
-					$quantity[$counter] = (double)$row[18];
-					$linetotal[$counter] = (double)$row[24];
+					$unitprice[$counter] = (double)$row[16];
+					$quantity[$counter] = (double)$row[17];
+					$linetotal[$counter] = (double)$row[23];
 			
 					// get number and serial
-					$arrDocumentNumberSerial 	= explode(' ', $row[12]);
+					$arrDocumentNumberSerial 	= explode(' ', $row[9]);
 					$documentno[$counter]  		= $arrDocumentNumberSerial[1];
 					$documentserial[$counter] 	= $arrDocumentNumberSerial[0];
 
@@ -259,7 +280,9 @@ class TicketsGNVModel extends Model {
 		}// ./ Else
 
 		$sql = "INSERT INTO " . $arrDataDetail['sNameTable'] . " (" . implode ( ",", array_filter ( $arrDataDetail['arrTableColumns'], 'is_string' ) ) . ") VALUES " . implode(',', $arrDetailGNV);
-    	$iStatusSQL = $sqlca->query($sql);
+    	error_log($sql);
+		
+		$iStatusSQL = $sqlca->query($sql);
     	if ( (int)$iStatusSQL < 0 ) {
     		$this->managerTransaction('ROLLBACK');
 
@@ -277,11 +300,21 @@ class TicketsGNVModel extends Model {
         unset($arrDetailGNV);
     }
 
-	function xls2sql($arrDataHeader) {
-		return self::array2sqlHeader(self::xls2array($arrDataHeader['sFileName']), $arrDataHeader);
+	function xls2sql($arrDataHeader) { //Cargar Datos Cabecera
+		return self::array2sqlHeader(
+		
+			self::xls2array($arrDataHeader['sFileName']), 
+			$arrDataHeader
+
+		);
 	}
 
-	function xls2sqldet($arrDataDetail) {
-		return self::array2sqlDetail(self::xls2array($arrDataDetail['sFileName']), $arrDataDetail);
+	function xls2sqldet($arrDataDetail) { //Cargar Datos Detalle
+		return self::array2sqlDetail(
+			
+			self::xls2array($arrDataDetail['sFileName']), 
+			$arrDataDetail
+		
+		);
 	}
 }

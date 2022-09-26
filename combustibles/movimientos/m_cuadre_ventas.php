@@ -30,6 +30,7 @@ class CuadreVentasModel extends Model {
 		else
 			$trabajador = addslashes($trabajador);
 
+		//Obtiene dia y turnos de pos_aprosys
 		$sql =	"	SELECT
 					da_fecha,
 					ch_posturno
@@ -37,30 +38,43 @@ class CuadreVentasModel extends Model {
 					pos_aprosys
 				WHERE
 					da_fecha BETWEEN '$dia1' AND '$dia2';";
+		echo "<pre>Query obtiene dia y turnos de pos_aprosys:";
+		echo $sql;
+		echo "</pre>";
 
 		if ($sqlca->query($sql)<0)
 			return FALSE;
 
 		$reporte = Array();
-		for ($i = 0; $i < $sqlca->numrows(); $i++)
+		for ($i = 0; $i < $sqlca->numrows(); $i++){
 			$b[] = $sqlca->fetchRow();
+		}
+		echo "<script>console.log('Dia y turnos de pos_aprosys')</script>";
+		echo "<script>console.log('" . json_encode($b) . "')</script>";
 
 		foreach ($b as $a) {
-			$dia = $a[0];
-			$turno = $a[1];
+			$dia = $a[0]; //Obtiene dia de pos_aprosys
+			$turno = $a[1]; //Obtiene turno de pos_aprosys
 
-			if ($dia==$dia1) {
-				if ($turno<$turno1)
+			if ($dia==$dia1) { //Valida el dia en pos_aprosys
+				if ($turno<$turno1) //Si el turno maximo de pos_aprosys < turno ingresado -> salta el foreach es decir no hace nada
 					continue;
 				$j = $turno1;
 			}
-			if ($dia==$dia2) {
-				if ($turno2>$turno)
+			echo "<script>console.log('j')</script>";
+			echo "<script>console.log('" . json_encode($j) . "')</script>";
+			
+			if ($dia==$dia2) { //Valida el dia en pos_aprosys
+				if ($turno2>$turno) //Si el turno ingresado > turno maximo de pos_aprosys -> No hace nada
 					;
 				else
 					$turno = $turno2+1;
 			}
-			for ($j=$j;$j<$turno;$j++) {
+			echo "<script>console.log('turno')</script>";
+			echo "<script>console.log('" . json_encode($turno) . "')</script>";
+			for ($j=$j;$j<$turno;$j++) { //Solo obtiene informacion del turno seleccionado
+				echo "<script>console.log('obtenerReporteTurno')</script>";
+				echo "<script>console.log('" . json_encode( array($dia,$j,$trabajador) ) . "')</script>";
 				$tabla = CuadreVentasModel::obtenerReporteTurno($dia,$j,$trabajador);
 				if ($tabla===FALSE)
 					return FALSE;
@@ -83,6 +97,8 @@ class CuadreVentasModel extends Model {
 		$reporte['dia'] = $diabonito;
 		$reporte['turno'] = $turno;
 		$reporte['cuadres'] = Array();
+		echo "<script>console.log('reporte')</script>";
+		echo "<script>console.log('" . json_encode( $reporte ) . "')</script>";
 
 		$apertura = "";
 		$cierre = "";
@@ -95,14 +111,17 @@ class CuadreVentasModel extends Model {
 				FROM
 					pos_aprosys
 				WHERE
-					ch_poscd='A';";
+					ch_poscd='A';"; //Ultimo dia abierto
+		echo "<pre>Query ultimo dia abierto:";
+		echo $sql;
+		echo "</pre>";
 
 		if ($sqlca->query($sql)<0)
 			return FALSE;
 
 		$taa = $sqlca->fetchRow();
 
-		if ($taa[0] == $dia && $taa[1] == $turno) {
+		if ($taa[0] == $dia && $taa[1] == $turno) { //Si el dia y turno ingresados estan abiertos
 			$tabcontometros = "pos_contometros_avance";
 			$turnoactual = TRUE;
 			$postrans = "pos_transtmp";
@@ -113,14 +132,17 @@ class CuadreVentasModel extends Model {
 						pos_aprosys
 					WHERE
 						da_fecha = '$dia';";
+			echo "<pre>Turno maximo de pos_aprosys:";
+			echo $sql;
+			echo "</pre>";
 
 			if ($sqlca->query($sql) < 0)
 				return FALSE;
 
 			$txx = $sqlca->fetchRow();
 			$ldt = $txx[0];
-			settype($ldt,"integer");
-			settype($turno,"integer");
+			settype($ldt,"integer"); //Turno maximo del dia
+			settype($turno,"integer"); //Turno ingresado
 			if ($ldt <= $turno)
 				return FALSE;
 		}
@@ -145,13 +167,15 @@ class CuadreVentasModel extends Model {
 		if ($sqlca->query($sql)<0)
 			return FALSE;
 
-		//echo $sql;
+		echo "<pre>Informacion de trabajadores:";
+		echo $sql;
+		echo "</pre>";
 
 		$ladosxtrabajador = Array();
 
 		for ($i = 0; $i < $sqlca->numrows(); $i++) {
 			$a = $sqlca->fetchRow();
-			if (!isset($ladosxtrabajador[$a[1].$a[4]])) {
+			if (!isset($ladosxtrabajador[$a[1].$a[4]])) { //Solo ingresa la informacion sino fue ingresada antes
 				$ladosxtrabajador[$a[1].$a[4]] = Array();
 				$ladosxtrabajador[$a[1].$a[4]]['trabajador'] = $a[1];
 				$ladosxtrabajador[$a[1].$a[4]]['tipo']       = $a[2];
@@ -159,16 +183,18 @@ class CuadreVentasModel extends Model {
 				$ladosxtrabajador[$a[1].$a[4]]['sucursal']   = $a[4];
 				$ladosxtrabajador[$a[1].$a[4]]['lados']      = Array();
 			}
-			if (strlen($a[0]) == 2 && $a[2] != 'M')
+			if (strlen($a[0]) == 2 && $a[2] != 'M') //Combustible
 				$ladosxtrabajador[$a[1].$a[4]]['lados'][] = $a[0];
-			else
+			else //Market
 				$ladosxtrabajador[$a[1].$a[4]]['pos'][] = $a[0];
 		}
+		echo "<script>console.log('ladosxtrabajador')</script>";
+		echo "<script>console.log('" . json_encode( $ladosxtrabajador ) . "')</script>";
 
 		if ($i == 0)
 			return FALSE;
 
-		foreach ($ladosxtrabajador as $lxa) {
+		foreach ($ladosxtrabajador as $lxa) { //Recorremos trabajadores
 			$cuadre = Array();
 			$cuadre['trabajador'] = $lxa['trabajador'];
 			$cuadre['nombre'] = $lxa['nombre'];
@@ -180,7 +206,7 @@ class CuadreVentasModel extends Model {
 			$listalados = "";
 			$lados = Array();
 
-			foreach ($lxa['lados'] as $lado) {
+			foreach ($lxa['lados'] as $lado) { //Solo recorre lados //Recorremos lados
 				$lda = Array();
 				$lda['lado'] = $lado;
 				$listalados .= "'$lado',";
@@ -197,12 +223,15 @@ class CuadreVentasModel extends Model {
 						ctc1.ch_codigocombustible,
 						ctc1.ch_nombrebreve,
 						ctc1.ch_codigocombex,
+						
 						ctc2.ch_codigocombustible,
 						ctc2.ch_nombrebreve,
 						ctc2.ch_codigocombex,
+						
 						ctc3.ch_codigocombustible,
 						ctc3.ch_nombrebreve,
 						ctc3.ch_codigocombex,
+						
 						ctc4.ch_codigocombustible,
 						ctc4.ch_nombrebreve,
 						ctc4.ch_codigocombex
@@ -219,15 +248,17 @@ class CuadreVentasModel extends Model {
 					return FALSE;
 
 				$mangueras = Array();
-				$row = $sqlca->fetchRow();
+				$row = $sqlca->fetchRow(); //Solo obtiene una fila
+				echo "<script>console.log('row - ".$lado."')</script>";
+				echo "<script>console.log('" . json_encode( $row ) . "')</script>";
 				for ($i=1;$i<5;$i++) {
-//					if ($row[(($i-1)*3)]===NULL)
-//						break;
+					// if ($row[(($i-1)*3)]===NULL)
+					// 	break;
 					$manguera = Array();
 					if ($row[(($i-1)*3)] !== NULL) {
-						$manguera['codigocombex'] = $row[((($i-1)*3)+2)];
-						$manguera['producto'] = $row[((($i-1)*3)+1)];
-						$manguera['codigo'] = $row[(($i-1)*3)];
+						$manguera['codigocombex'] = $row[((($i-1)*3)+2)]; //Esto es para capturar ch_codigocombex
+						$manguera['producto'] = $row[((($i-1)*3)+1)]; //ch_nombrebreve
+						$manguera['codigo'] = $row[(($i-1)*3)]; //ch_codigocombutible
 					} else {
 						$manguera['codigocombex'] = "??";
 						$manguera['producto'] = "??";
@@ -247,10 +278,16 @@ class CuadreVentasModel extends Model {
 								AND manguera = $i".(($turnoactual==TRUE)?" ":"
 								AND dia = '$dia'
 								AND turno = '$turno'").";";
+					//$turnoactual es variable que se identifica para cuando se hace select a pos_contometros_avance
+					echo "<pre>Query pos_contometros o pos_contometros_avance inicial:";
+					echo $sql;
+					echo "</pre>";					
 					if ($sqlca->query($sql)<0)
 						return FALSE;
 
 					$r = $sqlca->fetchRow();
+					echo "<script>console.log('row - Query pos_contometros o pos_contometros_avance inicial')</script>";
+					echo "<script>console.log('" . json_encode( $r ) . "')</script>";
 					if (!$r) {
 						if ($manguera['producto'] == "??")
 							continue;
@@ -287,12 +324,17 @@ class CuadreVentasModel extends Model {
 									turno DESC
 								LIMIT
 									1;";
+						echo "<pre>Query pos_contometros o pos_contometros_avance final:";
+						echo $sql;
+						echo "</pre>";
 
-//									AND cnt < {$r[2]}
+									// AND cnt < {$r[2]}
 						if ($sqlca->query($sql)<0)
 							return FALSE;
 
 						$r = $sqlca->fetchRow();
+						echo "<script>console.log('row - Query pos_contometros o pos_contometros_avance final')</script>";
+						echo "<script>console.log('" . json_encode( $r ) . "')</script>";
 						$manguera['conto_inicial_vol'] = $r[0];
 						$manguera['conto_inicial_sol'] = $r[1];
 
@@ -302,13 +344,13 @@ class CuadreVentasModel extends Model {
 
 					$manguera['conto_venta_vol'] = diferencia_contometros($manguera['conto_inicial_vol'],$manguera['conto_final_vol']);
 					$manguera['conto_venta_sol'] = diferencia_contometros($manguera['conto_inicial_sol'],$manguera['conto_final_sol']);
-//					$manguera['conto_venta_vol'] = $manguera['conto_final_vol'] - $manguera['conto_inicial_vol'];
-//					$manguera['conto_venta_sol'] = $manguera['conto_final_sol'] - $manguera['conto_inicial_sol'];
+					// $manguera['conto_venta_vol'] = $manguera['conto_final_vol'] - $manguera['conto_inicial_vol'];
+					// $manguera['conto_venta_sol'] = $manguera['conto_final_sol'] - $manguera['conto_inicial_sol'];
 
 					$lado_conto_vol += $manguera['conto_venta_vol'];
 					$lado_conto_sol += $manguera['conto_venta_sol'];
 
-					$filtrotrans = "codigo = '{$manguera['codigo']}'";
+					$filtrotrans = "codigo = '{$manguera['codigo']}'"; //Esto no sirve al final se reemplaza
 
 					$sql =	"	
 							SELECT
@@ -324,7 +366,7 @@ class CuadreVentasModel extends Model {
 								AND codigo = '{$manguera['codigo']}'
 
 						";
-//								--AND (importe > 0 OR tm = 'A');";
+								// --AND (importe > 0 OR tm = 'A');";
 
 					if ($sqlca->query($sql)<0)
 						return FALSE;
@@ -350,6 +392,7 @@ class CuadreVentasModel extends Model {
 					$mangueras[$i] = $manguera;
 					$manguera = NULL;
 				}
+				echo "filtrotrans: " . $filtrotrans; //Esto no sirve al final se reemplaza
 
 				$lda['mangueras'] = $mangueras;
 				$mangueras = NULL;
@@ -396,7 +439,7 @@ class CuadreVentasModel extends Model {
 			$listapos = "";
 			$pox = Array();
 
-			foreach ($lxa['pos'] as $pos) {
+			foreach ($lxa['pos'] as $pos) { //Recorremos pos
 				$pos = trim($pos);
 				$caja = Array();
 				$caja['pos'] = $pos;
@@ -441,6 +484,7 @@ class CuadreVentasModel extends Model {
 			$cuadre['venta_market'] = $venta_market;
 			$cuadre['diferencia'] = $diferencia;
 
+			/*Configuracion de where*/
 			$filtrolados = "";
 			$filtroladosvt = "";
 			$filtropos = "";
@@ -458,17 +502,18 @@ class CuadreVentasModel extends Model {
 			}
 
 			if ($filtrolados != "" && $filtropos != "") {
-				$filtrotrans = " (({$filtrolados}) OR ({$filtropos})) ";
+				$filtrotrans = " (({$filtrolados}) OR ({$filtropos})) "; //$filtrotrans
 				$filtrotransvt = " (({$filtroladosvt}) OR ({$filtroposvt} AND (v.ch_lado IS NULL OR v.ch_lado = ''))) ";
 				$filtrotransc = $filtrolados;
 			} else if ($filtrolados != "") {
-				$filtrotrans = $filtrolados;
+				$filtrotrans = $filtrolados; //$filtrotrans
 				$filtrotransvt = $filtroladosvt;
 				$filtrotransc = $filtrolados;
 			} else if ($filtropos != "") {
-				$filtrotrans = $filtropos;
+				$filtrotrans = $filtropos; //$filtrotrans
 				$filtrotransvt = "{$filtroposvt} AND (v.ch_lado IS NULL OR v.ch_lado = '')";
 			}
+			/*Cerrar Configuracion de where*/
 
 			$sql =	"SELECT
 					ch_numero_correl,
@@ -634,7 +679,7 @@ class CuadreVentasModel extends Model {
 			$cuadre['tc'] = $tarjetas;
 			$tarjetas = NULL;
 
-			//OPENSOFT-98: Redondeo de documentos en efectivo en reportes de liquidación
+			//OPENSOFT-98: Redondeo de documentos en efectivo en reportes de liquidación //
 			$sql =	"
 					SELECT 
 						sum(x) 
@@ -648,10 +693,13 @@ class CuadreVentasModel extends Model {
 							AND t.fpago = '1' 
 							AND t.dia = '$dia'
 							AND t.turno = '$turno'
-							AND $filtrotrans
+							AND $filtrotrans --Esto me interesa
 						GROUP BY 
 							t.caja,t.trans) x;
 			";
+			echo "<pre>Redonde de documentos en efectivo en reportes de liquidacion:";
+			echo $sql;
+			echo "</pre>";
 
 			if ($sqlca->query($sql)<0)
 				return FALSE;
@@ -772,6 +820,7 @@ class CuadreVentasModel extends Model {
 			$cuadre['tg'] = $transgrat;
 			$transgrat = NULL;
 
+			//Query Descuentos
 			if ($listalados != "") {
 				$sql =	"	
 					SELECT
@@ -854,13 +903,16 @@ class CuadreVentasModel extends Model {
 				$total_descuentos = $total_descuentos_efectivo = $total_afericiones = 0;
 			}
 
-/*			if ($cuadre['tipo']=="C")
+			/*if ($cuadre['tipo']=="C")
 				$cuadre['fs'] = ($total_depositos - $venta_conto) + ($total_notas + $total_tarjetas + ($total_descuentos_efectivo * -1) + ($total_devoluciones_efectivo * -1) + $total_afericiones);
 			else
 				$cuadre['fs'] = ($total_depositos - $venta_ticket) + ($total_notas + $total_tarjetas + ($total_descuentos_efectivo * -1) + ($total_devoluciones_efectivo * -1));
-*/
+			*/
 
 			$cuadre['fs'] = ($total_depositos - $venta_exigible) + ($total_notas + $total_tarjetas + $total_redondeo_efe + ($total_descuentos * -1) + ($total_devoluciones_efectivo * -1) + $total_afericiones + $total_transgrat);
+			// $sob_faltante_trabajador = CuadreVentasModel::obtenerReporteTurnoConsolidacion($dia,$turno,$cuadre['trabajador'],$cuadre['sucursal']);
+			// $cuadre['sob_fal'][$cuadre['trabajador']] = $sob_faltante_trabajador[$cuadre['trabajador']]['cuadres']['fs'];
+			// $cuadre['sob_fal'][$cuadre['trabajador']] = $sob_faltante_trabajador;			
 
 			$reporte['cuadres'][] = $cuadre;
 			$cuadre = NULL;

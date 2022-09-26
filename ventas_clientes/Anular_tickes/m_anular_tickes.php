@@ -50,7 +50,7 @@ class AnularTickesModel extends Model {
 		}
 	}
 
-	function getData($txtnualmacen, $caja, $trans, $fecha_trans, $td, $tv, $turno, $tm) {
+	function getData($txtnualmacen, $caja, $trans, $fecha_trans, $td, $tv, $turno, $tm) { //Buscar Ticket
 		global $sqlca;
 
 		$txtnualmacen	= trim($txtnualmacen);
@@ -134,7 +134,7 @@ class AnularTickesModel extends Model {
 		return $result;
 	}
 
-	function Anular_tickes($almacen, $caja, $trans, $fecha_trans, $td, $tv, $turno, $tm, $codigo, $i) {
+	function Anular_tickes($almacen, $caja, $trans, $fecha_trans, $td, $tv, $turno, $tm, $codigo, $i) { //Anular Tickets
 		global $sqlca;
 
 
@@ -406,7 +406,7 @@ class AnularTickesModel extends Model {
 
 		//error_log('paso2');
 
-		/* ACTUALIZAR POS_TRANSYYYYMM */
+		/* ACTUALIZAR POS_TRANSYYYYMM */ /* Actualizar pos_trans */
 
 		$query="
 		UPDATE

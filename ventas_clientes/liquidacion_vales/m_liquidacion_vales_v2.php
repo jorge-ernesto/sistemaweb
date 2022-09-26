@@ -637,8 +637,8 @@ WHERE
                     substr('".$cli_direccion."', 0, 100),
                     '".$cli_comp_direccion."',
                     '".str_replace("'", "''", $cli_razsocial)."',  
-                    now(),
-                    now()
+                    now(), --FECHA Y HORA DE LIQUIDACION
+                    now()  --FECHA Y HORA DE LIQUIDACION
                 );
             ";
 
@@ -804,7 +804,7 @@ INSERT INTO fac_ta_factura_cabecera(
  'N',
  'N',
  0.00,
- now()
+ now() --FECHA Y HORA DE LIQUIDACION
 );
     			";
 
@@ -1037,7 +1037,7 @@ INSERT INTO fac_ta_factura_detalle(
         }
     }
 
-    function procesoDocumnetoLiquidarUnicoClienteXNormal($DOCUMENTO, $SERIE, $FEC_LIQUIDACION, $datosDetalledocum, $datosCliente, $datos_inicales_documento, $cadena_vales, $f_inicio, $f_fina, $codigo_hermandad, $sCodigoImpuesto) {
+    function procesoDocumnetoLiquidarUnicoClienteXNormal($DOCUMENTO, $SERIE, $FEC_LIQUIDACION, $datosDetalledocum, $datosCliente, $datos_inicales_documento, $cadena_vales, $f_inicio, $f_fina, $codigo_hermandad, $sCodigoImpuesto) { //Function cliente normal
         	global $sqlca;
             $exonerada = LiquidacionValesModel::GetTaxOptional();
 		try {
@@ -1642,7 +1642,7 @@ GROUP BY
         }
     }
 
-    function ActualizarVales_Liquidacion($DOCUMENTO, $fecha_inicio, $fecha_final, $ruc, $vales, $serie, $num_documneto, $articulo, $NUMERO_LIQUIDACION, $fecha_liquidacion, $impo = 0, $cod_hermandad) {
+    function ActualizarVales_Liquidacion($DOCUMENTO, $fecha_inicio, $fecha_final, $ruc, $vales, $serie, $num_documneto, $articulo, $NUMERO_LIQUIDACION, $fecha_liquidacion, $impo = 0, $cod_hermandad) { //Metodo para insertar en val_ta_complemento_documento
         global $sqlca;
         try {
 
@@ -1711,7 +1711,7 @@ GROUP BY
 	                    art_codigo,
 	                    accion,
 	                    ch_placa,
-	                    fecha_liquidacion,
+	                    fecha_liquidacion, --FECHA DE LIQUIDACION
 	                    ch_cliente,
 	                    nu_fac_valortotal,
 	                    cod_hermandad
@@ -1729,7 +1729,7 @@ GROUP BY
 	                	'" . $fecha_liquidacion . "',
 	                	'" . $ruc . "',
 	                	'" . $ch_num_importe . "',
-	                	'" . $cod_hermandad . "');
+	                	'" . $cod_hermandad . "'); --CODIGO DE HERMANDAD
 	               	";
 
                     $estado = $sqlca->query($consulta);

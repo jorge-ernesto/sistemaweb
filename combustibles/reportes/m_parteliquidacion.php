@@ -188,7 +188,9 @@ class ParteLiquidacionModel extends Model {
 		$sqlA .= "	GROUP BY 1,2 
 				  	ORDER BY Co.ch_nombrebreve ;";
 
+		echo "<pre>";
 		echo '- PARTE I: '.$sqlA.' -';
+		echo "</pre>";
 
 		if ($sqlca->query($sqlA) < 0) 
 			return false;

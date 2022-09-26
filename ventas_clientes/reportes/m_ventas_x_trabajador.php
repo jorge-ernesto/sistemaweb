@@ -93,6 +93,10 @@ ORDER BY
  PT.fecha 
  		";
 
+		echo "<pre>";
+		echo $sql;
+		echo "</pre>";
+
 		$iStatusSQL = $sqlca->query($sql);
 		if ((int)$iStatusSQL < 0){
 			return array(

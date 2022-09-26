@@ -432,7 +432,7 @@ class RegistroComprasModel extends Model {
 					cab.mov_cantidad cantidad,
 					cab.mov_costounitario costo,
 					cab.mov_costototal total,
-					cab.tran_codigo||cab.mov_numero||to_char(cab.mov_fecha,'dd/mm/yyyy')||cab.art_codigo as id,
+					cab.tran_codigo||cab.mov_numero||to_char(cab.mov_fecha,'dd/mm/yyyy')||cab.art_codigo as id, --Importante en el query UPDATE inv_ta_compras_devoluciones
 					cab.mov_fecha
 				FROM
 					inv_ta_compras_devoluciones cab

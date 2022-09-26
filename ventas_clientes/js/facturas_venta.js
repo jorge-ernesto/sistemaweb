@@ -227,7 +227,7 @@ $(document).ready(function() {
 			window.location.href = '/sistemaweb/ventas_clientes/facturas_venta.php?action=edit&iCodigoAlmacen=' + iCodigoAlmacen + '&iTipoDocumento=' + iTipoDocumento + '&sSerieDocumento=' + sSerieDocumento + '&iNumeroDocumento=' + iNumeroDocumento + '&dFechaEmision=' + dFechaEmision + '&iIdCliente=' + iIdCliente;
 		} else if ( sAction == 'representacion_interna_pdf_sunat' ) {
 			window.open('/sistemaweb/ventas_clientes/facturas_venta.php?action=pdf_representacion_interna_fe_sunat&iCodigoAlmacen=' + iCodigoAlmacen + '&iTipoDocumento=' + iTipoDocumento + '&sSerieDocumento=' + sSerieDocumento + '&iNumeroDocumento=' + iNumeroDocumento + '&dFechaEmision=' + dFechaEmision + '&iIdCliente=' + iIdCliente + '&iNumeroLiquidacion=' + iNumeroLiquidacion + '&sAction=' + sAction, '_blank');
-		} else if ( sAction == 'enviar_sunat' ) {
+		} else if ( sAction == 'enviar_sunat' ) { //ENVIAR A SUNAT
 			url = '/sistemaweb/ventas_clientes/facturas_venta.php';
 			sMessage = "¿Deseas enviar el documento a SUNAT?";
 	    	if (confirm(sMessage)) {
@@ -689,7 +689,7 @@ $(document).ready(function() {
 	});
 });
 
-function calcAmountsSalesInvoice(){
+function calcAmountsSalesInvoice(){ //CALCULAR TOTALES
 	var $fSumCantidad = 0.00, $fSumSubtotal = 0.00, $fSumImpuesto = 0.00, $fSumDescuento = 0.00, $fSumTotal = 0.00, $sEstadoInafecto = "N";
 	var $fSubtotal=0.00, $fTotal=0.00, $fDescuento=0.00;
 	$( '#table-sales_invoice_detail > tbody > tr' ).each(function(){
@@ -892,7 +892,7 @@ function autocompleteBridge(type) {
 	if (type == 0) {// Cliente agregar
 		var customers = $("#txt-filtro-cliente-nombre");
 		if(customers.val() !== undefined) {
-			generalAutocomplete('#txt-filtro-cliente-nombre', '#hidden-filtro-cliente-id', 'getCustomers', ['getCustomerPriceList(), getCustomerCreditDays(), getOtherCustomerFields()']);
+			generalAutocomplete('#txt-filtro-cliente-nombre', '#hidden-filtro-cliente-id', 'getCustomers', ['getCustomerPriceList(), getCustomerCreditDays(), getOtherCustomerFields()']); //Autocomplete para cliente
 		}
 	} else if (type == 1) {
 		var items = $("#txt-add-item-nombre");
@@ -1117,7 +1117,7 @@ function searchSalesInvoice(iPage){
 	}, "JSON");
 }
 
-function saveSalesInvoice(){
+function saveSalesInvoice(){ //GUARDAR FACTURA
 	$( '#div-add-sales_invoice' ).prepend(block_loding_modal);
 	
 	$( '#btn-html-sales_invoice' ).attr('disabled', true);
@@ -1213,7 +1213,7 @@ function saveSalesInvoice(){
 												//Cliente
 												iIdCliente : $.trim($( '#hidden-filtro-cliente-id' ).val()),
 												iListaPrecioCliente : $.trim($( '#txt-lista_precio' ).val()),
-												sExonerado : $.trim($( '#cbo-add-exonerado' ).val()),
+												sExonerado : $.trim($( '#cbo-add-exonerado' ).val()), //Combo Exonerado
 												sTransferenciaGratuita : $.trim($( '#cbo-add-transferencia_gratuita' ).val()),
 												sDespachoPerdido : $.trim($( '#cbo-add-despacho_perdido' ).val()),
 												//Total del Documento

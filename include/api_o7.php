@@ -35,7 +35,7 @@ class O7Interface{
 	private $iStatusDebug = false;
 	private $fFactorConversionGLP = 3.785411784;
 
-	function debugO7Interface($arrData){
+	function debugO7Interface($arrData){ //debugO7Interface
 		if ( isset($arrData->debug_o7) && $arrData->debug_o7 == true ) {
 			$this->iStatusDebug = true;
 			return $this->iStatusDebug;
@@ -75,14 +75,18 @@ class O7Interface{
         return $dHoy_Hour;
     }
 
-    function validateToken(){
+    function validateToken(){ //validateToken
     	global $sqlca;
 
 		$token_key_httpheader = null;
 		$arrHeaders = apache_request_headers();
-		if(isset($arrHeaders['Authorization'])){
+		// error_log("arrHeaders");
+		// error_log(json_encode($arrHeaders));
+		if(isset($arrHeaders['authorization'])){
 			$arrMatches = array();
-			preg_match('/Token token="(.*)"/', $arrHeaders['Authorization'], $arrMatches);
+			preg_match('/Token token="(.*)"/', $arrHeaders['authorization'], $arrMatches);
+			// error_log("arrMatches");
+			// error_log(json_encode($arrMatches));
 			if(isset($arrMatches[1])){
 				$token_key_httpheader = $arrMatches[1];
 			}
@@ -661,11 +665,11 @@ fecha_replicacion
 GENERAR MOVIMIENTO DE INVENTARIO
 #########################################################
 */
-    function crudMovimientoInventario($arrData){
+    function crudMovimientoInventario($arrData){ //crudMovimientoInventario
     	global $sqlca;
         try {
         	if ( isset($arrData->debug_o7) ) {
-        		$this->debugO7Interface($arrData);
+        		$this->debugO7Interface($arrData); //iStatusDebug
         	}
 
         	$arrResponse = $this->validateToken();
@@ -675,6 +679,19 @@ GENERAR MOVIMIENTO DE INVENTARIO
 
         	$this->managerTransaction("BEGIN");
 
+			/**
+			 * En el webservice O7, hay una validación para comprobar movimientos ingresados no se repitan, esta validacion toma en cuenta estos campos de "inv_movialma"
+			 * tran_codigo   : Codigo de formulario ("id_tipo_movimiento" del JSON)
+			 * mov_entidad   : RUC del cliente ("id_entidad" del JSON)
+			 * mov_tipdocuref: Tipo de Comprobante ("tipo_comprobante" del JSON)
+			 * mov_docurefe  : Serie y Numero del documento ("serie" y "numero" del JSON)
+			 * 
+			 * En la validación el campo "mov_tipdocuref" es igualado a "id_item" del JSON que es el codigo del articulo, para ver si son iguales, por lo que nunca entra en la validación
+			 * ¿No deberia ser campo "mov_tipdocumento" a "tipo_comprobante" del JSON, ademas "art_codigo" a "id_item" del JSON y "mov_fecha" a "fecha_emision" del JSON?
+			 * 
+			 * En el INSERT final para ingresar movimiento de inventario en "mov_tipdocref" si guarda "tipo_comprobante" del JSON
+			 * ¿Es correcto que haya una validacion para no permitir movimientos de inventario con los campos: tran_codigo, mov_entidad, mov_tipdocuref, mov_docurefe?
+			 */
         	$arrDataSQL = array(
         		'sql' => "SELECT tran_codigo FROM inv_movialma WHERE tran_codigo='" . pg_escape_string($arrData->id_tipo_movimiento) . "' AND mov_entidad='" . pg_escape_string($arrData->id_entidad) . "' AND mov_tipdocuref='" . pg_escape_string($arrData->tipo_comprobante) . "' AND mov_docurefe='" . pg_escape_string($arrData->serie) . pg_escape_string($arrData->numero) . "' AND art_codigo='" . pg_escape_string($arrData->id_item) . "' AND DATE(mov_fecha)='" . pg_escape_string($arrData->fecha_emision) . "' LIMIT 1",
         		'sMessageDanger' => 'Problemas al Verificar movimiento de inventario',
@@ -707,7 +724,7 @@ GENERAR MOVIMIENTO DE INVENTARIO
 	            return $arrResponse;
         	}
 
-        	// Obtener número de formulario
+        	// Obtener número de formulario (Correlativo, agregando +1 siempre que utiliza el WebService O7)
 			$sql = "
 UPDATE
  inv_tipotransa
@@ -809,7 +826,7 @@ mov_almacen,
 mov_almaorigen,
 mov_almadestino,
 mov_naturaleza,
-mov_tipdocuref,
+mov_tipdocuref, --mov_tipdocuref
 mov_docurefe,
 mov_tipoentidad,
 mov_entidad,
@@ -1305,7 +1322,7 @@ if ( $data->operacion == 'modificar_item' ){
     exit();
 }
 
-if ( $data->operacion == 'consultar_item' ){
+if ( $data->operacion == 'consultar_item' ){ //consultar_item
 	echo json_encode($obj07Interface->getItem($data));
     exit();
 }
@@ -1320,7 +1337,7 @@ if ( $data->operacion == 'consultar_lista_precio' ){
     exit();
 }
 
-if ( $data->operacion == 'generar_movimiento_inventario' ){
+if ( $data->operacion == 'generar_movimiento_inventario' ){ //generar_movimiento_inventario
 	echo json_encode($obj07Interface->crudMovimientoInventario($data));
     exit();
 }

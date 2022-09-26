@@ -1,7 +1,7 @@
 <?php
 
-$serverName = "192.168.1.24, 1433"; //serverName\instanceName, portNumber (por defecto es 1433)
-$connectionInfo = array( "Database"=>"Octano", "UID"=>"Opensoft", "PWD"=>"%%20eneg1g4$$2019");
+$serverName = "10.0.1.80\serverspring, 1433"; //serverName\instanceName, portNumber (por defecto es 1433)
+$connectionInfo = array( "Database"=>"LLAMAGAS_SVO", "UID"=>"EESS", "PWD"=>"EESS");
 $conn = sqlsrv_connect( $serverName, $connectionInfo);
 
 if( $conn ) {

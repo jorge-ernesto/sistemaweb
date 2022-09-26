@@ -176,11 +176,11 @@
 		                data: {accion: 'tipo_documento_gennerar', fecha:$('#fecha_mostar').val()},
 		                success:function(xm){
                         console.log(xm);
-						if(xm == 1 || xm == '1'){
-							alert('Dia consolidado, seleccionar otra fecha');
-						} else if (xm == 2 || xm == '2') {
-                            alert('La fecha seleccionada, es menor a la fecha de inicio del sistema');
-                        } else {
+						// if(xm == 1 || xm == '1'){
+						// 	alert('Dia consolidado, seleccionar otra fecha');
+						// } else if (xm == 2 || xm == '2') {
+                  //           alert('La fecha seleccionada, es menor a la fecha de inicio del sistema');
+                  //       } else {
                     		$( "#fecha_mostar" ).prop("disabled", true);
 
 					            // var html_sin_cliente="<div style='float: left;width: auto;border: 1px;color:red;'>";
@@ -217,7 +217,7 @@
 						    $('#contenidoTablaSelecionar').html(html_sin_cliente);
 						    $('#tipo_accion').val('sin_cliente');
 						    $('#btnbuscar').css('display','none');
-						}
+						// }
 
                         		}
 
@@ -544,7 +544,7 @@
 
 		//CONSULTAR CLIENTES
 
-            $('#btnseleccionar').click(function(){
+            $('#btnseleccionar').click(function(){ //Consultar
 
 			$('#cargardor').css({'display':'inline'});
 
@@ -768,7 +768,7 @@
 		//BUSCAR CLIENTE DOCUMENTOS POR COBRAR
 
 		$('#btnbuscar').off('click');
-		$(document).on('click','#btnbuscar',function(){
+		$(document).on('click','#btnbuscar',function(){ //Operacion: Ventas Clientes, Boton: Documentos
 			$( "#fecha_mostar" ).prop("disabled", false);
 
 			ArregloCliente = new Array();
@@ -792,7 +792,7 @@
 		                } else {
 		                    $( "#fecha_mostar" ).prop("disabled", true);
 		                	$('#cargardor').css({'display':'inline'});
-		                	$.ajax({
+		                	$.ajax({ //Ajax para buscar documentos por cobrar
 		                		type: "POST",
 		                		url: "c_ingreso_caja_relacion.php",
 		                		data: { accion:'buscar_cliente',moneda:valor_moneda,tc:valor_tc,ruc:valor_dni,fecha:$('#fecha_mostar').val()},
@@ -973,7 +973,7 @@
 
 		/* GUARDANDO REGISTRO DE CAJA INGRESO FINAL */
 
-		$('#finalizarproceso').off('click');
+		$('#finalizarproceso').off('click'); //Finalizar Proceso para realizar pago de cuenta por cobrar
 
                 $(document).on('click','#finalizarproceso',function(){
 
@@ -1016,7 +1016,7 @@
 							"cmnmoneda_id"		:cmnmoneda_id
 						}];
 
-				$('.fac_insertar').each(function(){
+				$('.fac_insertar').each(function(){ //Detalles del recibo
                             		datos_facturas_pagar[conta]=$(this).val();
                             		conta++;
 				});
@@ -1026,7 +1026,7 @@
 
                         	var cc=0;
 
-				$('.medio_pago').each(function(){
+				$('.medio_pago').each(function(){ //Detalle de medio de pago
 
 					var cadena_mp_split=$(this).attr('campos').split("*");
 
@@ -1048,7 +1048,7 @@
 
                             		type: "POST",
                             		url: "c_ingreso_caja_relacion.php",
-                            		data: {accion:'finalizar_proceso',datos_medio_pago:medio_pago_tmp,datos_factura:datos_facturas_pagar,'datos_generales':datos_principales,'tipo_accion':$('#tipo_accion').val()},
+                            		data: {accion:'finalizar_proceso',datos_medio_pago:medio_pago_tmp,datos_factura:datos_facturas_pagar,'datos_generales':datos_principales,'tipo_accion':$('#tipo_accion').val()}, //Finalizar Proceso para realizar pago de cuenta por cobrar
 					success:function(xm){
 
                                 		$('#cargardor').css({'display':'none'});

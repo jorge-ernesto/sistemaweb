@@ -44,6 +44,7 @@ class InterfaceConcarActTemplate extends Template {
 										<option value="6" >Ventas Manuales</option>
 										<option value="3" >Cta. Cobrar Combustible</option>
 										<option value="4" >Cta. Cobrar Market</option>
+										<option value="7" >Cta. Cobrar Manuales</option>
 										<option value="5" >Compras</option>
 										<option value="8" >Liquidacion de Caja</option>
 										</select><br/>'));

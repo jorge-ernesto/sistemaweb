@@ -5,9 +5,9 @@ class AfericionesController extends Controller {
 	function Init() {
 		$this->visor = new Visor();
 		isset($_REQUEST['action']) ? $this->action = $_REQUEST['action']:$this->action='';
-    	}
+	}
     
-    	function Run() {
+	function Run() {
 		include 'reportes/m_afericiones.php';
 		include 'reportes/t_afericiones.php';
 		include('../include/paginador_new.php');
@@ -18,17 +18,17 @@ class AfericionesController extends Controller {
 		$result_f = '';
 		$search_form = false;
 
-	      	if(!isset($_REQUEST['rxp'],$_REQUEST['pagina'])) {
+		if(!isset($_REQUEST['rxp'],$_REQUEST['pagina'])) {
 			$_REQUEST['rxp'] = 30;
 		 	$_REQUEST['pagina'] = 1;
-	      	}
+		}
 
 		switch ($this->action) {
 
 			case "Reporte":
 				echo 'Entro al Reporte'."\n";
 				$busqueda    	= AfericionesModel::Paginacion($_REQUEST['desde'], $_REQUEST['hasta'],$_REQUEST['rxp'],$_REQUEST['pagina']);
-				$result_f 	= AfericionesTemplate::reporte($busqueda['datos'],$_REQUEST['desde'], $_REQUEST['hasta']);
+				$result_f 		= AfericionesTemplate::reporte($busqueda['datos'],$_REQUEST['desde'], $_REQUEST['hasta']);
 				$result     	= AfericionesTemplate::search_form($_REQUEST['desde'], $_REQUEST['hasta'],$busqueda['paginacion']);
 				$this->visor->addComponent("ContentB", "content_body", $result);
 				$this->visor->addComponent("ContentF", "content_footer", $result_f);
@@ -83,7 +83,7 @@ class AfericionesController extends Controller {
 				}
 				break;
 
-		    	default:
+			default:
 				$busqueda    	= AfericionesModel::Paginacion('', '',$_REQUEST['rxp'],$_REQUEST['pagina']);
 				$result_f 		= AfericionesTemplate::reporte($busqueda['datos'],date(d."/".m."/".Y), date(d."/".m."/".Y));
 				$result     	= AfericionesTemplate::search_form(date(d."/".m."/".Y), date(d."/".m."/".Y),$busqueda['paginacion']);

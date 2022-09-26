@@ -28,7 +28,7 @@ $txttm	 	= $_REQUEST['data']['txttm'];
 
 try {
 
-	if ($accion == "buscar") {
+	if ($accion == "buscar") { //Buscar Ticket
 
 		$sata_result	= AnularTickesModel::getData($txtnualmacen, $txtcaja, $txttickes, $txtfecha, $txttd, $txttv, $txtturno, $txttm);
 		$estado 	= "S";
@@ -94,15 +94,15 @@ try {
 		$today_before 	= date_create($year.'-'.$month.'-'.$day);
 
 		// RESTRICCION PARA FECHA EMISIÓN DE F.E SOLO ANULADOS y MENOR A 5 DIA
-		date_add($today_before, date_interval_create_from_date_string('-5 days'));
-		$today_before = date_format($today_before, 'Y-m-d');
+		// date_add($today_before, date_interval_create_from_date_string('-5 days'));
+		// $today_before = date_format($today_before, 'Y-m-d');
 
-		if (count($sata_result) > 0 && $rows['fecha'] <= $today && $rows['usr'] !=''){
-        	if (count($sata_result) > 0 && $rows['usr'] !='' && $rows['fecha'] < $today_before ) {
-				$estado = 'N';
-				$msg = "Solo se pueden anular documentos electrónicos hasta 5 días. \\nTicket Nro. " . $txttickes . " Fecha emision: " . $rows['fecha'];
-	        }
-		}
+		// if (count($sata_result) > 0 && $rows['fecha'] <= $today && $rows['usr'] !=''){
+        // 	if (count($sata_result) > 0 && $rows['usr'] !='' && $rows['fecha'] < $today_before ) {
+		// 		$estado = 'N';
+		// 		$msg = "Solo se pueden anular documentos electrónicos hasta 5 días. \\nTicket Nro. " . $txttickes . " Fecha emision: " . $rows['fecha'];
+	    //     }
+		// }
 		// CERRAR RESTRICCION PARA FECHA EMISIÓN DE F.E SOLO ANULADOS y MENOR A 5 DIA
 
 		if (count($sata_result) > 0)
@@ -111,7 +111,7 @@ try {
 		$data_json .= "]";
 
 		echo "{'dato':$data_json,'estado':'$estado','msg':'$msg'}";
-	} else if ($accion == "anular_tickes") {
+	} else if ($accion == "anular_tickes") { //Anular Ticket
 
     	$validacion1 = $_REQUEST['data']['chk_validacion1'];
     	$validacion2 = $_REQUEST['data']['chk_validacion2'];

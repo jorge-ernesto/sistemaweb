@@ -139,7 +139,7 @@ switch ($boton) {
 		}
 		break;
 
-	case "Buscar":
+	case "Buscar": //
 		$cdia = substr($fbuscar,6,4)."-".substr($fbuscar,3,2)."-".substr($fbuscar,0,2);
 
 		$almacen 	= $_SESSION['almacen'];

@@ -36,7 +36,7 @@
 				
 				if(nu_tipo_venta.length > 0){					
 					$.post( "/sistemaweb/assets/helper.php", {
-						accion 			: 'getValuesFechaTCL',//TCL = Get Values: Turno, Caja, Lado
+						accion 			: 'getValuesFechaTCL',//TCL = Get Values: Turno, Caja, Lado //Consultar turnos por fecha
 						nu_almacen 		: nu_almacen,
 						Fe_Emision 		: Fe_Emision,
 						nu_tipo_venta 	: nu_tipo_venta

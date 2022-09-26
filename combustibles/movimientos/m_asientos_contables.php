@@ -4002,127 +4002,9 @@ class AsientosContablesModel extends Model {
 	}	
 
 	function generarBalance($arrParams) {
-		global $sqlca;
-
-		/* Recogemos parametros */
-		$almacen = TRIM($arrParams['sCodeWarehouse']);
-		$fecha   = TRIM($arrParams['dEntry']);
-
-		/* Obtenemos partes del parametro fecha */
-		$porciones = explode("-", $fecha);
-		$anio      = $porciones[0];
-		$mes       = $porciones[1];		
-
-		/* Obtenemos fechas para usar en queries */
-		$result        = Array();
-		$fecha_mes     = $anio . "-" . $mes;
-		$fecha_balance = $anio . "-" . $mes . "-" . "01";
-
-		//ELIMINAMOS BALANCE DE TODO EL MES
-		$sql_eliminar_balance = "DELETE FROM act_balance WHERE TRIM(ch_sucursal) = '$almacen' AND TO_CHAR(DATE(dateacct),'YYYY-MM') = '$fecha_mes'";
-
-		//VERIFICAMOS QUE ELIMINACION SE REALIZO CORRECTAMENTE
-		$iStatus = $sqlca->query($sql_eliminar_balance);
-		
-		if ((int)$iStatus >= 0) {
-			//GENERAMOS BALANCE DE TODO EL MES
-			$sql_generar_balance = "
-				SELECT
-					e.ch_sucursal, 
-					a.act_account_id,
-					el.tab_currency,
-					SUM(el.amtdt) AS amtdt, 
-					SUM(el.amtct) AS amtct, 
-					SUM(el.amtsourcedt) AS amtsourcedt,
-					SUM(el.amtsourcect) AS amtsourcect
-				FROM
-					act_entryline el
-					LEFT JOIN act_entry   AS e ON (el.act_entry_id   = e.act_entry_id)
-					LEFT JOIN act_account AS a ON (el.act_account_id = a.act_account_id)
-				WHERE
-					1 = 1
-					AND TRIM(e.ch_sucursal) = '". $almacen . "'
-					AND TO_CHAR(DATE(e.documentdate),'YYYY-MM') = '" . $fecha_mes . "'
-				GROUP BY
-					e.ch_sucursal, a.act_account_id, el.tab_currency
-				ORDER BY 
-					1,2,3;
-			";
-
-			echo "<pre>sql_facturas_manuales:";
-			echo "$sql_generar_balance";
-			echo "</pre>";
-
-			if ($sqlca->query($sql_generar_balance) < 0) {
-				return array('error' => TRUE, 'message' => 'Error en sql_generar_balance');
-			}
-
-			//RECORREMOS INFORMACION DE BALANCE
-			for ($i = 0; $i < $sqlca->numrows(); $i++) {
-				$a = $sqlca->fetchRow();
-			
-				$result[$i]['ch_sucursal']    = $a['ch_sucursal'];
-				$result[$i]['act_account_id'] = $a['act_account_id'];
-				$result[$i]['tab_currency']   = $a['tab_currency'];
-				$result[$i]['amtdt']          = $a['amtdt'];
-				$result[$i]['amtct']          = $a['amtct'];
-				$result[$i]['amtsourcedt']    = $a['amtsourcedt'];
-				$result[$i]['amtsourcect']    = $a['amtsourcect'];
-			}
-
-			if ($this->isDebug) {
-				echo "<script>console.log('result')</script>";
-				echo "<script>console.log('" . json_encode($result, JSON_FORCE_OBJECT) . "')</script>";
-			}
-
-			//RECORREMOS INFORMACION DE BALANCE
-			foreach ($result as $key => $value) {	
-				$ch_sucursal    = $value['ch_sucursal'];
-				$act_account_id = $value['act_account_id'];
-				$tab_currency   = $value['tab_currency'];
-
-				if ($tab_currency == "01") {
-					$amtdt = $value['amtdt'];
-					$amtct = $value['amtct'];
-				} else {
-					$amtdt = $value['amtsourcedt'];
-					$amtct = $value['amtsourcect'];
-				}
-
-				//INSERTAMOS BALANCE
-				$sql_insertar_balance = "
-					INSERT INTO act_balance (
-						act_balance_id, 
-						ch_sucursal, 
-						dateacct, 
-						act_account_id, 
-						amtdt, 
-						amtct, 
-						tab_currency
-					) VALUES (
-						nextval('seq_act_balance_id'),
-						'$ch_sucursal',
-						'$fecha_balance',
-						'$act_account_id',
-						'$amtdt',
-						'$amtct',
-						'$tab_currency'
-					);
-				";
-				
-				$iStatus = $sqlca->query($sql_insertar_balance);
-
-				if ((int)$iStatus < 0) {
-					return array('error' => TRUE, 'message' => 'Error en insert sql_insertar_balance');
-				}
-			}
-		} else {
-			return array('error' => TRUE, 'message' => 'Error en sql_eliminar_balance');
-		}
-
-		return array(
-			'error' => FALSE
-		);
+		$objHelper = new HelperClass();	
+		$arrParams['isDebug'] = $this->isDebug;
+		return $objHelper->generarBalance($arrParams);
 	}
 
 	/**
@@ -4206,7 +4088,7 @@ class AsientosContablesModel extends Model {
 			$c_cash_mpayment_id_value = isset($c_cash_mpayment_id) ? ",'$c_cash_mpayment_id'" : NULL; 
 			$tab_currency_value       = isset($tab_currency)       ? ",'$tab_currency'"       : NULL; 
 
-			$iStatus = $sqlca->query("
+			$insert_act_entry = "
 				INSERT INTO public.act_entry (
 					act_entry_id
 					$ch_sucursal_column 
@@ -4236,7 +4118,11 @@ class AsientosContablesModel extends Model {
 					$c_cash_mpayment_id_value 
 					$tab_currency_value
 				) RETURNING act_entry_id AS act_entry_id
-			");
+			";
+			$iStatus = $sqlca->query($insert_act_entry);
+			// echo "<pre>";
+			// echo $insert_act_entry;
+			// echo "</pre>";
 
 			if ((int)$iStatus < 0) {
 				return array('error' => TRUE, 'message' => 'Error en insert act_entry');
@@ -4289,7 +4175,7 @@ class AsientosContablesModel extends Model {
 				$c_cash_mpayment_value = isset($c_cash_mpayment_id) ? ",'$c_cash_mpayment_id'" : NULL;
 				$tab_currency_value    = isset($tab_currency)       ? ",'$tab_currency'"       : NULL; 
 
-				$iStatus = $sqlca->query("
+				$insert_act_entryline = "
 					INSERT INTO public.act_entryline (
 						act_entryline_id
 						$act_entry_id_column 
@@ -4319,7 +4205,11 @@ class AsientosContablesModel extends Model {
 						$c_cash_mpayment_value		
 						$tab_currency_value		
 					);
-				");
+				";
+				$iStatus = $sqlca->query($insert_act_entryline);
+				// echo "<pre>";
+				// echo $insert_act_entryline;
+				// echo "</pre>";
 
 				if ((int)$iStatus < 0) {
 					return array('error' => TRUE, 'message' => 'Error en insert act_entryline');
@@ -4389,6 +4279,7 @@ class AsientosContablesModel extends Model {
 			WHERE
 				TRIM(ch_sucursal) = '$almacen'
 				AND DATE(documentdate) = '$fecha'
+				AND act_entrytype_id NOT IN ('11')
 			ORDER BY
 				subbookcode ASC, registerno ASC;
 		";
@@ -4455,7 +4346,8 @@ class AsientosContablesModel extends Model {
 																act_entry 
 															WHERE 
 																TRIM(ch_sucursal) = '$almacen'
-																AND DATE(documentdate) = '$fecha');
+																AND DATE(documentdate) = '$fecha'
+																AND act_entrytype_id NOT IN ('11'));
 		";
 		/* $sql_act_entryline = "DELETE FROM act_entryline"; */ //TODO: delete
 		$iStatus = $sqlca->query($sql_act_entryline);
@@ -4467,7 +4359,8 @@ class AsientosContablesModel extends Model {
 					act_entry 
 				WHERE
 					TRIM(ch_sucursal) = '$almacen'
-					AND DATE(documentdate) = '$fecha';
+					AND DATE(documentdate) = '$fecha'
+					AND act_entrytype_id NOT IN ('11');
 			";
 			/* $sql_act_entry = "DELETE FROM act_entry"; */ //TODO: delete	
 			$sqlca->query($sql_act_entry);	

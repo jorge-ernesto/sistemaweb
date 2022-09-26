@@ -1165,7 +1165,7 @@ $( function() {
 		}
     });
 
-	$( "#btn-save" ).click(function(){
+	$( "#btn-save" ).click(function(){ //BOTON GUARDAR DE FORMULARIOS DE MOVIMIENTOS DE INVENTARIO
 		// Validacion Orden Compra
 		//$( "#btn-save" ).prop( "disabled", true );
 
@@ -1216,14 +1216,14 @@ $( function() {
 					'Nu_Almacen_Destino' 					: $('.Nu_Almacen_Destino').val(),
 					'Nu_Naturaleza_Movimiento_Inventario' 	: $('#txt-Nu_Naturaleza_Movimiento_Inventario').val(),
 					'Nu_Tipo_Cambio_Compra' 				: $('#txt-Nu_Tipo_Cambio_Compra').val(),
-					'Fe_Emision' 							: $('#txt-Fe_Emision_Compra').val(),
+					'Fe_Emision' 							: $('#txt-Fe_Emision_Compra').val(), //F. Emisión (Inventario)
 					'Fe_Sistema' 							: $('#txt-Fe_Sistema').val(),
 					'Nu_Documento_Identidad' 				: $('#txt-Nu_Documento_Identidad').val(),
 					'Nu_Tipo_Documento_Compra' 				: $('#cbo-Nu_Tipo_Documento_Compra option:selected').val(),
 					'Nu_Serie_Compra' 						: $('#txt-Nu_Serie_Compra').val().toUpperCase(),
 					'Nu_Numero_Compra' 						: $('#txt-Nu_Numero_Compra').val(),
 					'Nu_Total_SIGV' 						: $('#txt-Nu_Total_SIGV_Tot_Actual').val(),
-					'Fe_Emision_Registro_Compra' 			: $('#txt-Fe_Emision_Registro_Compra').val(),
+					'Fe_Emision_Registro_Compra' 			: $('#txt-Fe_Emision_Registro_Compra').val(), //Fecha Emision (Factura)
 				};
 
 				var arrFormAgregarDocumentoReferencia = '';
@@ -1316,7 +1316,7 @@ $( function() {
 				// Registro de compras
 				if ($("#chk-addCUentasXPagar").prop("checked")){
 					var arrRegistroCompras = {
-						'Enviar_Regisro_Compra' 	: $("#chk-addCUentasXPagar").prop("checked"),
+						'Enviar_Regisro_Compra' 	: $("#chk-addCUentasXPagar").prop("checked"), //Puede ser true o false
 						'Nu_Dias_Vencimiento_RC' 	: $('#txt-Nu_Dias_Vencimiento_RC').val(),
 						'Fe_Vencimiento_RC' 		: $('#txt-Fe_Vencimiento_RC').val(),
 						'Fe_Periodo_RC' 			: $('#txt-Fe_Periodo_RC').val(),
@@ -1331,7 +1331,7 @@ $( function() {
 						'Txt_Glosa_RC' 				: $('#txt-Txt_Glosa_RC').val(),
 					};
 				}else{
-					var arrRegistroCompras = { 'Enviar_Regisro_Compra' : $("#chk-addCUentasXPagar").prop("checked")}
+					var arrRegistroCompras = { 'Enviar_Regisro_Compra' : $("#chk-addCUentasXPagar").prop("checked")} //Puede ser true o false
 				}
 
 				// Datos Complementarios
@@ -1384,6 +1384,22 @@ $( function() {
 				}
 				//console.log('-> arrFletes');
 				//console.log(arrFletes);
+
+				console.log('save_accion');
+				console.log(
+					{
+						accion 								: save_accion,
+						arrFormAgregar 						: arrFormAgregar,
+						arrTableAgregar						: arrDataVenta,
+						arrConversionGLP 					: arrConversionGLP,
+						arrRegistroCompras 					: arrRegistroCompras,
+						arrFormAgregarDocumentoReferencia 	: arrFormAgregarDocumentoReferencia,
+						arrDatosComplementarios 			: arrDatosComplementarios,
+						arrFletes 							: arrFletes,
+						enviar_orden_compra 				: $( "#txt-tab_orden_si" ).val()
+					}
+				);
+				// return;
 
 				$.post( "reportes/c_mov_almacen_crud.php", {
 					accion 								: save_accion,

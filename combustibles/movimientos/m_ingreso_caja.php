@@ -127,7 +127,7 @@ class RegistroCajasModel extends Model {
 
 	}
 
-	function obtenerCaja(){
+	function obtenerCaja(){ //Obtenemos CAJA PRINCIPAL
         	global $sqlca;
 
 		$sql = "SELECT c_cash_id, name FROM c_cash;";
@@ -300,7 +300,7 @@ class RegistroCajasModel extends Model {
         }
     }
 
-	function MostarResultadoDetalle($fecha_inicio, $fecha_final, $sucursal, $limit, $ruc, $operacion) {
+	function MostarResultadoDetalle($fecha_inicio, $fecha_final, $sucursal, $limit, $ruc, $operacion) { //Consultar
         	global $sqlca;
 
 		if(!empty($ruc))
@@ -711,7 +711,7 @@ ORDER BY
         return $resultado;
 	}
 
-	function DataCuentasCobrar($cli_codigo) {
+	function DataCuentasCobrar($cli_codigo) { //Documentos por cobrar de un cliente
         global $sqlca;
 
     	$query = "
@@ -828,6 +828,9 @@ ORDER BY
 		return $row['da_fecha'];
 	}
 
+	/**
+	 * Function para insertar en c_cash_transaction
+	 */
 	function Insertarc_cash_transaction($createdby, $type, $d_system, $transaction, $c_cash_id, $c_cash_operation_id, $reference, $bpartner, $c_currency_id, $rate, $amount, $ware_house) {
 		global $sqlca;
 
@@ -871,6 +874,9 @@ ORDER BY
 
 	}
 
+	/**
+	 * Function para insertar en Insertarc_cash_transaction_detail
+	 */
 	function Insertarc_cash_transaction_detail($doc_type, $doc_serial_number, $doc_number, $reference, $amount, $c_currency_id) {
 		global $sqlca;
 
@@ -971,6 +977,9 @@ ORDER BY
         return $secuencia;
     }
 
+	/**
+	 * Insertar en ccob_ta_detalle
+	 */
 	function Insertarc_cuentas_x_cobrar_detalle($cli_codigo, $ch_tipdocumento, $ch_seriedocumento, $ch_numdocumento, $ch_identidad, $ch_tipmovimiento, $dt_fechamovimiento, $ch_moneda, $nu_tipocambio, $nu_importemovimiento, $ch_numdocreferencia, $ch_sucursal, $ch_glosa, $dt_fecha_actualizacion, $nu_serie, $nu_documento, $i, $all_data_documentos, $monto_pago_total, $arrParams){
         global $sqlca;
 

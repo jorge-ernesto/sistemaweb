@@ -10,6 +10,7 @@ class TargpromocionModel extends Model {
 		$ip  = $row[0];
 		
 		$url = "http://".$ip."/sistemaweb/puntos/index.php?action=tarjetascuentas&proc=" . urlencode($procedimiento);
+		error_log(json_encode($url));
 
 		foreach($parametros as $parametro=>$valor) {
 			$url .= "&" . $parametro . "=" . urlencode($valor);
@@ -234,13 +235,18 @@ class TargpromocionModel extends Model {
 					c.ch_cuenta_email as email,
 					c.dt_fecha_nacimiento as f_nacimiento,
 					c.id_tipo_cuenta as tipo_cuenta,
-					t.nu_tarjeta_puntos as puntos_tarjeta
+					t.nu_tarjeta_puntos as puntos_tarjeta,
+					c.ch_sucursal as almacen,
+					alma.ch_nombre_breve_almacen as nombre_breve_almacen,
+					c.ch_usuario as usuario
 				FROM
 					prom_ta_tarjetas t 
 					INNER JOIN prom_ta_cuentas c ON (t.id_cuenta  = c.id_cuenta)
+					LEFT JOIN inv_ta_almacenes alma ON (c.ch_sucursal = alma.ch_almacen)   
 				".$cond;
 
 		$sqlca->query($sql);
+		error_log(json_encode($sql));
 
 		$sql2 = "SELECT * FROM tmpreporteCT";
 
@@ -264,6 +270,9 @@ class TargpromocionModel extends Model {
 			$f_nacimiento 		= $a[11];
 			$tipo_cuenta 		= $a[12];
 			$puntos_tarjeta 	= $a[13];
+			$almacen 	= $a[14];
+			$nombre_breve_almacen 	= $a[15];
+			$usuario 	= $a[16];
 			
 			$result[$i]['fecha_creacion'] 	= $fecha_creacion;	
 			$result[$i]['numero_tarjeta'] 	= $numero_tarjeta;
@@ -279,7 +288,28 @@ class TargpromocionModel extends Model {
 			$result[$i]['puntos_tarjeta'] 	= $puntos_tarjeta;
 			$result[$i]['nu_cuenta_numero'] = $nu_cuenta_numero;
 			$result[$i]['ch_cuenta_nombres'] = $ch_cuenta_nombres;
+			$result[$i]['almacen'] = $almacen;
+			$result[$i]['nombre_breve_almacen'] = $nombre_breve_almacen;
+			$result[$i]['usuario'] = $usuario;
 		}
+
+		// $result = Array();
+		// for ($i = 0; $i < 170803; $i++) {						
+		// 	$result[$i]['fecha_creacion'] 	= $i . "fecha_creacion";	
+		// 	$result[$i]['numero_tarjeta'] 	= $i . "numero_tarjeta";	
+		// 	$result[$i]['nombre_tarjeta'] 	= $i . "nombre_tarjeta";	
+		// 	$result[$i]['placa'] 			= $i . "placa";	
+		// 	$result[$i]['direccion'] 		= $i . "direccion";	
+		// 	$result[$i]['telefono'] 		= $i . "telefono";	
+		// 	$result[$i]['dni'] 				= $i . "dni";	
+		// 	$result[$i]['puntos_cuenta'] 	= $i . "puntos_cuenta";	
+		// 	$result[$i]['email'] 			= $i . "email";	
+		// 	$result[$i]['f_nacimiento'] 	= $i . "f_nacimiento";	
+		// 	$result[$i]['tipo_cuenta'] 		= $i . "tipo_cuenta";	
+		// 	$result[$i]['puntos_tarjeta'] 	= $i . "puntos_tarjeta";	
+		// 	$result[$i]['nu_cuenta_numero'] = $i . "nu_cuenta_numero";	
+		// 	$result[$i]['ch_cuenta_nombres'] = $i . "ch_cuenta_nombres";	
+		// }
 		return $result;
 	}
 

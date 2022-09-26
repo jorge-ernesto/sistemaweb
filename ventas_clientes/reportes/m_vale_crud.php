@@ -373,7 +373,7 @@ LIMIT 1
 		return $arrResponse;
 	}
 
-	public function addVale($data, $arrDetailCreditVoucher, $usuario, $ip) {
+	public function addVale($data, $arrDetailCreditVoucher, $usuario, $ip) { //addVale
 		global $sqlca;
 
 		ValeCRUDModel::BEGINTransacction();
@@ -589,6 +589,7 @@ LIMIT 1
 					);
 				}
 
+				//Insert into en val_ta_complemento en addVale
 				$sql_val_ta_complemento = "
 	 			INSERT INTO val_ta_complemento (
 					ch_sucursal,
@@ -647,7 +648,7 @@ LIMIT 1
 		}
 	}
 
-	public function updateVale($data, $arrDetailCreditVoucher, $usuario, $ip) {
+	public function updateVale($data, $arrDetailCreditVoucher, $usuario, $ip) { //updateVale
 		global $sqlca;
 
 		ValeCRUDModel::BEGINTransacction();
@@ -779,6 +780,7 @@ LIMIT 1
 					return $response;
 				}
 
+				//Select a val_ta_complemento en updateVale
 				$sql_val_ta_complemento = "
 SELECT
  *
@@ -841,6 +843,7 @@ WHERE
 				}else{
 					//ValeCRUDModel::COMMITTransacction();
 					// Paso 2 - Crear nuevamente el vale (Cabecera, Complemento y Detalle)
+					//Insert into en val_ta_cabecera en updateVale
 					$sql_val_ta_cabecera = "
 		 			INSERT INTO val_ta_cabecera (
 						ch_sucursal,
@@ -892,46 +895,9 @@ WHERE
 						return $response;
 					}
 
-					$sql_val_ta_complemento = "
-		 			INSERT INTO val_ta_complemento (
-						ch_sucursal,
-						dt_fecha,
-						ch_documento,
-						ch_numeval,
-						nu_importe,
-						ch_estado,
-						dt_fechaactualizacion,
-						ch_usuario,
-						ch_auditorpc,
-						flg_replicacion,
-						fecha_replicacion,
-						ch_tipovale 
-		 			) VALUES (
-		 				'" . $arrComplemento['ch_sucursal'] . "',
-		 				'" . $arrComplemento['dt_fecha'] . "',
-		 				'" . $arrComplemento['ch_documento'] . "',
-		 				'" . $Ch_Documento_Manual . "',
-		 				" . $arrComplemento['nu_importe'] . ",
-		 				'" . $arrComplemento['ch_estado'] . "',
-		 				'" . $arrComplemento['dt_fechaactualizacion'] . "',
-		 				'" . $arrComplemento['ch_usuario'] . "',
-		 				'" . $arrComplemento['ch_auditorpc'] . "',
-		 				'" . $arrComplemento['flg_replicacion'] . "',
-		 				'" . ($arrComplemento['fecha_replicacion'] != "" ? $arrComplemento['fecha_replicacion'] : 'now()') . "',
-		 				'" . $arrComplemento['ch_tipovale'] . "'
-		 			);
-		 			";
 
-					if ($sqlca->query($sql_val_ta_complemento) < 0){
-						$response = array(
-							'status' => 'error',
-					        'message_sql' => $sqlca->get_error(),
-							'message' => 'Problemas al insertar Vale de crédito (Complement)',
-							'arrComplemento' => $arrComplemento,
-						);
-						return $response;
-					}
 
+					$fTotal=0.00;
 					foreach ($arrDetailCreditVoucher as $row) {
 						$arrSQLDetail[] = "(
 	 					'" . strip_tags(stripslashes($Nu_Almacen)) . "',
@@ -950,6 +916,7 @@ WHERE
 						0,--nu_precio_especial
 						util_fn_igv())
 						";
+						$fTotal += $row['fTotal'];
 					}
 
 					$sql_val_ta_detalle = "
@@ -976,6 +943,96 @@ WHERE
 							'status' => 'error',
 					        'message_sql' => $sqlca->get_error(),
 							'message' => 'Problemas al actualizar Vale de crédito (Detail)',
+						);
+						return $response;
+					}					
+					
+					error_log("arrComplemento");
+					error_log(json_encode($arrComplemento));
+
+					$existDataArrayComplemento = false;
+					foreach ($arrComplemento as $key => $value) {
+						if( !empty($value) ){ //Si hay información en algun campo, entonces existe información
+							$existDataArrayComplemento = true;
+						}
+					}
+
+					if ( $existDataArrayComplemento ) { //Encontro información en val_ta_complemento
+						
+						$sql_val_ta_complemento = "
+						INSERT INTO val_ta_complemento (
+							ch_sucursal,
+							dt_fecha,
+							ch_documento,
+							ch_numeval,
+							nu_importe,
+							ch_estado,
+							dt_fechaactualizacion,
+							ch_usuario,
+							ch_auditorpc,
+							flg_replicacion,
+							fecha_replicacion,
+							ch_tipovale 
+						) VALUES (
+							'" . $arrComplemento['ch_sucursal'] . "',
+							'" . $arrComplemento['dt_fecha'] . "',
+							'" . $arrComplemento['ch_documento'] . "',
+							'" . $Ch_Documento_Manual . "',
+							" . $arrComplemento['nu_importe'] . ",
+							'" . $arrComplemento['ch_estado'] . "',
+							'" . $arrComplemento['dt_fechaactualizacion'] . "',
+							'" . $arrComplemento['ch_usuario'] . "',
+							'" . $arrComplemento['ch_auditorpc'] . "',
+							'" . $arrComplemento['flg_replicacion'] . "',
+							'" . ($arrComplemento['fecha_replicacion'] != "" ? $arrComplemento['fecha_replicacion'] : 'now()') . "',
+							'" . $arrComplemento['ch_tipovale'] . "'
+						);
+						";
+
+					} else { //No encontro información en val_ta_complemento
+
+						$sql_val_ta_complemento = "
+						INSERT INTO val_ta_complemento (
+							ch_sucursal,
+							dt_fecha,
+							ch_documento,
+							ch_numeval,
+							nu_importe,
+							ch_estado,
+							dt_fechaactualizacion,
+							ch_usuario,
+							ch_auditorpc,
+							flg_replicacion,
+							fecha_replicacion,
+							ch_tipovale
+						) VALUES (
+							'" . $Nu_Almacen . "',
+							'" . $Fe_Emision . "',
+							'" . $Ch_Documento . "',
+							'" . $Ch_Documento_Manual . "',
+							" . $fTotal . ",
+							'1',
+							'NOW()',
+							'',
+							'" . $ip . "',
+							0,
+							NOW(),
+							'00'
+						);
+						";
+
+					}
+					error_log("existDataArrayComplemento");
+					error_log($existDataArrayComplemento);
+					error_log("sql_val_ta_complemento");
+					error_log($sql_val_ta_complemento);
+
+					if ($sqlca->query($sql_val_ta_complemento) < 0){
+						$response = array(
+							'status' => 'error',
+					        'message_sql' => $sqlca->get_error(),
+							'message' => 'Problemas al insertar Vale de crédito (Complement)',
+							'arrComplemento' => $arrComplemento,
 						);
 						return $response;
 					}
@@ -1112,7 +1169,7 @@ WHERE
 			$sql_val_ta_detalle = "
 SELECT
  VD.*,
- CASE WHEN VD.nu_importe > 0.00 AND VD.nu_cantidad > 0.00 THEN ROUND(VD.nu_importe / VD.nu_cantidad, 3) ELSE 0 END AS nu_precio_venta,
+ CASE WHEN VD.nu_importe > 0.00 AND VD.nu_cantidad > 0.00 THEN ROUND(VD.nu_importe / VD.nu_cantidad, 3) ELSE 0 END AS nu_precio_venta, --El precio del detalle se calcula
  PRO.art_descripcion AS no_producto
 FROM
  val_ta_detalle AS VD

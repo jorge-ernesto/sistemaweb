@@ -132,7 +132,18 @@ class KardexActController extends Controller {
 			$cond_cantidad = "";
 
 			echo "<script>console.log('search')</script>";
-			echo "<script>console.log('" . json_encode( array($desde, $hasta, $producto, $_REQUEST['estacion'], $_REQUEST['art_linea'], $_REQUEST['tipovista'], $_REQUEST['tipoventa'], $cond_cantidad) ) . "')</script>";
+			echo "<script>console.log('" . json_encode( 
+				array(
+					"desde" => $desde, 
+					"hasta" => $hasta, 
+					"producto" => $producto, 
+					"estacion" => $_REQUEST['estacion'], 
+					"art_linea" => $_REQUEST['art_linea'], 
+					"tipovista" => $_REQUEST['tipovista'], 
+					"tipoventa" => $_REQUEST['tipoventa'], 
+					"cond_cantidad" => $cond_cantidad
+				)
+			) . "')</script>";
         	$resultado	= KardexActModel::search($desde, $hasta, $producto, $_REQUEST['estacion'], $_REQUEST['art_linea'], $_REQUEST['tipovista'], $_REQUEST['tipoventa'], $cond_cantidad);
 
 			if ( $resultado == "INVALID_DATE" ) {

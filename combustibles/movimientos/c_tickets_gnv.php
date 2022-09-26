@@ -75,7 +75,11 @@ class TicketsGNVController extends Controller {
 						'sVersionExcelGNV' => $arrVersionExcelGNV,
 						'sCodeWarehouse' => $sCodeWarehouse,
         			);
-					$arrResponseHeader = $objModelGNV->xls2sql($arrDataHeader);
+					// echo "<pre>";
+					// print_r($arrDataHeader);
+					// echo "</pre>";
+					// die();
+					$arrResponseHeader = $objModelGNV->xls2sql($arrDataHeader); //Cabecera
 
 					if ( $arrResponseHeader["sStatus"] != 'success' ) {
                         $result_f = $arrResponseHeader["sMessage"];
@@ -100,7 +104,11 @@ class TicketsGNVController extends Controller {
 							'iStartExcel' => 8,//RECIBO
 							'sVersionExcelGNV' => $arrVersionExcelGNV,
 	        			);
-						$arrResponseDetail = $objModelGNV->xls2sqldet($arrDataDetail);
+						// echo "<pre>";
+						// print_r($arrDataDetail);
+						// echo "</pre>";
+						// die();
+						$arrResponseDetail = $objModelGNV->xls2sqldet($arrDataDetail); //Detalle
 
 						if ( $arrResponseDetail["sStatus"] != 'success' ) {
 	                        $result_f = $arrResponseDetail["sMessage"];

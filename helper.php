@@ -318,6 +318,8 @@ ORDER BY
         $arrResponse = array('iStatus' => $iStatus, 'sStatus' => 'danger', 'sMessage' => 'error SQL - function verify_consolidation()');
         //dia format(YYYY-MM-DD), turno, almacen
         $iStatus = $sqlca->query("SELECT validar_consolidacion('" . $arrPost['dFecha'] . "', " . $arrPost['iTurno'] . ", '" . $arrPost['iAlmacen'] . "');");
+        error_log("verify_consolidation");
+        error_log("SELECT validar_consolidacion('" . $arrPost['dFecha'] . "', " . $arrPost['iTurno'] . ", '" . $arrPost['iAlmacen'] . "');");
         if ((int)$iStatus > 0) {
             $row = $sqlca->fetchRow();
             //Si devuelve 0, no está consolidado o no existe el registro en BD

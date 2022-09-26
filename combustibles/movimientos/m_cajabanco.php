@@ -148,7 +148,7 @@ SELECT
 		AND TO_CHAR(gnv.dt_fecha, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
 	 GROUP BY
 		gnv.dt_fecha
-	) GNV ON (GNV.fecha = C.fecha)
+	) GNV ON (GNV.fecha = C.fecha) --GNV
 	LEFT JOIN
 	(SELECT
 		v.dt_fecha AS fecha,
@@ -255,7 +255,7 @@ SELECT
 		) CD ON (CD.c_cash_transaction_id = c.c_cash_transaction_id)
 	WHERE
 		c.ware_house = '" . $estacion . "'
-		AND c.c_cash_id = 1--Solo se filtra caja principal
+		AND c.c_cash_id = 1 --Solo se filtra caja principal
 		AND TO_CHAR(c.d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
 		AND i.c_bank_id = '1'
 		AND c.type = '0'
@@ -298,7 +298,7 @@ SELECT
 		) CD ON (CD.c_cash_transaction_id = c.c_cash_transaction_id)
 	WHERE
 		c.ware_house = '" . $estacion . "'
-		AND c.c_cash_id = 1--Solo se filtra caja principal
+		AND c.c_cash_id = 1 --Solo se filtra caja principal
 		AND TO_CHAR(c.d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
 		AND i.c_bank_id = '2'
 		AND c.type = '0'
@@ -341,7 +341,7 @@ SELECT
 		) CD ON (CD.c_cash_transaction_id = c.c_cash_transaction_id)
 	WHERE
 		c.ware_house = '" . $estacion . "'
-		AND c.c_cash_id = 1--Solo se filtra caja principal
+		AND c.c_cash_id = 1 --Solo se filtra caja principal
 		AND TO_CHAR(c.d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
 		AND i.c_bank_id = '3'
 		AND c.type = '0'
@@ -383,7 +383,7 @@ SELECT
 		) CD ON (CD.c_cash_transaction_id = c.c_cash_transaction_id)
 	WHERE
 		c.ware_house = '" . $estacion . "'
-		AND c.c_cash_id = 1--Solo se filtra caja principal
+		AND c.c_cash_id = 1 --Solo se filtra caja principal
 		AND TO_CHAR(c.d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
 		AND i.c_bank_id = '4'
 		AND c.type = '0'
@@ -578,7 +578,7 @@ SELECT
 			ON (m.c_cash_mpayment_id = i.c_cash_mpayment_id)
 	WHERE
 		c.ware_house 	= '" . $estacion . "'
-		AND c.c_cash_id = 1--Solo se filtra caja principal
+		AND c.c_cash_id = 1 --Solo se filtra caja principal
 		AND c.type 		= '1'
 		AND m.banking 	= 0
 		AND TO_CHAR(c.d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
@@ -614,11 +614,11 @@ SELECT
 		) CD ON (CD.c_cash_transaction_id = c.c_cash_transaction_id)
 	WHERE
 		c.ware_house = '" . $estacion . "'
-		AND c.c_cash_id = 1--Solo se filtra caja principal
-		AND c.type = 0
+		AND c.c_cash_id = 1 --Solo se filtra caja principal
+		AND c.type = 0 --Es ingreso
 		AND TO_CHAR(c.d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "'
-		AND i.c_cash_mpayment_id != 1
-		AND i.c_cash_transaction_id IN(SELECT c_cash_transaction_id FROM c_cash_transaction WHERE TO_CHAR(d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "' AND c.c_cash_id = 1 AND bpartner = '99999999')
+		AND i.c_cash_mpayment_id != 1 --No debe ser deposito bancario
+		AND i.c_cash_transaction_id IN(SELECT c_cash_transaction_id FROM c_cash_transaction WHERE TO_CHAR(d_system, 'YYYY-MM') = '" . $dYear . '-' . $dMonth . "' AND c.c_cash_id = 1 AND bpartner = '99999999') --Solo si pertenece a la caja Principal y es CLIENTES VARIOS, es decir no es documentos por cobrar
 	GROUP BY
 		c.d_system
 	) OTHER ON (OTHER.d_system = C.fecha)

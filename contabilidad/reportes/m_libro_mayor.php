@@ -135,24 +135,22 @@ class LibroMayorModel {
 		// echo "</pre>";
 
 		$sqlca->query($sql_company);
-
 		$data_company = $sqlca->fetchRow();
 
 		try {
 			$sql = "
 				SELECT
-					e.ch_sucursal,   --1
-					a.acctcode,      --2
-					el.tab_currency, --3
-					TO_CHAR(e.documentdate, 'DD/MM/YYYY') AS documentdate, --YYYY-MM-DD HH12:MM:SS --4
-					e.subbookcode, --5
-					e.registerno,  --6
+					e.ch_sucursal,
+					e.act_entrytype_id,
+					e.subbookcode,
+					e.registerno,
+					TO_CHAR(e.documentdate, 'DD/MM/YYYY') AS documentdate,
 					el.description AS description_detail,
 					el.amtdt,
 					el.amtct,
 					a.act_account_id,
-					a.name,
-					e.act_entrytype_id
+					a.acctcode,
+					a.name					
 				FROM
 					act_entryline el
 					LEFT JOIN act_entry   AS e ON (el.act_entry_id   = e.act_entry_id)
@@ -160,11 +158,11 @@ class LibroMayorModel {
 				WHERE
 					1 = 1
 					AND TRIM(e.ch_sucursal) = '" . $Nu_Almacen . "'
-					--AND TO_CHAR(DATE(e.documentdate),'YYYY-MM') = '" . $Fe_Fecha . "'
+					AND TO_CHAR(DATE(e.documentdate),'YYYY-MM') = '" . $Fe_Fecha . "'
 					AND CAST(substr(a.acctcode,1,char_length(trim(to_char(".$Since_Account.",'99999999999999999999999999999')))  ) as numeric) >= ".$Since_Account."
 					AND CAST(substr(a.acctcode,1,char_length(trim(to_char(".$To_Account.",'99999999999999999999999999999')))  ) as numeric) <= ".$To_Account."
 				ORDER BY 
-					1,2,3,5,6;
+					e.ch_sucursal, a.acctcode, e.subbookcode, e.registerno
 			";
 			// echo "<pre>sql";
 			// print_r($sql);
@@ -203,42 +201,42 @@ class LibroMayorModel {
 	}
 
 	/**
-	* Funcion para agrupar asientos por cuentas contables
+	* Funcion para agrupar asientos por codigo de cuentas contables
 	*/
 	function groupByAccountArrEntry($arrEntry) {
 		$arrResult = array();
 		foreach ($arrEntry as $key => $value) {
 			$ch_sucursal        = $value['ch_sucursal'];
-			$acctcode           = $value['acctcode'];
-			$tab_currency       = $value['tab_currency'];
-			$documentdate       = $value['documentdate'];
+			$act_entrytype_id   = $value['act_entrytype_id'];
 			$subbookcode        = $value['subbookcode'];
 			$registerno         = $value['registerno'];
+			$documentdate       = $value['documentdate'];
 			$description_detail = $value['description_detail'];
 			$amtdt              = $value['amtdt'];
 			$amtct              = $value['amtct'];
 			$act_account_id     = $value['act_account_id'];
+			$acctcode           = $value['acctcode'];
 			$name               = $value['name'];
-			$act_entrytype_id   = $value['act_entrytype_id'];
 		
+			/**
+			* Ordenamos por cuenta contable colocando: Los 2 primeros digitos de acctcode, seguido de acctcode, y act_account_id. Ejemplo: 10*101101*9001	
+			*/
 			$sub_acctcode = substr($value['acctcode'], 0, 2);
-
-			$arrResult[$sub_acctcode . "*" . $acctcode]['detalle'][] = array(
+			$arrResult[$sub_acctcode."*".$acctcode."*".$act_account_id]['detalle'][] = array(
 				"ch_sucursal"        => $ch_sucursal,
-				"acctcode"           => $acctcode,
-				"tab_currency"       => $tab_currency,
-				"documentdate"       => $documentdate,
+				"act_entrytype_id"   => $act_entrytype_id,
 				"subbookcode"        => $subbookcode,
 				"registerno"         => $registerno,
+				"documentdate"       => $documentdate,
 				"description_detail" => $description_detail,
 				"amtdt"              => $amtdt,
 				"amtct"              => $amtct,
 				"act_account_id"     => $act_account_id,
+				"acctcode"           => $acctcode,
 				"name"               => $name,
-				"act_entrytype_id"   => $act_entrytype_id,
 			);
-			$arrResult[$sub_acctcode . "*" . $acctcode]['total']['total_amtdt'] += $amtdt;
-			$arrResult[$sub_acctcode . "*" . $acctcode]['total']['total_amtct'] += $amtct;
+			$arrResult[$sub_acctcode."*".$acctcode."*".$act_account_id]['total']['total_amtdt'] += $amtdt;
+			$arrResult[$sub_acctcode."*".$acctcode."*".$act_account_id]['total']['total_amtct'] += $amtct;
 		}
 		ksort($arrResult);
 		return $arrResult;

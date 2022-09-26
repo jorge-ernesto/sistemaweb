@@ -633,7 +633,12 @@ class HelperClass {
 				$numero                 = $response_tableid_regid['numero'];
 				$tipo_documento_sunat   = $response_tableid_regid['tipo_documento_sunat'];
 
-				$arrEntry[$key]['documento_sustentatorio'] = isset($documento) && !empty($documento) ? $documento : '-';
+				//VALIDACION DE INFORMACION A MOSTRAR PARA DOCUMENTO SUSTENTATORIO
+				if (!isset($documento) || empty($documento)) {
+					$documento = '-';
+				}
+
+				$arrEntry[$key]['documento_sustentatorio'] = $documento;
 				$arrEntry[$key]['serie']                   = $serie;
 				$arrEntry[$key]['numero']                  = $numero;
 				$arrEntry[$key]['tipo_documento_sunat']    = $tipo_documento_sunat;
@@ -824,5 +829,158 @@ class HelperClass {
 		}
 		
 		return $data;
+	}
+
+	function generarBalancePorAnioCierre($arrParams) {
+		$meses = array("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12");
+		foreach ($meses as $mes) {
+			$params['sCodeWarehouse'] = $arrParams['Nu_Almacen'];
+			$params['dEntry']         = $arrParams['Fe_Periodo'] ."-". $mes ."-". "01";
+			$params['isDebug']        = FALSE;
+			$this->generarBalance($params);
+		}
+	}
+
+	function generarBalance($arrParams) {
+		global $sqlca;
+
+		/* Recogemos parametros */
+		$almacen = TRIM($arrParams['sCodeWarehouse']);
+		$fecha   = TRIM($arrParams['dEntry']);
+		$isDebug = $arrParams['isDebug'];
+
+		/* Obtenemos partes del parametro fecha */
+		$porciones = explode("-", $fecha);
+		$anio      = $porciones[0];
+		$mes       = $porciones[1];		
+
+		/* Obtenemos fechas para usar en queries */
+		$result        = Array();
+		$fecha_mes     = $anio . "-" . $mes;
+		$fecha_balance = $anio . "-" . $mes . "-" . "01";
+
+		//ELIMINAMOS BALANCE DE TODO EL MES
+		$sql_eliminar_balance = "DELETE FROM act_balance WHERE TRIM(ch_sucursal) = '$almacen' AND TO_CHAR(DATE(dateacct),'YYYY-MM') = '$fecha_mes'";
+
+		//VERIFICAMOS QUE ELIMINACION SE REALIZO CORRECTAMENTE
+		$iStatus = $sqlca->query($sql_eliminar_balance);
+		
+		if ((int)$iStatus >= 0) {
+			//GENERAMOS BALANCE DE TODO EL MES
+			$sql_generar_balance = "
+				SELECT
+					e.ch_sucursal, 
+					a.act_account_id,
+					a.acctcode,
+					el.tab_currency AS tab_currency,
+					SUM(el.amtdt) AS amtdt, 
+					SUM(el.amtct) AS amtct, 
+					SUM(el.amtsourcedt) AS amtsourcedt,
+					SUM(el.amtsourcect) AS amtsourcect
+				FROM
+					act_entryline el
+					LEFT JOIN act_entry   AS e ON (el.act_entry_id   = e.act_entry_id)
+					LEFT JOIN act_account AS a ON (el.act_account_id = a.act_account_id)
+				WHERE
+					1 = 1
+					AND TRIM(e.ch_sucursal) = '". $almacen . "'
+					AND TO_CHAR(DATE(e.documentdate),'YYYY-MM') = '" . $fecha_mes . "'
+					AND el.tab_currency IS NOT NULL
+					AND e.act_entrytype_id NOT IN ('11')
+				GROUP BY
+					e.ch_sucursal, a.act_account_id, el.tab_currency
+				ORDER BY 
+					1,2,3;
+			";
+
+			if ($isDebug) {
+				echo "<pre>sql_facturas_manuales:";
+				echo "$sql_generar_balance";
+				echo "</pre>";
+			}
+
+			if ($sqlca->query($sql_generar_balance) < 0) {
+				return array('error' => TRUE, 'message' => 'Error en sql_generar_balance');
+			}
+
+			//RECORREMOS INFORMACION DE BALANCE
+			for ($i = 0; $i < $sqlca->numrows(); $i++) {
+				$a = $sqlca->fetchRow();
+			
+				$result[$i]['ch_sucursal']    = TRIM($a['ch_sucursal']);
+				$result[$i]['act_account_id'] = $a['act_account_id'];
+				$result[$i]['acctcode']       = TRIM($a['acctcode']);
+				$result[$i]['tab_currency']   = TRIM($a['tab_currency']);
+				$result[$i]['amtdt']          = $a['amtdt'];
+				$result[$i]['amtct']          = $a['amtct'];
+				$result[$i]['amtsourcedt']    = $a['amtsourcedt'];
+				$result[$i]['amtsourcect']    = $a['amtsourcect'];
+			}
+
+			if ($isDebug) {
+				echo "<script>console.log('result')</script>";
+				echo "<script>console.log('" . json_encode($result, JSON_FORCE_OBJECT) . "')</script>";
+			}
+
+			//RECORREMOS INFORMACION DE BALANCE
+			foreach ($result as $key => $value) {	
+				$ch_sucursal    = $value['ch_sucursal'];
+				$act_account_id = $value['act_account_id'];
+				$acctcode       = $value['acctcode'];
+				$tab_currency   = $value['tab_currency'];
+				
+				/**
+				* Balance de Saldos Acumulados
+				* El proceso de Balance de Saldos Acumulados solo guarda saldos acumulados en DOLARES de las cuentas: 12, 14, 16, 41, 42, 44, 45, 46. Solo si hubiera asientos cuya moneda original sea DOLARES y en esos asientos estuvieran esas Cuentas Contables 
+				*/
+				$cuentas = substr($acctcode, 0, 2);
+				if ($cuentas == "12" || $cuentas == "14" || $cuentas == "16" || $cuentas == "41" || $cuentas == "42" || $cuentas == "45" || $cuentas == "46") {
+					if ($tab_currency == "01") { //Si la moneda es '01' SOLES
+						$amtdt = $value['amtdt'];
+						$amtct = $value['amtct'];
+					} else { //Si la moneda es '02' DOLARES
+						$amtdt = $value['amtsourcedt'];
+						$amtct = $value['amtsourcect'];
+					}
+				} else { //Guardamos todo convertido en SOLES y con MONEDA '01'
+					$tab_currency = "01";
+					$amtdt = $value['amtdt'];
+					$amtct = $value['amtct'];
+				}
+
+				//INSERTAMOS BALANCE
+				$sql_insertar_balance = "
+					INSERT INTO act_balance (
+						act_balance_id, 
+						ch_sucursal, 
+						dateacct, 
+						act_account_id, 
+						amtdt, 
+						amtct, 
+						tab_currency
+					) VALUES (
+						nextval('seq_act_balance_id'),
+						'$ch_sucursal',
+						'$fecha_balance',
+						'$act_account_id',
+						'$amtdt',
+						'$amtct',
+						'$tab_currency'
+					);
+				";
+				
+				$iStatus = $sqlca->query($sql_insertar_balance);
+
+				if ((int)$iStatus < 0) {
+					return array('error' => TRUE, 'message' => 'Error en insert sql_insertar_balance');
+				}
+			}
+		} else {
+			return array('error' => TRUE, 'message' => 'Error en sql_eliminar_balance');
+		}
+
+		return array(
+			'error' => FALSE
+		);
 	}
 }

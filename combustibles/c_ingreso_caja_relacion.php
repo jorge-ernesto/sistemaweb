@@ -57,19 +57,19 @@ try {
 		$flag = RegistroCajasModel::validaDia($dia);
 		$dInicialSistema = RegistroCajasModel::obtenerDiaInicialSistema();
 
-		if($flag == 1){
-			echo $flag;
-		} else if ($dia < $dInicialSistema) {
-			echo 2;//La fecha es menor a la fecha de inicio del sistema
-		} else {
+		// if($flag == 1){
+		// 	echo $flag;
+		// } else if ($dia < $dInicialSistema) {
+		// 	echo 2;//La fecha es menor a la fecha de inicio del sistema
+		// } else {
 			$result = RegistroCajasModel::obtenerTipoDocumnetos_otros();
 			echo "<select id='cmbtipo_doc'>";
 			foreach ($result as $key => $value)
 				echo "<option value='" . $value[0] . "'>" . $value[1] . "</option>";
 			echo "</select>";
-		}
+		// }
 
-	} else if ($accion == "mostar_resultado_data") {
+	} else if ($accion == "mostar_resultado_data") { //Consultar
 
 		$fecha_inicio 	= $_REQUEST['fecha_inicio'];
 		$fecha_final 	= $_REQUEST['fecha_final'];
@@ -109,7 +109,7 @@ try {
 
 		$almacen	= $_SESSION['almacen'];
 		$estaciones 	= RegistroCajasModel::obtenerSucursales("");
-		$caja 		= RegistroCajasModel::obtenerCaja("");
+		$caja 		= RegistroCajasModel::obtenerCaja(""); //Obtenemos CAJA PRINCIPAL
 		$operacion 	= RegistroCajasModel::obtenerOperacion("");
 		$monedas 	= RegistroCajasModel::ObtenerMoneda("");
 		$fecha_actual 	= RegistroCajasModel::fecha_aprosys();
@@ -131,13 +131,13 @@ try {
 		$nu_almacen = $_REQUEST['nu_almacen'];
 		$dEntry = $_REQUEST['dEntry'];
 
-		$flag = RegistroCajasModel::validaDia($dEntry);
+		// $flag = RegistroCajasModel::validaDia($dEntry);
 
-		if($flag == 1){
-			//echo "<blink style='color: red'><b>¡ Dia consolidado, seleccionar otra fecha !</blink>";
-			echo "{'sStatus':'warning','sMessage':'¡ Dia consolidado, no se puede anular !'}";
-			exit();
-		}else{
+		// if($flag == 1){
+		// 	//echo "<blink style='color: red'><b>¡ Dia consolidado, seleccionar otra fecha !</blink>";
+		// 	echo "{'sStatus':'warning','sMessage':'¡ Dia consolidado, no se puede anular !'}";
+		// 	exit();
+		// }else{
 			try {
 				RegistroCajasModel::IniciarTransaccion(); //INICIAR TRANSACION 
 				RegistroCajasModel::Anular_Registro_Ingreso_Caja_solo_cliente($id_transacion, 0, $nu_almacen);
@@ -148,7 +148,7 @@ try {
 				RegistroCajasModel::ROLLBACKTransaccion();
 				throw $e;
 			}
-		}
+		// }
 	} else if ($accion == "buscar_cliente") {
 
 		$ruc_identi	= trim($_REQUEST['ruc']);
@@ -156,15 +156,15 @@ try {
 		$tc		= trim($_REQUEST['tc']);
 		$moneda		= trim($_REQUEST['moneda']);
 
-		$flag = RegistroCajasModel::validaDia($dia);
+		// $flag = RegistroCajasModel::validaDia($dia);
 
-		if($flag == 1){
-			echo "<blink style='color: red'><b>¡ Dia consolidado, seleccionar otra fecha !</blink>";
-			exit();
-		}else{
+		// if($flag == 1){
+		// 	echo "<blink style='color: red'><b>¡ Dia consolidado, seleccionar otra fecha !</blink>";
+		// 	exit();
+		// }else{
 
 			try {
-				$dat_cuentas_x_cobrar = RegistroCajasModel::DataCuentasCobrar($ruc_identi);
+				$dat_cuentas_x_cobrar = RegistroCajasModel::DataCuentasCobrar($ruc_identi); //Buscamos documentos por cobrar
 				RegistroCajasTemplate::CrearTablaSeleccionarCliente($dat_cuentas_x_cobrar, $tc, $moneda);
 
 			} catch (Exception $e) {
@@ -172,7 +172,7 @@ try {
 				exit();
 			}
 
-		}
+		// }
 
 	} else if ($accion == "buscar_cuenta_cobrar_recivo") {
 
@@ -275,7 +275,7 @@ try {
 
         	echo "{'dato':'$cmb_serie2'}";
 
-	} else if ($accion == "finalizar_proceso") {
+	} else if ($accion == "finalizar_proceso") { //Finalizar Proceso para realizar pago de cuenta por cobrar
 
 		$rate = 0;
 
@@ -315,7 +315,7 @@ try {
 
 		//ARRAY DETALLE DE RECIBO DE PAGO 
 
-		foreach ($datos_facturas_antelacion as $valores) {
+		foreach ($datos_facturas_antelacion as $valores) { //Recorremos factura una a una
 
 			$informacion	= explode("*", $valores);
 		    $tipo_doc 		= $informacion[0];
@@ -372,7 +372,7 @@ try {
 			$datos_facturas = $_REQUEST['datos_factura'];
 
 			//ARRAY DETALLE DE RECIBO
-		    foreach ($datos_facturas as $valores) {
+		    foreach ($datos_facturas as $valores) { //Recorremos factura una a una
 				$informacion = null;
 				$informacion = explode("*", $valores);
 				$tipo_doc = $informacion[0];

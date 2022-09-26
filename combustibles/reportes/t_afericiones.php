@@ -59,7 +59,7 @@ class AfericionesTemplate extends Template {
 		return $form->getForm();
     }
     
-    	function reporte($resultados,$desde, $hasta) {
+    function reporte($resultados,$desde, $hasta) {
 
 		$result .= '<table align="center">';
 		$result .= '<tr>';
@@ -105,11 +105,10 @@ class AfericionesTemplate extends Template {
 		$result .= '</table>';
 
 		return $result;
-    	}
+	}
 
 	function formAfericion() {
-
-       		$caja = AfericionesModel::obtieneCajas();
+		$caja = AfericionesModel::obtieneCajas();
 
 		$form = new form2('Datos de la boleta que se pasara a Aferici&oacute;n', 'form_afericion', FORM_METHOD_POST, 'control.php', '', 'control','');
 		$form->addElement(FORM_GROUP_HIDDEN, new f2element_hidden('rqst', 'REPORTES.AFERICIONES'));
@@ -125,7 +124,7 @@ class AfericionesTemplate extends Template {
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr><tr><td>'));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_text ('ticket','Nro. Ticket</td><td>: ', '','', 12, 14,''));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags(' / '));
-	        $form->addElement(FORM_GROUP_MAIN, new form_element_combo("Caja:", "caja", "", '<br>', '', '', $caja, false, ''));
+		$form->addElement(FORM_GROUP_MAIN, new form_element_combo("Caja:", "caja", "", '<br>', '', '', $caja, false, ''));
 //		$form->addElement(FORM_GROUP_MAIN, new f2element_text ('caja','', '','', 3, 4,''));
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('</td></tr>'));  
 		$form->addElement(FORM_GROUP_MAIN, new f2element_freeTags('<tr><td colspan="3" align="center" height="30">'));

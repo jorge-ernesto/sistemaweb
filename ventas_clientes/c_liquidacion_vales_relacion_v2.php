@@ -92,7 +92,7 @@ try {
 		$notas_depacho_efectivo   = array();
 		$fecha_inicio		      = strip_tags(stripslashes($_POST['fecha_inicio']));
 		$fecha_final		      = strip_tags(stripslashes($_POST['fecha_final']));
-		$codigo_hermandad	      = date("dnHis");
+		$codigo_hermandad	      = date("dnHis"); //Codigo de Hermandad
 		$estado_nega		      = strip_tags(stripslashes($_POST['estado_negativo']));
         $arrVales                 = $_POST['vales'];
         /*
@@ -142,7 +142,7 @@ try {
 
 			//COMIENZA LA CREACION DE LA FACTURA
             $falg_anticipo = false;
-            if ($tipo_operacion == "01") {//CLIENTE NORMAL
+            if ($tipo_operacion == "01") {//CLIENTE NORMAL //CLIENTE NORMAL
 				try {
                     LiquidacionValesModel::IniciarTransaccion(); //INICIAR TRANSACION 
 

@@ -62,7 +62,7 @@ if (!isset($_REQUEST['action'])) {
 				$controllerSalesInvoice->page_add_sales_invoice($arrDataHelper, "Editar", $_GET);
 				break;
 
-			case 'pdf_representacion_interna_fe_sunat':
+			case 'pdf_representacion_interna_fe_sunat': //ENVIAR A SUNAT
 				//Editar documento de ventas manuales
 				$arrMontoMinimo = $objHelper->getParametersTable('max_unidentified');
 				$arrImpuesto = $objHelper->getTax();
@@ -81,10 +81,11 @@ if (!isset($_REQUEST['action'])) {
 				$controllerSalesInvoice->generate_printed_representation_pdf_FE_sunat($_REQUEST, $arrDataHelper);
 				break;
 
-			case 'save': //GUARDAR
+			case 'save': //GUARDAR 
 				//Guardar documentos de ventas manuales
-				// error_log("****** Analisis para guardar documentos, etapa 5 ******");
-        		// error_log(json_encode(array($_POST, $objHelper->getUserIP(), $objHelper->getAllDateFormat('hora'))));								
+				error_log("****** Analisis para guardar documentos, etapa 5 ******");
+        		error_log(json_encode(array($_POST, $objHelper->getUserIP(), $objHelper->getAllDateFormat('hora'))));					
+				// die();
 				$controllerSalesInvoice->save_sales_invoice($_POST, $objHelper->getUserIP(), $objHelper->getAllDateFormat('hora'));
 				break;
 

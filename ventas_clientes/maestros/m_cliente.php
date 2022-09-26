@@ -326,7 +326,7 @@ INSERT INTO int_clientes(
 			0: Credito
 			4: Venta adelantada
 	*/
-	function obtenerLCDisponible($client,$lim,$ctype) {
+	function obtenerLCDisponible($client,$lim,$ctype) { //ANALIZAR LINEA O SALDO DISPONIBLE
 		global $sqlca;
 		
 		if($ctype == 4){ //Es venta adelantada

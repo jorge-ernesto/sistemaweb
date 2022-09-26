@@ -166,7 +166,7 @@ SELECT
 	when cli.cli_anticipo='S' then fac.cod_hermandad 
  	else
  	fac.ch_fac_seriedocumento||'-'||fac.ch_fac_numerodocumento
- end AS documento, --AQUI OBTIENE EL CAMPO #FACTURA
+ end AS documento, --AQUI OBTIENE EL CAMPO #FACTURA --AQUI OBTIENE EL CAMPO #FACTURA
  fac2.ch_fac_numerodocumento AS documento2,
  cab.ch_documento AS numero,
  fac.cod_hermandad AS referencia,--cai

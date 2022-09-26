@@ -325,7 +325,7 @@
 
             return $DatosFinales;
         }
-        function GeneraDatosPLACA($liquidacion, $ch_cliente, $placa) {
+        function GeneraDatosPLACA($liquidacion, $ch_cliente, $placa) { //
             global $sqlca;
             /*
 
@@ -849,7 +849,7 @@
             return $logo_data;
         }
 
-        function reportePdf($num_liquidacion, $ch_cliente, $Factura, $forma, $parametro_opcional) {
+        function reportePdf($num_liquidacion, $ch_cliente, $Factura, $forma, $parametro_opcional) { //reportePdf
             $reporte_array = array();
 
             error_log('reportePdf');
@@ -861,7 +861,7 @@
             } else if ($forma == 'ND') { //Funcion que se ejecuta cuando Tipo Operacion = 'Cliente Nota Despacho'
                 $reporte_array = $this->GeneraDatosND($num_liquidacion, $ch_cliente, $parametro_opcional);
             } else if ($forma == 'PLACA') { //Funcion que se ejecuta cuando Tipo Operacion = 'Cliente Placa'
-                $reporte_array = $this->GeneraDatosPLACA($num_liquidacion, $ch_cliente, $parametro_opcional);
+                $reporte_array = $this->GeneraDatosPLACA($num_liquidacion, $ch_cliente, $parametro_opcional); //
             } else if ($forma == 'PRODUCTO') { //Funcion que se ejecuta cuando Tipo Operacion = 'Cliente Producto'
                 $reporte_array = $this->GeneraDatosPRODUCTO($num_liquidacion, $ch_cliente, $parametro_opcional);
             } else if ($forma == 'XCOBRAR' || $parametro_opcional == 'POR-COBRAR') { //Si es 'XCOBRAR' o 'POR-COBRAR', esto ocurre cuando es liquidacion de cliente ANTICIPO
@@ -889,7 +889,7 @@
 
             $fontsize = 6.5;
 
-            $reporte = new CReportes2();
+            $reporte = new CReportes2();            
             $reporte->SetMargins(12.7, 12.7, 12.7); //Margenes estrechos en Word 0.5 pulgadas o 12.7 milimetros
             $reporte->SetFont("courier", "", $fontsize);
 
@@ -1094,7 +1094,7 @@
                         $datos['DT_FECHA'] = $value['dt_fechaactualizacion'];
                         }
                         */
-                        $datos['DT_FECHA'] = $value['fecha_insercion'];
+                        $datos['DT_FECHA'] = $value['fecha_insercion']; //
                         $datos['CH_DOCUMENTO'] = $value['ch_documento'];
                         $datos['CH_NUMEVAL_MANUAL'] = $value['ch_numeval_manual'];
                         $datos['CH_ARTICULO'] = $value['ch_articulo'];

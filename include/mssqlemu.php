@@ -21,7 +21,10 @@ mssql_scope_identity
 define("MSSQL_LAST_CONNECTION_KEY","_MSSQL_Last_Connection");
 $GLOBALS[MSSQL_LAST_CONNECTION_KEY] = NULL;
 
+error_log("wrapper mssqlemu.php");
+
 if (!function_exists("mssql_connect")) {
+	error_log("Entro en wrapper mssql_connect");
 	function mssql_connect($servername = NULL,$username = NULL,$password = NULL,$new_link = TRUE) {
 		$servername = str_replace(":", ", ", $servername);
 		$connectionInfo = array("CharacterSet" => "UTF-8", "UID" => $username, "PWD" => $password);
@@ -33,6 +36,7 @@ if (!function_exists("mssql_connect")) {
 			error_log("Conexion no se pudo establecer");
 			error_log( json_encode( sqlsrv_errors() ) );
 		}
+		die();
 
 		if ($ret === FALSE)
 			return $ret;
