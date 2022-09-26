@@ -433,7 +433,7 @@ class templateSalesInvoice {
 		$pdf->SetFont($sTipoLetra, 'B', 10);
 
 		// HEADER
-		$this->pdf_header($pdf, $sTipoLetra, $arrCompany, $arrHeader, $arrPlates);
+		$this->pdf_header($pdf, $sTipoLetra, $arrCompany, $arrHeader, $arrPlates); //
 
 		// BODY - Se mostrará solo si el documento no esta anulado
 		if ( $arrHeader["no_anulado"] != "S" ) {
@@ -454,7 +454,7 @@ class templateSalesInvoice {
 		$pdf->Output();
 	}
 
-	public function pdf_header($pdf, $sTipoLetra, $arrCompany, $arrHeader, $arrPlates){
+	public function pdf_header($pdf, $sTipoLetra, $arrCompany, $arrHeader, $arrPlates){ //pdf_header
 		// 1 FILA
 		// IZQUIERDA
 		$pdf->Multicell(0, 4, $this->printText(wordwrap($arrCompany["sEmpresaRazsocial"], 80, "\n")));
@@ -617,7 +617,7 @@ class templateSalesInvoice {
 		$pdf->Ln();
 	}
 
-	public function pdf_footer($pdf, $arrCompany, $arrMontoLetras, $arrTaxCode, $arrHeader, $arrMontos){
+	public function pdf_footer($pdf, $arrCompany, $arrMontoLetras, $arrTaxCode, $arrHeader, $arrMontos){ //
 		// DERECHA
 		$w = array(168, 25);
 		$pdf->SetWidths($w);

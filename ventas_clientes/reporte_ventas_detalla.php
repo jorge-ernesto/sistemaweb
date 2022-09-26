@@ -818,7 +818,7 @@ function reporteExcelPersonalizado($resultado_postrans, $biincre, $igvincre, $to
 	unset( $_SESSION['hasta'] );
 
    	$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-   	$objWriter->save('/sistemaweb/ventas_clientes/reportes/excel/VENTA_DETALLADA.xls');
+   	$objWriter->save('/sistemaweb/ventas_clientes/reportes/excel/VENTA_DETALLADA.xls'); //
 	   
 	echo "<script>
 			var link = document.createElement('a');

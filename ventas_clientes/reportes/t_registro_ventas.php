@@ -702,7 +702,7 @@ class RegistroVentasTemplate extends Template {
 		return $result;
 	}
 
-    function reportePDF($results, $almacen, $anio, $mes, $tipo_reporte, $BI_incre, $IGV_incre, $TOTAL_incre, $modelRegistroVentas, $arrParamsPOST, $dataPDF) { //reportePDF
+    function reportePDF($results, $almacen, $anio, $mes, $tipo_reporte, $BI_incre, $IGV_incre, $TOTAL_incre, $modelRegistroVentas, $arrParamsPOST, $dataPDF) { //reportePDF.
 		$estaciones	= RegistroVentasModel::obtieneListaEstaciones();
 		$v		= RegistroVentasModel::obtenerAlma($almacen);
 		$razsoc 	= $v[0];
