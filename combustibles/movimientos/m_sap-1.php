@@ -238,11 +238,11 @@ ORDER BY
 		$sql = "
 SELECT
 bpartner.Nu_Codigo_Cliente AS cardcode,
-FIRST(No_Nombre_Cliente) AS CARDNAME,
+SUBSTRING( FIRST(No_Nombre_Cliente) from 1 for 99 ) AS CARDNAME,
 FIRST(Nu_Documento_Identidad) AS FEDERALTAXID,
 FIRST(Nu_Telefono1) AS PHONE,
 FIRST(Txt_Email) AS EMAIL,
-FIRST(Txt_Direccion) AS STREET,
+SUBSTRING( FIRST(Txt_Direccion) from 1 for 99 ) AS STREET,
 FIRST(No_Contacto) AS _contact_name
 FROM (
 (SELECT
@@ -268,14 +268,14 @@ UNION
 
 (SELECT
  CLI.cli_codigo AS Nu_Codigo_Cliente,
- FIRST(CLI.cli_razsocial) AS No_Nombre_Cliente,
+ SUBSTRING( FIRST(CLI.cli_razsocial) from 1 for 99 ) AS No_Nombre_Cliente,
  FIRST(CLI.cli_ruc) AS Nu_Documento_Identidad,
  FIRST(CLI.cli_telefono1) AS Nu_Telefono1,
  FIRST(CLI.cli_email) AS Txt_Email,
  FIRST(CLI.cli_ndespacho_efectivo),
  FIRST(CLI.cli_anticipo),
  FIRST(CLI.cli_creditosol),
- FIRST(CLI.cli_direccion) AS Txt_Direccion,
+ SUBSTRING( FIRST(CLI.cli_direccion) from 1 for 99 ) AS Txt_Direccion,
  FIRST(CLI.cli_contacto) AS No_Contacto
 FROM
  val_ta_cabecera AS VC
@@ -288,7 +288,7 @@ UNION
 
 (SELECT
  CLI.ruc AS Nu_Codigo_Cliente,
- FIRST(CLI.razsocial) AS No_Nombre_Cliente,
+ SUBSTRING( FIRST(CLI.razsocial) from 1 for 99 ) AS No_Nombre_Cliente,
  FIRST(CLI.ruc) AS Nu_Documento_Identidad,
  '' AS Nu_Telefono1,
  '' AS Txt_Email,
@@ -458,11 +458,11 @@ ORDER BY 2;";
 		$sql = "
 SELECT
 bpartner.Nu_Codigo_Cliente AS cardcode,
-FIRST(No_Nombre_Cliente) AS CARDNAME,
+SUBSTRING( FIRST(No_Nombre_Cliente) from 1 for 99 ) AS CARDNAME,
 FIRST(Nu_Documento_Identidad) AS FEDERALTAXID,
 FIRST(Nu_Telefono1) AS PHONE,
 FIRST(Txt_Email) AS EMAIL,
-FIRST(Txt_Direccion) AS STREET,
+SUBSTRING( FIRST(Txt_Direccion) from 1 for 99 ) AS STREET,
 FIRST(No_Contacto) AS _contact_name
 FROM (
 (SELECT
@@ -488,14 +488,14 @@ UNION
 
 (SELECT
  CLI.cli_codigo AS Nu_Codigo_Cliente,
- FIRST(CLI.cli_razsocial) AS No_Nombre_Cliente,
+ SUBSTRING( FIRST(CLI.cli_razsocial) from 1 for 99 ) AS No_Nombre_Cliente,
  FIRST(CLI.cli_ruc) AS Nu_Documento_Identidad,
  FIRST(CLI.cli_telefono1) AS Nu_Telefono1,
  FIRST(CLI.cli_email) AS Txt_Email,
  FIRST(CLI.cli_ndespacho_efectivo),
  FIRST(CLI.cli_anticipo),
  FIRST(CLI.cli_creditosol),
- FIRST(CLI.cli_direccion) AS Txt_Direccion,
+ SUBSTRING( FIRST(CLI.cli_direccion) from 1 for 99 ) AS Txt_Direccion,
  FIRST(CLI.cli_contacto) AS No_Contacto
 FROM
  val_ta_cabecera AS VC
@@ -508,7 +508,7 @@ UNION
 
 (SELECT
  CLI.ruc AS Nu_Codigo_Cliente,
- FIRST(CLI.razsocial) AS No_Nombre_Cliente,
+ SUBSTRING( FIRST(CLI.razsocial) from 1 for 99 ) AS No_Nombre_Cliente,
  FIRST(CLI.ruc) AS Nu_Documento_Identidad,
  '' AS Nu_Telefono1,
  '' AS Txt_Email,
@@ -528,7 +528,7 @@ UNION --ESTE UNION SE AGREGO COMO PARTE DEL REQUERIMIENTO DE ENERGIGIAS PARA OBT
 
 (SELECT
  CLI.cli_ruc AS Nu_Codigo_Cliente,
- FIRST(CLI.cli_razsocial) AS No_Nombre_Cliente,
+ SUBSTRING( FIRST(CLI.cli_razsocial)  from 1 for 99 ) AS No_Nombre_Cliente,
  FIRST(CLI.cli_ruc) AS Nu_Documento_Identidad,
  '' AS Nu_Telefono1,
  '' AS Txt_Email,
@@ -987,6 +987,7 @@ GROUP BY
 				'errormsg' => '',
 				'transaccion' => $reg['transaccion'],
 				'docentry' => NULL,
+
 				'u_exc_fechaemi' => substr($reg['u_exc_fechaemi'],0,19)
 			);
 		}
@@ -1066,7 +1067,249 @@ GROUP BY 1;";
 				'errormsg' => '',
 				'transaccion' => '',
 				'docentry' => NULL,
+				
 				'u_exc_fechaemi' => substr($reg['u_exc_fechaemi'],0,19)
+			);
+		}
+
+		return array(
+			'error' => false,
+			'tableName' => $param['tableName'],
+			'nodeData' => 'invoiceheadersalecash',
+			'invoiceheadersalecash' => $res,
+			'count' => $c,
+		);
+	}
+
+	/**
+	 * Venta al contado - Cabecera
+	 * Se está analizando la posibilidad de incluir:
+	 * Las facturas de crédito que no tengan referencia a guías, deben insertarse aqui,
+	 * tanto cabecera como detalle
+	 */
+	public function getInvoiceHeaderSaleCashDesagregarDocumentosAnuladosTransferenciasGratuitas($param) {
+		global $sqlca;
+
+		$res = array();
+		$sql = "
+SELECT
+ PT.es || PT.caja || PT.trans AS noperacion,
+ FIRST(pt.ruc) AS cardcode,
+ FIRST(pt.dia) AS docdate,
+ CASE WHEN FIRST(pt.usr) IS NULL OR FIRST(pt.usr) = '' THEN LPAD(FIRST(pt.caja),3,'000'::text)
+ ELSE FIRST(pt.usr) END AS foliopref,
+ CASE WHEN FIRST(pt.usr) IS NULL OR FIRST(pt.usr) = '' THEN TO_CHAR(FIRST(pt.trans),'FM9999999999')
+ ELSE '' END AS folionum,
+
+ ROUND(SUM(pt.igv), 2) AS vatsum,
+ ROUND(SUM(pt.importe), 2) AS doctotal,
+
+ CASE WHEN FIRST(employe.ch_codigo_trabajador) IS NULL OR FIRST(employe.ch_codigo_trabajador) = '' THEN
+  FIRST(pt.cajero)
+ ELSE
+  FIRST(employe.ch_codigo_trabajador)
+ END AS extempno,
+ FIRST(pt.caja) AS u_exc_maqreg,
+ '01' AS indicador,
+ CASE WHEN FIRST(pt.usr) IS NULL OR FIRST(pt.usr) = '' THEN '0'
+ ELSE 1 END AS _isfe,
+ FIRST(pt.trans) AS transaccion
+FROM
+ " . $param['pos_trans'] . " AS pt
+ LEFT JOIN int_clientes AS client ON(client.cli_codigo = pt.cuenta)
+ LEFT JOIN pos_historia_ladosxtrabajador AS employe ON(employe.dt_dia = pt.dia AND employe.ch_posturno::CHAR = pt.turno AND employe.ch_lado = PT.pump)
+WHERE
+ pt.dia BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
+ AND pt.td='F'
+ AND pt.tm='V'
+ --AND pt.es = '".$param['warehouse']."'
+ --AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
+GROUP BY
+ PT.es,
+ PT.caja,
+ PT.trans;
+ 		";
+
+		$this->_error_log($param['tableName'].' - getInvoiceHeaderSaleCash: '.$sql.' [LINE: '.__LINE__.']');
+		$c = 0;
+		if ($sqlca->query($sql) < 0) {
+			return array('error' => true);
+		}
+		while ($reg = $sqlca->fetchRow()) {
+			$c++;
+			if ($reg['_isfe'] == '1') {
+				$arr_foliopref = explode('-', $reg['foliopref']);
+				$reg['foliopref'] = $arr_foliopref[0];
+				$reg['folionum'] = $arr_foliopref[1];
+			}
+
+			/**
+			 * Cuando es anulado cantidad, precio, igv, importe y soles_km se muestra en 0, y no hay documento de referencia
+			 */
+
+			/**
+			 * Campos:
+			   - indicator:
+					FA - Factura
+					BO - Boleta
+					AN - Factura Anulada
+					AB - Boleta Anulada
+					TG - Transferencia gratuita			 
+			 */
+			$indicator = "FA";
+			if ( $reg['doctotal'] == 0 ) {
+				$indicator = "AF";
+			}			
+
+			//No se almacena el detalle porque en el metodo de notas de credito consulta a postrans y estas deben aplicarse el mismo día
+			$res[] = array(
+				'noperacion' => $reg['noperacion'],
+				'cardcode' => $this->preLetterBPartner('C', $reg['cardcode']),
+				'docdate' => $reg['docdate'],
+				'foliopref' => $reg['foliopref'],
+				'folionum' => (int)$reg['folionum'],
+				'indicador' => $reg['indicador'],
+				'vatsum' => (float)$reg['vatsum'],
+				'doctotal' => (float)$reg['doctotal'],
+				'extempno' => $this->cleanStr($reg['extempno']),
+				'u_exc_maqreg' => $reg['u_exc_maqreg'],
+				'doccur' => '',
+
+				'estado' => 'P',
+				'errormsg' => '',
+				'transaccion' => $reg['transaccion'],
+				'docentry' => NULL,
+
+				'indicator' => $indicator,
+			);
+		}
+
+		//$client = "AND client.cli_ndespacho_efectivo = '0' AND client.cli_anticipo = 'N'"; //credito, se comenta para mejorarlo
+
+		$sql = "
+SELECT
+ ftfc.ch_fac_tipodocumento||ftfc.ch_fac_seriedocumento||ftfc.ch_fac_numerodocumento AS noperacion,
+ FIRST(ftfc.cli_codigo) AS cardcode,
+ FIRST(ftfc.dt_fac_fecha) AS docdate,
+ FIRST(ftfc.ch_fac_seriedocumento) AS foliopref,
+ FIRST(ftfc.ch_fac_numerodocumento) AS folionum,
+ ROUND(FIRST(ftfc.nu_fac_impuesto1), 2) AS vatsum,
+ ROUND(FIRST(ftfc.nu_fac_valortotal), 2) AS doctotal,
+
+ FIRST(ftfc.nu_fac_impuesto1) AS tax_total,
+ FIRST((util_fn_igv()/100)) AS cnf_igv_ocs,
+ FIRST(ftfc.nu_fac_valorbruto) AS taxable_operations,
+ FIRST(ftfc.nu_fac_valortotal) AS grand_total,
+ CASE WHEN FIRST(ftfc.ch_fac_tiporecargo2) IS NULL OR FIRST(ftfc.ch_fac_tiporecargo2) = '' THEN 0 -- NORMAL
+ WHEN FIRST(ftfc.ch_fac_tiporecargo2) = 'S' AND FIRST(ftfc.nu_fac_impuesto1) = 0 THEN 1 -- EXO
+ WHEN FIRST(ftfc.ch_fac_tiporecargo2) = 'S' AND FIRST(ftfc.nu_fac_impuesto1) > 0 THEN 2 -- TG
+ END AS typetax,
+ COALESCE(FIRST(ftfc.nu_fac_descuento1), 0) AS disc,
+
+ '' AS extempno,
+ '' AS u_exc_maqreg,
+ FIRST(doctype_s.tab_car_03) AS indicador,
+ CASE WHEN FIRST(ch_fac_moneda) IN('1','01') THEN '' ELSE 'USD' END AS moneda,
+ FIRST(ftfc.nu_fac_recargo3) as nu_fac_recargo3,
+ FIRST(ftfc.ch_fac_tiporecargo2) as ch_fac_tiporecargo2
+FROM
+ fac_ta_factura_cabecera ftfc
+ JOIN int_tabla_general doctype_s ON(ftfc.ch_fac_tipodocumento = SUBSTRING(TRIM(doctype_s.tab_elemento) for 2 from length(TRIM(doctype_s.tab_elemento))-1) AND doctype_s.tab_tabla ='08' AND doctype_s.tab_elemento != '000000')
+ LEFT JOIN val_ta_complemento_documento vtcd ON(ftfc.ch_fac_tipodocumento = vtcd.ch_fac_tipodocumento AND ftfc.ch_fac_seriedocumento = vtcd.ch_fac_seriedocumento AND ftfc.ch_fac_numerodocumento = vtcd.ch_fac_numerodocumento)--client valta_complemente
+ LEFT JOIN val_ta_cabecera vtc ON (vtcd.ch_sucursal = vtc.ch_sucursal AND vtcd.dt_fecha = vtc.dt_fecha AND vtcd.ch_numeval = vtc.ch_documento)
+ JOIN int_clientes client ON (ftfc.cli_codigo = client.cli_codigo)
+WHERE
+ ftfc.dt_fac_fecha BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
+ AND ftfc.ch_fac_tipodocumento = '10'
+ AND vtcd.ch_fac_seriedocumento IS NULL
+ AND ftfc.nu_fac_recargo3 IN (3, 5)--enviado o anulado
+ --AND ftfc.ch_liquidacion=''--cai
+ AND ftfc.ch_fac_anticipo!='S' --cai 21/01/20
+ --AND ftfc.ch_almacen = '".$param['warehouse']."'
+ --".$client." se comenta para mejorarlo, cai
+GROUP BY 1;";
+
+		$this->_error_log($param['tableName'].' - **getInvoiceHeaderSaleCredit: '.$sql.' [LINE: '.__LINE__.']');
+		//$c = 0;
+		if ($sqlca->query($sql) < 0) {
+			return array('error' => true);
+		}
+		while ($reg = $sqlca->fetchRow()) {
+			$c++;
+
+			$data = $this->calcAmounts($reg);
+
+			$data['tax_total'] = $this->getFormatNumber(array('number' => $data['tax_total'], 'decimal' => 2));
+			$data['grand_total'] = $this->getFormatNumber(array('number' => $data['grand_total'], 'decimal' => 2));
+
+			$this->invoiceSaleHead[$reg['foliopref']][$reg['folionum']] = $param['tableName'];
+
+			/**
+			 * Transferencias gratuitas solo se realizan en oficina
+			 */ 
+			
+			/**
+			 * Tabla fac_ta_factura_cabecera
+			 * Campos:
+				- nu_fac_recargo3:
+					0 = Registrado
+					1 = Completado
+					2 = Anulado
+					3 = Completado Enviado
+					4 = Completado Error (No se envió el documento a EBI -> SUNAT)
+					5 = Anulado enviado
+					6 = Anulado Error
+			 */
+			
+			/** 
+			 * - Valores (OCS) de tipos de impuesto:
+							Impuesto                  | ch_fac_tiporecargo2    |    Valor de impuesto (S / N)
+					----------------------------------------------------------------------------------------
+					- Op. Gravadas                  =   vacío 				 =		S
+					- Op. Exoneradas      ,          =   S 				 	 =		N
+					- Op. Gratuitas                 =   T 				 	 =		S
+					- Op. Gratuitas + Exoneradas    =   U  				 	 =		N
+					- Op. Inafectas                 =   V  	 				 =		N
+					- Op. Gratuitas + Inafectas     =   W  	 				 =		N
+			 */
+			
+			/**
+			 * Campos:
+			   - indicator:
+					FA - Factura
+					BO - Boleta
+					AN - Factura Anulada
+					AB - Boleta Anulada
+					TG - Transferencia gratuita			 
+			 */
+			$indicator = "FA";
+			if($reg['nu_fac_recargo3'] == 2 || $reg['nu_fac_recargo3'] == 5 || $reg['nu_fac_recargo3'] == 6 || TRIM($reg['ch_fac_tiporecargo2']) == "T"){ //ES DOCUMENTO ANULADO O ES TRANSFERENCIA GRATUITA
+				if( $reg['nu_fac_recargo3'] == 2 || $reg['nu_fac_recargo3'] == 5 || $reg['nu_fac_recargo3'] == 6 ) { //ES DOCUMENTO ANULADO
+					$indicator = "AN";
+				}else{ //ES TRANSFERENCIA GRATUITA
+					$indicator = "TG";
+				}
+			}
+
+			$res[] = array(
+				'noperacion' => $reg['noperacion'],
+				'cardcode' => $this->preLetterBPartner('C', $reg['cardcode']),
+				'docdate' => $reg['docdate'],
+				'foliopref' => $reg['foliopref'],
+				'folionum' => (int)$reg['folionum'],
+				'indicador' => $reg['indicador'],
+				'vatsum' => (float)$data['tax_total'],
+				'doctotal' => (float)$data['grand_total'],
+				'extempno' => $this->cleanStr($reg['extempno']),
+				'u_exc_maqreg' => 'CREDIT',
+				'doccur' => $reg['moneda'],
+
+				'estado' => 'P',
+				'errormsg' => '',
+				'transaccion' => '',
+				'docentry' => NULL,
+
+				'indicator' => $indicator,
 			);
 		}
 
@@ -1107,7 +1350,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  (CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE
   ''
  END) AS u_exc_manguera,
@@ -1173,7 +1416,7 @@ GROUP BY
 ORDER BY 1;
 		";
 
-		$this->_error_log($param['tableName'].' - getInvoiceDetailSaleCash: '.$sql.' [LINE: '.__LINE__.']');
+		$this->_error_log($param['tableName'].' - getInvoiceDetailSaleCash: '.$sql.' [LINE: '.__LINE__.']'); //
 		$c = 0;
 		if ($sqlca->query($sql) < 0) {
 			return array('error' => true);
@@ -1270,6 +1513,7 @@ AND ftfc.nu_fac_recargo3 IN (3, 5)--enviado o anulado
 AND ftfc.ch_fac_tipodocumento = '10'
 AND vtcd.ch_fac_seriedocumento IS NULL
 AND ftfc.ch_liquidacion=''
+AND ftfc.ch_fac_anticipo!='S'
 --".$client." cai, se comenta para mejorarlo
 ORDER BY _serie, _number, _turn;";
 
@@ -1360,7 +1604,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  (CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE
   ''
  END) AS u_exc_manguera,
@@ -1523,6 +1767,7 @@ AND ftfc.nu_fac_recargo3 IN (3, 5)--enviado o anulado
 AND ftfc.ch_fac_tipodocumento = '10'
 AND vtcd.ch_fac_seriedocumento IS NULL
 AND ftfc.ch_liquidacion=''
+AND ftfc.ch_fac_anticipo!='S'
 --".$client." cai, se comenta para mejorarlo
 ORDER BY _serie, _number, _turn;";
 
@@ -1998,7 +2243,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  FIRST(PT.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PT.fecha), 'HH12:MI:SS') AS u_exc_hora,
@@ -2131,7 +2376,7 @@ SELECT
  vtc.ch_caja AS u_exc_caja,
  --SURTIDOR.nu_manguera::TEXT AS u_exc_manguera,
  CASE WHEN vtc.ch_lado != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = vtc.ch_lado::INTEGER AND SURTIDOR.ch_codigocombustible = vtd.ch_articulo)::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = vtc.ch_lado::INTEGER AND SURTIDOR.ch_codigocombustible = vtd.ch_articulo LIMIT 1)::TEXT
  ELSE
   ''
  END AS u_exc_manguera,
@@ -2410,26 +2655,26 @@ ORDER BY 1;";
 		$res = array();
 
 		$sql = "SELECT
- vtc.ch_sucursal::INTEGER || TO_CHAR(vtc.dt_fecha, 'DDMMYY') || --vtc.ch_documento AS noperacionpe, CAI
- substr(vtc.ch_documento, position('-' in vtc.ch_documento)+1, char_length (vtc.ch_documento)+1 - position('-' in vtc.ch_documento)) AS noperacionpe,
- vtc.ch_sucursal::INTEGER || TO_CHAR(vtc.dt_fecha, 'DDMMYY') || --vtc.ch_documento AS noperacion, CAI
- substr(vtc.ch_documento, position('-' in vtc.ch_documento)+1, char_length (vtc.ch_documento)+1 - position('-' in vtc.ch_documento)) AS noperacion,
- client.cli_codigo AS cardcode,
- vtd.dt_fecha AS docdate,
- vtc.nu_importe AS doctotal,
+ FIRST(vtc.ch_sucursal::INTEGER) || TO_CHAR(FIRST(vtc.dt_fecha), 'DDMMYY') || --vtc.ch_documento AS noperacionpe, CAI
+ substr(FIRST(vtc.ch_documento), position('-' in FIRST(vtc.ch_documento))+1, char_length (FIRST(vtc.ch_documento))+1 - position('-' in FIRST(vtc.ch_documento))) AS noperacionpe,
+ FIRST(vtc.ch_sucursal::INTEGER) || TO_CHAR(FIRST(vtc.dt_fecha), 'DDMMYY') || --vtc.ch_documento AS noperacion, CAI
+ substr(FIRST(vtc.ch_documento), position('-' in FIRST(vtc.ch_documento))+1, char_length (FIRST(vtc.ch_documento))+1 - position('-' in FIRST(vtc.ch_documento))) AS noperacion,
+ FIRST(client.cli_codigo) AS cardcode,
+ FIRST(vtd.dt_fecha) AS docdate,
+ FIRST(vtc.nu_importe) AS doctotal,
  '' AS moneda,
- ftfc.ch_fac_forma_pago AS _type_payment_id,
- sap_cash_fund.sap_codigo AS fecuenta,
- sap_currency.sap_codigo AS femoneda,
+ FIRST(ftfc.ch_fac_forma_pago) AS _type_payment_id,
+ FIRST(sap_cash_fund.sap_codigo) AS fecuenta,
+ FIRST(sap_currency.sap_codigo) AS femoneda,
  1 AS fetc,
- vtc.nu_importe AS femonto,
+ FIRST(vtc.nu_importe) AS femonto,
  0 AS fecuentav,
  '' AS tccod,
  '' AS tccuenta,
  '' AS tcnumero,
  '' AS tcid,
- TO_CHAR(vtd.dt_fecha,'DD/MM') AS tcvalido,
- vtc.nu_importe AS tcmonto,
+ TO_CHAR(FIRST(vtd.dt_fecha),'DD/MM') AS tcvalido,
+ FIRST(vtc.nu_importe) AS tcmonto,
  '' AS bcuenta,
  '' AS breferencia,
  '' AS bfecha,
@@ -2445,6 +2690,8 @@ JOIN val_ta_cabecera vtc ON (vtd.ch_sucursal = vtc.ch_sucursal AND vtd.dt_fecha 
 WHERE
  vtc.dt_fecha BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
  AND client.cli_ndespacho_efectivo = '1' AND client.cli_anticipo = 'N'
+GROUP BY 
+ vtc.ch_documento
 ;";
 
 
@@ -2732,15 +2979,15 @@ SELECT
  FIRST(SAPALMA.sap_codigo) AS whscode,
  SUM(PT.cantidad) AS quantity,
 
- ROUND((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)))) / ".$param['tax'].", 4) AS price,
+ ROUND((SUM( (CASE WHEN PT.grupo='D' AND PT.precio>0 THEN -PT.precio ELSE PT.precio END) ) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)))) / ".$param['tax'].", 4) AS price, --Lo que queremos es conseguir el precio sin descuento o incremento
 
  CASE WHEN SUM(PT.cantidad) > 0 THEN
- 	ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4)
+ 	ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM( (CASE WHEN PT.grupo='D' AND PT.precio>0 THEN -PT.precio ELSE PT.precio END) ) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4)
  ELSE
  	0
  END AS discprcnt,
 
- SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _price,
+ SUM( (CASE WHEN PT.grupo='D' AND PT.precio>0 THEN -PT.precio ELSE PT.precio END) ) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _price,
  FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _discprcnt,
 
  '".$param['sap_tax_code']."' AS taxcode,
@@ -2754,7 +3001,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  FIRST(PT.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PT.fecha), 'HH12:MI:SS') AS u_exc_hora,
@@ -2842,12 +3089,12 @@ ORDER BY 1;
 				'itemcode' => $this->cleanStr($reg['itemcode']),
 				'whscode' => $reg['whscode'],
 				'quantity' => (float)$reg['quantity'],
-				'price' => (float)$reg['price'],
+				'price' => (float)$reg['price'], //
 				'taxcode' => $reg['taxcode'],
 				'discprcnt' => (float)$discprcnt,
 				'ocrcode' => $reg['ocrcode'],
 				'ocrcode2' => $reg['ocrcode2'],
-				'priceafvat' => (float)$reg['priceafvat'],
+				'priceafvat' => (float)$reg['priceafvat'], //
 				'u_exc_dispensador' => $reg['u_exc_dispensador'],
 				'u_exc_caja' => $reg['u_exc_caja'],
 				'u_exc_manguera' => $reg['u_exc_manguera'],
@@ -2892,7 +3139,7 @@ SELECT
  vtc.ch_caja AS u_exc_caja,
  --SURTIDOR.nu_manguera::TEXT AS u_exc_manguera,
  CASE WHEN vtc.ch_lado != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = vtc.ch_lado::INTEGER AND SURTIDOR.ch_codigocombustible = vtd.ch_articulo)::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = vtc.ch_lado::INTEGER AND SURTIDOR.ch_codigocombustible = vtd.ch_articulo LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  vtc.ch_turno AS u_exc_turno,
  TO_CHAR(vtc.dt_fecha, 'HH12:MI:SS') AS u_exc_hora,
@@ -2970,12 +3217,12 @@ WHERE
 					'itemcode' => $this->cleanStr($reg['itemcode']),
 					'whscode' => $reg['whscode'],
 					'quantity' => (float)$reg['quantity'],
-					'price' => (float)$reg['price'],
+					'price' => (float)$reg['price'], //
 					'taxcode' => $reg['taxcode'],
 					'discprcnt' => (float)$discprcnt,
 					'ocrcode' => $reg['ocrcode'],
 					'ocrcode2' => $reg['ocrcode2'],
-					'priceafvat' => (float)$reg['priceafvat'],
+					'priceafvat' => (float)$reg['priceafvat'], //
 					'u_exc_dispensador' => $reg['u_exc_dispensador'],
 					'u_exc_caja' => $reg['u_exc_caja'],
 					'u_exc_manguera' => $reg['u_exc_manguera'],
@@ -3038,7 +3285,7 @@ FROM
 fac_ta_factura_cabecera ftfc
 JOIN int_tabla_general doctype_s ON(ftfc.ch_fac_tipodocumento = SUBSTRING(TRIM(doctype_s.tab_elemento) for 2 from length(TRIM(doctype_s.tab_elemento))-1) AND doctype_s.tab_tabla ='08' AND doctype_s.tab_elemento != '000000')
 JOIN val_ta_complemento_documento vtcd ON(ftfc.ch_fac_tipodocumento = vtcd.ch_fac_tipodocumento AND ftfc.ch_fac_seriedocumento = vtcd.ch_fac_seriedocumento AND ftfc.ch_fac_numerodocumento = vtcd.ch_fac_numerodocumento)--client valta_complemente
-JOIN val_ta_cabecera vtc ON (vtcd.ch_sucursal = vtc.ch_sucursal AND vtcd.dt_fecha = vtc.dt_fecha AND vtcd.ch_numeval = vtc.ch_documento)
+JOIN val_ta_cabecera vtc ON (/*vtcd.ch_sucursal = vtc.ch_sucursal AND*/ vtcd.dt_fecha = vtc.dt_fecha AND vtcd.ch_numeval = vtc.ch_documento)
 JOIN int_clientes client ON (ftfc.cli_codigo = client.cli_codigo)
 WHERE ftfc.dt_fac_fecha BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
 AND ftfc.nu_fac_recargo3 IN (3, 5)
@@ -3898,7 +4145,7 @@ END AS discprcnt,
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  FIRST(PT.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PT.fecha), 'HH12:MI:SS') AS u_exc_hora,
@@ -4031,7 +4278,7 @@ SELECT
  vtc.ch_caja AS u_exc_caja,
  --SURTIDOR.nu_manguera::TEXT AS u_exc_manguera,
  CASE WHEN vtc.ch_lado != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = vtc.ch_lado::INTEGER AND SURTIDOR.ch_codigocombustible = vtd.ch_articulo)::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = vtc.ch_lado::INTEGER AND SURTIDOR.ch_codigocombustible = vtd.ch_articulo LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  vtc.ch_turno AS u_exc_turno,
  TO_CHAR(vtc.dt_fecha, 'HH12:MI:SS') AS u_exc_hora,
@@ -4491,7 +4738,17 @@ WHERE
  AND pt.tm = 'V'
  AND pt.dia BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
  --AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
- AND pt.importe < ".$cantidad."
+ --AND pt.importe < ".$cantidad."
+ AND pt.trans IN (
+	SELECT
+		trans
+	FROM 
+		".$param['pos_trans']."
+	GROUP BY
+		trans
+	HAVING 
+		SUM(importe) < ".$cantidad."
+ )
 GROUP BY
  1,
  pt.turno;
@@ -4551,7 +4808,17 @@ WHERE
  AND pt.tm = 'V'
  AND pt.dia BETWEEN '".$param['initial_date']." 00:00:00' AND '".$param['initial_date']." 23:59:59'
  --AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
- AND pt.importe >= ".$cantidad."
+ --AND pt.importe >= ".$cantidad."
+ AND pt.trans IN (
+	SELECT
+		trans
+	FROM 
+		".$param['pos_trans']."
+	GROUP BY
+		trans
+	HAVING 
+		SUM(importe) >= ".$cantidad."
+ )
 GROUP BY
  --1,
  --pt.turno;
@@ -4641,6 +4908,7 @@ GROUP BY 1, ftfc.ch_fac_tiporecargo3;";
 			);
 		}
 
+		error_log("ticketHead");
 		error_log( json_encode( $this->ticketHead ) );
 		return array(
 			'error' => false,
@@ -4654,7 +4922,7 @@ GROUP BY 1, ftfc.ch_fac_tiporecargo3;";
 	/**
 	 * Boletas - Cabecera
 	 */
-	public function getDocumentHeadTicketDesagregarDocumentosAnulados($param) {
+	public function getDocumentHeadTicketDesagregarDocumentosAnuladosTransferenciasGratuitas($param) {
 		//20 y 45 documentos manuales
 		global $sqlca;
 
@@ -4722,6 +4990,7 @@ ORDER BY
 				'errormsg' => '',
 				'transaccion' => $reg['transaccion'],
 				'docentry' => NULL,
+				
 				'_turn' => $reg['_turn'],
 				'es' => $reg['es'],
 				'caja' => $reg['caja'],
@@ -4733,7 +5002,7 @@ ORDER BY
 		//LOGICA PARA DESAGREGAR DOCUMENTOS ANULADOS MANTENIENDO CONTINUIDAD DE CORRELATIVO (1-19,20,21-69,70,71-100)
 		//OBTENEMOS UN ARRAY CON SERIE Y TURNO DEL DETALLE, YA QUE LOS DATOS SON AGRUPADOS POR SERIE Y TURNO
 		$array_serie_turno = array_unique($array_serie_turno);					
-		$i = 0;
+		$i = -1;
 
 		//RECORREMOS ARRAY DE SERIE Y TURNO
 		foreach ($array_serie_turno as $key => $value) {
@@ -4755,7 +5024,20 @@ ORDER BY
 				if(trim($serie_turno) == trim($originalHead[$key2]['foliopref']) ."-". trim($originalHead[$key2]['_turn'])){
 					$inicio_agrupacion = false;										
 
-					if($value2['doctotal'] != 0){ //NO ES DOCUMENTO ANULADO
+					/**
+					 * Cuando es anulado cantidad, precio, igv, importe y soles_km se muestra en 0, y no hay documento de referencia
+					 */ 
+
+					/**
+					 * Campos:
+						- indicator:
+							FA - Factura
+							BO - Boleta
+							AN - Factura Anulada
+							AB - Boleta Anulada
+							TG - Transferencia gratuita			 
+					*/
+					if($value2['doctotal'] != 0){ //NO ES DOCUMENTO ANULADO						
 						$res[$i]['noperacion']   = $noperacion;
 						$res[$i]['cardcode']     = $this->preLetterBPartner('C', $value2['cardcode']);
 						$res[$i]['docdate']      = $value2['docdate'];
@@ -4769,6 +5051,7 @@ ORDER BY
 						$res[$i]['transaccion']  = $transaccion;
 						$res[$i]['docentry']     = NULL;
 						$res[$i]['_turn']        = $value2['_turn'];													
+						$res[$i]['indicator']    = "BO";													
 					}else{ //DOCUMENTOS ANULADOS DIFERENCIADOS
 						$i++;
 						$res[$i]['noperacion']   = $value2['noperacion'];
@@ -4784,6 +5067,7 @@ ORDER BY
 						$res[$i]['transaccion']  = $value2['transaccion'];
 						$res[$i]['docentry']     = NULL;
 						$res[$i]['_turn']        = $value2['_turn'];
+						$res[$i]['indicator']    = "AB";
 						$i++;
 						$inicio_agrupacion = true;
 					}								
@@ -4843,6 +5127,7 @@ GROUP BY ftfc.ch_fac_seriedocumento, ftfc.ch_fac_numerodocumento, ftfc.ch_fac_ti
 				'errormsg' => '',
 				'transaccion' => $reg['transaccion'],
 				'docentry' => NULL,
+
 				'_turn' => $reg['_turn'],
 				'nu_fac_recargo3' => $reg['nu_fac_recargo3'],
 				'ch_fac_tiporecargo2' => $reg['ch_fac_tiporecargo2'],
@@ -4879,7 +5164,45 @@ GROUP BY ftfc.ch_fac_seriedocumento, ftfc.ch_fac_numerodocumento, ftfc.ch_fac_ti
 				if(trim($serie_turno) == trim($originalHead[$key2]['foliopref']) ."-". trim($originalHead[$key2]['_turn'])){
 					$inicio_agrupacion = false;										
 
-					if($value2['nu_fac_recargo3'] == 2 || $value2['nu_fac_recargo3'] == 5 || $value2['nu_fac_recargo3'] == 6 || trim($value2['ch_fac_tiporecargo2']) == "T"){ //ES DOCUMENTO ANULADO O ES TRANSFERENCIA GRATUITA
+					/**
+					 * Transferencias gratuitas solo se realizan en oficina
+					 */ 
+					
+					/**
+					 * Tabla fac_ta_factura_cabecera
+					 * Campos:
+						- nu_fac_recargo3:
+							0 = Registrado
+							1 = Completado
+							2 = Anulado
+							3 = Completado Enviado
+							4 = Completado Error (No se envió el documento a EBI -> SUNAT)
+							5 = Anulado enviado
+							6 = Anulado Error
+					 */
+					
+					/** 
+					 * - Valores (OCS) de tipos de impuesto:
+									Impuesto                  | ch_fac_tiporecargo2    |    Valor de impuesto (S / N)
+							----------------------------------------------------------------------------------------
+							- Op. Gravadas                  =   vacío 				 =		S
+							- Op. Exoneradas      ,          =   S 				 	 =		N
+							- Op. Gratuitas                 =   T 				 	 =		S
+							- Op. Gratuitas + Exoneradas    =   U  				 	 =		N
+							- Op. Inafectas                 =   V  	 				 =		N
+							- Op. Gratuitas + Inafectas     =   W  	 				 =		N
+					 */
+
+					/**
+					 * Campos:
+						- indicator:
+							FA - Factura
+							BO - Boleta
+							AN - Factura Anulada
+							AB - Boleta Anulada
+							TG - Transferencia gratuita			 
+					*/
+					if($value2['nu_fac_recargo3'] == 2 || $value2['nu_fac_recargo3'] == 5 || $value2['nu_fac_recargo3'] == 6 || TRIM($value2['ch_fac_tiporecargo2']) == "T"){ //ES DOCUMENTO ANULADO O ES TRANSFERENCIA GRATUITA DIFERENCIADOS
 						$i++;
 						$res[$i]['noperacion']   = $value2['noperacion'];
 						$res[$i]['cardcode']     = $this->preLetterBPartner('C', $value2['cardcode']);
@@ -4894,6 +5217,7 @@ GROUP BY ftfc.ch_fac_seriedocumento, ftfc.ch_fac_numerodocumento, ftfc.ch_fac_ti
 						$res[$i]['transaccion']  = $value2['transaccion'];
 						$res[$i]['docentry']     = NULL;
 						$res[$i]['_turn']        = $value2['_turn'];
+						$res[$i]['indicator']    = ( $value2['nu_fac_recargo3'] == 2 || $value2['nu_fac_recargo3'] == 5 || $value2['nu_fac_recargo3'] == 6 ) ? "AB" : "TG"; //ES DOCUMENTO ANULADO - ES TRANSFERENCIA GRATUITA
 						$i++;
 						$inicio_agrupacion = true;
 					}else{
@@ -4910,21 +5234,51 @@ GROUP BY ftfc.ch_fac_seriedocumento, ftfc.ch_fac_numerodocumento, ftfc.ch_fac_ti
 						$res[$i]['transaccion']  = $transaccion;
 						$res[$i]['docentry']     = NULL;
 						$res[$i]['_turn']        = $value2['_turn'];													
+						$res[$i]['indicator']    = "BO";
 					}								
 				}
 			}
 		}
 
+		//GUARDAMOS DATA EN ARRAY CON INDICES CORRELATIVOS
+		$res_ = array();
+		foreach ($res as $key => $value) {
+			$res_[] = array(
+				'noperacion'   => $value['noperacion'],
+				'cardcode'     => $value['cardcode'],
+				'docdate'      => $value['docdate'],
+				'foliopref'    => $value['foliopref'],
+				'u_exx_nroini' => $value['u_exx_nroini'],
+				'u_exx_nrofin' => $value['u_exx_nrofin'],
+				'vatsum'       => $value['vatsum'],
+				'doctotal'     => $value['doctotal'],
+				'estado'       => $value['estado'],
+				'errormsg'     => $value['errormsg'],
+				'transaccion'  => $value['transaccion'],
+				'docentry'     => $value['docentry'],
+				'_turn'        => $value['_turn'],
+				'indicator'    => $value['indicator']
+			);
+		}
+		//CERRAR GUARDAMOS DATA EN ARRAY CON INDICES CORRELATIVOS
+
+		$res = $res_;
 		foreach ($res as $key => $value) {
 			//ESTO SE CALCULARA EN EL ARRAY RESULTANTE
-			$c++;
-			$this->ticketHead[$value['foliopref']][$value['_turn']] = array(
+			$c++;			
+			$this->ticketHead[$value['foliopref']][$value['_turn']][] = array(
 				'u_exx_nroini' => (int)$value['u_exx_nroini'],
 				'u_exx_nrofin' => (int)$value['u_exx_nrofin'],
 				'noperacion' => $value['noperacion'],
 			);
 			//CERRAR ESTO SE CALCULARA EN EL ARRAY RESULTANTE
 		}
+
+		//ELIMINAMOS CAMPO QUE NO SE INSERTARA
+		foreach ($res as $key => $value) {
+			unset($res[$key]['_turn']);
+		}
+		//CERRAR ELIMINAMOS CAMPO QUE NO SE INSERTARA
 		//CERRAR DESAGREGAR TRANSFERENCIAS GRATUITAS MANTENIENDO CONTINUIDAD DE CORRELATIVO
 
 		return array(
@@ -4952,7 +5306,14 @@ SELECT
  SUM(PT.cantidad) AS quantity,
 
  ROUND((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)))) / ".$param['tax'].", 2) AS price,
- ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) AS discprcnt,
+
+ --ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) AS discprcnt,
+ CASE
+  WHEN (SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) = 0 THEN
+    0
+  ELSE
+    ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4)
+ END AS discprcnt,
 
  SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _price,--ROUND
  FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _discprcnt,
@@ -4968,7 +5329,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  FIRST(PT.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PT.fecha), 'HH12:MI:SS') AS u_exc_hora,
@@ -5046,8 +5407,11 @@ ORDER BY _serie, _number, _turn;";
 		}
 		$ci = 1;
 		$tmpDoc = '';
+		// echo "<pre>";
+		// print_r($this->ticketHead);
+		// echo "</pre>";
 		while ($reg = $sqlca->fetchRow()) {
-			$c++;
+			$c++;			
 			$noperacion = $this->getNOperacionTicket($reg);
 			if ($tmpDoc == $noperacion) {
 				$ci++;
@@ -5221,7 +5585,14 @@ SELECT
  SUM(PT.cantidad) AS quantity,
 
  ROUND((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)))) / ".$param['tax'].", 2) AS price,
- ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) AS discprcnt,
+
+ --ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) AS discprcnt,
+ CASE
+  WHEN (SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) = 0 THEN
+    0
+  ELSE
+    ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4)
+ END AS discprcnt,
 
  SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _price,--ROUND
  FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _discprcnt,
@@ -5237,7 +5608,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  FIRST(PT.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PT.fecha), 'HH12:MI:SS') AS u_exc_hora,
@@ -5302,7 +5673,17 @@ WHERE
  AND pt.td IN ('B')
  AND pt.tm = 'V'
  --AND PT.es = '".$param['warehouse']."'
- AND pt.importe < ".$cantidad."
+ --AND pt.importe < ".$cantidad."
+ AND pt.trans IN (
+	SELECT
+		trans
+	FROM 
+		".$param['pos_trans']."
+	GROUP BY
+		trans
+	HAVING 
+		SUM(importe) < ".$cantidad."
+ )
 GROUP BY
  PT.es,
  PT.caja,
@@ -5378,7 +5759,14 @@ SELECT
  SUM(PT.cantidad) AS quantity,
 
  ROUND((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)))) / ".$param['tax'].", 2) AS price,
- ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) AS discprcnt,
+ 
+ --ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) AS discprcnt,
+ CASE
+  WHEN (SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) = 0 THEN
+    0
+  ELSE
+    ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4)
+ END AS discprcnt,
 
  SUM(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _price,--ROUND
  FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _discprcnt,
@@ -5394,7 +5782,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  FIRST(PT.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PT.fecha), 'HH12:MI:SS') AS u_exc_hora,
@@ -5459,7 +5847,17 @@ WHERE
  AND pt.td IN ('B')
  AND pt.tm = 'V'
  --AND PT.es = '".$param['warehouse']."'
- AND pt.importe >= ".$cantidad."
+ --AND pt.importe >= ".$cantidad."
+ AND pt.trans IN (
+	SELECT
+		trans
+	FROM 
+		".$param['pos_trans']."
+	GROUP BY
+		trans
+	HAVING 
+		SUM(importe) >= ".$cantidad."
+ )
 GROUP BY
  PT.es,
  PT.caja,
@@ -6008,7 +6406,17 @@ WHERE
  AND pt.fpago = '1' --Pago realizado con efectivo
  --AND pt.es = '".$param['warehouse']."'
  AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
- AND pt.importe < ".$cantidad."
+ --AND pt.importe < ".$cantidad."
+ AND pt.trans IN (
+	SELECT
+		trans
+	FROM 
+		".$param['pos_trans']."
+	GROUP BY
+		trans
+	HAVING 
+		SUM(importe) < ".$cantidad."
+ )
 GROUP BY
  -- PT.es,
  -- PT.caja,
@@ -6163,7 +6571,17 @@ WHERE
  AND pt.fpago = '1'
  --AND pt.es = '".$param['warehouse']."'
  AND pt.rendi_gln IS NULL --JEL, quitamos documentos originales que hacen referencia a notas de credito
- AND pt.importe >= ".$cantidad."
+ --AND pt.importe >= ".$cantidad."
+ AND pt.trans IN (
+	SELECT
+		trans
+	FROM 
+		".$param['pos_trans']."
+	GROUP BY
+		trans
+	HAVING 
+		SUM(importe) >= ".$cantidad."
+ )
 GROUP BY
  PT.es,
  PT.caja,
@@ -7388,12 +7806,22 @@ GROUP BY
  FIRST(PTA.cantidad) AS quantity,
  ROUND((FIRST(PTA.precio) / ".$param['tax']."), 4) AS price,
  '".$param['sap_tax_code']."' AS taxcode,
- ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / 1) * 100) / (FIRST(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1))) / 1), 4) AS discprcnt,
+ --ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / 1) * 100) / (FIRST(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1))) / 1), 4) AS discprcnt,
+ CASE
+   WHEN 
+      (FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / 1) * 100) = 0 
+      OR (FIRST(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1))) / 1) = 0
+   THEN 0
+   ELSE ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / 1) * 100) / (FIRST(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1))) / 1), 4)
+ END AS discprcnt,
  FIRST(SAPLINEA.sap_codigo) AS ocrcode,
  FIRST(SAPCC.sap_codigo) AS ocrcode2,
  '' AS u_exc_dispensador,
  PTA.caja AS u_exc_caja,
- FIRST(SURTIDOR.nu_manguera) AS u_exc_manguera,
+ --FIRST(SURTIDOR.nu_manguera) AS u_exc_manguera,
+ CASE WHEN FIRST(PTA.pump) != '' THEN
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PTA.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PTA.codigo) LIMIT 1)::TEXT
+ ELSE '' END AS u_exc_manguera,
  FIRST(PTA.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PTA.fecha), 'HH12:MI:SS') AS u_exc_hora,
  FIRST(pt.placa) AS u_exc_placa,
@@ -7404,7 +7832,7 @@ GROUP BY
 FROM
  pos_ta_afericiones AS PTA
  JOIN ".$param['pos_trans']." pt ON (pta.trans = pt.trans AND pta.es = pt.es AND pta.caja = pt.caja AND pta.turno = pt.turno AND pta.pump = pt.pump)
- JOIN comb_ta_surtidores AS SURTIDOR ON (PTA.pump::INTEGER = SURTIDOR.ch_numerolado::INTEGER AND SURTIDOR.ch_codigocombustible = PTA.codigo)
+ --JOIN comb_ta_surtidores AS SURTIDOR ON (PTA.pump::INTEGER = SURTIDOR.ch_numerolado::INTEGER AND SURTIDOR.ch_codigocombustible = PTA.codigo)
  JOIN inv_ta_almacenes AS ALMA ON (ALMA.ch_almacen = PTA.es)
  JOIN int_ta_sucursales AS ORG ON (ORG.ch_sucursal = ALMA.ch_sucursal)
  LEFT JOIN sap_mapeo_tabla_detalle AS SAPCC ON (SAPCC.opencomb_codigo = ORG.ch_sucursal AND SAPCC.id_tipo_tabla = 1)
@@ -7516,7 +7944,7 @@ fac_ta_factura_cabecera AS Cab
 JOIN fac_ta_factura_detalle AS FD USING (ch_fac_tipodocumento, ch_fac_seriedocumento, ch_fac_numerodocumento, cli_codigo)
 LEFT JOIN fac_ta_factura_complemento AS com ON (cab.cli_codigo = com.cli_codigo AND cab.ch_fac_seriedocumento=com.ch_fac_seriedocumento AND cab.ch_fac_numerodocumento=com.ch_fac_numerodocumento AND cab.ch_fac_tipodocumento=com.ch_fac_tipodocumento)
 LEFT JOIN int_clientes AS Cli ON (Cli.cli_codigo = Cab.cli_codigo)
-LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = Cab.dt_fac_fecha)
+--LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = Cab.dt_fac_fecha)
 WHERE
 Cab.ch_fac_tipodocumento = '20'
 AND Cab.dt_fac_fecha BETWEEN '".$param['initial_date']."' AND '".$param['initial_date']."'
@@ -7800,7 +8228,7 @@ fac_ta_factura_cabecera AS Cab
 JOIN fac_ta_factura_detalle AS FD USING (ch_fac_tipodocumento, ch_fac_seriedocumento, ch_fac_numerodocumento, cli_codigo)
 LEFT JOIN fac_ta_factura_complemento AS com ON (cab.cli_codigo = com.cli_codigo AND cab.ch_fac_seriedocumento=com.ch_fac_seriedocumento AND cab.ch_fac_numerodocumento=com.ch_fac_numerodocumento AND cab.ch_fac_tipodocumento=com.ch_fac_tipodocumento)
 LEFT JOIN int_clientes AS Cli ON (Cli.cli_codigo = Cab.cli_codigo)
-LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = Cab.dt_fac_fecha)
+--LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = Cab.dt_fac_fecha)
 WHERE
 Cab.ch_fac_tipodocumento = '20'
 AND Cab.dt_fac_fecha BETWEEN '".$param['initial_date']."' AND '".$param['initial_date']."'
@@ -8043,8 +8471,11 @@ GROUP BY
 		);
 	}
 
-	public function getItemCreditNote($noperacion, $itemcode, $arrOrigenDocumento) {
+	public function getItemCreditNote($noperacion, $itemcode, $arrOrigenDocumento) { //ACA
 		error_log('BUSCANDO REFERENCIA');
+		error_log('==================');
+		error_log( json_encode($this->creditNote) );
+		error_log( json_encode( array( $noperacion, $itemcode, $arrOrigenDocumento ) ) );
 		error_log('==================');
 		error_log('$this->creditNote[' . $noperacion . ']');
 		foreach ($this->creditNote[$noperacion] as $key => $value) {
@@ -8121,7 +8552,7 @@ fac_ta_factura_detalle AS FD
 JOIN fac_ta_factura_cabecera AS Cab USING (ch_fac_tipodocumento, ch_fac_seriedocumento, ch_fac_numerodocumento, cli_codigo)
 LEFT JOIN fac_ta_factura_complemento AS com ON (cab.cli_codigo = com.cli_codigo AND cab.ch_fac_seriedocumento=com.ch_fac_seriedocumento AND cab.ch_fac_numerodocumento=com.ch_fac_numerodocumento AND cab.ch_fac_tipodocumento=com.ch_fac_tipodocumento)
 LEFT JOIN int_clientes AS Cli ON (Cli.cli_codigo = Cab.cli_codigo)
-LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = Cab.dt_fac_fecha)
+--LEFT JOIN int_tipo_cambio AS TC ON (TC.tca_fecha = Cab.dt_fac_fecha) --No se utiliza
 
 LEFT JOIN sap_mapeo_tabla_detalle AS SAPALMA ON (SAPALMA.opencomb_codigo = cab.ch_almacen AND SAPALMA.id_tipo_tabla = 2)
 JOIN int_articulos art ON (FD.art_codigo = art.art_codigo)
@@ -8184,7 +8615,7 @@ ORDER BY 1;";
 							'sSerieDocumentoOrigen' => $u_exx_serdocor,
 							'sNumeroDocumentoOrigen' => $u_exx_cordocor,
 						);
-						$itemref = $this->getItemCreditNote($reg['noperacion'], $this->cleanStr($reg['itemcode']), $arrOrigenDocumento);
+						$itemref = $this->getItemCreditNote($reg['noperacion'], $this->cleanStr($reg['itemcode']), $arrOrigenDocumento); //ACA
 						if (!$itemref['isFind']) {
 							$item = NULL;
 							$data['item'] = NULL;
@@ -8232,7 +8663,13 @@ SELECT
  FIRST(PT.cantidad) AS quantity,
 
  ROUND((FIRST(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)))) / ".$param['tax'].", 4) AS price,
- ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((FIRST(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) AS discprcnt,
+
+ --ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((FIRST(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4) AS discprcnt,
+ CASE
+   WHEN ((FIRST(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax'].") = 0
+   THEN ROUND(0, 4)
+   ELSE ROUND((FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0)) / ".$param['tax'].") * 100) / ((FIRST(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 1)))) / ".$param['tax']."), 4)
+ END AS discprcnt,
 
  FIRST(PT.precio) + FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _price,
  FIRST(ABS(COALESCE(PTDSCT.precio_descuento, 0))) AS _discprcnt,
@@ -8254,7 +8691,7 @@ SELECT
  PT.caja AS u_exc_caja,
  --FIRST(SURTIDOR.nu_manguera)::TEXT AS u_exc_manguera,
  CASE WHEN FIRST(PT.pump) != '' THEN
-  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo))::TEXT
+  (SELECT nu_manguera FROM comb_ta_surtidores SURTIDOR WHERE SURTIDOR.ch_numerolado::INTEGER = FIRST(PT.pump)::INTEGER AND SURTIDOR.ch_codigocombustible = FIRST(PT.codigo) LIMIT 1)::TEXT
  ELSE '' END AS u_exc_manguera,
  FIRST(PT.turno) AS u_exc_turno,
  TO_CHAR(FIRST(PT.fecha), 'HH12:MI:SS') AS u_exc_hora,
@@ -8469,8 +8906,13 @@ Cab.ch_fac_numerodocumento;
 			$u_exx_cordocor = $u_exx_docor[0];
 			$u_exx_tipdocor = $u_exx_docor[2];
 
-			$u_exx_fecdocor = explode('/', $reg['u_exx_fecdocor']);
-			$u_exx_fecdocor = $u_exx_fecdocor[2].'-'.$u_exx_fecdocor[1].'-'.$u_exx_fecdocor[0];
+			$pos = strpos($reg['u_exx_fecdocor'], '/');
+			if ($pos !== false) {
+				$u_exx_fecdocor = explode('/', $reg['u_exx_fecdocor']);
+				$u_exx_fecdocor = $u_exx_fecdocor[2].'-'.$u_exx_fecdocor[1].'-'.$u_exx_fecdocor[0];
+			} else {
+				$u_exx_fecdocor = $reg['u_exx_fecdocor'];
+			}
 
 			$let = trim($u_exx_serdocor);
 			$let = substr($let, 0, 1);
@@ -9303,7 +9745,9 @@ ORDER BY 1;";
 				$insert .= ($c != $countValues ? ',' : '');
 			}
 			$insert .= ");\n";
-			//echo '<br>'.$insert;
+			// echo '<br>'.$insert;
+			// error_log($i);
+			// error_log($insert);
 			$stmt = odbc_exec($hanaInstance['instance'], $insert);
 			if (!$stmt) {
 				$this->_error_log('$insert: '.$insert.' [LINE: '.__LINE__.']');
@@ -9494,13 +9938,34 @@ WHERE se.systemdate = '".$req['initial_systemdate']."' ORDER BY se.systemdate;";
 
 	public function getNOperacionTicket($res) {
 		if (isset($this->ticketHead[$res['_serie']][$res['_turn']])) {
-			$val = $this->ticketHead[$res['_serie']][$res['_turn']];
-			if ($res['_number'] >= $val['u_exx_nroini'] && $res['_number'] <= $val['u_exx_nrofin']) {
-				return $val['noperacion'];
-			} else {
-				error_log('No valido, u_exx_nroini: '.$val['u_exx_nroini'].' u_exx_nrofin: '.$val['u_exx_nrofin'].' - _number: '.$res['_number']);
-				return '';
+			$tickets = $this->ticketHead[$res['_serie']][$res['_turn']];		
+								
+			$es_array = false;
+			if( isset( $tickets[0]) ){ //SI EXISTE
+				if( is_array( $tickets[0] ) ){ //SI ES ARRAY
+					$es_array = true;
+				}
 			}
+
+			if( $es_array == true ){ //FUNCIONALIDAD PARA OBTENER DE ARRAY "ticketHead" DESGLOSE DE DOCUMENTOS TRANSFERENCIA GRATUITA O DOCUMENTOS ANULADOS				
+				foreach ($tickets as $key => $val) {
+					if ($res['_number'] >= $val['u_exx_nroini'] && $res['_number'] <= $val['u_exx_nrofin']) {
+						return $val['noperacion'];
+					}
+				}
+			} else { //LO MISMO DE SIEMPRE	
+				$val = $tickets;			
+				if ($res['_number'] >= $val['u_exx_nroini'] && $res['_number'] <= $val['u_exx_nrofin']) {
+					return $val['noperacion'];
+				} else {
+					error_log('No valido, u_exx_nroini: '.$val['u_exx_nroini'].' u_exx_nrofin: '.$val['u_exx_nrofin'].' - _number: '.$res['_number']);
+					return '';
+				}
+			}
+
+			error_log('No valido, u_exx_nroini: '.$val['u_exx_nroini'].' u_exx_nrofin: '.$val['u_exx_nrofin'].' - _number: '.$res['_number']);
+			return '';
+
 		} else {
 			error_log('No existe en ticketHead');
 			return '';
@@ -9509,7 +9974,8 @@ WHERE se.systemdate = '".$req['initial_systemdate']."' ORDER BY se.systemdate;";
 
 	public function getNOperacionTicketDetail($res, $noperacion) {
 		error_log($reg['_number']);
-		$res['_number'] = substr($res['_number'], 2);
+		// $res['_number'] = substr($res['_number'], 2); //Con substr le quitabamos los dos ceros iniciales, pero pueden haber casos donde haya mas de 2 ceros, puede haber 3 o 4, asi que se cambio por intval
+		$res['_number'] = intval($res['_number']);
 		if (isset($this->ticketHead[$res['_number']])) {
 			$val = $this->ticketHead[$res['_number']];
 			if ($res['_number'] == $val['u_exx_nroini']) {
@@ -9555,7 +10021,8 @@ WHERE se.systemdate = '".$req['initial_systemdate']."' ORDER BY se.systemdate;";
 	 */
 	function converterUM($data) {
 		if($data['type'] == 0) {
-			return $data['co'] / 3.785411784;//11620307 - GLP
+			// return $data['co'] / 3.785411784;//11620307 - GLP
+			return $data['co'] / 1;//11620307 - GLP
 		} else if($data['type'] == 1) {
 			return $data['co'] / 3.15;//11620308 - GNV
 		} else {

@@ -651,6 +651,77 @@ class v_sap_1 {
 	<?php }
 
 	/**
+	 * =============================================
+	 * Contado
+	 * Venta sin guia (Uno a uno)
+	 *
+	 * Venta al contado [CABECERA]
+	 */
+	public function tableInvoiceHeaderSaleCashDesagregarDocumentosAnuladosTransferenciasGratuitas($data) { ?>
+
+	<br>
+	<div>
+		<h3>Factura Cliente (Venta Contado) <?php echo $data['isViewTableName'] ? '['.$data['tableName'].']' : '' ?></h3><hr>		
+		<?php
+			if($_SESSION['debug'] == true){
+				/*** Debug ***/
+				$sql_delete = "DELETE FROM BDINT2.". $data['tableName'] ." WHERE noperacion IN (";
+				$sql_select = "SELECT * FROM BDINT2.". $data['tableName'] ." WHERE noperacion IN (";			
+				foreach($data['invoiceheadersalecash'] as $key=>$row){
+					$sql_data .= "'" . $row['noperacion'] . "',";
+				}
+				$sql_data = substr($sql_data,0,-1);
+				$sql_data .= ");";
+				$sql_delete = $sql_delete . $sql_data;
+				$sql_select = $sql_select . $sql_data;
+				echo "<pre>";
+				echo "<h3>$sql_delete</h3>";
+				echo "<h3>$sql_select</h3>";
+				echo "</pre>";				
+				/***/
+			}
+		?>
+		<table class="table-sap-1">
+			<thead class="head-table-preview-sap-1">
+				<tr>
+					<th>noperacion</th>
+					<th>cardcode</th>
+					<th>docdate</th>
+					<th>foliopref</th>
+					<th>folionum</th>
+					<th>indicator</th>
+					<th>vatsum</th>
+					<th>doctotal</th>
+					<th>extempno</th>
+					<th>u_exc_maqreg</th>
+					<th>doccur</th>
+					<th>indicator</th>
+				</tr>
+			</thead>
+			<tbody>			
+				<?php foreach ($data['invoiceheadersalecash'] as $key => $row) { ?>
+				<tr>
+					<th><?php echo $row['noperacion'] ?></th>
+					<th><?php echo $row['cardcode'] ?></th>
+					<th><?php echo $row['docdate'] ?></th>
+					<th><?php echo $row['foliopref'] ?></th>
+					<th><?php echo $row['folionum'] ?></th>
+					<th><?php echo $row['indicador'] ?></th>
+					<th><?php echo $row['vatsum'] ?></th>
+					<th><?php echo $row['doctotal'] ?></th>
+					<th><?php echo $row['extempno'] ?></th>
+					<th><?php echo $row['u_exc_maqreg'] ?></th>
+					<th><?php echo $row['doccur'] ?></th>
+					<th><?php echo $row['indicator'] ?></th>
+				</tr>
+				<?php } ?>				
+			</tbody>
+		</table>
+	</div>
+	<div>Cantidad de registros: <?php echo $data['count'] ?></div>
+	<?php }
+
+	/**
 	 * Venta al contado [DETALLE]
 	 */
 	public function tableInvoiceDetailSaleCash($data) { ?>
@@ -2149,6 +2220,70 @@ class v_sap_1 {
 					<th><?php echo $row['vatsum'] ?></th>
 					<th><?php echo $row['doctotal'] ?></th>
 					<th><?php echo $row['transaccion'] ?></th>
+				</tr>
+				<?php } ?>
+			</tbody>
+		</table>
+	</div>
+	<div>Cantidad de registros: <?php echo $data['count'] ?></div>
+	<?php }
+
+	/**
+	 * Boletas cabecera
+	 * 
+	 */
+	public function tableDocumentHeadTicketDesagregarDocumentosAnuladosTransferenciasGratuitas($data) { ?>
+
+	<br>
+	<div>
+		<h3>Boleta (Venta Cliente) <?php echo $data['isViewTableName'] ? '['.$data['tableName'].']' : '' ?></h3><hr>
+		<?php
+			if($_SESSION['debug'] == true){
+				/*** Debug ***/
+				$sql_delete = "DELETE FROM BDINT2.". $data['tableName'] ." WHERE noperacion IN (";
+				$sql_select = "SELECT * FROM BDINT2.". $data['tableName'] ." WHERE noperacion IN (";			
+				foreach($data['documentHeadTicket'] as $key=>$row){
+					$sql_data .= "'" . $row['noperacion'] . "',";
+				}
+				$sql_data = substr($sql_data,0,-1);
+				$sql_data .= ");";
+				$sql_delete = $sql_delete . $sql_data;
+				$sql_select = $sql_select . $sql_data;
+				echo "<pre>";
+				echo "<h3>$sql_delete</h3>";
+				echo "<h3>$sql_select</h3>";
+				echo "</pre>";				
+				/***/
+			}
+		?>
+		<table class="table-sap-1">
+			<thead class="head-table-preview-sap-1">
+				<tr>
+					<th>noperacion</th>
+					<th>cardcode</th>
+					<th>docdate</th>
+					<th>foliopref</th>
+					<th>u_exx_nroini</th>
+					<th>u_exx_nrofin</th>
+					<th>vatsum</th>
+					<th>doctotal</th>
+					<th>transaccion</th>
+					<th>indicator</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ($data['documentHeadTicket'] as $key => $row) { ?>
+				<tr>
+					<th><?php echo $row['noperacion'] ?></th>
+					<th><?php echo $row['cardcode'] ?></th>
+					<th><?php echo $row['docdate'] ?></th>
+					<th><?php echo $row['foliopref'] ?></th>
+					<th><?php echo $row['u_exx_nroini'] ?></th>
+					<th><?php echo $row['u_exx_nrofin'] ?></th>
+					<th><?php echo $row['vatsum'] ?></th>
+					<th><?php echo $row['doctotal'] ?></th>
+					<th><?php echo $row['transaccion'] ?></th>
+					<th><?php echo $row['indicator'] ?></th>
 				</tr>
 				<?php } ?>
 			</tbody>
