@@ -1,4 +1,8 @@
 <?php
+
+// error_log("menu_prin");
+// error_log(json_encode($_SERVER));
+
 include("valida_sess.php");
 include("config.php");
 if ($_SERVER['REQUEST_URI'] != '/sistemaweb/menu_princ.php') {

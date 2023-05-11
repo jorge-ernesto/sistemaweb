@@ -1,16 +1,22 @@
 <?php
 $v_url		= "http://localhost/sistemaweb/";
-$v_path_linux	= "/var/www/html/sistemaweb/";
+// $v_path_linux	= "/var/www/html/sistemaweb/";
+$v_path_linux	= "$_SERVER[DOCUMENT_ROOT]/sistemaweb/";
 $v_path_url	= "/sistemaweb/";
 $db_host	= "localhost";
 $db_name	= "integrado";
 $db_user	= "postgres";
-$coneccion	= pg_connect("host=".$db_host." port=5432 dbname=".$db_name." user=".$db_user." ");
-$xsql		= pg_exec($coneccion,"select almac from tab_logueo where id_sesion='".$_COOKIE["PHPSESSID"]."'");
+$db_pass	= "conejitalinda777";
+$coneccion	= pg_connect("host=".$db_host." port=5432 dbname=".$db_name." user=".$db_user." password=".$db_pass." ");
+error_log("Conexion include");
+error_log("host=".$db_host." port=5432 dbname=".$db_name." user=".$db_user." password=".$db_pass." ");
+if( isset($_COOKIE["PHPSESSID"]) ){
+	$xsql		= pg_exec($coneccion,"select almac from tab_logueo where id_sesion='".$_COOKIE["PHPSESSID"]."'");
 
-if(pg_numrows($xsql) > 0) {
-	$almacen = pg_result($xsql,0,0);
-	$g_almacen = $almacen;
+	if(pg_numrows($xsql) > 0) {
+		$almacen = pg_result($xsql,0,0);
+		$g_almacen = $almacen;
+	}
 }
 $tamPag = 10;
 

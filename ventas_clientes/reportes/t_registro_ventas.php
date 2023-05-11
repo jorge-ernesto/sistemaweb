@@ -1549,7 +1549,7 @@ class RegistroVentasTemplate extends Template {
 		$reporte->Ln();
 		/* Cerrar Cuadro Resumen */
 
-		$reporte->Output("/sistemaweb/ventas_clientes/reportes/pdf/registros_ventas_ingresos.pdf", "F");
+		$reporte->Output("D:/PORTABLES/laragon/www/sistemaweb/ventas_clientes/reportes/pdf/registros_ventas_ingresos.pdf", "F");
 
 		return '<script> window.open("/sistemaweb/ventas_clientes/reportes/pdf/registros_ventas_ingresos.pdf","miwin","width=750,height=550,scrollbars=yes, resizable=yes, menubar=no");</script>';
 	}

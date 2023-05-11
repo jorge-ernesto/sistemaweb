@@ -33,15 +33,21 @@ class MainController extends Controller
 	    case "check":
 		$form_login = true;
 		$usuario = CUsuarios::login($_REQUEST['user'], $_REQUEST['password']);
-		var_dump($usuario);
+		error_log("usuario");
+		error_log(json_encode($usuario));
+		error_log("SESSION");
+		error_log(json_encode($_SESSION));
 		$almacen=$_SESSION['almacen'];
 		if (!$usuario || !$usuario->almacenPermitido($almacen)) {
 			$bFailed = 1;
 			$form_login = true;
 		} else {
+			error_log("Entro en la condicional de acceso");
 			$usuario->ponerAlmacenActual($almacen);
 			$_SESSION['sist'] = "000004";
 			$_SESSION['usuario'] = $usuario;
+			error_log("SESSION");
+			error_log(json_encode($_SESSION));
 			die("<script>top.location.href=\"/sistemaweb/menu_princ.php\"</script>");
 		}
 		break;

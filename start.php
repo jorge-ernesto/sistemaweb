@@ -21,7 +21,7 @@
 	define('OK', 'OK');
 
 	//define global variables
-	$sqlca = new pgsqlDB('localhost','postgres', 'postgres', 'integrado');
+	$sqlca = new pgsqlDB('localhost','postgres', 'conejitalinda777', 'integrado');
         $sqlca->cursor
         
 ?>

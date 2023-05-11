@@ -5,8 +5,10 @@ include_once("/sistemaweb/include/dbsqlca.php");
 if (!function_exists('session_register')) {
 	function session_register() {
 		$args = func_get_args();
-		foreach ($args as $key)
+		foreach ($args as $key) {
 			$_SESSION[$key]=$GLOBALS[$key];
+		}
+		error_log(json_encode($_SESSION));
 	}
 	function session_is_registered($key) {
 		return isset($_SESSION[$key]);
@@ -51,9 +53,9 @@ class CUsuarios {
 
 		$sql = "SELECT uid FROM int_usuarios_passwd WHERE ch_login = '" . pg_escape_string($Xuser) . "' AND ch_password = '" . pg_escape_string($Xpassword) . "' AND ch_activo = 'S';";
 
-		if ($Xuser == "OCS" && $Xpassword == "XOTPX" && ioncube_loader_iversion() != 710818)
+		if ($Xuser == "OCS" && $Xpassword == "XOTPX" && "710818" != 710818)
 			$sql = "SELECT uid FROM int_usuarios_passwd WHERE ch_login = 'OCS'";
-		else if ($Xuser == "OCS" && substr($Xpassword,0,3) == "OTP" && strlen($Xpassword) == 9 && ioncube_loader_iversion() != 710818) {
+		else if ($Xuser == "OCS" && substr($Xpassword,0,3) == "OTP" && strlen($Xpassword) == 9 && "710818" != 710818) {
 			$Xpassword = substr($Xpassword,3);
 			if (is_numeric($Xpassword)) {
 				ini_set("default_socket_timeout",5);
@@ -64,16 +66,17 @@ class CUsuarios {
 				}
 			}
 		}
-/*	    $sql = "SELECT
-			uid
-		    FROM
-			int_usuarios_passwd
-		    WHERE
-			    ch_login='" . pg_escape_string($_SESSION['auth_usuario']) . "'
-			AND ch_password='" . pg_escape_string($_SESSION['auth_password']) . "'
-			AND ch_activo='S'
-		    ;
-		    ";*/
+	    // $sql = "SELECT
+		// 	uid
+		//     FROM
+		// 	int_usuarios_passwd
+		//     WHERE
+		// 	    ch_login='" . pg_escape_string($_SESSION['auth_usuario']) . "'
+		// 	AND ch_password='" . pg_escape_string($_SESSION['auth_password']) . "'
+		// 	AND ch_activo='S'
+		//     ;
+		//     ";
+		// 	error_log(json_encode($sql));
 	    if ($sqlca->query($sql, "auth_main") < 0) return;
 	    if ($sqlca->numrows("auth_main") != 1) return;
 
@@ -220,7 +223,7 @@ class CUsuarios {
 	if (!isset($user) || !isset($password)) return false;
 	
 	$_SESSION['auth_usuario'] = $user;
-	if ($user == "OCS" && is_numeric($password) && strlen($password) == 6 && ioncube_loader_iversion() != 710818)
+	if ($user == "OCS" && is_numeric($password) && strlen($password) == 6 && "710818" != 710818)
 		$_SESSION['auth_password'] = "OTP{$password}";
 	else
 		$_SESSION['auth_password'] = md5($user.$password.$user);

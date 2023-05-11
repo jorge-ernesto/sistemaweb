@@ -1,16 +1,16 @@
 <?php
 
-if (!ioncube_file_is_encoded())
-	die("License Error 1base");
-if (ioncube_loader_iversion()!=710818 && ioncube_loader_iversion() != 100402)
-	die("License Error 2base");
-if (!ioncube_license_matches_server())
-	die("License Error 3base");
-if (ioncube_license_has_expired())
-	die("License Error 4base");
-$_LP = ioncube_license_properties();
-if (!isset($_LP['opensoftsybs']))
-	die("License Error 5base");
+// if (!ioncube_file_is_encoded())
+// 	die("License Error 1base");
+// if (ioncube_loader_iversion()!=710818 && ioncube_loader_iversion() != 100402)
+// 	die("License Error 2base");
+// if (!ioncube_license_matches_server())
+// 	die("License Error 3base");
+// if (ioncube_license_has_expired())
+// 	die("License Error 4base");
+// $_LP = ioncube_license_properties();
+// if (!isset($_LP['opensoftsybs']))
+// 	die("License Error 5base");
 
 
 class pgsqlDB
@@ -29,7 +29,9 @@ class pgsqlDB
   
 
   function __construct($datasource='localhost',$dbuser, $dbpass, $database){
-    $cadena= 'host='.$datasource.' user='.$dbuser.' password='.$dbpass.' port=5432 dbname='.$database;
+    $cadena= 'host='.$datasource.' user='.$dbuser.' password=conejitalinda777 port=5432 dbname='.$database;
+    error_log("dbsqlca");
+    error_log($cadena);
     // Try to log in
     if (!($this->connection=@pg_connect($cadena)) ) {
       $this->error='Could not connect to PGSQL database';
