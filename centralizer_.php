@@ -685,6 +685,7 @@ switch ($CxModule) {
 			FROM comb_liquidaciongnv
 			WHERE ch_almacen = '$warehouse_id'
 				AND dt_fecha BETWEEN '$BeginDate' AND '$EndDate';";
+			error_log("QUERY TOTALS_SALE_COMB: ".$sql);
 
 				//ultima compra del mes (inv_saldoalma)
 
@@ -913,6 +914,7 @@ WHERE
 			FROM comb_liquidaciongnv
 			WHERE ch_almacen = '$warehouse_id'
 			AND dt_fecha BETWEEN '$BeginDate' AND '$EndDate';";
+			error_log("QUERY DETAIL_SALE_COMB: ".$sql);
 
 			SQLImplode($sql);
 			$contenido = ob_get_contents();
@@ -1070,17 +1072,87 @@ FROM
 			echo $comprimido;
 		break;
 
-		case 'STOCK_COMB': //AQUI
+		case 'STOCK_COMB':
 			argRangedCheck();
 			//pg_escape_string
 			$warehouse_id = $_REQUEST['warehouse_id'];
 			$days = $_REQUEST['days'];
+		
+			/*Datos para querie Stock Diario (Modo Proyección)
+			Cuadro adjunto se agregarían 2 columnas:
+			1. Proyeccion: Cantidad de Venta Proyectada por N días
+			2. Utilidad: Seria igual a (Proyeccion x Ultimo Precio de Venta) – (Proyecccion x Costo Promedio)
+			*/
+			$checkProyeccion = $_REQUEST['checkProyeccion'];
+			$desdeProyeccion = $_REQUEST['desdeProyeccion'];
+			$hastaProyeccion = $_REQUEST['hastaProyeccion'];
+			$diasDiferenciaProyeccion = $_REQUEST['diasDiferenciaProyeccion'];
+			$diasProyeccion = $_REQUEST['diasProyeccion'];
+			
+			$fecha_desde_proyeccion_explode = explode("/", $desdeProyeccion);
+			$fecha_hasta_proyeccion_explode = explode("/", $hastaProyeccion);
+
+			$fechadproy  = $fecha_desde_proyeccion_explode['2'] . "-" . $fecha_desde_proyeccion_explode['1'] . "-" . $fecha_desde_proyeccion_explode['0'];
+			$fechaaproy  = $fecha_hasta_proyeccion_explode['2'] . "-" . $fecha_hasta_proyeccion_explode['1'] . "-" . $fecha_hasta_proyeccion_explode['0'];
+			
+			$daysProyeccion     = "0";
+			$sql_costo_promedio = ",0 AS costo_comb";
+			$sql_precio_venta   = ",0 AS precio_venta";			
+
+			//Usar datos de Modo Proyección
+			if ($checkProyeccion == 'true') {
+				//Reemplazar datos
+					$BeginDate = $fechadproy;
+					$EndDate = $fechaaproy;
+					$days = $diasDiferenciaProyeccion;
+					$daysProyeccion = $diasProyeccion;
+
+				//Datos para calcular utilidad
+					//Datos para query Costo Promedio
+					$stk_periodo = $fecha_desde_proyeccion_explode['2'];
+					$stk_mes = $fecha_desde_proyeccion_explode['1'];
+
+					//Datos para query Ultimo Precio de Venta
+					$fechadproy = $fechadproy;
+					$fechaaproy = $fechaaproy;
+
+					//SQL Costo Promedio
+					$sql_costo_promedio = "
+						,(SELECT
+							stk_costo$stk_mes AS costo_comb
+						FROM
+							inv_saldoalma 
+						WHERE
+							stk_periodo = '$stk_periodo'
+							AND stk_almacen = TRIM ('$warehouse_id')
+							AND art_codigo = tanques.ch_codigocombustible
+						LIMIT 1) AS costo_comb
+					";
+
+					//SQL Ultimo Precio de Venta
+					$sql_precio_venta = "
+						,(SELECT
+							(nu_ventavalor/1.18) / nu_ventagalon AS precio_venta
+						FROM
+							comb_ta_contometros 
+						WHERE
+							dt_fechaparte BETWEEN '$fechadproy' AND '$fechaaproy'
+							AND ch_sucursal = TRIM ('$warehouse_id')
+							AND ch_codigocombustible = tanques.ch_codigocombustible
+							AND nu_ventavalor != 0
+							AND nu_ventagalon != 0	
+						ORDER BY 
+							dt_fechaparte DESC
+						LIMIT 1) AS precio_venta
+					";
+			}			
+			/*Cerrar*/
 
 			$sql = "SELECT
 				tanques.ch_codigocombustible AS cod_comb,
 				combustibles.ch_nombrecombustible AS desc_comb,
 				tanques.nu_capacidad,
-				(SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days AS nu_venta,
+				(SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days AS nu_venta, -- Promedio diario vendido en galones
 				contometros.ch_tanque,
 				mediciondiaria.nu_medicion,
 				CASE
@@ -1093,23 +1165,31 @@ FROM
 
 			 	--mediciondiaria.nu_medicion / ((SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days) AS tiempo,			
 			 	CASE
-					WHEN ((SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / 7) > 0 THEN
-						mediciondiaria.nu_medicion / ((SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / 7)
+					WHEN ((SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days) > 0 THEN
+						mediciondiaria.nu_medicion / ((SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days)
 					ELSE
 						0
 				END AS tiempo, --Calculamos tiempo pero validando error de division / 0
 				(SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) AS suma,
-				$days AS dia,
+				$days AS dia, -- Dias a proyectar
 				compra.mov_cantidad AS cantidad_ultima_compra,
 				compra.mov_fecha AS fecha_ultima_compra,
 				'$BeginDate' AS BeginDate,
-				'$EndDate' AS EndDate
+				'$EndDate' AS EndDate,
+				((SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days) * $daysProyeccion AS nu_venta_proyeccion -- Proyeccion: Promedio diario vendido en galones * Dias a proyectar
+				
+				-- Costo Promedio
+				$sql_costo_promedio
+
+				-- Ultimo Precio de Venta
+				$sql_precio_venta
+				
 			FROM
 				comb_ta_contometros contometros
-			JOIN comb_ta_tanques tanques ON (contometros.ch_tanque = tanques.ch_tanque AND tanques.ch_sucursal = '$warehouse_id' )
+			JOIN comb_ta_tanques tanques                    ON (contometros.ch_tanque = tanques.ch_tanque AND tanques.ch_sucursal = '$warehouse_id' )
 			LEFT JOIN comb_ta_mediciondiaria mediciondiaria ON (contometros.ch_tanque = mediciondiaria.ch_tanque AND mediciondiaria.ch_sucursal = '$warehouse_id' AND mediciondiaria.dt_fechamedicion = '$EndDate' )
-			JOIN comb_ta_combustibles combustibles ON (tanques.ch_codigocombustible = combustibles.ch_codigocombustible)
-			JOIN inv_ta_compras_devoluciones compra ON (TRIM(tanques.ch_codigocombustible) = TRIM(compra.art_codigo) AND compra.mov_fecha = (SELECT MAX(mov_fecha) FROM inv_ta_compras_devoluciones WHERE TRIM(art_codigo) = TRIM(tanques.ch_codigocombustible)))
+			JOIN comb_ta_combustibles combustibles          ON (tanques.ch_codigocombustible = combustibles.ch_codigocombustible)
+			JOIN inv_ta_compras_devoluciones compra         ON (TRIM(tanques.ch_codigocombustible) = TRIM(compra.art_codigo) AND compra.mov_fecha = (SELECT MAX(mov_fecha) FROM inv_ta_compras_devoluciones WHERE TRIM(art_codigo) = TRIM(tanques.ch_codigocombustible)))
 			WHERE
 				contometros.ch_sucursal = '$warehouse_id'
 			AND contometros.dt_fechaparte BETWEEN '$BeginDate'
@@ -1120,6 +1200,8 @@ FROM
 			ORDER BY
 				tanques.ch_codigocombustible ASC;";
 			//echo $sql;
+			error_log("QUERY STOCK_COMB: ".$sql);
+
 			SQLImplode($sql);
 			$contenido = ob_get_contents();
 			ob_end_clean();
@@ -1132,34 +1214,119 @@ FROM
 			//pg_escape_string
 			$warehouse_id = $_REQUEST['warehouse_id'];
 			$days = $_REQUEST['days'];
+		
+			/*Datos para querie Stock Diario (Modo Proyección)
+			Cuadro adjunto se agregarían 2 columnas:
+			1. Proyeccion: Cantidad de Venta Proyectada por N días
+			2. Utilidad: Seria igual a (Proyeccion x Ultimo Precio de Venta) – (Proyecccion x Costo Promedio)
+			*/
+			$checkProyeccion = $_REQUEST['checkProyeccion'];
+			$desdeProyeccion = $_REQUEST['desdeProyeccion'];
+			$hastaProyeccion = $_REQUEST['hastaProyeccion'];
+			$diasDiferenciaProyeccion = $_REQUEST['diasDiferenciaProyeccion'];
+			$diasProyeccion = $_REQUEST['diasProyeccion'];
+			
+			$fecha_desde_proyeccion_explode = explode("/", $desdeProyeccion);
+			$fecha_hasta_proyeccion_explode = explode("/", $hastaProyeccion);
+
+			$fechadproy  = $fecha_desde_proyeccion_explode['2'] . "-" . $fecha_desde_proyeccion_explode['1'] . "-" . $fecha_desde_proyeccion_explode['0'];
+			$fechaaproy  = $fecha_hasta_proyeccion_explode['2'] . "-" . $fecha_hasta_proyeccion_explode['1'] . "-" . $fecha_hasta_proyeccion_explode['0'];
+			
+			$daysProyeccion     = "0";
+			$sql_costo_promedio = ",0 AS costo_comb";
+			$sql_precio_venta   = ",0 AS precio_venta";			
+
+			//Usar datos de Modo Proyección
+			if ($checkProyeccion == 'true') {
+				//Reemplazar datos
+					$BeginDate = $fechadproy;
+					$EndDate = $fechaaproy;
+					$days = $diasDiferenciaProyeccion;
+					$daysProyeccion = $diasProyeccion;
+
+				//Datos para calcular utilidad
+					//Costo Promedio
+					$stk_periodo = $fecha_desde_proyeccion_explode['2'];
+					$stk_mes = $fecha_desde_proyeccion_explode['1'];
+
+					//Ultimo Precio de Venta
+					$fechadproy = $fechadproy;
+					$fechaaproy = $fechaaproy;
+
+					//SQL para Costo Promedio
+					$sql_costo_promedio = "
+						,(SELECT
+							stk_costo$stk_mes AS costo_comb
+						FROM
+							inv_saldoalma 
+						WHERE
+							stk_periodo = '$stk_periodo'
+							AND stk_almacen = TRIM ('$warehouse_id')
+							AND art_codigo = tanques.ch_codigocombustible
+						LIMIT 1) AS costo_comb
+					";
+
+					//SQL para Ultimo Precio de Venta
+					$sql_precio_venta = "
+						,(SELECT
+							(nu_ventavalor/1.18) / nu_ventagalon AS precio_venta
+						FROM
+							comb_ta_contometros 
+						WHERE
+							dt_fechaparte BETWEEN '$fechadproy' AND '$fechaaproy'
+							AND ch_sucursal = TRIM ('$warehouse_id')
+							AND ch_codigocombustible = tanques.ch_codigocombustible
+							AND nu_ventavalor != 0
+							AND nu_ventagalon != 0	
+						ORDER BY 
+							dt_fechaparte DESC
+						LIMIT 1) AS precio_venta
+					";
+			}			
+			/*Cerrar*/
 
 			$sql = "SELECT
 				tanques.ch_codigocombustible AS cod_comb,
 				combustibles.ch_nombrecombustible AS desc_comb,
 				tanques.nu_capacidad,
-				(SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days AS nu_venta,
+				(SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days AS nu_venta, -- Promedio diario vendido en galones
 				contometros.ch_tanque,
 				mediciondiaria.nu_medicion,
 				CASE
-			WHEN tanques.nu_capacidad > 0 THEN
-				(mediciondiaria.nu_medicion / tanques.nu_capacidad) * 100
-			ELSE
-				0
-			END AS porcentaje_existente,
-			 --mediciondiaria.nu_medicion / ((tanques.nu_capacidad - mediciondiaria.nu_medicion) / $days) AS dias,
-			 mediciondiaria.nu_medicion / ((SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days) AS tiempo,
-			 (SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) AS suma,
-			 $days AS dia,
-			 compra.mov_cantidad AS cantidad_ultima_compra,
-			 compra.mov_fecha AS fecha_ultima_compra,
-			 '$BeginDate' AS BeginDate,
-			 '$EndDate' AS EndDate
+					WHEN tanques.nu_capacidad > 0 THEN
+						(mediciondiaria.nu_medicion / tanques.nu_capacidad) * 100
+					ELSE
+						0
+				END AS porcentaje_existente,
+			 	--mediciondiaria.nu_medicion / ((tanques.nu_capacidad - mediciondiaria.nu_medicion) / $days) AS dias,
+
+			 	--mediciondiaria.nu_medicion / ((SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days) AS tiempo,			
+			 	CASE
+					WHEN ((SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days) > 0 THEN
+						mediciondiaria.nu_medicion / ((SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days)
+					ELSE
+						0
+				END AS tiempo, --Calculamos tiempo pero validando error de division / 0
+				(SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) AS suma,
+				$days AS dia, -- Dias a proyectar
+				compra.mov_cantidad AS cantidad_ultima_compra,
+				compra.mov_fecha AS fecha_ultima_compra,
+				'$BeginDate' AS BeginDate,
+				'$EndDate' AS EndDate,
+				((SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days) * $daysProyeccion AS nu_venta_proyeccion -- Proyeccion: Promedio diario vendido en galones * Dias a proyectar
+				
+				-- Costo Promedio
+				$sql_costo_promedio
+
+				-- Ultimo Precio de Venta
+				$sql_precio_venta
+				
 			FROM
 				comb_ta_contometros contometros
-			JOIN comb_ta_tanques tanques ON (contometros.ch_tanque = tanques.ch_tanque AND tanques.ch_sucursal = '$warehouse_id' )
+			JOIN comb_ta_tanques tanques                    ON (contometros.ch_tanque = tanques.ch_tanque AND tanques.ch_sucursal = '$warehouse_id' )
 			LEFT JOIN comb_ta_mediciondiaria mediciondiaria ON (contometros.ch_tanque = mediciondiaria.ch_tanque AND mediciondiaria.ch_sucursal = '$warehouse_id' AND mediciondiaria.dt_fechamedicion = '$EndDate' )
-			JOIN comb_ta_combustibles combustibles ON (tanques.ch_codigocombustible = combustibles.ch_codigocombustible)
-			JOIN inv_ta_compras_devoluciones compra ON (TRIM(tanques.ch_codigocombustible) = TRIM(compra.art_codigo) AND compra.mov_fecha = (SELECT MAX(mov_fecha) FROM inv_ta_compras_devoluciones WHERE TRIM(art_codigo) = TRIM(tanques.ch_codigocombustible)))
+			JOIN comb_ta_combustibles combustibles          ON (tanques.ch_codigocombustible = combustibles.ch_codigocombustible)
+			JOIN inv_ta_compras_devoluciones compra         ON (TRIM(tanques.ch_codigocombustible) = TRIM(compra.art_codigo) AND compra.mov_fecha = (SELECT MAX(mov_fecha) FROM inv_ta_compras_devoluciones WHERE TRIM(art_codigo) = TRIM(tanques.ch_codigocombustible)))
 			WHERE
 				contometros.ch_sucursal = '$warehouse_id'
 			AND contometros.dt_fechaparte BETWEEN '$BeginDate'
@@ -1170,6 +1337,8 @@ FROM
 			ORDER BY
 				tanques.ch_codigocombustible ASC;";
 			//echo $sql;
+			error_log("QUERY STOCK_COMB: ".$sql);
+
 			SQLImplodeSerialize($sql);
 			$contenido = ob_get_contents();
 			ob_end_clean();
