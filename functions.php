@@ -825,6 +825,19 @@ function diferenciarArrays($A,$limit){
 
 function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unidadmedida, $detallecompras, $buscar_por_tanque = true){
 	
+        // echo "Data";
+        // echo "<pre>";
+        // print_r(array(
+        //         "almacen" => $almacen,
+        //         "cod_tanque" => $cod_tanque,
+        //         "fechad" => $fechad,
+        //         "fechaa" => $fechaa,
+        //         "unidadmedida" => $unidadmedida,
+        //         "detallecompras" => $almadetallecomprascen,
+        //         "buscar_por_tanque" => $buscar_por_tanque,
+        // ));
+        // echo "</pre>";
+
 	//Aqui se saca el codigo del combustible de una vez para no estar metiendo mas cosas
 	$comb = pg_exec("SELECT 
 				ch_codigocombustible 
@@ -847,7 +860,8 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
                 $operacion='/';
         }
         
-        // echo "Query 1:";
+        // echo "<b>**************************************** <h1>Combustible $cod_combustible</h1> ****************************************</b><br /><br />";
+        // echo "Query Combustible:";
 	// echo "<pre>";
 	// echo $comb;
 	// echo "</pre>";	
@@ -890,21 +904,16 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 		ORDER BY 
 			dt_fechamedicion";
         }
-        // echo "FECHA";
+        // echo "<b>Query Fecha</b>";
         // echo "<pre>";
         // echo $qf;
         // echo "</pre>";
-        $rs1 = pg_exec($qf);
-        
-        // echo "Query 2:";
-        // echo "<pre>";
-        // echo $qf;
-        // echo "</pre>";
+
+        $rs1 = pg_exec($qf);    
 	
 	//IF POR LO QUE ENCONTO FRED
 	if(pg_numrows($rs1)>0){
 		for($i=0;$i<pg_numrows($rs1);$i++){
-		
 			$A = pg_fetch_row($rs1,$i);
 		
 			$rep[$i][0] = $A[0];
@@ -946,17 +955,12 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 			ORDER BY 
 				dt_fechamedicion";
                 }
-                // echo "SALDO";
+                // echo "<b>Query Saldo</b>";
                 // echo "<pre>";
                 // echo $qe;
                 // echo "</pre>";
 	
                 $rs1 = pg_exec($qe) ;
-                
-                // echo "Query 3:";
-                // echo "<pre>";
-                // echo $qe;
-                // echo "</pre>";
 	
 		for($i=0;$i<pg_numrows($rs1);$i++){
 			$A = pg_fetch_row($rs1,$i);
@@ -1002,7 +1006,6 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 		}
 	
 		//MEDICION O AFERICION
-
                 $rs1 = pg_exec("
 				SELECT
 					TO_CHAR(a.dia, 'DD-MM-YYYY') AS fecha,
@@ -1032,6 +1035,7 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 			for($b=0;$b<count($F3);$b++)
 			if($F3[$b]==$fec[$i]){  $rep[$i][3] = $AFE[$b];  }
 		}
+
                 //VENTA
                 if($buscar_por_tanque){
 		$rs1 = pg_exec("SELECT 
@@ -1079,19 +1083,19 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 			$A = pg_fetch_row($rs1,$a);
 			$F4[$a]             = $A[0];
 			$VENTA[$a]          = $A[1];
-            $PRECIO_VENTA[$a]   = $A[2];
+                        $PRECIO_VENTA[$a]   = $A[2];
 		}
 
 		for($i = 0; $i < count($fec); $i++){
 
 			$rep[$i][4] = "0.000";
 
-			for($b = 0; $b < count($F4); $b++)
-
-			if($F4[$b]==$fec[$i]){
-                $rep[$i][4] = $VENTA[$b];
-                $rep[$i][12] = $PRECIO_VENTA[$b];
-            }
+			for($b = 0; $b < count($F4); $b++){
+                                if($F4[$b]==$fec[$i]){
+                                        $rep[$i][4] = $VENTA[$b];
+                                        $rep[$i][12] = $PRECIO_VENTA[$b];
+                                }
+                        }
 
 		}
 
@@ -1109,8 +1113,6 @@ function sobrantesyfaltantesReporte($almacen,$cod_tanque,$fechad,$fechaa, $unida
 					AND tran_codigo='27' 
 				GROUP BY 
 					mov_fecha::date");
-
-
 
 		for($a=0;$a<pg_numrows($rs1);$a++){
 			$A = pg_fetch_row($rs1,$a);

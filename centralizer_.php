@@ -1443,10 +1443,8 @@ FROM
 			$contenido = ob_get_contents();
 			ob_end_clean();
 			$comprimido = gzcompress($contenido);
-
-			error_log($contenido);
-			error_log($comprimido);
-			
+			// error_log($contenido);
+			// error_log($comprimido);
 			echo $comprimido;
 		break;
 
@@ -1589,22 +1587,14 @@ FROM
 					dt_fechaparte
 				;";
 			/*CERRAR UNION*/
-			
 			error_log( $sql );
-
-			if(isset($_REQUEST['unserialize'])) {
-				SQLImplodeSerialize($sql, true);
-			} else {
-				SQLImplode($sql);
-			}
-
+			
+			SQLImplode($sql);
 			$contenido = ob_get_contents();
 			ob_end_clean();
-			$comprimido = ($contenido); //$comprimido = gzcompress($contenido);
-
-			error_log($contenido);
-			error_log($comprimido);
-			
+			$comprimido = $contenido; // $comprimido = gzcompress($contenido);
+			// error_log($contenido);
+			// error_log($comprimido);		
 			echo $comprimido;
 		break;
 
@@ -2217,6 +2207,383 @@ ORDER BY
 			";
 			$contenido['2_vales'] = SQLImplodeArray($sql_vales);
 
+			$data = json_encode($contenido);
+			$comprimido = gzcompress($data);
+			echo $comprimido;
+		break;
+
+		case 'TOTALS_SOBRANTES_FALTANTES':
+			argRangedCheck();
+			//pg_escape_string
+			$warehouse_id = $_REQUEST['warehouse_id'];
+			$desde = $_REQUEST['desde'];
+			$hasta = $_REQUEST['hasta'];
+			$productos = $_REQUEST['productos'];
+			$arrayProductos = explode('|', $productos);
+			$unidadmedida = $_REQUEST['unidadmedida'];
+
+			/*Datos para queries Sobrantes y Faltantes*/
+			$fecha_desde_explode = explode("/", $desde);
+			$fecha_hasta_explode = explode("/", $hasta);
+
+			$almacen = $warehouse_id;
+			$fechad  = $fecha_desde_explode['0'] . "-" . $fecha_desde_explode['1'] . "-" . $fecha_desde_explode['2'];
+			$fechaa  = $fecha_hasta_explode['0'] . "-" . $fecha_hasta_explode['1'] . "-" . $fecha_hasta_explode['2'];
+			/*Cerrar*/
+
+			global $sqlca;
+
+			// RECORREMOS PRODUCTOS
+			foreach ($arrayProductos as $key => $producto) {	
+				// OBTENEMOS CODIGO DE COMBUSTIBLE
+				$cod_combustible = $producto;
+
+				// OBTENEMOS CODIGO Y NOMBRE DE COMBUSTIBLE
+				$sqlca->query("SELECT 
+									c.ch_nombrecombustible,
+									c.ch_codigocombustible
+								FROM
+									comb_ta_combustibles c
+								WHERE
+									c.ch_codigocombustible = trim('$cod_combustible')");
+
+				if ($sqlca->numrows() > 0) { //Si selecciona un combustible especifico
+					$C               = $sqlca->fetchRow();
+					$nom_combustible = $C[1] . " -- " . $C[0];
+				}
+				
+				// CONVERSION DE GLP
+				if(trim($cod_combustible)=='11620307'&&$unidadmedida=='Litros_a_Galones'){
+					$factor=3.785411784;
+					$operacion='/';
+				}else if(trim($cod_combustible)=='11620307'&&$unidadmedida=='Galones_a_Litros'){
+					$factor=3.785411784;
+					$operacion='*';
+				}else{
+					$factor=1; //Por defecto todo esta en litros, mencionar que segun lo indicado en OPENSOFT-93, por defecto la unidad de medida de GLP vendra en Galones, ya no en Litros
+					$operacion='/';
+				}
+
+				//FECHA
+				$qf = "SELECT 
+							to_char(dt_fechamedicion,'DD-MM-YYYY') AS fecha,
+							SUM(nu_medicion) AS saldo,
+							to_char(dt_fechamedicion- interval '1 day','DD-MM-YYYY') AS fecha2
+						FROM 
+							comb_ta_mediciondiaria med
+							INNER JOIN comb_ta_tanques tan ON (med.ch_tanque = tan.ch_tanque)
+						WHERE 
+							med.ch_sucursal=trim('$almacen')
+							AND tan.ch_sucursal=trim('$almacen')
+							AND tan.ch_codigocombustible = '$cod_combustible'
+							AND dt_fechamedicion >= to_date('$fechad','dd-mm-yyyy')
+							AND dt_fechamedicion <= to_date('$fechaa','dd-mm-yyyy')
+						GROUP BY 
+							dt_fechamedicion,
+							fecha2 
+						ORDER BY 
+							dt_fechamedicion";
+
+				$sqlca->query($qf);
+
+				if($sqlca->numrows()>0){
+					//FECHA
+					$A = array();
+					$rep = array();
+					$fec = array();
+					$fec_saldo = array();
+					
+					//SALDO
+					$A = array();
+					$Fe = array();
+					$Saldo = array();
+
+					//COMPRA
+					$A = array();
+					$F2 = array();
+					$COMPRA = array();
+
+					//MEDICION O AFERICION
+					$A = array();
+					$F3 = array();
+					$AFE = array();
+
+					//VENTA
+					$A = array();
+					$F4 = array();
+					$VENTA = array();
+					$PRECIO_VENTA = array();
+
+					//INGRESO
+					$A = array();
+					$F5 = array();
+					$ING = array();
+
+					//SALIDA
+					$A = array();
+					$F6 = array();
+					$SAL = array();
+
+					//PARTE
+					$rep = array();
+
+					// VARILLA
+					$A = array();
+					$FE8 = array();
+					$VARI = array();
+
+					//DIARIA
+					$rep = array();
+
+					//ACUMULADA
+					$rep = array();
+
+					for($i=0;$i<$sqlca->numrows();$i++){
+						$A = $sqlca->fetchRow();
+					
+						$rep[$i][0] = $A[0];
+						$fec[$i] = $A[0];
+						$fec_saldo[$i] = $A[2];
+					}
+
+					//SALDO
+					$qe =  "SELECT 
+								to_char(dt_fechamedicion,'DD-MM-YYYY') AS fecha,
+								ROUND(SUM(nu_medicion) $operacion '$factor',3) AS saldo
+							FROM	
+								comb_ta_mediciondiaria med
+								INNER JOIN comb_ta_tanques tan ON (med.ch_tanque = tan.ch_tanque)
+							WHERE 
+								med.ch_sucursal=trim('$almacen')
+								AND tan.ch_sucursal=trim('$almacen')
+								AND dt_fechamedicion >= to_date('$fec_saldo[0]','dd-mm-yyyy')
+								AND dt_fechamedicion <= to_date('$fechaa','dd-mm-yyyy')
+								AND tan.ch_codigocombustible = '$cod_combustible'
+							GROUP BY 
+								dt_fechamedicion 
+							ORDER BY 
+								dt_fechamedicion";
+
+					$sqlca->query($qe);
+
+					for($i=0;$i<$sqlca->numrows();$i++){
+						$A = $sqlca->fetchRow();
+						$Fe[$i] = $A[0];
+						$Saldo[$i] = $A[1];
+					}
+				
+					for($i=0;$i<count($fec_saldo);$i++){
+						$rep[$i][1] = "0.000";
+						for($a=0;$a<count($Fe);$a++){
+							if($Fe[$a]==$fec_saldo[$i]){  
+								$rep[$i][1] = $Saldo[$a];
+							}
+						}
+					}
+
+					//COMPRA
+					$limit = count($fec)-1;
+					$sqlca->query("SELECT 
+										to_char(mov_fecha::DATE,'DD-MM-YYYY') AS fecha,
+										ROUND(SUM(mov_cantidad) $operacion '$factor',3) AS compra
+									FROM
+										inv_movialma mov 
+									WHERE 
+										tran_codigo	= '21'
+										AND mov_almacen	= trim('$almacen')
+										AND art_codigo	= '$cod_combustible'
+										AND to_date(to_char(mov_fecha,'DD-MM-YYYY'),'DD-MM-YYYY') >= to_date('$fec[0]','dd-mm-yyyy')
+										AND to_date(to_char(mov_fecha,'DD-MM-YYYY'),'DD-MM-YYYY') <= to_date('$fec[$limit]','dd-mm-yyyy')
+									GROUP BY 
+										mov_fecha::DATE");
+
+					for($a=0;$a<$sqlca->numrows();$a++){
+						$A = $sqlca->fetchRow();
+						$F2[$a] = $A[0];
+						$COMPRA[$a] = $A[1];
+					}
+			
+					for($i=0;$i<count($fec);$i++){
+						$rep[$i][2] = "0.000";
+						for($b=0;$b<count($F2);$b++)
+						if($F2[$b]==$fec[$i]){  $rep[$i][2] = $COMPRA[$b];  }
+					}
+
+					//MEDICION O AFERICION
+					$sqlca->query("
+								SELECT
+									TO_CHAR(a.dia, 'DD-MM-YYYY') AS fecha,
+									ROUND(SUM(a.cantidad) $operacion '$factor',3) AS medicion
+								FROM
+									pos_ta_afericiones a
+									LEFT JOIN comb_ta_tanques t ON(t.ch_codigocombustible = a.codigo AND t.ch_sucursal = a.es)
+								WHERE
+									a.es = trim('$almacen')
+									AND t.ch_sucursal = trim('$almacen')
+									AND a.dia BETWEEN to_date('$fechad','dd-mm-yyyy') AND to_date('$fechaa','dd-mm-yyyy')
+									AND t.ch_codigocombustible = '$cod_combustible'
+								GROUP BY
+									a.dia
+								ORDER BY
+									a.dia
+							");
+
+					for($a=0;$a<$sqlca->numrows();$a++){
+						$A = $sqlca->fetchRow();
+						$F3[$a] = $A[0];
+						$AFE[$a] = $A[1];
+					}
+
+					for($i=0;$i<count($fec);$i++){
+						$rep[$i][3] = "0.000";
+						for($b=0;$b<count($F3);$b++)
+						if($F3[$b]==$fec[$i]){  $rep[$i][3] = $AFE[$b];  }
+					}
+
+					//VENTA
+					$sqlca->query("SELECT 
+									to_char(dt_fechaparte,'DD-MM-YYYY') AS fecha,
+									ROUND(SUM(cont.nu_ventagalon) $operacion '$factor',3) AS venta,
+									CASE 
+									WHEN SUM(cont.nu_ventagalon) = 0 THEN 0.00
+									ELSE
+									ROUND((COALESCE(SUM(cont.nu_ventavalor),0) / COALESCE(SUM(cont.nu_ventagalon),1)) , 2) 
+									END AS nu_precio_venta
+								FROM 
+									comb_ta_contometros cont
+								WHERE 
+									cont.ch_sucursal=trim('$almacen')
+									AND dt_fechaparte >= to_date('$fechad','dd-mm-yyyy')
+									AND dt_fechaparte <= to_date('$fechaa','dd-mm-yyyy')
+									AND cont.ch_codigocombustible = '$cod_combustible'
+								GROUP BY 
+									dt_fechaparte");
+
+					for($a=0;$a<$sqlca->numrows();$a++){
+						$A = $sqlca->fetchRow();
+						$F4[$a]             = $A[0];
+						$VENTA[$a]          = $A[1];
+						$PRECIO_VENTA[$a]   = $A[2];
+					}
+
+					for($i = 0; $i < count($fec); $i++){
+
+						$rep[$i][4] = "0.000";
+
+						for($b = 0; $b < count($F4); $b++){
+							if($F4[$b]==$fec[$i]){
+								$rep[$i][4] = $VENTA[$b];
+								$rep[$i][12] = $PRECIO_VENTA[$b];
+							}
+						}
+
+					}
+
+					//INGRESO
+					$sqlca->query("SELECT 
+										to_char(mov_fecha::date,'DD-MM-YYYY') AS fecha,
+										ROUND(SUM(mov_cantidad) $operacion '$factor',3) AS compra
+									FROM 
+										inv_movialma
+									WHERE 
+										mov_almacen=trim('$almacen')
+										AND art_codigo='$cod_combustible'
+										AND to_date(to_char(mov_fecha,'DD-MM-YYYY'),'DD-MM-YYYY') >= to_date('$fec[0]','DD-MM-YYYY')
+										AND to_date(to_char(mov_fecha,'DD-MM-YYYY'),'DD-MM-YYYY') <= to_date('$fec[$limit]','DD-MM-YYYY')
+										AND tran_codigo='27' 
+									GROUP BY 
+										mov_fecha::date");
+
+					for($a=0;$a<$sqlca->numrows();$a++){
+						$A = $sqlca->fetchRow();
+						$F5[$a] = $A[0];
+						$ING[$a] = $A[1];
+					}
+
+					for($i=0;$i<count($fec);$i++){
+						$rep[$i][5] = "0.000";
+						for($b=0;$b<count($F5);$b++)
+						if($F5[$b]==$fec[$i]){  $rep[$i][5] = $ING[$b];  }
+					}
+
+					//SALIDA
+					$sqlca->query("SELECT 
+										to_char(mov_fecha::date,'DD-MM-YYYY') AS fecha,
+										ROUND(SUM(mov_cantidad) $operacion '$factor',3) AS compra
+									FROM 
+										inv_movialma
+									WHERE 
+										mov_almacen=trim('$almacen')
+										AND art_codigo='$cod_combustible'
+										AND to_date(to_char(mov_fecha,'DD-MM-YYYY'),'DD-MM-YYYY') >= to_date('$fec[0]','DD-MM-YYYY')
+										AND to_date(to_char(mov_fecha,'DD-MM-YYYY'),'DD-MM-YYYY') <= to_date('$fec[$limit]','DD-MM-YYYY')
+										AND tran_codigo='28' 
+									GROUP BY 
+										mov_fecha::date");
+
+					for($a=0;$a<$sqlca->numrows();$a++){
+						$A = $sqlca->fetchRow();
+						$F6[$a] = $A[0];
+						$SAL[$a] = $A[1];
+					}
+
+					for($i=0;$i<count($fec);$i++){
+						$rep[$i][6] = "0.000";
+						for($b=0;$b<count($F6);$b++)
+						if($F6[$b]==$fec[$i]){  $rep[$i][6] = $SAL[$b];  }
+					}
+
+					//PARTE
+					for($i=0;$i<count($fec);$i++){
+						$rep[$i][7] = $rep[$i][1]+$rep[$i][2]+$rep[$i][3]-$rep[$i][4]+$rep[$i][5]-$rep[$i][6];
+					}
+
+					//VARILLA
+					$sqlca->query("SELECT 
+										to_char(dt_fechamedicion,'DD-MM-YYYY') AS fecha,
+										ROUND(SUM(nu_medicion) $operacion '$factor',3) AS saldo
+									FROM 
+										comb_ta_mediciondiaria med
+										INNER JOIN comb_ta_tanques tan ON (med.ch_tanque = tan.ch_tanque)
+									WHERE 
+										med.ch_sucursal=trim('$almacen')
+										AND tan.ch_sucursal=trim('$almacen')
+										AND dt_fechamedicion >= to_date('$fechad','dd-mm-yyyy')
+										AND dt_fechamedicion <= to_date('$fechaa','dd-mm-yyyy')
+										AND tan.ch_codigocombustible = '$cod_combustible'
+									GROUP BY 
+										dt_fechamedicion 
+									ORDER BY dt_fechamedicion");
+					
+					for($i=0;$i<$sqlca->numrows();$i++){
+						$A = $sqlca->fetchRow();
+						$FE8[$i] = $A[0];
+						$VARI[$i] = $A[1];
+					}
+				
+					for($i=0;$i<count($fec);$i++){
+						$rep[$i][8] = "0.000";
+						for($a=0;$a<count($FE8);$a++){
+							if($FE8[$a]==$fec[$i]){  $rep[$i][8] = $VARI[$a];  }
+						}
+					}
+
+					//DIARIA
+					for($i=0;$i<count($fec);$i++){
+						$rep[$i][9] = $rep[$i][8]-$rep[$i][7];
+					}
+				
+					//ACUMULADA
+					for($i=0;$i<count($fec);$i++){
+					
+						$rep[$i][10] = $rep[$i][9]+$rep[$i-1][10];
+					
+					}
+
+					$contenido[$nom_combustible] = $rep;
+				}
+			}
+		
 			$data = json_encode($contenido);
 			$comprimido = gzcompress($data);
 			echo $comprimido;
