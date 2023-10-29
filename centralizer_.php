@@ -1149,11 +1149,11 @@ FROM
 			/*Cerrar*/
 
 			$sql = "SELECT
-				tanques.ch_codigocombustible AS cod_comb,
+				contometros.ch_codigocombustible AS cod_comb,
 				combustibles.ch_nombrecombustible AS desc_comb,
 				tanques.nu_capacidad,
 				(SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days AS nu_venta, -- Promedio diario vendido en galones
-				contometros.ch_tanque,
+				tanques.ch_tanque,
 				mediciondiaria.nu_medicion,
 				CASE
 					WHEN tanques.nu_capacidad > 0 THEN
@@ -1186,8 +1186,8 @@ FROM
 				
 			FROM
 				comb_ta_contometros contometros
-			JOIN comb_ta_tanques tanques                    ON (contometros.ch_tanque = tanques.ch_tanque AND tanques.ch_sucursal = '$warehouse_id' )
-			LEFT JOIN comb_ta_mediciondiaria mediciondiaria ON (contometros.ch_tanque = mediciondiaria.ch_tanque AND mediciondiaria.ch_sucursal = '$warehouse_id' AND mediciondiaria.dt_fechamedicion = '$EndDate' )
+			JOIN comb_ta_tanques tanques                    ON (contometros.ch_codigocombustible = tanques.ch_codigocombustible AND tanques.ch_sucursal = '$warehouse_id' )
+			LEFT JOIN comb_ta_mediciondiaria mediciondiaria ON (tanques.ch_tanque = mediciondiaria.ch_tanque AND mediciondiaria.ch_sucursal = '$warehouse_id' AND mediciondiaria.dt_fechamedicion = '$EndDate' )
 			JOIN comb_ta_combustibles combustibles          ON (tanques.ch_codigocombustible = combustibles.ch_codigocombustible)
 			JOIN inv_ta_compras_devoluciones compra         ON (TRIM(tanques.ch_codigocombustible) = TRIM(compra.art_codigo) AND compra.mov_fecha = (SELECT MAX(mov_fecha) FROM inv_ta_compras_devoluciones WHERE TRIM(art_codigo) = TRIM(tanques.ch_codigocombustible)))
 			WHERE
@@ -1195,7 +1195,7 @@ FROM
 			AND contometros.dt_fechaparte BETWEEN '$BeginDate'
 			AND '$EndDate'
 			GROUP BY
-				contometros.ch_tanque, tanques.ch_codigocombustible, tanques.nu_capacidad, mediciondiaria.nu_medicion, combustibles.ch_nombrecombustible,
+				contometros.ch_codigocombustible, tanques.ch_tanque, tanques.ch_codigocombustible, tanques.nu_capacidad, mediciondiaria.nu_medicion, combustibles.ch_nombrecombustible,
 				compra.mov_cantidad, compra.mov_fecha
 			ORDER BY
 				tanques.ch_codigocombustible ASC;";
@@ -1286,11 +1286,11 @@ FROM
 			/*Cerrar*/
 
 			$sql = "SELECT
-				tanques.ch_codigocombustible AS cod_comb,
+				contometros.ch_codigocombustible AS cod_comb,
 				combustibles.ch_nombrecombustible AS desc_comb,
 				tanques.nu_capacidad,
 				(SUM (contometros.nu_ventagalon) - SUM (contometros.nu_afericionveces_x_5 * 5)) / $days AS nu_venta, -- Promedio diario vendido en galones
-				contometros.ch_tanque,
+				tanques.ch_tanque,
 				mediciondiaria.nu_medicion,
 				CASE
 					WHEN tanques.nu_capacidad > 0 THEN
@@ -1323,8 +1323,8 @@ FROM
 				
 			FROM
 				comb_ta_contometros contometros
-			JOIN comb_ta_tanques tanques                    ON (contometros.ch_tanque = tanques.ch_tanque AND tanques.ch_sucursal = '$warehouse_id' )
-			LEFT JOIN comb_ta_mediciondiaria mediciondiaria ON (contometros.ch_tanque = mediciondiaria.ch_tanque AND mediciondiaria.ch_sucursal = '$warehouse_id' AND mediciondiaria.dt_fechamedicion = '$EndDate' )
+			JOIN comb_ta_tanques tanques                    ON (contometros.ch_codigocombustible = tanques.ch_codigocombustible AND tanques.ch_sucursal = '$warehouse_id' )
+			LEFT JOIN comb_ta_mediciondiaria mediciondiaria ON (tanques.ch_tanque = mediciondiaria.ch_tanque AND mediciondiaria.ch_sucursal = '$warehouse_id' AND mediciondiaria.dt_fechamedicion = '$EndDate' )
 			JOIN comb_ta_combustibles combustibles          ON (tanques.ch_codigocombustible = combustibles.ch_codigocombustible)
 			JOIN inv_ta_compras_devoluciones compra         ON (TRIM(tanques.ch_codigocombustible) = TRIM(compra.art_codigo) AND compra.mov_fecha = (SELECT MAX(mov_fecha) FROM inv_ta_compras_devoluciones WHERE TRIM(art_codigo) = TRIM(tanques.ch_codigocombustible)))
 			WHERE
@@ -1332,7 +1332,7 @@ FROM
 			AND contometros.dt_fechaparte BETWEEN '$BeginDate'
 			AND '$EndDate'
 			GROUP BY
-				contometros.ch_tanque, tanques.ch_codigocombustible, tanques.nu_capacidad, mediciondiaria.nu_medicion, combustibles.ch_nombrecombustible,
+				contometros.ch_codigocombustible, tanques.ch_tanque, tanques.ch_codigocombustible, tanques.nu_capacidad, mediciondiaria.nu_medicion, combustibles.ch_nombrecombustible,
 				compra.mov_cantidad, compra.mov_fecha
 			ORDER BY
 				tanques.ch_codigocombustible ASC;";
@@ -2753,6 +2753,76 @@ ORDER BY
 				}
 			}
 		
+			$data = json_encode($contenido);
+			$comprimido = gzcompress($data);
+			echo $comprimido;
+		break;
+
+		case 'TOTALS_MARGEN_CLIENTE':
+			argRangedCheck();
+			//pg_escape_string
+			$warehouse_id = $_REQUEST['warehouse_id'];
+			$desde = $_REQUEST['desde'];
+			$hasta = $_REQUEST['hasta'];
+			$clientes = $_REQUEST['clientes'];
+
+			/*Condicion de clientes*/
+			$where_clientes = "";
+			if(!empty($clientes)) {
+				$where_clientes = "AND c.cli_codigo = '$clientes'";
+			}			
+			/*Cerrar*/
+
+			/*Datos para query Costo Promedio*/
+			$hasta_ = explode("/", $hasta);
+			$stk_periodo = $hasta_['2'];
+			$stk_mes = $hasta_['1'];
+			/*Cerrar*/
+
+			global $sqlca;
+
+			//SQL Costo Promedio
+			$sql_costo_promedio = "(SELECT
+										stk_costo$stk_mes AS costo_art
+									FROM
+										inv_saldoalma 
+									WHERE
+										stk_periodo = '$stk_periodo'
+										AND stk_almacen = TRIM ('$warehouse_id')
+										AND art_codigo = d.art_codigo
+									LIMIT 1) AS costo_art,";
+
+			//SQL Margen por Cliente
+			$sql = "SELECT
+						c.cli_codigo AS RUC,
+						cli.cli_razsocial AS RAZON_SOCIAL,
+						d.art_codigo AS CODIGO,
+						art.art_descripcion AS DESCRIPCION,
+						d.nu_fac_cantidad AS CANTIDAD,
+						d.nu_fac_importeneto AS IMPORTE_NETO,
+						$sql_costo_promedio
+						c.ch_fac_tipodocumento AS TIPO_DOCUMENTO,
+						c.ch_fac_seriedocumento AS SERIE_DOCUMENTO,
+						c.ch_fac_numerodocumento AS NUMERO_DOCUMENTO,
+						c.dt_fac_fecha AS FECHA_DOCUMENTO
+					FROM
+						fac_ta_factura_cabecera c
+						INNER JOIN fac_ta_factura_detalle d ON ( c.ch_fac_tipodocumento = d.ch_fac_tipodocumento AND c.ch_fac_seriedocumento = d.ch_fac_seriedocumento AND c.ch_fac_numerodocumento = d.ch_fac_numerodocumento AND c.cli_codigo = d.cli_codigo )
+						LEFT JOIN int_clientes cli ON ( c.cli_codigo = cli.cli_codigo )
+						LEFT JOIN int_articulos art ON ( d.art_codigo = art.art_codigo )
+					WHERE
+						1 = 1
+						AND c.ch_fac_credito = 'S'
+						AND c.ch_fac_tipodocumento IN ('10', '35', '11', '20')
+						AND c.dt_fac_fecha BETWEEN TO_DATE('$desde','DD/MM/YYYY') AND TO_DATE('$hasta','DD/MM/YYYY')
+						AND c.ch_almacen = '$warehouse_id'
+						$where_clientes
+					ORDER BY
+						c.cli_codigo, d.art_codigo;";
+
+			$contenido['sql_margen_cliente'] = $sql;
+			$contenido['data_margen_cliente'] = SQLImplodeArray($sql);
+
 			$data = json_encode($contenido);
 			$comprimido = gzcompress($data);
 			echo $comprimido;
